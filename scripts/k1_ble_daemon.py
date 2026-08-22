@@ -2,6 +2,7 @@
 Robosen K1 Persistent BLE Daemon
 Maintains a persistent, long-lived Bluetooth BLE connection to the Robosen K1 robot.
 Event-driven action completion based on live 100% robot telemetry ACK.
+Maintains exact live joint posture state to articulate head without moving standing legs.
 """
 
 import asyncio
@@ -37,15 +38,13 @@ ACTIONS = {
     "status": (0x0F, b"", 1.5),
 }
 
-# Neutral base frame with configurable head angle (index 16) and speed (index 24)
-def make_head_frame(head_angle: int = 122, speed: int = 25) -> bytes:
-    frame = bytearray([
-        129, 60, 106, 118, 190, 146, 212, 36, 123, 123, 129, 115, 223, 116, 34, 126,
-        head_angle,
-        125, 125, 125, 125, 100, 100, 100,
-        speed
-    ])
-    return bytes(frame)
+# Factory baseline standing pose as fallback
+DEFAULT_STAND_FRAME = bytearray([
+    129, 60, 106, 118, 190, 146, 212, 36, 123, 123, 129, 115, 223, 116, 34, 126,
+    122, # Head (index 16)
+    125, 125, 125, 125, 100, 100, 100,
+    35   # Speed (index 24)
+])
 
 def build_packet(opcode: int, payload: bytes = b"") -> bytes:
     num_bytes = 1 + len(payload) + 1
@@ -70,18 +69,24 @@ class RobosenBleDaemon:
         self.firmware = None
         self.auto_stand = None
         self.active_action_event = None
+        self.current_joints = bytearray(DEFAULT_STAND_FRAME)
 
     def notification_handler(self, sender, data: bytearray):
         if len(data) >= 4:
             opcode = data[3]
             payload = data[4:-1]
+
             if opcode == 0x17 and len(payload) >= 1:
                 progress = payload[-1]
                 emit_event("action_progress", {"progress": progress})
-                # If progress reaches 100%, trigger instant event completion
                 if progress == 100 or progress == 0x64:
                     if self.active_action_event and not self.active_action_event.is_set():
                         self.active_action_event.set()
+
+            elif opcode in [0xE9, 0xE8, 0xE6] and len(payload) >= 17:
+                # Capture the robot's real-time joint positions
+                for i in range(min(len(payload), len(self.current_joints))):
+                    self.current_joints[i] = payload[i]
 
             elif opcode == 0x0F and len(payload) >= 8:
                 self.battery = payload[1]
@@ -94,6 +99,7 @@ class RobosenBleDaemon:
                     "autoTurn": bool(payload[5]),
                     "autoOff": bool(payload[7]),
                 })
+
             elif opcode == 0xF7:
                 try:
                     self.firmware = payload.decode("ascii", errors="replace").strip()
@@ -129,10 +135,13 @@ class RobosenBleDaemon:
 
             await self.client.start_notify(CHARACTERISTIC_UUID, self.notification_handler)
 
-            # Handshake & Info queries
+            # Handshake & Queries
             await self.client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0x0B), response=False)
             await asyncio.sleep(0.3)
             await self.client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xF7), response=False)
+            await asyncio.sleep(0.3)
+            # Sync live joint positions so we know standing pose
+            await self.client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE9), response=False)
             await asyncio.sleep(0.3)
             await self.client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0x0F), response=False)
             await asyncio.sleep(0.5)
@@ -150,6 +159,20 @@ class RobosenBleDaemon:
             emit_event("connect_failed", {"error": str(e)})
             return False
 
+    async def move_head_only(self, target_angle: int, speed: int = 35):
+        """
+        Rotates ONLY the neck/head servo (index 16) while preserving
+        all 16 body and leg joint angles to maintain standing balance.
+        """
+        # Build frame from current live joints
+        frame = bytearray(self.current_joints)
+        frame[16] = max(42, min(202, target_angle)) # Head angle
+        frame[24] = speed                           # Smooth speed
+
+        pkt = build_packet(0xE8, bytes(frame))
+        await self.client.write_gatt_char(CHARACTERISTIC_UUID, pkt, response=False)
+        self.current_joints[16] = frame[16]
+
     async def execute_action(self, action_key: str):
         if not self.client or not self.client.is_connected:
             emit_event("action_failed", {"action": action_key, "error": "Robot not connected"})
@@ -158,39 +181,33 @@ class RobosenBleDaemon:
         action_key = action_key.lower().strip()
         emit_event("action_started", {"action": action_key})
 
-        # Distinct head articulation commands:
+        # Distinct head articulation commands (posture-preserving)
         if action_key == "head_left":
-            # Turn head to the left (angle 42)
-            pkt = build_packet(0xE8, make_head_frame(42, 25))
-            await self.client.write_gatt_char(CHARACTERISTIC_UUID, pkt, response=False)
+            await self.move_head_only(42, speed=35)
             await asyncio.sleep(0.8)
             emit_event("action_completed", {"action": action_key})
             return
 
         elif action_key == "head_right":
-            # Turn head to the right (angle 202)
-            pkt = build_packet(0xE8, make_head_frame(202, 25))
-            await self.client.write_gatt_char(CHARACTERISTIC_UUID, pkt, response=False)
+            await self.move_head_only(202, speed=35)
             await asyncio.sleep(0.8)
             emit_event("action_completed", {"action": action_key})
             return
 
         elif action_key in ["head_center", "head_neutral"]:
-            # Center head (angle 122)
-            pkt = build_packet(0xE8, make_head_frame(122, 25))
-            await self.client.write_gatt_char(CHARACTERISTIC_UUID, pkt, response=False)
-            await asyncio.sleep(0.6)
+            await self.move_head_only(122, speed=35)
+            await asyncio.sleep(0.8)
             emit_event("action_completed", {"action": action_key})
             return
 
         elif action_key == "head_pan":
-            # Sweep Left -> Right -> Center
-            await self.client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, make_head_frame(42, 25)), response=False)
-            await asyncio.sleep(0.8)
-            await self.client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, make_head_frame(202, 25)), response=False)
-            await asyncio.sleep(0.8)
-            await self.client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, make_head_frame(122, 25)), response=False)
-            await asyncio.sleep(0.5)
+            # Sweep Left -> Right -> Center smoothly
+            await self.move_head_only(42, speed=35)
+            await asyncio.sleep(0.9)
+            await self.move_head_only(202, speed=35)
+            await asyncio.sleep(0.9)
+            await self.move_head_only(122, speed=35)
+            await asyncio.sleep(0.7)
             emit_event("action_completed", {"action": action_key})
             return
 
@@ -207,11 +224,15 @@ class RobosenBleDaemon:
                 except asyncio.TimeoutError:
                     pass
                 self.active_action_event = None
+                # Update joints snapshot after dynamic action completes
+                await self.client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE9), response=False)
             elif opcode in [0x01, 0x02, 0x05, 0x08]:
                 # Locomotion steps: Walk for exact duration, then send immediate stop (0x0C)
                 await self.client.write_gatt_char(CHARACTERISTIC_UUID, pkt, response=False)
                 await asyncio.sleep(max_timeout)
                 await self.client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0x0C), response=False)
+                # Resync joints after walking
+                await self.client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE9), response=False)
             else:
                 await self.client.write_gatt_char(CHARACTERISTIC_UUID, pkt, response=False)
                 await asyncio.sleep(0.3)

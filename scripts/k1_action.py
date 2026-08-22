@@ -1,6 +1,7 @@
 """
 Robosen K1 Quick Action & Motion CLI
 Run individual actions, toggle safety modes, or query telemetry over BLE.
+Maintains standing posture when articulating head.
 """
 
 import asyncio
@@ -35,14 +36,10 @@ ACTIONS = {
     "status": (0x0F, b"", 1.5),
 }
 
-def make_head_frame(head_angle: int = 122, speed: int = 25) -> bytes:
-    frame = bytearray([
-        129, 60, 106, 118, 190, 146, 212, 36, 123, 123, 129, 115, 223, 116, 34, 126,
-        head_angle,
-        125, 125, 125, 125, 100, 100, 100,
-        speed
-    ])
-    return bytes(frame)
+current_joints = bytearray([
+    129, 60, 106, 118, 190, 146, 212, 36, 123, 123, 129, 115, 223, 116, 34, 126,
+    122, 125, 125, 125, 125, 100, 100, 100, 35
+])
 
 def build_packet(opcode: int, payload: bytes = b"") -> bytes:
     num_bytes = 1 + len(payload) + 1
@@ -51,17 +48,19 @@ def build_packet(opcode: int, payload: bytes = b"") -> bytes:
     return bytes([0xFF, 0xFF]) + body + bytes([checksum])
 
 def notification_handler(sender, data: bytearray):
+    global current_joints
     if len(data) >= 4:
         opcode = data[3]
         payload = data[4:-1]
-        if opcode == 0x17 and len(payload) >= 1:
+        if opcode in [0xE9, 0xE8, 0xE6] and len(payload) >= 17:
+            for i in range(min(len(payload), len(current_joints))):
+                current_joints[i] = payload[i]
+        elif opcode == 0x17 and len(payload) >= 1:
             progress = payload[-1]
             print(f"[Telemetry] Action Progress: {progress}%")
         elif opcode == 0x0F and len(payload) >= 8:
-            pattern = payload[0]
             battery = payload[1]
             volume = payload[2]
-            progress = payload[3]
             auto_stand = bool(payload[4])
             auto_turn = bool(payload[5])
             auto_off = bool(payload[7])
@@ -74,13 +73,6 @@ def notification_handler(sender, data: bytearray):
             print(f"  🔄 Auto-Turn Mode:    {'Enabled' if auto_turn else 'Disabled'}")
             print(f"  ⏱️ Auto-Off Timer:    {'Enabled' if auto_off else 'Disabled'}")
             print("=" * 45)
-        else:
-            try:
-                text = payload.decode("ascii", errors="replace").strip()
-                if text:
-                    print(f"[Telemetry] Response (0x{opcode:02X}): {text}")
-            except Exception:
-                pass
 
 async def get_k1_device():
     print("[*] Scanning for K1 robot...")
@@ -92,6 +84,14 @@ async def get_k1_device():
             print(f"[+] Found {name} ({device.address})")
             return device
     return None
+
+async def move_head_safely(client, target_angle: int, speed: int = 35):
+    global current_joints
+    frame = bytearray(current_joints)
+    frame[16] = max(42, min(202, target_angle))
+    frame[24] = speed
+    await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, bytes(frame)), response=False)
+    current_joints[16] = frame[16]
 
 async def execute_action(action_key: str):
     device = await get_k1_device()
@@ -108,9 +108,11 @@ async def execute_action(action_key: str):
         print("[+] Connected!")
         await client.start_notify(CHARACTERISTIC_UUID, notification_handler)
         
-        # Handshake
+        # Handshake & Sync live joint positions
         await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0x0B), response=False)
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(0.3)
+        await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE9), response=False)
+        await asyncio.sleep(0.4)
 
         if action_key == "status":
             print("[*] Querying status...")
@@ -119,34 +121,34 @@ async def execute_action(action_key: str):
             return
 
         if action_key == "head_left":
-            print("[*] Turning Head Left (Angle 42)...")
-            await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, make_head_frame(42, 25)), response=False)
-            await asyncio.sleep(1.0)
+            print("[*] Turning Head Left (preserving standing pose)...")
+            await move_head_safely(client, 42, speed=35)
+            await asyncio.sleep(0.8)
             print("[+] Head Left complete.")
             return
 
         if action_key == "head_right":
-            print("[*] Turning Head Right (Angle 202)...")
-            await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, make_head_frame(202, 25)), response=False)
-            await asyncio.sleep(1.0)
+            print("[*] Turning Head Right (preserving standing pose)...")
+            await move_head_safely(client, 202, speed=35)
+            await asyncio.sleep(0.8)
             print("[+] Head Right complete.")
             return
 
         if action_key in ["head_center", "head_neutral"]:
-            print("[*] Centering Head (Angle 122)...")
-            await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, make_head_frame(122, 25)), response=False)
+            print("[*] Centering Head (preserving standing pose)...")
+            await move_head_safely(client, 122, speed=35)
             await asyncio.sleep(0.8)
             print("[+] Head Center complete.")
             return
 
         if action_key == "head_pan":
-            print("[*] Executing Head Pan routine (Left -> Right -> Center)...")
-            await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, make_head_frame(42, 25)), response=False)
-            await asyncio.sleep(1.0)
-            await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, make_head_frame(202, 25)), response=False)
-            await asyncio.sleep(1.0)
-            await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, make_head_frame(122, 25)), response=False)
-            await asyncio.sleep(0.8)
+            print("[*] Executing Head Pan (Left -> Right -> Center)...")
+            await move_head_safely(client, 42, speed=35)
+            await asyncio.sleep(0.9)
+            await move_head_safely(client, 202, speed=35)
+            await asyncio.sleep(0.9)
+            await move_head_safely(client, 122, speed=35)
+            await asyncio.sleep(0.7)
             print("[+] Head Pan complete.")
             return
 
