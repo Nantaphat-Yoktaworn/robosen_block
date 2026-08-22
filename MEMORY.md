@@ -220,6 +220,7 @@ Because Node v24 on Windows requires MSVC C++ compilation for `@abandonware/nobl
 ### 1. Persistent BLE Background Daemon ([`scripts/k1_ble_daemon.py`](file:///C:/Users/poomz/nnnn/robosen_block/scripts/k1_ble_daemon.py))
 - **Persistent Connection:** Auto-connects to the robot on launch and keeps a long-lived BLE link active to eliminate reconnect latencies.
 - **Dynamic 100% Telemetry ACK Resolution:** Actions resolve the exact millisecond the physical robot emits `action_progress: 100%`, enabling instant back-to-back chaining without hardcoded sleep delays.
+- **Standing Posture Preservation (`move_head_only`):** Captures live standing angles of all 16 body/leg servos via `0xE9` (`jointSync`) so that neck/head articulations rotate smoothly without snapping leg angles or causing the robot to lose balance.
 - **IPC Interface:** Accepts JSON commands via `stdin` (`{"cmd": "action", "action": "punch_left"}`) and streams events over `stdout` (`action_progress`, `action_completed`, `status_update`).
 
 ### 2. Quick Command-Line Execution ([`scripts/k1_action.py`](file:///C:/Users/poomz/nnnn/robosen_block/scripts/k1_action.py))
