@@ -233,15 +233,18 @@ python scripts/k1_action.py head_center  # Returns head to Center (angle 122)
 python scripts/k1_action.py head_pan     # Full Sweep (Left -> Right -> Center)
 
 # Martial Arts & Punches
-python scripts/k1_action.py punch_left
-python scripts/k1_action.py punch_right
-python scripts/k1_action.py kung_fu
+python scripts/k1_action.py punch_left   # ProAction/Left Punch
+python scripts/k1_action.py punch_right  # ProAction/Right Punch
+python scripts/k1_action.py kung_fu      # ProAction/Kung Fu
+python scripts/k1_action.py single_kick  # ProAction/Left Kick
 
-# Dance & Acrobatics
-python scripts/k1_action.py boogaloo
-python scripts/k1_action.py push_ups
-python scripts/k1_action.py handstand
-python scripts/k1_action.py single_kick
+# Dance, Acrobatics & Stunts
+python scripts/k1_action.py push_ups     # ProAction/Push Ups (Fixed path)
+python scripts/k1_action.py handstand    # ProAction/Handstand
+python scripts/k1_action.py boogaloo     # Action/Boogaloo
+python scripts/k1_action.py say_hello    # ProAction/Say Hello
+python scripts/k1_action.py celebrate    # ProAction/Celebrate
+python scripts/k1_action.py do_squats    # ProAction/Do Squats
 
 # Locomotion Steps
 python scripts/k1_action.py walk
