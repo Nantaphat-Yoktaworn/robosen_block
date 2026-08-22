@@ -48,7 +48,8 @@ robosen_block/
 │   ├── nodes/
 │   │   ├── robosen-master.js / .html     # Master Block controller node (Persistent BLE daemon & string parser)
 │   │   ├── robosen-instruction.js / .html# Modular instruction blocks (locomotion, combat, stunts)
-│   │   └── robosen-end.js / .html        # Passive loopback terminator block node
+│   │   ├── robosen-end.js / .html        # Passive loopback terminator block node
+│   │   └── robosen-tester.js / .html     # Standalone action tester & direct controller node
 │   ├── examples/
 │   │   └── robosen_simulator_flow.json   # Ready-to-import Node-RED simulation flow
 │   ├── package.json
@@ -288,6 +289,10 @@ A dedicated Node-RED palette simulating the physical block-based tangible progra
    - Appends its unique `,command` token.
 3. **`robosen-end` (End Block):**
    - Passive loopback terminator connecting Pin 3 TX to Pin 4 RX.
+4. **`robosen-tester` (Action Tester / Direct Controller):**
+   - Standalone node for direct action testing without loopback wiring.
+   - Includes **⚡ Execute Action Immediately** button, **Connect / Disconnect** buttons, and live battery & connection status card right inside the properties dialog.
+   - Canvas button for one-click action triggering from the Node-RED editor.
 
 ### Machine Symlink Setup:
 - Linked directly into machine's Node-RED via NTFS Directory Junction:

@@ -1,0 +1,272 @@
+<script type="text/javascript">
+  RED.nodes.registerType("robosen-tester", {
+    category: "Robosen Block",
+    color: "#7B1FA2",
+    defaults: {
+      name: { value: "Action Tester" },
+      command: { value: "punch_left", required: true },
+      autoConnect: { value: true },
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: "font-awesome/fa-gamepad",
+    paletteLabel: "action tester",
+    label: function () {
+      if (this.name && this.name !== "Action Tester") return this.name;
+      const map = {
+        punch_left: "Test: Left Punch",
+        punch_right: "Test: Right Punch",
+        kung_fu: "Test: Kung Fu",
+        boogaloo: "Test: Boogaloo Dance",
+        push_ups: "Test: Push-ups",
+        handstand: "Test: Handstand",
+        single_kick: "Test: Single Kick",
+        do_squats: "Test: Squats",
+        say_hello: "Test: Say Hello",
+        celebrate: "Test: Celebrate",
+        head_left: "Test: Head Left",
+        head_right: "Test: Head Right",
+        head_center: "Test: Head Center",
+        head_pan: "Test: Head Pan",
+        walk: "Test: Walk Forward",
+        turn_left: "Test: Turn Left",
+        turn_right: "Test: Turn Right",
+        auto_stand_on: "Test: Auto-Stand ON",
+        auto_stand_off: "Test: Auto-Stand OFF",
+        status: "Test: Status Query",
+      };
+      return map[this.command] || "Action Tester";
+    },
+    button: {
+      enabled: function () {
+        return !this.changed;
+      },
+      onclick: function () {
+        const node = this;
+        $.ajax({
+          url: "robosen-tester/" + this.id + "/trigger",
+          type: "POST",
+          success: function (resp) {
+            RED.notify("Action Triggered: " + (node.command || "custom"), "info");
+          },
+          error: function (jqXHR) {
+            if (jqXHR.status == 404) {
+              RED.notify("Node not deployed yet. Please Deploy first!", "error");
+            } else {
+              RED.notify("Failed to trigger action", "error");
+            }
+          },
+        });
+      },
+    },
+    oneditprepare: function () {
+      const node = this;
+
+      function updateStatusCard() {
+        $.ajax({
+          url: "robosen-tester/" + node.id + "/info",
+          type: "GET",
+          success: function (data) {
+            if (data.isConnected) {
+              $("#k1-badge")
+                .html("🟢 Connected")
+                .css({ "background-color": "#E8F5E9", color: "#2E7D32", "border-color": "#A5D6A7" });
+              $("#k1-device-name").text(data.robotInfo.name || "K1");
+              $("#k1-battery").text(data.robotInfo.battery + "%");
+              $("#k1-volume").text(data.robotInfo.volume + " / 140");
+              $("#k1-firmware").text(data.robotInfo.firmware || "VER:3.03L");
+            } else {
+              $("#k1-badge")
+                .html("🔴 Disconnected")
+                .css({ "background-color": "#FFEBEE", color: "#C62828", "border-color": "#FFCDD2" });
+              $("#k1-device-name").text("--");
+              $("#k1-battery").text("--");
+              $("#k1-volume").text("--");
+              $("#k1-firmware").text("--");
+            }
+            if (data.lastEvent) {
+              $("#k1-last-log").text(data.lastEvent);
+            }
+          },
+          error: function () {
+            $("#k1-badge")
+              .html("⚪ Node Not Deployed")
+              .css({ "background-color": "#ECEFF1", color: "#546E7A", "border-color": "#CFD8DC" });
+          },
+        });
+      }
+
+      // Initial update and periodic polling while modal open
+      updateStatusCard();
+      const pollTimer = setInterval(updateStatusCard, 1500);
+
+      // Clean timer when dialog closes
+      $("#dialog").on("dialogclose", function () {
+        clearInterval(pollTimer);
+      });
+
+      // Execute Action Button
+      $("#node-btn-execute").click(function () {
+        const selectedAction = $("#node-input-command").val();
+        $("#k1-last-log").text("Dispatching " + selectedAction + "...");
+        $.ajax({
+          url: "robosen-tester/" + node.id + "/execute",
+          type: "POST",
+          contentType: "application/json",
+          data: JSON.stringify({ action: selectedAction }),
+          success: function () {
+            RED.notify("Action [" + selectedAction + "] executed on robot!", "success");
+            updateStatusCard();
+          },
+          error: function () {
+            RED.notify("Deploy flow first before executing!", "warning");
+          },
+        });
+      });
+
+      // Connect Button
+      $("#node-btn-connect").click(function () {
+        $("#k1-last-log").text("Scanning & connecting to K1...");
+        $.ajax({
+          url: "robosen-tester/" + node.id + "/connect",
+          type: "POST",
+          success: function () {
+            RED.notify("Connecting to K1 robot...", "info");
+            setTimeout(updateStatusCard, 1000);
+          },
+          error: function () {
+            RED.notify("Deploy flow first to connect!", "warning");
+          },
+        });
+      });
+
+      // Disconnect Button
+      $("#node-btn-disconnect").click(function () {
+        $.ajax({
+          url: "robosen-tester/" + node.id + "/disconnect",
+          type: "POST",
+          success: function () {
+            RED.notify("Disconnected from robot.", "info");
+            setTimeout(updateStatusCard, 500);
+          },
+        });
+      });
+
+      // Query Status Button
+      $("#node-btn-status").click(function () {
+        $.ajax({
+          url: "robosen-tester/" + node.id + "/status",
+          type: "POST",
+          success: function () {
+            RED.notify("Status query sent.", "info");
+            setTimeout(updateStatusCard, 600);
+          },
+        });
+      });
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="robosen-tester">
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Action Tester" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-command"><i class="fa fa-cogs"></i> Action</label>
+    <select id="node-input-command" style="width: 70%;">
+      <optgroup label="Combat & Martial Arts">
+        <option value="punch_left">Left Punch</option>
+        <option value="punch_right">Right Punch</option>
+        <option value="kung_fu">Kung Fu Stance & Punch</option>
+        <option value="single_kick">Single Leg Kick</option>
+      </optgroup>
+      <optgroup label="Stunts & Acrobatics">
+        <option value="push_ups">Push-ups (10s Routine)</option>
+        <option value="handstand">Handstand (16s Routine)</option>
+        <option value="do_squats">Squats (18s Routine)</option>
+        <option value="boogaloo">Boogaloo Dance</option>
+        <option value="say_hello">Say Hello Voice Routine</option>
+        <option value="celebrate">Celebrate Cheering Routine</option>
+      </optgroup>
+      <optgroup label="Head Kinematics (Zero Leg Shift)">
+        <option value="head_left">Head Turn Left</option>
+        <option value="head_right">Head Turn Right</option>
+        <option value="head_center">Head Center (Neutral)</option>
+        <option value="head_pan">Head Pan (Left -> Right -> Center)</option>
+      </optgroup>
+      <optgroup label="Locomotion Steps">
+        <option value="walk">Walk Forward (2s)</option>
+        <option value="turn_left">Turn Left</option>
+        <option value="turn_right">Turn Right</option>
+      </optgroup>
+      <optgroup label="Safety & System Modes">
+        <option value="status">Query Live Telemetry</option>
+        <option value="auto_stand_on">Enable Auto-Stand</option>
+        <option value="auto_stand_off">Disable Auto-Stand</option>
+      </optgroup>
+    </select>
+  </div>
+
+  <div class="form-row" style="margin-top: 15px;">
+    <button type="button" class="red-ui-button" id="node-btn-execute" style="width: 100%; height: 38px; background: #2E7D32; color: #ffffff; font-weight: bold; border-radius: 4px; font-size: 14px;">
+      <i class="fa fa-play"></i> ⚡ Execute Action Immediately
+    </button>
+  </div>
+
+  <hr style="margin: 15px 0;" />
+
+  <!-- Robot Connection & Telemetry Dashboard Card -->
+  <div style="background: #FAFAFA; border: 1px solid #E0E0E0; border-radius: 6px; padding: 12px; margin-bottom: 12px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <span style="font-weight: bold; font-size: 13px;"><i class="fa fa-bluetooth"></i> Robosen K1 Live Status</span>
+      <span id="k1-badge" style="padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; border: 1px solid #ccc;">
+        Connecting...
+      </span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; margin-bottom: 10px;">
+      <div><b>Device:</b> <span id="k1-device-name">--</span></div>
+      <div><b>Battery:</b> <span id="k1-battery" style="color: #2E7D32; font-weight: bold;">--</span></div>
+      <div><b>Volume:</b> <span id="k1-volume">--</span></div>
+      <div><b>Firmware:</b> <span id="k1-firmware">--</span></div>
+    </div>
+
+    <div style="font-size: 11px; color: #555; background: #FFF; border: 1px solid #EEE; padding: 6px 8px; border-radius: 4px; margin-bottom: 10px;">
+      <b>Activity:</b> <span id="k1-last-log">Ready</span>
+    </div>
+
+    <!-- Manual Connection Buttons -->
+    <div style="display: flex; gap: 6px;">
+      <button type="button" class="red-ui-button" id="node-btn-connect" style="flex: 1; font-size: 11px;">
+        <i class="fa fa-link"></i> Connect
+      </button>
+      <button type="button" class="red-ui-button" id="node-btn-status" style="flex: 1; font-size: 11px;">
+        <i class="fa fa-refresh"></i> Query Status
+      </button>
+      <button type="button" class="red-ui-button" id="node-btn-disconnect" style="flex: 1; font-size: 11px; color: #C62828;">
+        <i class="fa fa-unlink"></i> Disconnect
+      </button>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-autoConnect"><i class="fa fa-plug"></i> Auto-Connect</label>
+    <input type="checkbox" id="node-input-autoConnect" style="width: auto; vertical-align: top;" />
+    <span style="font-size: 12px; color: #666; margin-left: 5px;">Auto-connect to K1 on deploy/startup</span>
+  </div>
+</script>
+
+<script type="text/html" data-help-name="robosen-tester">
+  <p><b>Robosen Standalone Action Tester & Direct Controller</b></p>
+  <p>A standalone testing panel to control the physical Robosen K1 robot directly without needing the modular block loopback wiring.</p>
+
+  <h3>Features:</h3>
+  <ul>
+    <li><b>Instant Execution:</b> Select any action and click <b>⚡ Execute Action Immediately</b> inside the node properties to test it live.</li>
+    <li><b>Direct Connection Controls:</b> Connect, Disconnect, and query battery telemetry directly inside the properties panel.</li>
+    <li><b>Canvas Button:</b> Click the button on the left of the node on your canvas to trigger the selected action at any time.</li>
+    <li><b>Flow Input:</b> Send <code>msg.payload = "punch_left"</code> to trigger actions dynamically from any other node or inject node.</li>
+  </ul>
+</script>

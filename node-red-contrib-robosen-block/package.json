@@ -18,7 +18,8 @@
     "nodes": {
       "robosen-master": "nodes/robosen-master.js",
       "robosen-instruction": "nodes/robosen-instruction.js",
-      "robosen-end": "nodes/robosen-end.js"
+      "robosen-end": "nodes/robosen-end.js",
+      "robosen-tester": "nodes/robosen-tester.js"
     }
   },
   "dependencies": {},

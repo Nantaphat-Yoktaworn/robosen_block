@@ -37,6 +37,7 @@ This custom Node-RED palette simulates the **physical modular coding block syste
 | **`robosen-master`** | `Robosen Block` | 🔴 `#E53935` | **Master Block:** Auto-connects to the robot on boot and keeps connection alive. Has a clickable Start button in Node-RED to trigger the sequence. Receives loopback return string and dispatches actions instantly. |
 | **`robosen-instruction`** | `Robosen Block` | 🔵 `#0288D1` | **Instruction Block:** Configurable dropdown commands (Walk, Turn, Left/Right Punch, Kung Fu, Boogaloo Dance, Push-ups, Handstand, Head Pan, Delay). Appends its command token. |
 | **`robosen-end`** | `Robosen Block` | ⚫ `#616161` | **End Block:** Passive loopback module that connects Pin 3 TX to Pin 4 RX. |
+| **`robosen-tester`** | `Robosen Block` | 🟣 `#7B1FA2` | **Action Tester (Direct Controller):** Standalone testing node. Select any action and click **⚡ Execute Action Immediately** in the node properties or canvas button. Includes live connection and battery dashboard. |
 
 ---
 
