@@ -47,8 +47,9 @@ module.exports = function (RED) {
       single_kick: "single_kick",
       push_ups: "push_ups",
       handstand: "handstand",
-      head_left: "head_pan",
-      head_right: "head_pan",
+      head_left: "head_left",
+      head_right: "head_right",
+      head_center: "head_center",
       head_pan: "head_pan",
       wait_delay: "delay",
     };

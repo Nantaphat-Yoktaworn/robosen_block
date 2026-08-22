@@ -27,7 +27,6 @@ ACTIONS = {
     "single_kick": (0x17, b"Action/Single Leg Kick", 5.0),
     "push_ups": (0x17, b"Action/Push-ups", 9.0),
     "handstand": (0x17, b"Action/Handstand", 7.0),
-    "head_pan": (0xE8, "HEAD_PAN", 4.0),
     "walk": (0x01, b"", 2.0),
     "move_forward": (0x01, b"", 2.0),
     "move_backward": (0x05, b"", 2.0),
@@ -37,6 +36,16 @@ ACTIONS = {
     "auto_stand_off": (0x11, bytes([0]), 1.0),
     "status": (0x0F, b"", 1.5),
 }
+
+# Neutral base frame with configurable head angle (index 16) and speed (index 24)
+def make_head_frame(head_angle: int = 122, speed: int = 25) -> bytes:
+    frame = bytearray([
+        129, 60, 106, 118, 190, 146, 212, 36, 123, 123, 129, 115, 223, 116, 34, 126,
+        head_angle,
+        125, 125, 125, 125, 100, 100, 100,
+        speed
+    ])
+    return bytes(frame)
 
 def build_packet(opcode: int, payload: bytes = b"") -> bytes:
     num_bytes = 1 + len(payload) + 1
@@ -149,18 +158,38 @@ class RobosenBleDaemon:
         action_key = action_key.lower().strip()
         emit_event("action_started", {"action": action_key})
 
-        if action_key == "head_pan" or action_key in ["head_left", "head_right"]:
-            # Head left
-            f_left = bytearray([129, 60, 106, 118, 190, 146, 212, 36, 123, 123, 129, 115, 223, 116, 34, 126, 42, 125, 125, 125, 125, 100, 100, 100, 30])
-            await self.client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, bytes(f_left)), response=False)
+        # Distinct head articulation commands:
+        if action_key == "head_left":
+            # Turn head to the left (angle 42)
+            pkt = build_packet(0xE8, make_head_frame(42, 25))
+            await self.client.write_gatt_char(CHARACTERISTIC_UUID, pkt, response=False)
             await asyncio.sleep(0.8)
-            # Head right
-            f_right = bytearray([129, 60, 106, 118, 190, 146, 212, 36, 123, 123, 129, 115, 223, 116, 34, 126, 202, 125, 125, 125, 125, 100, 100, 100, 30])
-            await self.client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, bytes(f_right)), response=False)
+            emit_event("action_completed", {"action": action_key})
+            return
+
+        elif action_key == "head_right":
+            # Turn head to the right (angle 202)
+            pkt = build_packet(0xE8, make_head_frame(202, 25))
+            await self.client.write_gatt_char(CHARACTERISTIC_UUID, pkt, response=False)
             await asyncio.sleep(0.8)
-            # Head center
-            f_center = bytearray([129, 60, 106, 118, 190, 146, 212, 36, 123, 123, 129, 115, 223, 116, 34, 126, 122, 125, 125, 125, 125, 100, 100, 100, 30])
-            await self.client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, bytes(f_center)), response=False)
+            emit_event("action_completed", {"action": action_key})
+            return
+
+        elif action_key in ["head_center", "head_neutral"]:
+            # Center head (angle 122)
+            pkt = build_packet(0xE8, make_head_frame(122, 25))
+            await self.client.write_gatt_char(CHARACTERISTIC_UUID, pkt, response=False)
+            await asyncio.sleep(0.6)
+            emit_event("action_completed", {"action": action_key})
+            return
+
+        elif action_key == "head_pan":
+            # Sweep Left -> Right -> Center
+            await self.client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, make_head_frame(42, 25)), response=False)
+            await asyncio.sleep(0.8)
+            await self.client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, make_head_frame(202, 25)), response=False)
+            await asyncio.sleep(0.8)
+            await self.client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, make_head_frame(122, 25)), response=False)
             await asyncio.sleep(0.5)
             emit_event("action_completed", {"action": action_key})
             return
@@ -174,7 +203,6 @@ class RobosenBleDaemon:
                 self.active_action_event = asyncio.Event()
                 await self.client.write_gatt_char(CHARACTERISTIC_UUID, pkt, response=False)
                 try:
-                    # As soon as robot emits progress: 100%, this resolves immediately
                     await asyncio.wait_for(self.active_action_event.wait(), timeout=max_timeout)
                 except asyncio.TimeoutError:
                     pass

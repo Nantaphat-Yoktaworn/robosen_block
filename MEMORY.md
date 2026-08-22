@@ -226,8 +226,11 @@ Because Node v24 on Windows requires MSVC C++ compilation for `@abandonware/nobl
 # Query Live Telemetry & Battery Status
 python scripts/k1_action.py status
 
-# Test Head Servo Motion
-python scripts/k1_action.py head_pan
+# Test Head Servo Articulations Individually
+python scripts/k1_action.py head_left    # Turns head to the Left (angle 42)
+python scripts/k1_action.py head_right   # Turns head to the Right (angle 202)
+python scripts/k1_action.py head_center  # Returns head to Center (angle 122)
+python scripts/k1_action.py head_pan     # Full Sweep (Left -> Right -> Center)
 
 # Martial Arts & Punches
 python scripts/k1_action.py punch_left

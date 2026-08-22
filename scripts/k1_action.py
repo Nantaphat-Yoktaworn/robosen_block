@@ -23,7 +23,6 @@ ACTIONS = {
     "single_kick": (0x17, b"Action/Single Leg Kick", 4.0),
     "push_ups": (0x17, b"Action/Push-ups", 8.0),
     "handstand": (0x17, b"Action/Handstand", 6.0),
-    "head_pan": (0xE8, "HEAD_PAN", 4.0),
     "walk": (0x01, b"", 2.5),
     "turn_left": (0x08, b"", 2.0),
     "turn_right": (0x02, b"", 2.0),
@@ -35,6 +34,15 @@ ACTIONS = {
     "auto_off_off": (0x13, bytes([0]), 1.0),
     "status": (0x0F, b"", 1.5),
 }
+
+def make_head_frame(head_angle: int = 122, speed: int = 25) -> bytes:
+    frame = bytearray([
+        129, 60, 106, 118, 190, 146, 212, 36, 123, 123, 129, 115, 223, 116, 34, 126,
+        head_angle,
+        125, 125, 125, 125, 100, 100, 100,
+        speed
+    ])
+    return bytes(frame)
 
 def build_packet(opcode: int, payload: bytes = b"") -> bytes:
     num_bytes = 1 + len(payload) + 1
@@ -110,17 +118,35 @@ async def execute_action(action_key: str):
             await asyncio.sleep(1.5)
             return
 
-        if action_key == "head_pan":
-            print("[*] Executing Head Pan routine...")
-            f_left = bytearray([129, 60, 106, 118, 190, 146, 212, 36, 123, 123, 129, 115, 223, 116, 34, 126, 42, 125, 125, 125, 125, 100, 100, 100, 30])
-            await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, bytes(f_left)), response=False)
-            await asyncio.sleep(1.2)
-            f_right = bytearray([129, 60, 106, 118, 190, 146, 212, 36, 123, 123, 129, 115, 223, 116, 34, 126, 202, 125, 125, 125, 125, 100, 100, 100, 30])
-            await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, bytes(f_right)), response=False)
-            await asyncio.sleep(1.2)
-            f_center = bytearray([129, 60, 106, 118, 190, 146, 212, 36, 123, 123, 129, 115, 223, 116, 34, 126, 122, 125, 125, 125, 125, 100, 100, 100, 30])
-            await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, bytes(f_center)), response=False)
+        if action_key == "head_left":
+            print("[*] Turning Head Left (Angle 42)...")
+            await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, make_head_frame(42, 25)), response=False)
             await asyncio.sleep(1.0)
+            print("[+] Head Left complete.")
+            return
+
+        if action_key == "head_right":
+            print("[*] Turning Head Right (Angle 202)...")
+            await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, make_head_frame(202, 25)), response=False)
+            await asyncio.sleep(1.0)
+            print("[+] Head Right complete.")
+            return
+
+        if action_key in ["head_center", "head_neutral"]:
+            print("[*] Centering Head (Angle 122)...")
+            await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, make_head_frame(122, 25)), response=False)
+            await asyncio.sleep(0.8)
+            print("[+] Head Center complete.")
+            return
+
+        if action_key == "head_pan":
+            print("[*] Executing Head Pan routine (Left -> Right -> Center)...")
+            await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, make_head_frame(42, 25)), response=False)
+            await asyncio.sleep(1.0)
+            await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, make_head_frame(202, 25)), response=False)
+            await asyncio.sleep(1.0)
+            await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, make_head_frame(122, 25)), response=False)
+            await asyncio.sleep(0.8)
             print("[+] Head Pan complete.")
             return
 
@@ -142,6 +168,10 @@ async def execute_action(action_key: str):
             print(f"[-] Unknown action '{action_key}'. Available actions:")
             for k in ACTIONS:
                 print(f"    - {k}")
+            print("    - head_left")
+            print("    - head_right")
+            print("    - head_center")
+            print("    - head_pan")
 
 async def main():
     if len(sys.argv) < 2 or sys.argv[1] == "scan":
@@ -152,6 +182,10 @@ async def main():
             print("Available actions:")
             for k in ACTIONS:
                 print(f"  python scripts/k1_action.py {k}")
+            print("  python scripts/k1_action.py head_left")
+            print("  python scripts/k1_action.py head_right")
+            print("  python scripts/k1_action.py head_center")
+            print("  python scripts/k1_action.py head_pan")
         return
 
     action = sys.argv[1].lower()
