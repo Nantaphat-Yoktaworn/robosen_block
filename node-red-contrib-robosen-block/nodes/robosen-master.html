@@ -1,0 +1,89 @@
+<script type="text/javascript">
+  RED.nodes.registerType("robosen-master", {
+    category: "Robosen Block",
+    color: "#E53935",
+    defaults: {
+      name: { value: "Master Block" },
+      mode: { value: "live" },
+      stepDelay: { value: 0, validate: RED.validators.number() },
+    },
+    inputs: 1,
+    outputs: 2,
+    icon: "font-awesome/fa-microchip",
+    paletteLabel: "master block",
+    label: function () {
+      return this.name || "Master Block";
+    },
+    outputLabels: ["Downstream TX (Pin 3)", "Telemetry & Status"],
+    inputLabels: ["Return RX (Pin 4)"],
+    button: {
+      enabled: function () {
+        return !this.changed;
+      },
+      onclick: function () {
+        const node = this;
+        $.ajax({
+          url: "robosen-master/" + this.id + "/trigger",
+          type: "POST",
+          success: function (resp) {
+            RED.notify("Master Block Start Button Pressed!", "info");
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            if (jqXHR.status == 404) {
+              RED.notify("Node not deployed", "error");
+            } else {
+              RED.notify("Failed to trigger master block", "error");
+            }
+          },
+        });
+      },
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="robosen-master">
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Master Block" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-mode"><i class="fa fa-sliders"></i> Execution Mode</label>
+    <select id="node-input-mode">
+      <option value="live">Live Physical Robot (Bluetooth BLE)</option>
+      <option value="sim">Simulation Only (Debug Log)</option>
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="node-input-stepDelay"><i class="fa fa-clock-o"></i> Step Delay (ms)</label>
+    <input type="number" id="node-input-stepDelay" placeholder="500" />
+  </div>
+</script>
+
+<script type="text/html" data-help-name="robosen-master">
+  <p><b>Robosen Master Block (Controller & Gateway)</b></p>
+  <p>Simulates the physical Master Block in the tangible coding block system.</p>
+
+  <h3>How it Works:</h3>
+  <ol>
+    <li>
+      <b>Press the Start Button</b> (click the button on the left of the node, or send an input trigger): The Master Block sends the seed string <code>"start"</code> out of its <b>Downstream TX</b> port (Output 1).
+    </li>
+    <li>
+      The signal travels sequentially through connected <b>Instruction Blocks</b>, each appending their unique command token.
+    </li>
+    <li>
+      The <b>End Block</b> loops the final accumulated string back into the Master Block's <b>Return RX</b> input (Input 1).
+    </li>
+    <li>
+      The Master Block parses the returned string into individual actions and executes them sequentially on the physical <b>Robosen K1</b> robot via Bluetooth BLE.
+    </li>
+  </ol>
+
+  <h3>Outputs:</h3>
+  <dl class="message-properties">
+    <dt>Output 1 (Downstream TX)<span class="property-type">string</span></dt>
+    <dd>Transmits <code>"start"</code> down the daisy chain to the first instruction block.</dd>
+    <dt>Output 2 (Telemetry & Status)<span class="property-type">object</span></dt>
+    <dd>Emits real-time execution progress, active step details, and completion status.</dd>
+  </dl>
+</script>

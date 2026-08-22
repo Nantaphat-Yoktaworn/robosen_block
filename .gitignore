@@ -16,3 +16,10 @@ node_modules/
 
 # coverage
 coverage/
+
+# Python
+__pycache__/
+*.pyc
+
+# Logs
+*.log
