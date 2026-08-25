@@ -101,16 +101,16 @@ sequenceDiagram
     participant Master as Master Block (ESP32)
     participant B1 as Block 1 (Walk 3 Steps)
     participant B2 as Block 2 (Punch Left)
-    participant End as End Block (Loopback)
+    participant EndBlock as End Block (Loopback)
     participant Robot as Robosen K1 Robot
 
-    Note over Master,End: PHASE 1: DISCOVERY & COMPILATION (Press Green Start Button)
+    Note over Master,EndBlock: PHASE 1: DISCOVERY & COMPILATION (Press Green Start Button)
     Master->>B1: Frame [0xAA, Len=0, Count=0, CRC] (Pin 3 TX)
     Note over B1: Sets Index=1, appends Token 0x01 (Walk) + Param=3, Count=1
     B1->>B2: Frame [0xAA, Len=2, Count=1, 0x01, 0x03, CRC]
     Note over B2: Sets Index=2, appends Token 0x10 (Punch) + Param=1, Count=2
-    B2->>End: Frame [0xAA, Len=4, Count=2, 0x01, 0x03, 0x10, 0x01, CRC]
-    End->>Master: Return Program Frame over Pin 4 (Return RX Rail)
+    B2->>EndBlock: Frame [0xAA, Len=4, Count=2, 0x01, 0x03, 0x10, 0x01, CRC]
+    EndBlock->>Master: Return Program Frame over Pin 4 (Return RX Rail)
     Master->>Master: Validates CRC-8 Checksum & Queues Sequence
 
     Note over Master,Robot: PHASE 2: REAL-TIME EXECUTION & VISUAL STEP TRACKING
@@ -125,9 +125,9 @@ sequenceDiagram
     Master->>Robot: Send BLE Action "ProAction/Left Punch" (Opcode 0x17)
     Robot->>Master: Robot streams progress -> reaches 100% ACK (0x64)
 
-    Note over Master,End: PROGRAM COMPLETE
+    Note over Master,EndBlock: PROGRAM COMPLETE
     Master->>Master: Victory Fanfare on Piezo Buzzer!
-    Master-->>End: Broadcast [0xBB, 0xFF] (All Block LEDs flash celebratory green)
+    Master-->>EndBlock: Broadcast [0xBB, 0xFF] (All Block LEDs flash celebratory green)
 ```
 
 ---

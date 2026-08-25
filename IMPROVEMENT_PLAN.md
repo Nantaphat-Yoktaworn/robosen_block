@@ -87,17 +87,17 @@ sequenceDiagram
     participant Master as Master Block (ESP32)
     participant B1 as Block 1 (Walk)
     participant B2 as Block 2 (Punch)
-    participant End as End Block (Loopback)
+    participant EndBlock as End Block (Loopback)
 
-    Note over Master,End: PHASE 1: DISCOVERY & PROGRAM COMPILATION (FORWARD PIPELINE)
+    Note over Master,EndBlock: PHASE 1: DISCOVERY & PROGRAM COMPILATION (FORWARD PIPELINE)
     Master->>B1: Frame [0xAA, Len=0, Count=0, CRC] (Pin 3 TX)
     Note over B1: Sets MyIndex = 1<br/>Appends: ID=0x01, Param=3 steps<br/>Increments Count = 1
     B1->>B2: Frame [0xAA, Len=2, Count=1, 0x01, 0x03, CRC]
     Note over B2: Sets MyIndex = 2<br/>Appends: ID=0x10, Param=1 combo<br/>Increments Count = 2
-    B2->>End: Frame [0xAA, Len=4, Count=2, 0x01, 0x03, 0x10, 0x01, CRC]
-    End->>Master: Loopback Frame over Pin 4 (Return RX Rail)
+    B2->>EndBlock: Frame [0xAA, Len=4, Count=2, 0x01, 0x03, 0x10, 0x01, CRC]
+    EndBlock->>Master: Loopback Frame over Pin 4 (Return RX Rail)
 
-    Note over Master,End: PHASE 2: REAL-TIME EXECUTION BROADCAST (RETURN BUS)
+    Note over Master,EndBlock: PHASE 2: REAL-TIME EXECUTION BROADCAST (RETURN BUS)
     Master->>Master: BLE Send Walk 3 Steps -> Robot
     Master-->>B1: Broadcast [0xBB, ActiveStep=1, CRC] (Pin 4 RX_BUS)
     Note over B1: MyIndex(1) == ActiveStep(1) -> Glows Bright Green!
