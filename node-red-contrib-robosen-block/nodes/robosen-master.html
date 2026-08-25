@@ -5,16 +5,17 @@
     defaults: {
       name: { value: "Master Block" },
       mode: { value: "live" },
+      protocolVersion: { value: "binary" },
       stepDelay: { value: 0, validate: RED.validators.number() },
     },
     inputs: 1,
-    outputs: 2,
+    outputs: 3,
     icon: "font-awesome/fa-microchip",
     paletteLabel: "master block",
     label: function () {
       return this.name || "Master Block";
     },
-    outputLabels: ["Downstream TX (Pin 3)", "Telemetry & Status"],
+    outputLabels: ["Downstream TX (Pin 3)", "Telemetry & Status", "RX Broadcast Bus (Pin 4)"],
     inputLabels: ["Return RX (Pin 4)"],
     button: {
       enabled: function () {
@@ -28,7 +29,7 @@
           success: function (resp) {
             RED.notify("Master Block Start Button Pressed!", "info");
           },
-          error: function (jqXHR, textStatus, errorThrown) {
+          error: function (jqXHR) {
             if (jqXHR.status == 404) {
               RED.notify("Node not deployed", "error");
             } else {
@@ -37,6 +38,92 @@
           },
         });
       },
+    },
+    oneditprepare: function () {
+      const node = this;
+
+      function updateStatusCard() {
+        $.ajax({
+          url: "robosen-master/" + node.id + "/info",
+          type: "GET",
+          success: function (data) {
+            if (data.isConnected) {
+              $("#master-k1-badge")
+                .html("🟢 Connected")
+                .css({ "background-color": "#E8F5E9", color: "#2E7D32", "border-color": "#A5D6A7" });
+              $("#master-k1-device-name").text(data.robotInfo.name || "K1");
+              $("#master-k1-battery").text(data.robotInfo.battery + "%");
+              $("#master-k1-volume").text(data.robotInfo.volume + " / 140");
+              $("#master-k1-firmware").text(data.robotInfo.firmware || "VER:3.03L");
+            } else {
+              $("#master-k1-badge")
+                .html("🔴 Disconnected")
+                .css({ "background-color": "#FFEBEE", color: "#C62828", "border-color": "#FFCDD2" });
+              $("#master-k1-device-name").text("--");
+              $("#master-k1-battery").text("--");
+              $("#master-k1-volume").text("--");
+              $("#master-k1-firmware").text("--");
+            }
+            if (data.lastEvent) {
+              $("#master-k1-last-log").text(data.lastEvent);
+            }
+          },
+          error: function () {
+            $("#master-k1-badge")
+              .html("⚪ Node Not Deployed")
+              .css({ "background-color": "#ECEFF1", color: "#546E7A", "border-color": "#CFD8DC" });
+          },
+        });
+      }
+
+      // Initial update and periodic polling while dialog open
+      updateStatusCard();
+      const pollTimer = setInterval(updateStatusCard, 1500);
+
+      // Clean timer when dialog closes
+      $("#dialog").on("dialogclose", function () {
+        clearInterval(pollTimer);
+      });
+
+      // Connect Button
+      $("#master-btn-connect").click(function () {
+        $("#master-k1-last-log").text("Scanning & connecting to K1...");
+        $.ajax({
+          url: "robosen-master/" + node.id + "/connect",
+          type: "POST",
+          success: function () {
+            RED.notify("Connecting to Robosen K1 robot...", "info");
+            setTimeout(updateStatusCard, 1000);
+          },
+          error: function () {
+            RED.notify("Deploy flow first to connect!", "warning");
+          },
+        });
+      });
+
+      // Disconnect Button
+      $("#master-btn-disconnect").click(function () {
+        $.ajax({
+          url: "robosen-master/" + node.id + "/disconnect",
+          type: "POST",
+          success: function () {
+            RED.notify("Disconnected from robot.", "info");
+            setTimeout(updateStatusCard, 500);
+          },
+        });
+      });
+
+      // Query Status Button
+      $("#master-btn-status").click(function () {
+        $.ajax({
+          url: "robosen-master/" + node.id + "/status",
+          type: "POST",
+          success: function () {
+            RED.notify("Status query sent.", "info");
+            setTimeout(updateStatusCard, 600);
+          },
+        });
+      });
     },
   });
 </script>
@@ -47,6 +134,13 @@
     <input type="text" id="node-input-name" placeholder="Master Block" />
   </div>
   <div class="form-row">
+    <label for="node-input-protocolVersion"><i class="fa fa-exchange"></i> Bus Protocol</label>
+    <select id="node-input-protocolVersion">
+      <option value="binary">2-Phase Binary Frames with CRC-8 (V2 - Recommended)</option>
+      <option value="string">Legacy CSV Strings (V1)</option>
+    </select>
+  </div>
+  <div class="form-row">
     <label for="node-input-mode"><i class="fa fa-sliders"></i> Execution Mode</label>
     <select id="node-input-mode">
       <option value="live">Live Physical Robot (Bluetooth BLE)</option>
@@ -55,7 +149,43 @@
   </div>
   <div class="form-row">
     <label for="node-input-stepDelay"><i class="fa fa-clock-o"></i> Step Delay (ms)</label>
-    <input type="number" id="node-input-stepDelay" placeholder="500" />
+    <input type="number" id="node-input-stepDelay" placeholder="0" />
+  </div>
+
+  <hr style="margin: 15px 0;" />
+
+  <!-- Robot Connection & Live Telemetry Dashboard Card -->
+  <div style="background: #FAFAFA; border: 1px solid #E0E0E0; border-radius: 6px; padding: 12px; margin-bottom: 12px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <span style="font-weight: bold; font-size: 13px;"><i class="fa fa-bluetooth"></i> Robosen K1 BLE Connection</span>
+      <span id="master-k1-badge" style="padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; border: 1px solid #ccc; background: #ECEFF1; color: #546E7A;">
+        Checking...
+      </span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; margin-bottom: 10px;">
+      <div><b>Device:</b> <span id="master-k1-device-name">--</span></div>
+      <div><b>Battery:</b> <span id="master-k1-battery" style="color: #2E7D32; font-weight: bold;">--</span></div>
+      <div><b>Volume:</b> <span id="master-k1-volume">--</span></div>
+      <div><b>Firmware:</b> <span id="master-k1-firmware">--</span></div>
+    </div>
+
+    <div style="font-size: 11px; color: #555; background: #FFF; border: 1px solid #EEE; padding: 6px 8px; border-radius: 4px; margin-bottom: 10px;">
+      <b>Activity:</b> <span id="master-k1-last-log">Ready</span>
+    </div>
+
+    <!-- Manual Connection Buttons -->
+    <div style="display: flex; gap: 6px;">
+      <button type="button" class="red-ui-button" id="master-btn-connect" style="flex: 1; font-size: 11px; font-weight: bold; background: #E8F5E9; color: #2E7D32; border-color: #A5D6A7;">
+        <i class="fa fa-link"></i> Connect
+      </button>
+      <button type="button" class="red-ui-button" id="master-btn-status" style="flex: 1; font-size: 11px;">
+        <i class="fa fa-refresh"></i> Query Status
+      </button>
+      <button type="button" class="red-ui-button" id="master-btn-disconnect" style="flex: 1; font-size: 11px; font-weight: bold; background: #FFEBEE; color: #C62828; border-color: #FFCDD2;">
+        <i class="fa fa-unlink"></i> Disconnect
+      </button>
+    </div>
   </div>
 </script>
 
@@ -63,27 +193,29 @@
   <p><b>Robosen Master Block (Controller & Gateway)</b></p>
   <p>Simulates the physical Master Block in the tangible coding block system.</p>
 
-  <h3>How it Works:</h3>
+  <h3>2-Phase Protocol:</h3>
   <ol>
     <li>
-      <b>Press the Start Button</b> (click the button on the left of the node, or send an input trigger): The Master Block sends the seed string <code>"start"</code> out of its <b>Downstream TX</b> port (Output 1).
+      <b>Press the Start Button:</b> Emits Phase 1 Seed Frame (<code>0xAA</code>) down <b>Output 1 (Pin 3 TX)</b>.
     </li>
     <li>
-      The signal travels sequentially through connected <b>Instruction Blocks</b>, each appending their unique command token.
+      The signal travels through connected <b>Smart Blocks</b>, each appending its Token ID & Parameter.
     </li>
     <li>
-      The <b>End Block</b> loops the final accumulated string back into the Master Block's <b>Return RX</b> input (Input 1).
+      The <b>Smart End Block</b> returns the binary packet into <b>Input 1 (Pin 4 RX)</b>.
     </li>
     <li>
-      The Master Block parses the returned string into individual actions and executes them sequentially on the physical <b>Robosen K1</b> robot via Bluetooth BLE.
+      Master verifies <b>CRC-8</b>, executes commands sequentially on the robot, and broadcasts <code>0xBB</code> step frames across <b>Output 3 (Pin 4 Broadcast Bus)</b> so the active physical block glows bright green!
     </li>
   </ol>
 
   <h3>Outputs:</h3>
   <dl class="message-properties">
-    <dt>Output 1 (Downstream TX)<span class="property-type">string</span></dt>
-    <dd>Transmits <code>"start"</code> down the daisy chain to the first instruction block.</dd>
+    <dt>Output 1 (Downstream TX - Pin 3)<span class="property-type">buffer</span></dt>
+    <dd>Transmits <code>0xAA</code> seed frame down the daisy chain.</dd>
     <dt>Output 2 (Telemetry & Status)<span class="property-type">object</span></dt>
-    <dd>Emits real-time execution progress, active step details, and completion status.</dd>
+    <dd>Emits real-time execution progress, active step details, and robot telemetry.</dd>
+    <dt>Output 3 (RX Broadcast Bus - Pin 4)<span class="property-type">buffer</span></dt>
+    <dd>Broadcasts <code>0xBB</code> active step frames to trigger real-time LED feedback on Smart Blocks.</dd>
   </dl>
 </script>

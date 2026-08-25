@@ -1,0 +1,44 @@
+<script type="text/javascript">
+  RED.nodes.registerType("robosen-smart-end", {
+    category: "Robosen Block",
+    color: "#2E7D32",
+    defaults: {
+      name: { value: "Smart End Block" },
+      injectError: { value: false },
+    },
+    inputs: 1,
+    outputs: 2,
+    icon: "font-awesome/fa-stop-circle-o",
+    paletteLabel: "smart end block",
+    label: function () {
+      return this.name || "Smart End Block";
+    },
+    inputLabels: ["Pin 3 In (Downstream TX)"],
+    outputLabels: ["Pin 4 Out (Return RX Rail)", "Diagnostics & Telemetry"],
+  });
+</script>
+
+<script type="text/html" data-template-name="robosen-smart-end">
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Smart End Block" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-injectError"><i class="fa fa-bug"></i> Test Fault</label>
+    <input type="checkbox" id="node-input-injectError" style="display: inline-block; width: auto; vertical-align: top;" />
+    <span style="font-size: 12px; margin-left: 6px; color: #D32F2F;">Inject intentional CRC-8 corruption (for error testing)</span>
+  </div>
+
+  <div style="background: #E8F5E9; border: 1px solid #A5D6A7; border-radius: 6px; padding: 10px; margin-top: 15px; font-size: 12px;">
+    <b><i class="fa fa-microchip"></i> Smart Terminator Function:</b>
+    <p style="margin: 4px 0 0 0;">
+      Detects end-of-chain, validates CRC-8 on the compiled binary program, and bridges data straight into <b>Pin 4 (Return RX Rail)</b> back to the Master Block.
+    </p>
+  </div>
+</script>
+
+<script type="text/html" data-help-name="robosen-smart-end">
+  <p><b>Robosen Smart End Block (Active Terminator)</b></p>
+  <p>Marks the physical end of the coding sequence. Contains an active microcontroller that calculates CRC-8 and loops data onto the shared Pin 4 Return Rail.</p>
+</script>

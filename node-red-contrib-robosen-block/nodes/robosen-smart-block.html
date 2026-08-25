@@ -1,0 +1,131 @@
+<script type="text/javascript">
+  RED.nodes.registerType("robosen-smart-block", {
+    category: "Robosen Block",
+    color: "#0277BD",
+    defaults: {
+      name: { value: "" },
+      tokenId: { value: "1", required: true },
+      param: { value: 3, required: true, validate: RED.validators.number() },
+    },
+    inputs: 1,
+    outputs: 2,
+    icon: "font-awesome/fa-cube",
+    paletteLabel: "smart block",
+    label: function () {
+      if (this.name) return this.name;
+      const catalog = {
+        "1": "Walk Forward",
+        "2": "Walk Backward",
+        "3": "Turn Left",
+        "4": "Turn Right",
+        "7": "Side-Step Left",
+        "8": "Side-Step Right",
+        "16": "Left Punch",
+        "17": "Right Punch",
+        "18": "Kung Fu",
+        "19": "Boogaloo Dance",
+        "20": "Push-ups",
+        "21": "Handstand",
+        "22": "Single Kick",
+        "23": "Do Squats",
+        "24": "Say Hello",
+        "25": "Celebrate Cheer",
+        "32": "Head Pan",
+        "48": "Wait Delay",
+        "64": "Repeat Loop",
+      };
+      const name = catalog[this.tokenId] || `Action (0x${parseInt(this.tokenId, 10).toString(16)})`;
+      return `${name} [${this.param}]`;
+    },
+    labelStyle: function () {
+      return this.name ? "node_label_italic" : "";
+    },
+    inputLabels: ["Pin 3 In (Downstream) / Pin 4 In (RX Bus)"],
+    outputLabels: ["Pin 3 Out (Downstream)", "WS2812B LED Telemetry"],
+    button: {
+      enabled: function () {
+        return !this.changed;
+      },
+      onclick: function () {
+        const node = this;
+        $.ajax({
+          url: "robosen-smart-block/" + this.id + "/cycle",
+          type: "POST",
+          success: function (resp) {
+            RED.notify("Cycled Smart Block Action: " + resp.label, "info");
+          },
+          error: function () {
+            RED.notify("Deploy flow first to interact!", "warning");
+          },
+        });
+      },
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="robosen-smart-block">
+  <div class="form-row">
+    <label for="node-input-tokenId"><i class="fa fa-hand-pointer-o"></i> Push Button</label>
+    <select id="node-input-tokenId">
+      <optgroup label="Locomotion">
+        <option value="1">Walk Forward (0x01)</option>
+        <option value="2">Walk Backward (0x02)</option>
+        <option value="3">Turn Left (0x03)</option>
+        <option value="4">Turn Right (0x04)</option>
+        <option value="7">Side-Step Left (0x07)</option>
+        <option value="8">Side-Step Right (0x08)</option>
+      </optgroup>
+      <optgroup label="Combat & Martial Arts">
+        <option value="16">Left Punch (0x10)</option>
+        <option value="17">Right Punch (0x11)</option>
+        <option value="18">Kung Fu Stunt (0x12)</option>
+      </optgroup>
+      <optgroup label="Stunts & Acrobatics">
+        <option value="19">Boogaloo Dance (0x13)</option>
+        <option value="20">Push-ups (0x14)</option>
+        <option value="21">Handstand (0x15)</option>
+        <option value="22">Single Kick (0x16)</option>
+        <option value="23">Do Squats (0x17)</option>
+        <option value="24">Say Hello (0x18)</option>
+        <option value="25">Celebrate Cheer (0x19)</option>
+      </optgroup>
+      <optgroup label="Kinematics & Control">
+        <option value="32">Head Pan Sweep (0x20)</option>
+        <option value="48">Wait Delay Seconds (0x30)</option>
+        <option value="64">Repeat Loop (0x40)</option>
+      </optgroup>
+    </select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-param"><i class="fa fa-sliders"></i> Rotary Knob</label>
+    <input type="number" id="node-input-param" placeholder="Steps, Angle, or Reps" min="1" max="180" style="width: 120px;" />
+    <span style="color: #666; font-size: 12px; margin-left: 8px;">(Steps 1-10, Angle 45°-180°, Reps 1-5, Sec 1-5)</span>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Optional custom label" />
+  </div>
+
+  <div style="background: #E1F5FE; border: 1px solid #81D4FA; border-radius: 6px; padding: 10px; margin-top: 15px; font-size: 12px;">
+    <b><i class="fa fa-microchip"></i> CH32V003 Smart Hardware Features:</b>
+    <ul style="margin: 6px 0 0 16px; padding: 0;">
+      <li><b>Push Button:</b> Cycles robot actions and updates WS2812B LED mode color.</li>
+      <li><b>Rotary Knob:</b> Adjusts step counts, angles, or repetition parameters.</li>
+      <li><b>2-Phase Auto-Discovery:</b> Discovers its spatial index automatically during Phase 1.</li>
+      <li><b>Active Execution Tracking:</b> WS2812B LED glows <b>Bright Pulsing Green</b> during Phase 2 execution.</li>
+    </ul>
+  </div>
+</script>
+
+<script type="text/html" data-help-name="robosen-smart-block">
+  <p><b>Robosen Smart Multi-Action Block (CH32V003 RISC-V)</b></p>
+  <p>Simulates the next-generation smart physical coding block with interactive push button, rotary potentiometer dial, and WS2812B real-time RGB LED.</p>
+
+  <h3>2-Phase Protocol:</h3>
+  <ol>
+    <li><b>Phase 1 (Discovery):</b> Receives binary frame <code>0xAA</code>, auto-assigns its sequence index (<code>#1, #2...</code>), appends its Token ID & Parameter, and forwards downstream.</li>
+    <li><b>Phase 2 (Active Tracking):</b> When the Master broadcasts <code>0xBB</code> with this block's index, the block status illuminates <b>Bright Pulsing Green</b> while the robot executes this step!</li>
+  </ol>
+</script>

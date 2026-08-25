@@ -1,0 +1,37 @@
+<script type="text/javascript">
+  RED.nodes.registerType("robosen-protocol-monitor", {
+    category: "Robosen Block",
+    color: "#607D8B",
+    defaults: {
+      name: { value: "Protocol Bus Monitor" },
+    },
+    inputs: 1,
+    outputs: 2,
+    icon: "font-awesome/fa-search",
+    paletteLabel: "protocol monitor",
+    label: function () {
+      return this.name || "Protocol Bus Monitor";
+    },
+    inputLabels: ["Serial Bus Tap"],
+    outputLabels: ["Pass-Through Bus", "Protocol Analysis JSON"],
+  });
+</script>
+
+<script type="text/html" data-template-name="robosen-protocol-monitor">
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Protocol Bus Monitor" />
+  </div>
+
+  <div style="background: #ECEFF1; border: 1px solid #CFD8DC; border-radius: 6px; padding: 10px; margin-top: 15px; font-size: 12px;">
+    <b><i class="fa fa-terminal"></i> Bus Sniffer & Packet Inspector:</b>
+    <p style="margin: 4px 0 0 0;">
+      Inspects raw serial frames on the wire in real time. Decodes token opcodes, rotary parameters, packet framing, and verifies <b>CRC-8 integrity</b>.
+    </p>
+  </div>
+</script>
+
+<script type="text/html" data-help-name="robosen-protocol-monitor">
+  <p><b>Robosen Protocol Sniffer & Bus Analyzer</b></p>
+  <p>Can be inserted anywhere in the physical block wire to sniff and inspect binary packets (<code>0xAA</code> Discovery & <code>0xBB</code> Step Broadcast) in real time.</p>
+</script>

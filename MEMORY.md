@@ -1,7 +1,7 @@
 # RobosenJS & Tangible Coding Block System: Master Project Memory
 
 > **System Overview:** Programmatic Control (Node.js & Python SDK), Custom Node-RED Tangible Block Simulator Palette, and Bluetooth Low Energy (BLE) Reverse Engineering for the **Robosen K1 / Interstellar Scout K1 Series** Humanoid Robot.  
-> **Last Updated:** August 23, 2026  
+> **Last Updated:** August 25, 2026  
 > **FCC ID:** `2ATNWK1` | **Live Verified Robot ID:** `K1-00457` (`3C:A5:51:94:97:70`) | **Firmware:** `VER:3.03L`
 
 ---
@@ -10,6 +10,9 @@
 
 ```
 robosen_block/
+├── assignments/
+│   ├── as01_เอกสารสรุปงานวิจัยที่เกี่ยวข้อง.pdf # Academic literature review (4 verified research papers)
+│   └── RESEARCH_SUMMARY.md               # Presentation-ready markdown summary of AS01 research papers
 ├── bin/
 │   └── k1.js                             # Node.js CLI executable wrapper
 ├── recordings/
@@ -44,23 +47,30 @@ robosen_block/
 │   ├── __mocks__/@abandonware/noble.js   # Mock BLE hardware layer for offline unit testing
 │   ├── K1.test.js                        # K1 integration unit tests
 │   └── Robot.test.js                     # Robot protocol & packet encoder tests
-├── node-red-contrib-robosen-block/       # Custom Node-RED palette simulating physical block daisy chain
+├── node-red-contrib-robosen-block/       # Custom Node-RED palette simulating physical block daisy chain (v2.0)
+│   ├── lib/
+│   │   └── protocol.js                   # Protocol encoder/decoder, CRC-8, and token catalog
 │   ├── nodes/
-│   │   ├── robosen-master.js / .html     # Master Block controller node (Persistent BLE daemon & string parser)
-│   │   ├── robosen-instruction.js / .html# Modular instruction blocks (locomotion, combat, stunts)
-│   │   ├── robosen-end.js / .html        # Passive loopback terminator block node
-│   │   └── robosen-tester.js / .html     # Standalone action tester & direct controller node
+│   │   ├── robosen-master.js / .html     # Master Block controller node (Persistent BLE daemon, Start button & REST API)
+│   │   ├── robosen-smart-block.js / .html# Smart Multi-Action Block (CH32V003 RISC-V with Button & Knob)
+│   │   ├── robosen-smart-end.js / .html  # Smart Active Terminator Block with CRC-8 validation & loopback
+│   │   ├── robosen-protocol-monitor.js / .html # Serial Protocol Bus Analyzer & Packet Sniffer
+│   │   ├── robosen-tester.js / .html     # Standalone action tester & direct controller node
+│   │   ├── robosen-instruction.js / .html# Legacy modular instruction blocks (V1 CSV mode)
+│   │   └── robosen-end.js / .html        # Legacy passive loopback terminator block node (V1)
 │   ├── examples/
-│   │   └── robosen_simulator_flow.json   # Ready-to-import Node-RED simulation flow
-│   ├── package.json
-│   └── README.md
+│   │   ├── robosen_smart_block_flow.json # Ready-to-import 2-Phase Binary simulation flow
+│   │   └── robosen_simulator_flow.json   # Legacy string simulation flow
+│   ├── package.json                      # Node-RED palette package manifest (v2.0.0)
+│   └── README.md                         # Detailed palette documentation & API guide
 ├── index.d.ts                            # Root TypeScript exports
 ├── index.js                              # Package entry point (exports K1 and Robot)
 ├── package.json                          # NPM dependencies and script definitions
-├── README.md                             # Original RobosenJS getting started guide
-├── ROBOSEN_K1_DOCUMENTATION.md           # Complete official K1 documentation & user manual
+├── README.md                             # Comprehensive project master README
+├── PROJECT_SUMMARY.md                    # Executive project summary & scope
 ├── PHYSICAL_BLOCK_SYSTEM_SPEC.md         # Hardware & electrical spec for modular tangible coding blocks
 ├── IMPROVEMENT_PLAN.md                   # 5-Pillar master improvement plan & roadmap
+├── ROBOSEN_K1_DOCUMENTATION.md           # Complete official K1 documentation & user manual
 └── MEMORY.md                             # Master project memory & knowledge base (this file)
 ```
 
@@ -261,44 +271,54 @@ python scripts/k1_ble_tester.py
 
 ---
 
-## 8. Node-RED Custom Palette: `node-red-contrib-robosen-block`
+## 8. Node-RED Custom Palette: `node-red-contrib-robosen-block` (v2.0)
 
 A dedicated Node-RED palette simulating the physical block-based tangible programming system:
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                    NODE-RED SIGNAL FLOW                                         │
-│                                                                                                 │
-│  [ Master Block ] ────► [ Instruction 1 ] ────► [ Instruction 2 ] ────► [ End Block Loopback ]  │
-│  (TX: "start")          (+ ",move_forward")     (+ ",left_punch")       (Routes back to RX)     │
-│        ▲                                                                        │               │
-│        └──────────────────── Return RX ("start,move_forward,left_punch") ────────┘               │
-│                    │                                                                            │
-│                    ▼ (Persistent BLE 4.2 Stream)                                                │
-│          [ Robosen K1 Robot ]                                                                   │
-└─────────────────────────────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                       NODE-RED SIMULATED SIGNAL FLOW                                   │
+│                                                                                                        │
+│  [ Master Block ] ──Pin 3 (TX)──► [ Smart Block 1 ] ──Pin 3 (TX)──► [ Smart End Terminator ]           │
+│  (Emits Seed 0xAA)                (+ Token 0x01, Param 3)           (Validates CRC-8 & Loops to Pin 4) │
+│        ▲                                                                    │                          │
+│        └──────────────────── Pin 4 Return RX & Broadcast Bus ───────────────┘                          │
+│                     │                                                                                  │
+│                     ├──────────────────────────────────────────────┐                                   │
+│                     ▼ (Phase 1: Binary Return)                     ▼ (Phase 2: Live 0xBB Broadcast)    │
+│             [ Master Parser & BLE Queue ]                 [ Smart Block 1 LED: Bright Green! ]         │
+│                     │                                                                                  │
+│                     ▼ (Bluetooth Low Energy 4.2)                                                       │
+│           [ Robosen K1 Robot ]                                                                         │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Nodes in Palette:
-1. **`robosen-master` (Master Block):**
-   - Auto-connects to robot on flow deployment via persistent daemon.
-   - Clickable button sends `"start"` down the chain.
-   - Receives loopback string, parses tokens, and dispatches actions to robot with live telemetry.
-   - Default `stepDelay = 0ms` for seamless action chaining.
-2. **`robosen-instruction` (Instruction Block):**
-   - Configurable action selector (Walk, Turn, Punch, Kung Fu, Dance, Push-ups, Handstand, Head Pan, Delay).
-   - Appends its unique `,command` token.
-3. **`robosen-end` (End Block):**
-   - Passive loopback terminator connecting Pin 3 TX to Pin 4 RX.
-4. **`robosen-tester` (Action Tester / Direct Controller):**
-   - Standalone node for direct action testing without loopback wiring.
-   - Includes **⚡ Execute Action Immediately** button, **Connect / Disconnect** buttons, and live battery & connection status card right inside the properties dialog.
-   - Canvas button for one-click action triggering from the Node-RED editor.
+### Nodes in Palette (Version 2.0):
+1. **`robosen-master` (Master Block Controller & Gateway):**
+   - Supports 2-Phase Binary Protocol (`0xAA`/`0xBB`) with CRC-8 and legacy CSV strings.
+   - Clickable canvas button sends `0xAA` seed frame down Pin 3.
+   - Output 1: Pin 3 Downstream TX, Output 2: Telemetry, Output 3: Pin 4 RX Broadcast Bus.
+   - Dispatches live BLE commands and broadcasts `0xBB` frames to trigger green active step LEDs on smart blocks in real time!
+   - HTTP Admin REST Endpoints: `/trigger`, `/info`, `/connect`, `/disconnect`, `/status`.
+2. **`robosen-smart-block` (Smart Multi-Action Block - CH32V003):**
+   - Push Button action selector (cycles actions on button click).
+   - Rotary Knob parameter adjuster (steps 1-10, angle 45°-180°, reps 1-5, delay 1-5s).
+   - Dynamic WS2812B RGB LED state machine: turns **Bright Pulsing Green** when actively executing during Phase 2 broadcast.
+3. **`robosen-smart-end` (Smart Active Terminator):**
+   - Active end-of-chain terminator with CRC-8 validation, footer `0x55` framing, and return loopback into Pin 4.
+   - Built-in fault injection toggle to simulate CRC corruption for error testing.
+4. **`robosen-protocol-monitor` (Bus Analyzer & Packet Inspector):**
+   - Live packet sniffer inspecting raw Hex frames, opcode decoding, parameter tables, and CRC status.
+5. **`robosen-tester` (Action Tester / Direct Controller):**
+   - Standalone testing node with direct BLE execution, properties dashboard card, and REST endpoints.
+6. **`robosen-instruction` / `robosen-end` (Legacy V1 Blocks):**
+   - Maintained for backwards compatibility with single-action CSV chains.
 
-### Machine Symlink Setup:
+### Machine Symlink & Simulation Flows:
 - Linked directly into machine's Node-RED via NTFS Directory Junction:
   `C:\Users\poomz\.node-red\node_modules\node-red-contrib-robosen-block` $\longleftrightarrow$ `C:\Users\poomz\nnnn\robosen_block\node-red-contrib-robosen-block`
-- Ready-to-import simulation flow: [`node-red-contrib-robosen-block/examples/robosen_simulator_flow.json`](file:///C:/Users/poomz/nnnn/robosen_block/node-red-contrib-robosen-block/examples/robosen_simulator_flow.json).
+- **V2 Smart Block Flow**: [`node-red-contrib-robosen-block/examples/robosen_smart_block_flow.json`](node-red-contrib-robosen-block/examples/robosen_smart_block_flow.json).
+- **V1 Legacy Flow**: [`node-red-contrib-robosen-block/examples/robosen_simulator_flow.json`](node-red-contrib-robosen-block/examples/robosen_simulator_flow.json).
 
 ---
 
@@ -307,23 +327,52 @@ A dedicated Node-RED palette simulating the physical block-based tangible progra
 Designed for screenless STEM learning, physical modular coding blocks snap together in a daisy-chain bus to control the Robosen K1:
 
 ### Standardized 4-Pin Pogo Connector Pinout:
-* **Pin 1 (`V+`):** Power rail supplied by Master Block ($3.3\text{V}–3.7\text{V}$).
+* **Pin 1 (`V+`):** Regulated power rail supplied by Master Block ($3.3\text{V}$).
 * **Pin 2 (`GND`):** Common system ground.
-* **Pin 3 (`UART TX`):** Downstream serial transmit line (Master $\to$ Block $1 \to$ Block $2 \dots$).
-* **Pin 4 (`UART RX`):** Upstream return rail (hardwired loopback in End Block returning to Master RX).
+* **Pin 3 (`UART TX_DOWN`):** Downstream serial point-to-point transmit line (Master $\to$ Block $1 \to$ Block $2 \dots$).
+* **Pin 4 (`UART RX_BUS`):** Continuous return rail & live step broadcast bus (Loopback $\to$ Master RX, Master Step Broadcast $\to$ Blocks).
 
 ---
 
-## 10. 5-Pillar Master Improvement Plan & Roadmap
+## 10. 5-Pillar Master Improvement Plan & Protocol Architecture
 
 1. **Pillar 1: Hardware & Power BOM**
-   - Replace instruction block MCUs with **\$0.15 WCH CH32V003 (RISC-V)** or **ATtiny85** to drop idle current from $50\text{mA}$ to $<10\,\mu\text{A}$.
+   - Replace instruction block MCUs with **$0.15 WCH CH32V003 (32-bit RISC-V)** in SOP-8 package to drop idle current from $50\text{mA}$ to $<10\,\mu\text{A}$.
+   - **Unified Firmware Architecture**: Single shared firmware binary across all action & smart End blocks with runtime pin/ADC role detection.
    - Add magnetic polarity keying, TP4056 USB-C BMS charging, and RC debouncing filters on UART pins.
-2. **Pillar 2: Protocol & Resilience**
-   - Migrate from plaintext comma strings to structured binary frames with **CRC-8** verification.
+
+2. **Pillar 2: 2-Phase Bi-Directional Binary Protocol & Resilience**
+   - Protocol Research evaluated 7 alternatives (I2C, SPI, 1-Wire, CAN, Analog Ladders) and confirmed **Daisy-Chain UART** as optimal for native physical order auto-discovery, 4-pin magnetic connector compatibility, and $0.15 SOP-8 MCU budget.
+   - **Phase 1 (Discovery & Compilation - `0xAA`)**: Forward pipeline token-passing with dynamic index auto-discovery ($1..N$) and CRC-8 protection.
+   - **Phase 2 (Execution & Live Feedback - `0xBB`)**: Master broadcasts `[0xBB, StepIndex, TotalSteps, CRC]` across Pin 4 so the active block's WS2812B LED turns bright pulsating green in real time.
+
 3. **Pillar 3: Master ESP32 BLE Firmware**
    - Implement an asynchronous non-blocking command execution queue with $100\%$ action ACK confirmation (`0x17` progress byte `0x64`).
+   - Keep-alive pings (`0x0B`), automatic reconnection, and battery telemetry monitoring (`0x0F`).
+
 4. **Pillar 4: Visual & Auditory UX**
-   - Integrate **WS2812B RGB LEDs** on each instruction block to illuminate in real-time as that specific step is executed by the robot. Add a piezo buzzer on the Master block for start/victory audio fanfares.
-5. **Pillar 5: Next-Generation Blocks**
-   - Develop Parameter Dial blocks (step/angle sliders), `Repeat [N]x` loop blocks, and Ultrasonic Distance obstacle-avoidance blocks.
+   - Integrate **WS2812B RGB LEDs** on each instruction block: color-coded for selected action, pulsing for parameter value, bright green during active robot execution, red on fault.
+   - Add piezo buzzer on Master block for start chimes, step ticks, and victory fanfare.
+
+5. **Pillar 5: Smart Multi-Action & Parameter Blocks**
+   - **Push Button** for cycling actions (Walk, Turn, Punch, Kung Fu, Dance, Delay, Repeat).
+   - **Rotary Knob** (Potentiometer ADC / Rotary Encoder) for increasing/decreasing parameters (steps 1-10, angle 45°-180°, delay 1-5s, loop count 2x-5x).
+   - **Smart End Block** active loopback with CRC-8 calculation and green ready indicator.
+
+---
+
+## 11. Academic Research & Coursework Assignments (`assignments/`)
+
+The `assignments/` folder stores academic project coursework, literature reviews, and research summaries assigned by professors:
+
+### 11.1 Assignment 01: Literature Review on Related Research
+* **File:** [`assignments/as01_เอกสารสรุปงานวิจัยที่เกี่ยวข้อง.pdf`](assignments/as01_เอกสารสรุปงานวิจัยที่เกี่ยวข้อง.pdf)
+* **Summary:** [`assignments/RESEARCH_SUMMARY.md`](assignments/RESEARCH_SUMMARY.md)
+* **Status:** Verified live against all publisher sources. 100% accurate summaries with strong theoretical and pedagogical alignment to the Tangible Robosen Block project.
+
+| Paper # | Citation & Source | Core Focus & Findings | Project Alignment & Pedagogical Justification |
+| :---: | :--- | :--- | :--- |
+| **1** | **ELLA: Generative AI-Powered Social Robots for Early Language Development at Home**<br>*(Antony et al., arXiv:2603.12508 / IDC 2026)* | Evaluated in-home social robot with 10 families & kids aged 4–6. Yielded +2.8 target words and high emotional engagement. | Highlights the power of screenless physical social robot interaction for young children (ages 4–6 / 5–7), contrasting LLM storytelling with our computational logic focus. |
+| **2** | **Evaluation of the Efficacy of Fine Motor Skill Practice by Using Tangible User Interface through Educational Games in Children with Intellectual Disability**<br>*(Teekeng et al., RMUTSVRJ 2020)* | Experimental study ($N=60$) comparing TUI manipulation against conventional therapy. Found significant hand grip gains ($p<0.05$) and superior motivation. | Provides empirical proof that physical Tangible User Interfaces (TUIs) overcome 2D touchscreen fatigue, boosting physical coordination and sustained attention. |
+| **3** | **หุ่นยนต์สื่อการเรียนรู้ปฐมวัย: กรณีศึกษา โรงเรียนเทศบาล 4 ฉลองรัตน (Kinder Bot)**<br>*(Phanpakdee et al., JSET 2025)* | Evaluated Thai early childhood teaching robot with Kindergarten 2 students. Demonstrated 100% functional reliability and top-tier user satisfaction. | Serves as a local Thai classroom benchmark; contrasts Kinder Bot's touchscreen/cloud architecture against our 100% screenless, local BLE closed-loop paradigm. |
+| **4** | **Early Childhood Computational Thinking through Tangible Floor-Robot Programming in an eTwinning Community of Practice**<br>*(Foti & Bratitsis, EJEL 2026)* | 24-week DBR study ($N=473$ Greek educators) on floor-robot programming for ages 4–6. Discovered 3 core design principles. | **Direct Pedagogical Justification:** Directly validates our system architecture: (1) physical magnetic blocks = *explicit sequencing supports*, (2) live pulsing green LED feedback = *testing and debugging cycles*. |

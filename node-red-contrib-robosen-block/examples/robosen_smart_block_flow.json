@@ -1,0 +1,165 @@
+[
+  {
+    "id": "tab_smart_block_sim",
+    "type": "tab",
+    "label": "2-Phase Smart Block Simulator (V2)",
+    "disabled": false,
+    "info": "Demonstrates the 2-Phase Binary Protocol with CRC-8, CH32V003 Smart Multi-Action Blocks, and Real-Time Green LED tracking during execution."
+  },
+  {
+    "id": "node_master_v2",
+    "type": "robosen-master",
+    "z": "tab_smart_block_sim",
+    "name": "Master Block (ESP32 Gateway)",
+    "mode": "live",
+    "protocolVersion": "binary",
+    "stepDelay": 500,
+    "x": 160,
+    "y": 180,
+    "wires": [
+      ["node_smart_1"],
+      ["node_debug_telemetry"],
+      ["node_smart_1", "node_smart_2", "node_smart_3", "node_smart_4", "node_smart_5"]
+    ]
+  },
+  {
+    "id": "node_smart_1",
+    "type": "robosen-smart-block",
+    "z": "tab_smart_block_sim",
+    "name": "Block 1 (CH32V003)",
+    "tokenId": "1",
+    "param": 3,
+    "x": 390,
+    "y": 140,
+    "wires": [
+      ["node_smart_2"],
+      ["node_debug_leds"]
+    ]
+  },
+  {
+    "id": "node_smart_2",
+    "type": "robosen-smart-block",
+    "z": "tab_smart_block_sim",
+    "name": "Block 2 (CH32V003)",
+    "tokenId": "3",
+    "param": 90,
+    "x": 590,
+    "y": 140,
+    "wires": [
+      ["node_smart_3"],
+      ["node_debug_leds"]
+    ]
+  },
+  {
+    "id": "node_smart_3",
+    "type": "robosen-smart-block",
+    "z": "tab_smart_block_sim",
+    "name": "Block 3 (CH32V003)",
+    "tokenId": "16",
+    "param": 1,
+    "x": 790,
+    "y": 140,
+    "wires": [
+      ["node_smart_4"],
+      ["node_debug_leds"]
+    ]
+  },
+  {
+    "id": "node_smart_4",
+    "type": "robosen-smart-block",
+    "z": "tab_smart_block_sim",
+    "name": "Block 4 (CH32V003)",
+    "tokenId": "18",
+    "param": 1,
+    "x": 990,
+    "y": 140,
+    "wires": [
+      ["node_smart_5"],
+      ["node_debug_leds"]
+    ]
+  },
+  {
+    "id": "node_smart_5",
+    "type": "robosen-smart-block",
+    "z": "tab_smart_block_sim",
+    "name": "Block 5 (CH32V003)",
+    "tokenId": "19",
+    "param": 1,
+    "x": 1190,
+    "y": 140,
+    "wires": [
+      ["node_sniffer_1"],
+      ["node_debug_leds"]
+    ]
+  },
+  {
+    "id": "node_sniffer_1",
+    "type": "robosen-protocol-monitor",
+    "z": "tab_smart_block_sim",
+    "name": "Bus Analyzer & Sniffer",
+    "x": 1390,
+    "y": 140,
+    "wires": [
+      ["node_smart_end_1"],
+      ["node_debug_protocol"]
+    ]
+  },
+  {
+    "id": "node_smart_end_1",
+    "type": "robosen-smart-end",
+    "z": "tab_smart_block_sim",
+    "name": "Smart End Terminator",
+    "injectError": false,
+    "x": 1600,
+    "y": 140,
+    "wires": [
+      ["node_master_v2"],
+      []
+    ]
+  },
+  {
+    "id": "node_debug_telemetry",
+    "type": "debug",
+    "z": "tab_smart_block_sim",
+    "name": "Robot BLE & Progress",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "targetType": "full",
+    "x": 430,
+    "y": 260,
+    "wires": []
+  },
+  {
+    "id": "node_debug_leds",
+    "type": "debug",
+    "z": "tab_smart_block_sim",
+    "name": "WS2812B LED States",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "x": 790,
+    "y": 260,
+    "wires": []
+  },
+  {
+    "id": "node_debug_protocol",
+    "type": "debug",
+    "z": "tab_smart_block_sim",
+    "name": "Protocol Frame Inspector",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "x": 1420,
+    "y": 260,
+    "wires": []
+  }
+]
