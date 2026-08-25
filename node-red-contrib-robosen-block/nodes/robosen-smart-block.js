@@ -44,16 +44,29 @@ module.exports = function (RED) {
 
     // Handle incoming signals
     node.on("input", function (msg, send, done) {
+      const _send = send || function () { node.send.apply(node, arguments); };
+
+      let payload = msg.payload;
+      if (!Buffer.isBuffer(payload)) {
+        if (payload && payload.type === "Buffer" && Array.isArray(payload.data)) {
+          payload = Buffer.from(payload.data);
+        } else if (Array.isArray(payload)) {
+          payload = Buffer.from(payload);
+        } else if (typeof payload === "string" && /^[0-9a-fA-F]{4,}$/.test(payload.replace(/\s+/g, ""))) {
+          payload = Buffer.from(payload.replace(/\s+/g, ""), "hex");
+        }
+      }
+
       // Determine if message is arriving on Pin 3 In (Downstream Pipeline) or Pin 4 (Broadcast Rail)
-      const isBroadcast = msg.topic === "rx_bus_broadcast" || (Buffer.isBuffer(msg.payload) && msg.payload[0] === 0xbb) || msg.activeStep !== undefined;
+      const isBroadcast = msg.topic === "rx_bus_broadcast" || (Buffer.isBuffer(payload) && payload[0] === 0xbb) || msg.activeStep !== undefined;
 
       if (isBroadcast) {
         // --- PHASE 2: REAL-TIME STEP EXECUTION BROADCAST (Pin 4 RX_BUS) ---
         let activeStep = 0;
         let totalSteps = 0;
 
-        if (Buffer.isBuffer(msg.payload) && msg.payload[0] === 0xbb) {
-          const parsed = parseBroadcastFrame(msg.payload);
+        if (Buffer.isBuffer(payload) && payload[0] === 0xbb) {
+          const parsed = parseBroadcastFrame(payload);
           if (parsed.valid) {
             activeStep = parsed.activeStep;
             totalSteps = parsed.totalSteps;
@@ -91,7 +104,7 @@ module.exports = function (RED) {
         }
 
         // Emit WS2812B LED status on Output 2 (Telemetry)
-        send([
+        _send([
           null,
           {
             topic: "led_state",
@@ -110,19 +123,19 @@ module.exports = function (RED) {
         // --- PHASE 1: DISCOVERY & PROGRAM COMPILATION (Pin 3 Downstream Pipeline) ---
         const info = getInfo();
 
-        if (Buffer.isBuffer(msg.payload) && msg.payload[0] === 0xaa) {
+        if (Buffer.isBuffer(payload) && payload[0] === 0xaa) {
           // Binary protocol frame
-          const currentCount = msg.payload[2] || 0;
+          const currentCount = payload[2] || 0;
           node.myIndex = currentCount + 1; // Dynamically assign index!
 
-          const mutatedBuf = appendBlockToFrame(msg.payload, node.tokenId, node.param);
+          const mutatedBuf = appendBlockToFrame(payload, node.tokenId, node.param);
 
           node.status({ fill: "blue", shape: "dot", text: `+#${node.myIndex} ${info.label} (${node.param})` });
           setTimeout(() => node.refreshStatus(), 1200);
 
           const chainList = Array.isArray(msg.chain) ? [...msg.chain, { index: node.myIndex, action: info.action, param: node.param }] : [{ index: node.myIndex, action: info.action, param: node.param }];
 
-          send([
+          _send([
             Object.assign({}, msg, {
               payload: mutatedBuf,
               hex: mutatedBuf.toString("hex").toUpperCase(),
@@ -145,7 +158,7 @@ module.exports = function (RED) {
           node.status({ fill: "blue", shape: "dot", text: `+#${node.myIndex} ${info.label}` });
           setTimeout(() => node.refreshStatus(), 1200);
 
-          send([
+          _send([
             Object.assign({}, msg, {
               payload: mutatedPayload,
               chain: Array.isArray(msg.chain) ? [...msg.chain, info.action] : [info.action],

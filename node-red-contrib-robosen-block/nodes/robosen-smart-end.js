@@ -12,8 +12,21 @@ module.exports = function (RED) {
     node.status({ fill: "grey", shape: "ring", text: "Smart Terminator Ready" });
 
     node.on("input", function (msg, send, done) {
-      if (Buffer.isBuffer(msg.payload)) {
-        let frameBuf = Buffer.from(msg.payload);
+      const _send = send || function () { node.send.apply(node, arguments); };
+
+      let payload = msg.payload;
+      if (!Buffer.isBuffer(payload)) {
+        if (payload && payload.type === "Buffer" && Array.isArray(payload.data)) {
+          payload = Buffer.from(payload.data);
+        } else if (Array.isArray(payload)) {
+          payload = Buffer.from(payload);
+        } else if (typeof payload === "string" && /^[0-9a-fA-F]{4,}$/.test(payload.replace(/\s+/g, ""))) {
+          payload = Buffer.from(payload.replace(/\s+/g, ""), "hex");
+        }
+      }
+
+      if (Buffer.isBuffer(payload)) {
+        let frameBuf = Buffer.from(payload);
 
         if (frameBuf[0] === 0xaa) {
           // If error injection is enabled, tamper with CRC
@@ -46,7 +59,7 @@ module.exports = function (RED) {
 
           // Output 1: Return RX Rail (Pin 4 to Master)
           // Output 2: Diagnostics
-          send([
+          _send([
             outMsg,
             {
               topic: "loopback_telemetry",
@@ -66,7 +79,7 @@ module.exports = function (RED) {
           node.status({ fill: "grey", shape: "ring", text: "Smart Terminator Ready" });
         }, 1500);
 
-        send([
+        _send([
           Object.assign({}, msg, {
             loopback: true,
             returnedAt: Date.now(),

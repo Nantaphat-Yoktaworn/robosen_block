@@ -283,8 +283,12 @@ module.exports = function (RED) {
       }
     };
 
+    let chainTimeout = null;
+
     // 4. Function to trigger downstream transmission (Phase 1 Seed Frame)
     node.startChain = function () {
+      if (chainTimeout) clearTimeout(chainTimeout);
+
       if (node.protocolVersion === "binary") {
         const seedBuf = createSeedFrame();
         node.status({ fill: "blue", shape: "ring", text: "Transmitting 0xAA Seed Frame..." });
@@ -315,6 +319,12 @@ module.exports = function (RED) {
           },
           null,
         ]);
+
+        // Safety timeout if return rail is disconnected
+        chainTimeout = setTimeout(() => {
+          node.status({ fill: "red", shape: "ring", text: "Chain Broken: Loopback wire not connected to Master Input!" });
+          node.warn("[Master Block] Phase 1 Seed Frame sent, but no return packet received within 4s. Check that Smart End output connects back to Master input.");
+        }, 4000);
       } else {
         // Legacy String mode
         node.status({ fill: "blue", shape: "ring", text: "Transmitting 'start'..." });
@@ -337,11 +347,17 @@ module.exports = function (RED) {
           },
           null,
         ]);
+
+        // Safety timeout if return rail is disconnected
+        chainTimeout = setTimeout(() => {
+          node.status({ fill: "red", shape: "ring", text: "Chain Broken: Loopback wire not connected to Master Input!" });
+        }, 4000);
       }
     };
 
     // 5. Action execution queue (Phase 2 with Real-Time Broadcast on Output 3)
     async function executeQueue(commandObjects, originalMsg) {
+      if (chainTimeout) clearTimeout(chainTimeout);
       const totalSteps = commandObjects.length;
       node.status({ fill: "yellow", shape: "dot", text: `Executing ${totalSteps} steps...` });
 
@@ -465,9 +481,22 @@ module.exports = function (RED) {
 
     // Handle incoming messages on Input 1 (Pin 4 Return Rail)
     node.on("input", function (msg, send, done) {
-      if (Buffer.isBuffer(msg.payload) && msg.payload[0] === 0xaa) {
+      if (chainTimeout) clearTimeout(chainTimeout);
+
+      let payload = msg.payload;
+      if (!Buffer.isBuffer(payload)) {
+        if (payload && payload.type === "Buffer" && Array.isArray(payload.data)) {
+          payload = Buffer.from(payload.data);
+        } else if (Array.isArray(payload)) {
+          payload = Buffer.from(payload);
+        } else if (typeof payload === "string" && /^[0-9a-fA-F]{4,}$/.test(payload.replace(/\s+/g, ""))) {
+          payload = Buffer.from(payload.replace(/\s+/g, ""), "hex");
+        }
+      }
+
+      if (Buffer.isBuffer(payload) && payload.length > 0 && payload[0] === 0xaa) {
         // Binary Compilation Frame received from End Block!
-        const parsed = parseCompilationFrame(msg.payload);
+        const parsed = parseCompilationFrame(payload);
 
         if (!parsed.valid) {
           node.error(`[Master Block] Binary Frame CRC Error: ${parsed.error}`);
@@ -478,7 +507,7 @@ module.exports = function (RED) {
               topic: "protocol_error",
               payload: {
                 error: parsed.error,
-                rawHex: msg.payload.toString("hex").toUpperCase(),
+                rawHex: payload.toString("hex").toUpperCase(),
               },
             },
             null,

@@ -10,14 +10,26 @@ module.exports = function (RED) {
     node.status({ fill: "grey", shape: "ring", text: "Bus Sniffer Idle" });
 
     node.on("input", function (msg, send, done) {
+      const _send = send || function () { node.send.apply(node, arguments); };
       let analysis = null;
 
-      if (Buffer.isBuffer(msg.payload)) {
-        const header = msg.payload[0];
+      let payload = msg.payload;
+      if (!Buffer.isBuffer(payload)) {
+        if (payload && payload.type === "Buffer" && Array.isArray(payload.data)) {
+          payload = Buffer.from(payload.data);
+        } else if (Array.isArray(payload)) {
+          payload = Buffer.from(payload);
+        } else if (typeof payload === "string" && /^[0-9a-fA-F]{4,}$/.test(payload.replace(/\s+/g, ""))) {
+          payload = Buffer.from(payload.replace(/\s+/g, ""), "hex");
+        }
+      }
+
+      if (Buffer.isBuffer(payload)) {
+        const header = payload[0];
 
         if (header === 0xaa) {
           // Phase 1 Compilation Frame
-          const parsed = parseCompilationFrame(msg.payload);
+          const parsed = parseCompilationFrame(payload);
           analysis = {
             frameType: "PHASE_1_DISCOVERY",
             header: "0xAA",
@@ -47,7 +59,7 @@ module.exports = function (RED) {
           }
         } else if (header === 0xbb) {
           // Phase 2 Broadcast Frame
-          const parsed = parseBroadcastFrame(msg.payload);
+          const parsed = parseBroadcastFrame(payload);
           analysis = {
             frameType: "PHASE_2_BROADCAST",
             header: "0xBB",
@@ -81,7 +93,7 @@ module.exports = function (RED) {
 
       // Output 1: Pass-through untouched
       // Output 2: Protocol Analysis JSON
-      send([
+      _send([
         msg,
         {
           topic: "protocol_analysis",
