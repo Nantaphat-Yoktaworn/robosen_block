@@ -38,6 +38,8 @@ ACTIONS = {
     "move_backward": (0x05, b"", 2.0),
     "turn_left": (0x08, b"", 1.5),
     "turn_right": (0x02, b"", 1.5),
+    "move_left": (0x07, b"", 2.0),
+    "move_right": (0x03, b"", 2.0),
     "auto_stand_on": (0x11, bytes([1]), 1.0),
     "auto_stand_off": (0x11, bytes([0]), 1.0),
     "status": (0x0F, b"", 1.5),
@@ -231,7 +233,7 @@ class RobosenBleDaemon:
                 self.active_action_event = None
                 # Update joints snapshot after dynamic action completes
                 await self.client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE9), response=False)
-            elif opcode in [0x01, 0x02, 0x05, 0x08]:
+            elif opcode in [0x01, 0x02, 0x03, 0x05, 0x07, 0x08]:
                 # Locomotion steps: Walk for exact duration, then send immediate stop (0x0C)
                 await self.client.write_gatt_char(CHARACTERISTIC_UUID, pkt, response=False)
                 await asyncio.sleep(max_timeout)

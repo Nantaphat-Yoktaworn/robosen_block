@@ -208,14 +208,29 @@ module.exports = function (RED) {
       }
     }
 
-    // 3. Send command to persistent daemon over stdin
-    function sendDaemonCommand(cmdObj) {
+    // 3. Send command to persistent daemon over stdin with safety timeout
+    function sendDaemonCommand(cmdObj, timeoutMs = 15000) {
       return new Promise((resolve) => {
         if (!node.pyDaemon || !node.pyDaemon.stdin.writable) {
           return resolve({ event: "action_failed", error: "Daemon stdin not writable" });
         }
-        node.currentActionResolver = resolve;
-        node.pyDaemon.stdin.write(JSON.stringify(cmdObj) + "\n");
+        let timer = setTimeout(() => {
+          node.currentActionResolver = null;
+          node.warn(`[Legacy Master] Command '${cmdObj.action || cmdObj.cmd}' timed out after ${timeoutMs}ms. Advancing queue.`);
+          resolve({ event: "action_timeout", error: "Command timed out" });
+        }, timeoutMs);
+
+        node.currentActionResolver = (res) => {
+          clearTimeout(timer);
+          resolve(res);
+        };
+
+        try {
+          node.pyDaemon.stdin.write(JSON.stringify(cmdObj) + "\n");
+        } catch (e) {
+          clearTimeout(timer);
+          resolve({ event: "action_failed", error: e.message });
+        }
       });
     }
 
