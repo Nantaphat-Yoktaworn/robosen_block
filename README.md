@@ -148,7 +148,8 @@ node-red-contrib-robosen-block/
 ├── lib/
 │   └── protocol.js                       # Protocol encoder, decoder, CRC-8, and token catalog
 ├── nodes/
-│   ├── robosen-master.js / .html         # Master Block controller node with BLE gateway & REST API
+│   ├── robosen-master.js / .html         # Smart Master Block controller (2-Phase Binary V2)
+│   ├── robosen-legacy-master.js / .html  # Dedicated Legacy Master Block (CSV String V1)
 │   ├── robosen-smart-block.js / .html    # Smart Multi-Action Block (CH32V003) with button & knob
 │   ├── robosen-smart-end.js / .html      # Active Smart End Terminator with CRC validation
 │   ├── robosen-protocol-monitor.js / .html # Serial Protocol Analyzer & Packet Sniffer
@@ -163,21 +164,24 @@ node-red-contrib-robosen-block/
 ```
 
 ### Palette Nodes Overview:
-1. **`robosen-master` (Master Block Controller):**
+1. **`robosen-master` (Smart Master Block Controller - V2):**
    - Clickable start button emits Phase 1 seed frame (`0xAA`) on Pin 3 TX (Output 1).
    - Verifies CRC-8 on Pin 4 Return RX (Input 1), coordinates BLE execution queue, and broadcasts Phase 2 execution frames (`0xBB`) on Pin 4 (Output 3).
-   - Contains live properties dashboard card with robot status, battery level, firmware version, and manual connect/disconnect/status controls.
-2. **`robosen-smart-block` (Smart Multi-Action Block):**
+   - Contains live properties dashboard card with robot status, battery level, firmware version, and manual controls.
+2. **`robosen-legacy-master` (Legacy Master Block - V1):**
+   - Dedicated master controller for non-smart blocks.
+   - Emits `"start"` string, collects CSV tokens, and runs sequence on Robosen K1 via persistent BLE.
+3. **`robosen-smart-block` (Smart Multi-Action Block):**
    - Simulates the CH32V003 RISC-V smart block.
    - Interactive push-button cycles actions; rotary knob adjusts parameters.
    - Illuminates **bright pulsating green** during active step execution.
-3. **`robosen-smart-end` (Smart Active Terminator):**
+4. **`robosen-smart-end` (Smart Active Terminator):**
    - Validates CRC-8 checksum, appends `0x55` framing footer, and loops signal back to Pin 4 Return RX rail.
    - Includes fault injection toggle to simulate CRC corruption for error testing.
-4. **`robosen-protocol-monitor` (Bus Analyzer & Packet Inspector):**
+5. **`robosen-protocol-monitor` (Bus Analyzer & Packet Inspector):**
    - Sniffs serial frames on the bus in real time.
    - Displays raw hex bytes, decoded tokens, parameter values, and CRC integrity status.
-5. **`robosen-tester` (Direct Controller & Tester):**
+6. **`robosen-tester` (Direct Controller & Tester):**
    - Standalone testing node for one-click action triggering and live battery monitoring.
 
 ### Import Simulation Flow in Node-RED:

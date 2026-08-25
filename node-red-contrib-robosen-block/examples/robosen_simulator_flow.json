@@ -8,9 +8,9 @@
   },
   {
     "id": "node_master_1",
-    "type": "robosen-master",
+    "type": "robosen-legacy-master",
     "z": "tab_robosen_simulator",
-    "name": "Master Block (Controller)",
+    "name": "Legacy Master Block",
     "mode": "live",
     "stepDelay": 500,
     "x": 160,

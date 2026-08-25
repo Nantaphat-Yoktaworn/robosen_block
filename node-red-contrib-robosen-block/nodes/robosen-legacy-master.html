@@ -1,0 +1,197 @@
+<script type="text/javascript">
+  RED.nodes.registerType("robosen-legacy-master", {
+    category: "Robosen Block",
+    color: "#D32F2F",
+    defaults: {
+      name: { value: "Legacy Master Block" },
+      mode: { value: "live" },
+      stepDelay: { value: 0, validate: RED.validators.number() },
+    },
+    inputs: 1,
+    outputs: 2,
+    icon: "font-awesome/fa-microchip",
+    paletteLabel: "legacy master",
+    label: function () {
+      return this.name || "Legacy Master Block";
+    },
+    outputLabels: ["Downstream String TX", "Telemetry & Status"],
+    inputLabels: ["Return String RX"],
+    button: {
+      enabled: function () {
+        return !this.changed;
+      },
+      onclick: function () {
+        const node = this;
+        $.ajax({
+          url: "robosen-legacy-master/" + this.id + "/trigger",
+          type: "POST",
+          success: function () {
+            RED.notify("Legacy Master Block Start Button Pressed!", "info");
+          },
+          error: function (jqXHR) {
+            if (jqXHR.status == 404) {
+              RED.notify("Deploy flow first to interact!", "warning");
+            } else {
+              RED.notify("Failed to trigger legacy master block", "error");
+            }
+          },
+        });
+      },
+    },
+    oneditprepare: function () {
+      const node = this;
+
+      function updateStatusCard() {
+        $.ajax({
+          url: "robosen-legacy-master/" + node.id + "/info",
+          type: "GET",
+          success: function (data) {
+            if (data.isConnected) {
+              $("#legacy-master-k1-badge")
+                .html("🟢 Connected")
+                .css({ "background-color": "#E8F5E9", color: "#2E7D32", "border-color": "#A5D6A7" });
+              $("#legacy-master-k1-device-name").text(data.robotInfo.name || "K1");
+              $("#legacy-master-k1-battery").text(data.robotInfo.battery + "%");
+              $("#legacy-master-k1-volume").text(data.robotInfo.volume + " / 140");
+              $("#legacy-master-k1-firmware").text(data.robotInfo.firmware || "VER:3.03L");
+            } else {
+              $("#legacy-master-k1-badge")
+                .html("🔴 Disconnected")
+                .css({ "background-color": "#FFEBEE", color: "#C62828", "border-color": "#FFCDD2" });
+              $("#legacy-master-k1-device-name").text("--");
+              $("#legacy-master-k1-battery").text("--");
+              $("#legacy-master-k1-volume").text("--");
+              $("#legacy-master-k1-firmware").text("--");
+            }
+            if (data.lastEvent) {
+              $("#legacy-master-k1-last-log").text(data.lastEvent);
+            }
+          },
+          error: function () {
+            $("#legacy-master-k1-badge")
+              .html("⚪ Node Not Deployed")
+              .css({ "background-color": "#ECEFF1", color: "#546E7A", "border-color": "#CFD8DC" });
+          },
+        });
+      }
+
+      updateStatusCard();
+      const pollTimer = setInterval(updateStatusCard, 1500);
+
+      $("#dialog").on("dialogclose", function () {
+        clearInterval(pollTimer);
+      });
+
+      $("#legacy-master-btn-connect").click(function () {
+        $("#legacy-master-k1-last-log").text("Scanning & connecting to K1...");
+        $.ajax({
+          url: "robosen-legacy-master/" + node.id + "/connect",
+          type: "POST",
+          success: function () {
+            RED.notify("Connecting to Robosen K1 robot...", "info");
+            setTimeout(updateStatusCard, 1000);
+          },
+          error: function () {
+            RED.notify("Deploy flow first to connect!", "warning");
+          },
+        });
+      });
+
+      $("#legacy-master-btn-disconnect").click(function () {
+        $.ajax({
+          url: "robosen-legacy-master/" + node.id + "/disconnect",
+          type: "POST",
+          success: function () {
+            RED.notify("Disconnected from robot.", "info");
+            setTimeout(updateStatusCard, 500);
+          },
+        });
+      });
+
+      $("#legacy-master-btn-status").click(function () {
+        $.ajax({
+          url: "robosen-legacy-master/" + node.id + "/status",
+          type: "POST",
+          success: function () {
+            RED.notify("Status query sent.", "info");
+            setTimeout(updateStatusCard, 600);
+          },
+        });
+      });
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="robosen-legacy-master">
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Legacy Master Block" />
+  </div>
+  <div class="form-row">
+    <label for="node-input-mode"><i class="fa fa-sliders"></i> Execution Mode</label>
+    <select id="node-input-mode">
+      <option value="live">Live Physical Robot (Bluetooth BLE)</option>
+      <option value="sim">Simulation Only (Debug Log)</option>
+    </select>
+  </div>
+  <div class="form-row">
+    <label for="node-input-stepDelay"><i class="fa fa-clock-o"></i> Step Delay (ms)</label>
+    <input type="number" id="node-input-stepDelay" placeholder="0" />
+  </div>
+
+  <hr style="margin: 15px 0;" />
+
+  <!-- Robot Connection & Live Telemetry Dashboard Card -->
+  <div style="background: #FAFAFA; border: 1px solid #E0E0E0; border-radius: 6px; padding: 12px; margin-bottom: 12px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <span style="font-weight: bold; font-size: 13px;"><i class="fa fa-bluetooth"></i> Robosen K1 BLE Connection</span>
+      <span id="legacy-master-k1-badge" style="padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; border: 1px solid #ccc; background: #ECEFF1; color: #546E7A;">
+        Checking...
+      </span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; margin-bottom: 10px;">
+      <div><b>Device:</b> <span id="legacy-master-k1-device-name">--</span></div>
+      <div><b>Battery:</b> <span id="legacy-master-k1-battery" style="color: #2E7D32; font-weight: bold;">--</span></div>
+      <div><b>Volume:</b> <span id="legacy-master-k1-volume">--</span></div>
+      <div><b>Firmware:</b> <span id="legacy-master-k1-firmware">--</span></div>
+    </div>
+
+    <div style="font-size: 11px; color: #555; background: #FFF; border: 1px solid #EEE; padding: 6px 8px; border-radius: 4px; margin-bottom: 10px;">
+      <b>Activity:</b> <span id="legacy-master-k1-last-log">Ready</span>
+    </div>
+
+    <div style="display: flex; gap: 6px;">
+      <button type="button" class="red-ui-button" id="legacy-master-btn-connect" style="flex: 1; font-size: 11px; font-weight: bold; background: #E8F5E9; color: #2E7D32; border-color: #A5D6A7;">
+        <i class="fa fa-link"></i> Connect
+      </button>
+      <button type="button" class="red-ui-button" id="legacy-master-btn-status" style="flex: 1; font-size: 11px;">
+        <i class="fa fa-refresh"></i> Query Status
+      </button>
+      <button type="button" class="red-ui-button" id="legacy-master-btn-disconnect" style="flex: 1; font-size: 11px; font-weight: bold; background: #FFEBEE; color: #C62828; border-color: #FFCDD2;">
+        <i class="fa fa-unlink"></i> Disconnect
+      </button>
+    </div>
+  </div>
+</script>
+
+<script type="text/html" data-help-name="robosen-legacy-master">
+  <p><b>Robosen Legacy Master Block (Dedicated for Non-Smart Blocks)</b></p>
+  <p>Specifically designed to control the Robosen K1 using original, non-smart <code>robosen-instruction</code> and <code>robosen-end</code> blocks.</p>
+
+  <h3>How it Works:</h3>
+  <ol>
+    <li><b>Click the Start Button:</b> Emits string <code>"start"</code> down <b>Output 1</b>.</li>
+    <li>Each connected <b>Instruction Block</b> appends its command token (e.g. <code>",move_forward"</code>, <code>",left_punch"</code>).</li>
+    <li>The <b>End Block</b> loops the full CSV string back to <b>Input 1</b>.</li>
+    <li>The Legacy Master executes each action sequentially on the Robosen K1 robot via persistent BLE.</li>
+  </ol>
+
+  <h3>Outputs:</h3>
+  <dl class="message-properties">
+    <dt>Output 1 (Downstream TX)<span class="property-type">string</span></dt>
+    <dd>Transmits initial <code>"start"</code> string token down the instruction chain.</dd>
+    <dt>Output 2 (Telemetry & Status)<span class="property-type">object</span></dt>
+    <dd>Emits real-time execution progress, active step details, and robot telemetry.</dd>
+  </dl>
+</script>

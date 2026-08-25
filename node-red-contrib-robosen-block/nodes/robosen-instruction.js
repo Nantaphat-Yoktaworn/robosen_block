@@ -11,9 +11,19 @@ module.exports = function (RED) {
     node.status({ fill: "grey", shape: "ring", text: node.command });
 
     node.on("input", function (msg, send, done) {
+      const _send = send || function () { node.send.apply(node, arguments); };
+
+      let incomingPayload = "";
       if (typeof msg.payload === "string") {
-        const incomingPayload = msg.payload.trim();
-        const mutatedPayload = incomingPayload ? `${incomingPayload},${node.command}` : node.command;
+        incomingPayload = msg.payload.trim();
+      } else if (Buffer.isBuffer(msg.payload)) {
+        incomingPayload = msg.payload.toString("utf8").trim();
+      } else if (msg.payload && typeof msg.payload === "object") {
+        incomingPayload = msg.payload.toString ? msg.payload.toString() : "";
+      }
+
+      if (incomingPayload) {
+        const mutatedPayload = `${incomingPayload},${node.command}`;
 
         // Visual flash showing signal propagation
         node.status({ fill: "blue", shape: "dot", text: `+ ${node.command}` });
@@ -28,9 +38,9 @@ module.exports = function (RED) {
           lastBlock: node.command,
         });
 
-        send(outMsg);
+        _send(outMsg);
       } else {
-        node.warn("Instruction block received non-string payload: " + typeof msg.payload);
+        node.warn("Instruction block expected string payload ('start...'), but received: " + typeof msg.payload + ". If using Smart Blocks, use 'Smart Master Block' instead.");
       }
 
       if (done) {

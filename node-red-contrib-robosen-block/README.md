@@ -41,29 +41,37 @@ This custom Node-RED palette simulates the **physical modular tangible coding bl
 
 | Node | Category | Color | Type | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| **`robosen-master`** | `Robosen Block` | 🔴 `#E53935` | Gateway / Controller | **Master Block:** Auto-connects to robot via BLE. Clickable Start button. Emits Phase 1 seed frame (`0xAA`) on Pin 3 TX, verifies CRC-8 on loopback, and broadcasts Phase 2 execution frames (`0xBB`) on Pin 4. |
+| **`robosen-master`** | `Robosen Block` | 🔴 `#E53935` | Gateway / Controller | **Smart Master Block (V2):** Auto-connects to robot via BLE. Clickable Start button. Emits Phase 1 seed frame (`0xAA`) on Pin 3 TX, verifies CRC-8 on loopback, and broadcasts Phase 2 execution frames (`0xBB`) on Pin 4. |
+| **`robosen-legacy-master`**| `Robosen Block` | 🔴 `#D32F2F` | Legacy Controller | **Legacy Master Block (V1):** Dedicated controller for non-smart instruction blocks. Emits `"start"` string, collects CSV tokens, and runs sequence on Robosen K1 via persistent BLE. |
 | **`robosen-smart-block`** | `Robosen Block` | 🔵 `#0277BD` | Instruction Block | **Smart Block (CH32V003):** Features interactive Push Button (Action Selector) and Rotary Knob (Parameter Adjuster). Auto-discovers its sequence index and illuminates **bright pulsating green** when actively executing. |
 | **`robosen-smart-end`** | `Robosen Block` | 🟢 `#2E7D32` | Terminator | **Smart End Terminator:** Active end block that verifies CRC-8 checksum, appends framing footer `0x55`, and loops data into Pin 4 Return RX. Includes fault injection toggle for testing CRC errors. |
 | **`robosen-protocol-monitor`**| `Robosen Block` | 🔘 `#607D8B` | Bus Analyzer | **Protocol Bus Analyzer & Sniffer:** Real-time inspector for serial frames. Displays raw hex bytes, decoded tokens, parameters, and CRC verification status (`VALID` / `CORRUPT`). |
 | **`robosen-tester`** | `Robosen Block` | 🟣 `#7B1FA2` | Controller / Tester | **Direct Action Tester:** Standalone controller node with instant action triggering, live telemetry dashboard card, and BLE connection management. |
-| **`robosen-instruction`** | `Robosen Block` | 🔷 `#0288D1` | Legacy Instruction | **Legacy Instruction Block:** 1-action block appending CSV command tokens (V1 backwards compatibility). |
-| **`robosen-end`** | `Robosen Block` | ⚫ `#616161` | Legacy Terminator | **Legacy End Block:** Passive loopback terminator bridge (V1 backwards compatibility). |
+| **`robosen-instruction`** | `Robosen Block` | 🔷 `#0288D1` | Legacy Instruction | **Legacy Instruction Block:** 1-action block appending CSV command tokens (used with Legacy Master). |
+| **`robosen-end`** | `Robosen Block` | ⚫ `#616161` | Legacy Terminator | **Legacy End Block:** Passive loopback terminator bridge (used with Legacy Master). |
 
 ---
 
 ## 3. Node Specifications & Details
 
-### 3.1 `robosen-master` (Master Block Controller)
-- **Inputs:** 1 (Pin 4 Return RX Rail - receives compiled binary frame `0xAA` or legacy CSV string).
+### 3.1 `robosen-master` (Smart Master Block Controller - V2)
+- **Inputs:** 1 (Pin 4 Return RX Rail - receives compiled binary frame `0xAA`).
 - **Outputs:**
   - **Output 1 (Pin 3 Downstream TX):** Emits `0xAA` seed frame `[0xAA, 0x00, 0x00, 0x00, 0x55]`.
   - **Output 2 (Telemetry & Status):** Emits real-time execution progress, active step details, robot telemetry, and errors.
   - **Output 3 (Pin 4 RX Broadcast Bus):** Broadcasts `0xBB` active step frames `[0xBB, StepNum, TotalSteps, CRC, 0x55]` to trigger real-time LED illumination on Smart Blocks.
 - **Interactive Features:**
-  - Clickable button on the node canvas triggers `startChain()`.
-  - Edit dialog properties panel contains a live robot status card showing connection state, battery percentage, volume, firmware version, and manual Connect / Disconnect / Query Status buttons.
+  - Clickable canvas Start button triggers `startChain()`.
+  - Edit dialog properties panel contains a live robot status card (BLE connection, battery, volume, firmware) and manual controls.
 
-### 3.2 `robosen-smart-block` (Smart Multi-Action Block)
+### 3.2 `robosen-legacy-master` (Legacy Master Block Controller - V1)
+- **Inputs:** 1 (Return String RX Rail from `robosen-end` - receives `"start,move_forward,left_punch"`).
+- **Outputs:**
+  - **Output 1 (Downstream TX):** Emits initial `"start"` string down the chain.
+  - **Output 2 (Telemetry & Status):** Emits real-time execution progress, step details, and robot telemetry.
+- **Features:** Clickable canvas Start button, live robot connection dashboard card, and built-in loopback timeout diagnostic.
+
+### 3.3 `robosen-smart-block` (Smart Multi-Action Block)
 - **Inputs:** 2 (Input 1: Pin 3 Downstream In; Input 2: Pin 4 Broadcast Bus In).
 - **Outputs:** 1 (Pin 3 Downstream Out to next block).
 - **Interactive Controls:**

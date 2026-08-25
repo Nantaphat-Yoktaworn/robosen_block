@@ -51,7 +51,8 @@ robosen_block/
 │   ├── lib/
 │   │   └── protocol.js                   # Protocol encoder/decoder, CRC-8, and token catalog
 │   ├── nodes/
-│   │   ├── robosen-master.js / .html     # Master Block controller node (Persistent BLE daemon, Start button & REST API)
+│   │   ├── robosen-master.js / .html     # Smart Master Block controller (2-Phase Binary V2, Start button & REST API)
+│   │   ├── robosen-legacy-master.js / .html # Dedicated Legacy Master Block (CSV String V1, Start button & REST API)
 │   │   ├── robosen-smart-block.js / .html# Smart Multi-Action Block (CH32V003 RISC-V with Button & Knob)
 │   │   ├── robosen-smart-end.js / .html  # Smart Active Terminator Block with CRC-8 validation & loopback
 │   │   ├── robosen-protocol-monitor.js / .html # Serial Protocol Bus Analyzer & Packet Sniffer
@@ -60,7 +61,7 @@ robosen_block/
 │   │   └── robosen-end.js / .html        # Legacy passive loopback terminator block node (V1)
 │   ├── examples/
 │   │   ├── robosen_smart_block_flow.json # Ready-to-import 2-Phase Binary simulation flow
-│   │   └── robosen_simulator_flow.json   # Legacy string simulation flow
+│   │   └── robosen_simulator_flow.json   # Legacy string simulation flow (uses Legacy Master)
 │   ├── package.json                      # Node-RED palette package manifest (v2.0.0)
 │   └── README.md                         # Detailed palette documentation & API guide
 ├── index.d.ts                            # Root TypeScript exports
