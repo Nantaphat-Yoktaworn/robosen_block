@@ -140,11 +140,10 @@ The Master ESP32-S3 coordinates robot actions and feeds execution states back to
  [ Broadcast [0xBB, 0xFF, N] (Synchronized Rainbow Sparkle Across All Blocks) ]
 ```
 
-### 4.2 BLE Connection Management
-- Auto-discovery on Service `0xFFE0` with Local Name filter (`"K1"`).
-- Persistent keep-alive handshake (`0x0B`) every 5 seconds when idle.
-- Automatic reconnection with exponential backoff on signal drop.
-- Telemetry monitoring: battery voltage, volume, and fall-recovery status via Opcode `0x0F`.
+### 4.2 Multi-Robot Classroom BLE Pairing (Smart NVS Binding)
+- **Direct Instant Boot (<500ms)**: Master ESP32-S3 reads `last_paired_mac` from internal Non-Volatile Storage (NVS) on power-up and connects directly without broadcast scanning delays or classroom crosstalk.
+- **Teacher Pairing Menu on E-Ink**: Holding the Start button or Knob for 3 seconds enters Pairing Mode. Nearby `K1-*` robots are scanned, sorted by **RSSI Proximity (nearest robot first)**, selected via Knob 1, and saved to NVS as the new persistent default.
+- **Persistent Keep-Alive & Health**: Handshake ping (`0x0B`) every 5s when idle, auto-reconnect with exponential backoff, and live battery telemetry monitoring via Opcode `0x0F`.
 
 ---
 

@@ -191,9 +191,10 @@ The project is currently in an **advanced software, protocol simulation, and liv
 - **Contact Bounce Suppression:** 10 kΩ pull-ups and 22 pF RC filtering on UART pins to eliminate electrical glitches when children wiggle blocks.
 - **Graceful Error Recovery:** If a child unplugs a block mid-execution, the Master catches the break within 50 ms, stops the robot safely, and flashes the affected block red rather than crashing.
 
-### Pillar 3: Master ESP32-S3 Standalone Embedded Firmware
+### Pillar 3: Master ESP32-S3 Standalone Embedded Firmware & Smart NVS Pairing
 - **Full Embedded Port:** Flash the non-blocking command queue directly onto the Master ESP32-S3 in C++ (ESP-IDF / Arduino), eliminating the need for a laptop, Python script, or Node-RED in the final classroom setup.
-- **Automatic BLE Pairing:** Master automatically scans for `"K1"` advertising packets and pairs instantly on power-up.
+- **Multi-Robot Smart NVS Binding:** Boots and connects directly to the last-paired robot MAC in $<500\,\text{ms}$, preventing classroom crosstalk.
+- **Teacher E-Ink Pairing Menu:** Hold Start for 3 seconds to scan, sort nearby robots by RSSI proximity, select via Knob 1, and save as the new persistent default MAC.
 
 ### Pillar 4: Child-Centric UX, Light Language & Enclosures
 - **Visual Color-Coded Actions:**

@@ -256,3 +256,49 @@ Because knobs and buttons are eliminated from the action blocks, the **CH32V003 
                         +-------------+
 ```
 
+---
+
+## 8. Multi-Robot Classroom Deployment & Smart NVS BLE Pairing
+
+In classroom environments with 5–10 student groups operating simultaneously, each Master Block is locked to its own designated Robosen K1 robot to prevent BLE crosstalk and command collisions.
+
+```text
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                              SMART NVS BLE PAIRING LIFECYCLE                           │
+│                                                                                        │
+│  [ Boot-Up ] ──► [ Read Target MAC from NVS ] ──► [ Direct Connect (<500ms) ] ──► [ Ready ]
+│                          │
+│                          ▼ (If Start/Knob held for 3 seconds)
+│                  [ E-Ink Pairing Menu ] 
+│                  - Scans nearby "K1-*" devices
+│                  - Sorts by RSSI Proximity (Nearest first)
+│                  - Turn Knob 1 to select -> Click to save
+│                  - Writes new MAC to NVS as persistent default
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 8.1 3-Tier Multi-Robot Architecture
+1. **Persistent Default (Direct Instant Boot):**
+   - The ESP32-S3 stores `last_paired_mac` and `last_paired_name` in its internal Non-Volatile Storage (NVS flash partition).
+   - On power-up, the Master bypasses BLE broadcast scanning and connects directly to the stored MAC in $<500\,\text{ms}$.
+2. **E-Ink Teacher Pairing Menu (Hot-Swap / Re-Binding):**
+   - If a robot battery runs low or is swapped with a spare unit:
+     1. The teacher/student holds the **Start Button (or Knob Click) for 3 seconds**.
+     2. The Master enters **BLE Scan Mode** and displays a live list on the **E-Ink Screen**:
+        ```text
+        ┌─────────────────────────────┐
+        │     PAIR ROBOSEN ROBOT      │
+        │                             │
+        │ ► [1] K1-00457  (Nearest)   │  ◄── RSSI > -50 dBm
+        │   [2] K1-00892  (Medium)    │
+        │   [3] K1-00311  (Far)       │
+        │                             │
+        │  Turn Knob to Select & Click│
+        └─────────────────────────────┘
+        ```
+     3. The device list is automatically sorted by **signal strength (RSSI proximity)** so the robot sitting directly on the desk appears at the top.
+     4. Rotating **Knob 1** moves the selection cursor; **clicking the knob/Start button** confirms the pairing.
+     5. The new MAC is written to **NVS Flash** as the **new persistent default** for all future boot-ups.
+3. **Physical Tagging & Visual Identifiers:**
+   - Master Blocks and Robosen K1 robots are tagged with matching color-coded number labels (e.g. *Blue 1*, *Red 2*, *Green 3*) for young children ($\le 7$ years old).
+

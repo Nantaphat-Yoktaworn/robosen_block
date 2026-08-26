@@ -368,7 +368,9 @@ Designed for screenless STEM learning, physical modular coding blocks snap toget
    - **Phase 1 (Discovery & Compilation - `0xAA`)**: Forward pipeline token-passing with dynamic index auto-discovery ($1..N$) reading saved flash tokens and CRC-8 protection.
    - **Phase 2 (Execution & Live Feedback - `0xBB`)**: Master broadcasts `[0xBB, StepIndex, TotalSteps, CRC]` across Pin 4 so the active block's WS2812B LED turns bright pulsating green in real time.
 
-3. **Pillar 3: Master ESP32-S3 BLE Firmware**
+3. **Pillar 3: Master ESP32-S3 BLE Firmware & Smart NVS Pairing**
+   - **Smart NVS MAC Binding**: Stores target robot MAC in NVS; on boot, connects directly in $<500\,\text{ms}$ with zero classroom crosstalk.
+   - **Teacher E-Ink Pairing Menu**: Long-press (3s) to scan and select nearby `K1-*` robots by RSSI proximity; selected robot becomes new persistent default MAC.
    - Implement an asynchronous non-blocking command execution queue with $100\%$ action ACK confirmation (`0x17` progress byte `0x64`).
    - Keep-alive pings (`0x0B`), automatic reconnection, and battery telemetry monitoring (`0x0F`).
 
