@@ -22,4 +22,10 @@ __pycache__/
 *.pyc
 
 # Logs
-*.log
+*.log
+
+# BOM & Procurement
+BOM*
+P01BOM*
+
+
