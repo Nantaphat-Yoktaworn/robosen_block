@@ -29,18 +29,19 @@ Most modern coding curricula for children rely on tablets, smartphones, or compu
 - **Disconnected Output:** Virtual sprites on screens lack the visceral spatial feedback and excitement of watching a physical bipedal robot walk, punch, balance, and cheer.
 
 ### The Tangible Coding Solution
-This project creates a **tangible, screenless, modular physical block programming system**. Children physically snap together magnetic coding blocks in a line to create an algorithmic sequence. When they press the big **Green "Start" Button** on the Master Block, the sequence compiles instantly, verifies checksums, commands the **Robosen K1 humanoid robot** via Bluetooth Low Energy (BLE), and lights up each physical block with a **bright pulsating green LED** in real time as the robot executes each step!
+This project creates a **tangible, screenless, modular physical block programming system**. Children configure solid coding blocks on the Master's **Config Dock**, then snap them together in a line to create an algorithmic sequence at the **Run Port**. When they press the big **Green "Start" Button** on the Master Block, the sequence compiles instantly, verifies checksums, commands the **Robosen K1 humanoid robot** via Bluetooth Low Energy (BLE), and lights up each physical block with a **bright pulsating green LED** in real time as the robot executes each step!
 
-```
+```text
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
 │                                   PHYSICAL TANGIBLE CODING CHAIN                                 │
 │                                                                                                  │
 │   [ MASTER BLOCK ] ──► [ WALK BLOCK ] ──► [ TURN BLOCK ] ──► [ PUNCH BLOCK ] ──► [ END BLOCK ]   │
 │   (Brain, Battery,     (Param: 3 steps)   (Param: 90° Right) (Action: Left Hook) (Terminator)    │
-│    Start Button,                                                                                 │
-│    Buzzer Chime)                                                                                 │
+│    E-Ink Display,                                                                                │
+│    2 Config Knobs,                                                                               │
+│    Start Button)                                                                                 │
 │          │                                                                                       │
-│          ▼ (Bluetooth BLE 4.2 Stream)                                                            │
+│          ▼ (Bluetooth BLE 4.2 / 5.0 Stream)                                                      │
 │   [ ROBOSEN K1 HUMANOID ROBOT ] ─── Executes commands step-by-step with real-time feedback!      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -50,24 +51,31 @@ This project creates a **tangible, screenless, modular physical block programmin
 ## ⚡ System Architecture & Signal Flow
 
 The system operates across three interconnected layers:
-1. **Physical Modular Block Bus (4-Pin Magnetic Interface):** Master Block (ESP32) $\longleftrightarrow$ Smart Blocks (WCH CH32V003 RISC-V) $\longleftrightarrow$ Smart End Block.
+1. **Physical Modular Block Bus (4-Pin Magnetic Interface):** Master Block (ESP32-S3 with E-Ink & Config Dock) $\longleftrightarrow$ Solid Smart Blocks (WCH CH32V003 RISC-V) $\longleftrightarrow$ Smart End Block.
 2. **Simulation & Orchestration Layer (Node-RED v2.0):** Custom palette simulating hardware blocks, serial bus signals, protocol validation, and execution queues.
 3. **Hardware Gateway & Robot Layer (Python BLE Daemon & Robosen K1):** Persistent BLE connection to Robosen K1 with dynamic 100% action completion ACK resolution.
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Master as Master Block (ESP32 / Node-RED)
+    participant Master as Master Block (ESP32-S3 / Node-RED)
+    participant Docked as Action Block (At Config Dock)
     participant B1 as Smart Block 1 (Walk 3 Steps)
     participant B2 as Smart Block 2 (Punch Left)
     participant EndBlock as Smart End Terminator
     participant Robot as Robosen K1 Humanoid Robot
 
+    Note over Master,Docked: CONFIGURATION MODE (At Master Config Dock)
+    Master->>Docked: Send Write Config [0xCF, 0x02, ActionID, Param, CRC, 0x55]
+    Note over Docked: Saves [ActionID, Param] to Internal Flash Memory
+    Docked-->>Master: Send ACK [0xCF, 0x06, CRC, 0x55]
+    Note over Master,Docked: Block LED Pulses Emerald Green (Saved!)
+
     Note over Master,EndBlock: PHASE 1: DISCOVERY & COMPILATION (Press Start Button)
     Master->>B1: Frame [0xAA, Len=0, Count=0, CRC] (Pin 3 TX)
-    Note over B1: Sets Index=1, appends Token 0x01 (Walk) + Param=3, Count=1
+    Note over B1: Sets Index=1, appends Flash Token 0x01 (Walk) + Param=3, Count=1
     B1->>B2: Frame [0xAA, Len=2, Count=1, 0x01, 0x03, CRC]
-    Note over B2: Sets Index=2, appends Token 0x10 (Punch) + Param=1, Count=2
+    Note over B2: Sets Index=2, appends Flash Token 0x10 (Punch) + Param=1, Count=2
     B2->>EndBlock: Frame [0xAA, Len=4, Count=2, 0x01, 0x03, 0x10, 0x01, CRC]
     EndBlock->>Master: Return Verified Program Frame over Pin 4 (Return RX Rail)
     Master->>Master: Validates CRC-8 Checksum & Queues Sequence
@@ -85,8 +93,7 @@ sequenceDiagram
     Robot->>Master: Robot streams progress -> reaches 100% ACK (0x64)
 
     Note over Master,EndBlock: PROGRAM COMPLETE
-    Master->>Master: Victory Fanfare on Piezo Buzzer!
-    Master-->>EndBlock: Broadcast [0xBB, 0xFF] (All Block LEDs flash celebratory green)
+    Master-->>EndBlock: Broadcast [0xBB, 0xFF] (All Block LEDs sparkle rainbow victory!)
 ```
 
 ---
@@ -257,11 +264,12 @@ python scripts/k1_ble_tester.py
 
 Complete hardware specifications are detailed in [`PHYSICAL_BLOCK_SYSTEM_SPEC.md`](PHYSICAL_BLOCK_SYSTEM_SPEC.md):
 
-- **Master Block MCU:** ESP32-C3 / ESP32-S3 (BLE Central Gateway + 2-Phase Protocol Engine).
-- **Slave Block MCUs:** Ultra-low-cost WCH CH32V003 (32-bit RISC-V, ~$0.15 in SOP-8 package), dropping idle power consumption from 50 mA to $< 10\,\mu\text{A}$.
+- **Master Block MCU:** ESP32-S3 (Dual-Core Xtensa LX7, Native Bluetooth BLE 5.0, SPI for E-Ink, and Dual UARTs for Config Dock & Run Chain).
+- **Master UI & Display:** 1.54"/2.13" E-Ink E-Paper display + Dual Rotary Dials (Action & Parameter) + Large tactile Start button.
+- **Visual Feedback (No Buzzer):** Master & Block WS2812B RGB LEDs with rich light choreography (emerald green flash ACK, data comet compilation wave, live step glowing green, rainbow victory sparkle).
+- **Solid Action Block MCUs:** Ultra-low-cost WCH CH32V003 (32-bit RISC-V, ~$0.15 in SOP-8 package) with internal non-volatile flash parameter storage. No potentiometers or buttons on individual blocks!
 - **Power & Charging:** Single 3.7V LiPo cell with onboard TP4056 USB-C charging and BMS protection.
-- **Physical Connector:** 4-pin polarized magnetic pogo connector with reverse-polarity protection and RC debouncing filters.
-- **Unified Firmware Architecture:** Single compiled RISC-V binary flashed across all instruction and end blocks with runtime pin/ADC role detection.
+- **Physical Connector:** Standardized 4-pin polarized magnetic pogo connector with reverse-polarity protection and RC debouncing filters.
 
 ---
 

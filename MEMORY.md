@@ -350,35 +350,36 @@ Designed for screenless STEM learning, physical modular coding blocks snap toget
 ### Standardized 4-Pin Pogo Connector Pinout:
 * **Pin 1 (`V+`):** Regulated power rail supplied by Master Block ($3.3\text{V}$).
 * **Pin 2 (`GND`):** Common system ground.
-* **Pin 3 (`UART TX_DOWN`):** Downstream serial point-to-point transmit line (Master $\to$ Block $1 \to$ Block $2 \dots$).
-* **Pin 4 (`UART RX_BUS`):** Continuous return rail & live step broadcast bus (Loopback $\to$ Master RX, Master Step Broadcast $\to$ Blocks).
+* **Pin 3 (`UART TX_DOWN`):** Downstream serial point-to-point transmit line (Master $\to$ Block $1 \to$ Block $2 \dots$) / Config Command TX line.
+* **Pin 4 (`UART RX_BUS`):** Continuous return rail & live step broadcast bus (Loopback $\to$ Master RX, Master Step Broadcast $\to$ Blocks) / Config ACK response line.
 
 ---
 
 ## 10. 5-Pillar Master Improvement Plan & Protocol Architecture
 
 1. **Pillar 1: Hardware & Power BOM**
-   - Replace instruction block MCUs with **$0.15 WCH CH32V003 (32-bit RISC-V)** in SOP-8 package to drop idle current from $50\text{mA}$ to $<10\,\mu\text{A}$.
-   - **Unified Firmware Architecture**: Single shared firmware binary across all action & smart End blocks with runtime pin/ADC role detection.
+   - **Master Controller**: Upgraded to **ESP32-S3** (Dual-Core Xtensa LX7, Native Bluetooth BLE 5.0, SPI for E-Ink, dual UARTs for Config Dock & Run Port).
+   - **Solid Action Blocks**: Built with **$0.15 WCH CH32V003 (32-bit RISC-V)** in SOP-8 package.
+   - **No Moving Parts on Action Blocks**: Buttons and potentiometers removed from individual blocks $\to$ BOM cost dropped to **~$0.25–$0.35/block** with $<10\,\mu\text{A}$ idle current.
    - Add magnetic polarity keying, TP4056 USB-C BMS charging, and RC debouncing filters on UART pins.
 
-2. **Pillar 2: 2-Phase Bi-Directional Binary Protocol & Resilience**
-   - Protocol Research evaluated 7 alternatives (I2C, SPI, 1-Wire, CAN, Analog Ladders) and confirmed **Daisy-Chain UART** as optimal for native physical order auto-discovery, 4-pin magnetic connector compatibility, and $0.15 SOP-8 MCU budget.
-   - **Phase 1 (Discovery & Compilation - `0xAA`)**: Forward pipeline token-passing with dynamic index auto-discovery ($1..N$) and CRC-8 protection.
+2. **Pillar 2: Dual-Port Communication Protocol & Resilience**
+   - **Config Dock UART (`0xCF`)**: Master flashes action ID and parameter into docked block's internal non-volatile EEPROM/Flash.
+   - **Phase 1 (Discovery & Compilation - `0xAA`)**: Forward pipeline token-passing with dynamic index auto-discovery ($1..N$) reading saved flash tokens and CRC-8 protection.
    - **Phase 2 (Execution & Live Feedback - `0xBB`)**: Master broadcasts `[0xBB, StepIndex, TotalSteps, CRC]` across Pin 4 so the active block's WS2812B LED turns bright pulsating green in real time.
 
-3. **Pillar 3: Master ESP32 BLE Firmware**
+3. **Pillar 3: Master ESP32-S3 BLE Firmware**
    - Implement an asynchronous non-blocking command execution queue with $100\%$ action ACK confirmation (`0x17` progress byte `0x64`).
    - Keep-alive pings (`0x0B`), automatic reconnection, and battery telemetry monitoring (`0x0F`).
 
-4. **Pillar 4: Visual & Auditory UX**
-   - Integrate **WS2812B RGB LEDs** on each instruction block: color-coded for selected action, pulsing for parameter value, bright green during active robot execution, red on fault.
-   - Add piezo buzzer on Master block for start chimes, step ticks, and victory fanfare.
+4. **Pillar 4: Visual UX & Light Choreography (No Buzzer)**
+   - **E-Ink Display**: High-contrast, sunlight-readable e-paper screen on Master showing action names, icons, and parameter values.
+   - **Silent Classroom Light Language**: Removed noisy piezo buzzers; feedback provided via WS2812B RGB LEDs (cyan dock pulse, color morph, parameter flash count, emerald green save pulse, comet compilation wave, glowing green active step, rainbow victory sparkle).
 
-5. **Pillar 5: Smart Multi-Action & Parameter Blocks**
-   - **Push Button** for cycling actions (Walk, Turn, Punch, Kung Fu, Dance, Delay, Repeat).
-   - **Rotary Knob** (Potentiometer ADC / Rotary Encoder) for increasing/decreasing parameters (steps 1-10, angle 45°-180°, delay 1-5s, loop count 2x-5x).
-   - **Smart End Block** active loopback with CRC-8 calculation and green ready indicator.
+5. **Pillar 5: Master Config Dock & Solid Action Blocks**
+   - **Master UI Controls**: Knob 1 (Action Selector), Knob 2 (Parameter Adjuster), Large tactile Start button.
+   - **Non-Volatile Memory**: 192-byte flash on CH32V003 retains action settings indefinitely across power-downs.
+   - **Smart End Block**: Active loopback with CRC-8 calculation and green ready indicator.
 
 ---
 
