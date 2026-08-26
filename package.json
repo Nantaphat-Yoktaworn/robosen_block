@@ -32,7 +32,7 @@
     "k1:voice:joint": "k1 voice joint",
     "test": "jest .",
     "start": "node scripts/main",
-    "demo": "node scripts/demo",
+    "demo": "node scripts/main demo",
     "control": "node scripts/control",
     "main": "node scripts/main",
     "prompt": "node scripts/prompt",

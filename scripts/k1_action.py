@@ -167,6 +167,24 @@ async def execute_action(action_key: str):
             print("[+] Default Stand Posture complete.")
             return
 
+        if action_key in ["volume", "vol", "set_volume"]:
+            val_str = extra_arg or "50"
+            val_str = val_str.replace("%", "").strip()
+            try:
+                val_int = int(val_str)
+                if val_int > 100:
+                    raw_vol = max(0, min(140, val_int))
+                else:
+                    raw_vol = int(round(140 * (val_int / 100.0)))
+                    raw_vol = max(0, min(140, raw_vol))
+            except ValueError:
+                raw_vol = 70
+            print(f"[*] Setting Speaker Volume to raw {raw_vol} / 140 ({int(round(raw_vol/140*100))}%)...")
+            await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0x06, bytes([raw_vol])), response=False)
+            await asyncio.sleep(0.8)
+            print(f"[+] Volume updated to {raw_vol} / 140.")
+            return
+
         if action_key in ACTIONS:
             opcode, payload, duration = ACTIONS[action_key]
             print(f"[*] Executing action '{action_key}'...")
@@ -185,6 +203,7 @@ async def execute_action(action_key: str):
             print(f"[-] Unknown action '{action_key}'. Available actions:")
             for k in ACTIONS:
                 print(f"    - {k}")
+            print("    - volume <0-100%>")
             print("    - default_stand")
             print("    - head_left")
             print("    - head_right")
@@ -196,10 +215,11 @@ async def main():
         device = await get_k1_device()
         if device:
             print(f"[+] Ready to execute commands on {device.name}!")
-            print("Usage: python scripts/k1_action.py <action_name>")
+            print("Usage: python scripts/k1_action.py <action_name> [param]")
             print("Available actions:")
             for k in ACTIONS:
                 print(f"  python scripts/k1_action.py {k}")
+            print("  python scripts/k1_action.py volume 80")
             print("  python scripts/k1_action.py default_stand")
             print("  python scripts/k1_action.py head_left")
             print("  python scripts/k1_action.py head_right")
@@ -208,7 +228,8 @@ async def main():
         return
 
     action = sys.argv[1].lower()
-    await execute_action(action)
+    extra_arg = sys.argv[2] if len(sys.argv) > 2 else ""
+    await execute_action(action, extra_arg)
 
 if __name__ == "__main__":
     asyncio.run(main())

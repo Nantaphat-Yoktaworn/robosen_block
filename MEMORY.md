@@ -20,8 +20,7 @@ robosen_block/
 │       └── test.json                     # Recorded joint keyframe motion sequences
 ├── scripts/
 │   ├── control.js                        # Gamepad / Keyboard controller runner (Node.js)
-│   ├── demo.js                           # Quick demo choreography script (Node.js)
-│   ├── main.js                           # Standard startup & health check script (Node.js)
+│   ├── main.js                           # Unified startup, demo & health check runner (Node.js)
 │   ├── program.js                        # Scripted robot movements & routines (Node.js)
 │   ├── prompt.js                         # LLM natural language prompt runner (Node.js)
 │   ├── repl.js                           # Interactive REPL session (Node.js)
@@ -29,8 +28,7 @@ robosen_block/
 │   ├── k1_ble_daemon.py                  # Persistent background BLE daemon with dynamic 100% progress ACK (Python/Bleak)
 │   ├── k1_joint_controller.py            # Interactive 17-joint kinematics controller with safeguard limits (Python)
 │   ├── k1_ble_tester.py                  # Live interactive BLE test menu & telemetry monitor (Python/Bleak)
-│   ├── k1_action.py                      # Fast one-shot action execution CLI & status query (Python/Bleak)
-│   └── set_volume.py                     # Direct speaker volume configuration utility (Python/Bleak)
+│   └── k1_action.py                      # Fast one-shot action execution, status, and volume CLI (Python/Bleak)
 ├── src/
 │   ├── K1/
 │   │   ├── llm/
@@ -54,24 +52,21 @@ robosen_block/
 │   │   └── protocol.js                   # Protocol encoder/decoder, CRC-8, and token catalog
 │   ├── nodes/
 │   │   ├── robosen-master.js / .html     # Smart Master Block controller (2-Phase Binary V2, Start button & REST API)
-│   │   ├── robosen-legacy-master.js / .html # Dedicated Legacy Master Block (CSV String V1, Start button & REST API)
-│   │   ├── robosen-smart-block.js / .html# Smart Multi-Action Block (CH32V003 RISC-V with Button & Knob)
+│   │   ├── robosen-smart-block.js / .html# Smart Action Block (CH32V003 flash model & LED feedback)
 │   │   ├── robosen-smart-end.js / .html  # Smart Active Terminator Block with CRC-8 validation & loopback
 │   │   ├── robosen-protocol-monitor.js / .html # Serial Protocol Bus Analyzer & Packet Sniffer
-│   │   ├── robosen-tester.js / .html     # Standalone action tester & direct controller node
-│   │   ├── robosen-instruction.js / .html# Legacy modular instruction blocks (V1 CSV mode)
-│   │   └── robosen-end.js / .html        # Legacy passive loopback terminator block node (V1)
+│   │   └── robosen-tester.js / .html     # Standalone action tester & direct controller node
 │   ├── examples/
-│   │   ├── robosen_smart_block_flow.json # Ready-to-import 2-Phase Binary simulation flow
-│   │   └── robosen_simulator_flow.json   # Legacy string simulation flow (uses Legacy Master)
+│   │   └── robosen_smart_block_flow.json # Ready-to-import 2-Phase Binary simulation flow
 │   ├── package.json                      # Node-RED palette package manifest (v2.0.0)
 │   └── README.md                         # Detailed palette documentation & API guide
 ├── index.d.ts                            # Root TypeScript exports
 ├── index.js                              # Package entry point (exports K1 and Robot)
 ├── package.json                          # NPM dependencies and script definitions
+├── note.md                               # Quick project guidelines & architecture cheat sheet
 ├── README.md                             # Comprehensive project master README
 ├── PROJECT_SUMMARY.md                    # Executive project summary & scope
-├── PHYSICAL_BLOCK_SYSTEM_SPEC.md         # Hardware & electrical spec for modular tangible coding blocks
+├── PHYSICAL_BLOCK_SYSTEM_SPEC.md         # Hardware & electrical spec for modular tangible coding blocks (v3.0)
 ├── IMPROVEMENT_PLAN.md                   # 5-Pillar master improvement plan & roadmap
 ├── ROBOSEN_K1_DOCUMENTATION.md           # Complete official K1 documentation & user manual
 └── MEMORY.md                             # Master project memory & knowledge base (this file)
@@ -427,4 +422,25 @@ The `assignments/` folder stores academic project coursework, literature reviews
 1. **Do NOT Delete Copyright Notices:** Never remove existing copyright headers from inherited upstream source files.
 2. **Do NOT Claim Creation of the Base from Scratch:** Always acknowledge `RobosenJS` as the protocol origin while highlighting your own original architecture.
 3. **Do NOT Violate Trademarks:** Robosen is a registered trademark of Robosen Robotics. Software must be marketed as an independent compatible system, never as an official Robosen brand product.
+
+---
+
+## 13. Project Workflow Guidelines & Core Architecture Summary
+
+### 13.1 Agent Workflow & Interaction Rules
+1. **Propose & Await Order:** Always discuss and propose design decisions/solutions first. Do **NOT** modify project files, commit, or push until explicitly ordered/confirmed by the user.
+2. **Proactive Commit Reminders:** Whenever uncommitted changes exist, or before transitioning to a new topic/task, actively recommend and remind the user to commit and push to keep git history clean.
+3. **Repository State:** The repository [`https://github.com/Nantaphat-Yoktaworn/robosen_block.git`](https://github.com/Nantaphat-Yoktaworn/robosen_block.git) is strictly **PRIVATE**.
+
+### 13.2 Consolidated Hardware & Protocol Decisions
+- **Master Block (ESP32-S3):**
+  - **Dual Interfaces:** (1) **Config Port (Dock)** to program 1 block via UART `0xCF`, (2) **Run Port (Chain)** to execute the multi-block sequence (`0xAA`/`0xBB`).
+  - **User Interface:** High-contrast 1.54"/2.13" E-Ink display, Dual EC11 Incremental Rotary Encoders with detent clicks (Knob 1 = Action, Knob 2 = Parameter with bidirectional stepping & firmware bounds clamping), large tactile Start button.
+  - **Silent Classroom Feedback:** No buzzer; multi-state WS2812B RGB light choreography (cyan dock pulse, color morph, parameter flash count, emerald green save pulse, comet compilation wave, glowing green active step, rainbow victory sparkle).
+  - **Smart NVS BLE Pairing:** Stores last manually paired robot MAC in NVS. Direct instant boot in $<500\,\text{ms}$ with zero classroom crosstalk. Long-press (3s) opens E-Ink Teacher Pairing Menu sorted by RSSI proximity.
+- **Solid Action Blocks (WCH CH32V003):**
+  - **Zero Moving Parts:** No buttons or potentiometers on individual blocks.
+  - **Ultra-Low BOM:** CH32V003 (SOP-8, ~$0.15) + WS2812B RGB LED + 4-pin magnetic pogo connector (~$0.25–$0.35 total BOM).
+  - **Non-Volatile Storage:** Action Token ID and Parameter stored inside internal 192-byte flash/EEPROM emulation; retains configuration indefinitely without battery power.
+
 

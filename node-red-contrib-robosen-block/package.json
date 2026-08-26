@@ -23,12 +23,9 @@
   "node-red": {
     "nodes": {
       "robosen-master": "nodes/robosen-master.js",
-      "robosen-legacy-master": "nodes/robosen-legacy-master.js",
       "robosen-smart-block": "nodes/robosen-smart-block.js",
       "robosen-smart-end": "nodes/robosen-smart-end.js",
       "robosen-protocol-monitor": "nodes/robosen-protocol-monitor.js",
-      "robosen-instruction": "nodes/robosen-instruction.js",
-      "robosen-end": "nodes/robosen-end.js",
       "robosen-tester": "nodes/robosen-tester.js"
     }
   },

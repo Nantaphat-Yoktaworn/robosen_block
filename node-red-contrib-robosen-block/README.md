@@ -42,13 +42,10 @@ This custom Node-RED palette simulates the **physical modular tangible coding bl
 | Node | Category | Color | Type | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | **`robosen-master`** | `Robosen Block` | 🔴 `#E53935` | Gateway / Controller | **Smart Master Block (V2):** Auto-connects to robot via BLE. Clickable Start button. Emits Phase 1 seed frame (`0xAA`) on Pin 3 TX, verifies CRC-8 on loopback, and broadcasts Phase 2 execution frames (`0xBB`) on Pin 4. |
-| **`robosen-legacy-master`**| `Robosen Block` | 🔴 `#D32F2F` | Legacy Controller | **Legacy Master Block (V1):** Dedicated controller for non-smart instruction blocks. Emits `"start"` string, collects CSV tokens, and runs sequence on Robosen K1 via persistent BLE. |
-| **`robosen-smart-block`** | `Robosen Block` | 🔵 `#0277BD` | Instruction Block | **Smart Block (CH32V003):** Features interactive Push Button (Action Selector) and Rotary Knob (Parameter Adjuster). Auto-discovers its sequence index and illuminates **bright pulsating green** when actively executing. |
+| **`robosen-smart-block`** | `Robosen Block` | 🔵 `#0277BD` | Instruction Block | **Smart Block (CH32V003):** Simulates the solid modular block with flash parameter storage and WS2812B RGB LED state machine (pulsing bright green during execution). |
 | **`robosen-smart-end`** | `Robosen Block` | 🟢 `#2E7D32` | Terminator | **Smart End Terminator:** Active end block that verifies CRC-8 checksum, appends framing footer `0x55`, and loops data into Pin 4 Return RX. Includes fault injection toggle for testing CRC errors. |
 | **`robosen-protocol-monitor`**| `Robosen Block` | 🔘 `#607D8B` | Bus Analyzer | **Protocol Bus Analyzer & Sniffer:** Real-time inspector for serial frames. Displays raw hex bytes, decoded tokens, parameters, and CRC verification status (`VALID` / `CORRUPT`). |
 | **`robosen-tester`** | `Robosen Block` | 🟣 `#7B1FA2` | Controller / Tester | **Direct Action Tester:** Standalone controller node with instant action triggering, live telemetry dashboard card, and BLE connection management. |
-| **`robosen-instruction`** | `Robosen Block` | 🔷 `#0288D1` | Legacy Instruction | **Legacy Instruction Block:** 1-action block appending CSV command tokens (used with Legacy Master). |
-| **`robosen-end`** | `Robosen Block` | ⚫ `#616161` | Legacy Terminator | **Legacy End Block:** Passive loopback terminator bridge (used with Legacy Master). |
 
 ---
 
@@ -63,13 +60,6 @@ This custom Node-RED palette simulates the **physical modular tangible coding bl
 - **Interactive Features:**
   - Clickable canvas Start button triggers `startChain()`.
   - Edit dialog properties panel contains a live robot status card (BLE connection, battery, volume, firmware) and manual controls.
-
-### 3.2 `robosen-legacy-master` (Legacy Master Block Controller - V1)
-- **Inputs:** 1 (Return String RX Rail from `robosen-end` - receives `"start,move_forward,left_punch"`).
-- **Outputs:**
-  - **Output 1 (Downstream TX):** Emits initial `"start"` string down the chain.
-  - **Output 2 (Telemetry & Status):** Emits real-time execution progress, step details, and robot telemetry.
-- **Features:** Clickable canvas Start button, live robot connection dashboard card, and built-in loopback timeout diagnostic.
 
 ### 3.3 `robosen-smart-block` (Smart Multi-Action Block)
 - **Inputs:** 2 (Input 1: Pin 3 Downstream In; Input 2: Pin 4 Broadcast Bus In).
@@ -167,9 +157,6 @@ cmd /c mklink /J "%USERPROFILE%\.node-red\node_modules\node-red-contrib-robosen-
 2. Open Menu $\to$ **Import** $\to$ select [`examples/robosen_smart_block_flow.json`](examples/robosen_smart_block_flow.json).
 3. Click **Deploy**.
 4. Click the button on the **Master Block** node to compile the sequence and watch each block turn bright green as the robot executes!
-
-### 6.3 Import the Legacy Simulation Flow
-Import [`examples/robosen_simulator_flow.json`](examples/robosen_simulator_flow.json) for single-action CSV chain testing.
 
 ---
 
