@@ -170,3 +170,12 @@ cmd /c mklink /J "%USERPROFILE%\.node-red\node_modules\node-red-contrib-robosen-
 
 ### 6.3 Import the Legacy Simulation Flow
 Import [`examples/robosen_simulator_flow.json`](examples/robosen_simulator_flow.json) for single-action CSV chain testing.
+
+---
+
+## 📄 License & Attribution
+
+Licensed under the **[Apache License 2.0](../LICENSE)**.
+- Core reverse-engineered Robosen protocol derived from [RobosenJS](https://github.com/oklemenz/RobosenJS) by Oliver Klemenz (Apache-2.0).
+- Node-RED palette, 2-phase protocol, and simulation blocks developed by [Nantaphat Yoktaworn](https://github.com/Nantaphat-Yoktaworn).
+

@@ -41,10 +41,12 @@ ACTIONS = {
     "status": (0x0F, b"", 1.5),
 }
 
-current_joints = bytearray([
-    129, 60, 106, 118, 190, 146, 212, 36, 123, 123, 129, 115, 223, 116, 34, 126,
-    122, 125, 125, 125, 125, 100, 100, 100, 35
+DEFAULT_STAND_FRAME = bytearray([
+    126, 65, 100, 127, 184, 141, 222, 26, 125, 116, 135, 120, 214, 146, 42, 99,
+    123, 125, 125, 125, 125, 100, 100, 100, 35
 ])
+
+current_joints = bytearray(DEFAULT_STAND_FRAME)
 
 def build_packet(opcode: int, payload: bytes = b"") -> bytes:
     num_bytes = 1 + len(payload) + 1
@@ -141,7 +143,7 @@ async def execute_action(action_key: str):
 
         if action_key in ["head_center", "head_neutral"]:
             print("[*] Centering Head (preserving standing pose)...")
-            await move_head_safely(client, 122, speed=35)
+            await move_head_safely(client, 123, speed=35)
             await asyncio.sleep(0.8)
             print("[+] Head Center complete.")
             return
@@ -152,9 +154,17 @@ async def execute_action(action_key: str):
             await asyncio.sleep(0.9)
             await move_head_safely(client, 202, speed=35)
             await asyncio.sleep(0.9)
-            await move_head_safely(client, 122, speed=35)
+            await move_head_safely(client, 123, speed=35)
             await asyncio.sleep(0.7)
             print("[+] Head Pan complete.")
+            return
+
+        if action_key in ["default_stand", "stand", "stand_posture"]:
+            print("[*] Resetting to Default Stand Posture (all 17 servos)...")
+            current_joints = bytearray(DEFAULT_STAND_FRAME)
+            await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, bytes(DEFAULT_STAND_FRAME)), response=False)
+            await asyncio.sleep(1.0)
+            print("[+] Default Stand Posture complete.")
             return
 
         if action_key in ACTIONS:
@@ -175,6 +185,7 @@ async def execute_action(action_key: str):
             print(f"[-] Unknown action '{action_key}'. Available actions:")
             for k in ACTIONS:
                 print(f"    - {k}")
+            print("    - default_stand")
             print("    - head_left")
             print("    - head_right")
             print("    - head_center")
@@ -189,6 +200,7 @@ async def main():
             print("Available actions:")
             for k in ACTIONS:
                 print(f"  python scripts/k1_action.py {k}")
+            print("  python scripts/k1_action.py default_stand")
             print("  python scripts/k1_action.py head_left")
             print("  python scripts/k1_action.py head_right")
             print("  python scripts/k1_action.py head_center")

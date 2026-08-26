@@ -43,7 +43,8 @@ const TOKEN_CATALOG = {
   0x19: { name: "CELEBRATE", label: "Celebrate Cheer", action: "celebrate", defaultParam: 1, paramName: "Style", color: "#FDD835" },
 
   // Head & Joint Kinematics
-  0x20: { name: "HEAD_MOVE", label: "Head Pan", action: "head_pan", defaultParam: 122, paramName: "Angle", color: "#00897B" },
+  0x20: { name: "HEAD_MOVE", label: "Head Pan", action: "head_pan", defaultParam: 123, paramName: "Angle", color: "#00897B" },
+  0x21: { name: "DEFAULT_STAND", label: "Default Stand", action: "default_stand", defaultParam: 35, paramName: "Speed", color: "#00897B" },
 
   // Control Flow
   0x30: { name: "WAIT_DELAY", label: "Wait Delay", action: "delay", defaultParam: 2, paramName: "Seconds", color: "#FBC02D" },

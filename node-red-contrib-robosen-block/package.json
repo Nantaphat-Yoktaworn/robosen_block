@@ -14,8 +14,12 @@
     "ble",
     "crc8"
   ],
-  "author": "Robosen Block Project",
+  "author": "Nantaphat Yoktaworn",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nantaphat-Yoktaworn/robosen_block.git"
+  },
   "node-red": {
     "nodes": {
       "robosen-master": "nodes/robosen-master.js",

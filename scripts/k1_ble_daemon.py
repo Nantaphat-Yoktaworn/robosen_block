@@ -45,10 +45,10 @@ ACTIONS = {
     "status": (0x0F, b"", 1.5),
 }
 
-# Factory baseline standing pose as fallback
+# Calibrated baseline standing pose
 DEFAULT_STAND_FRAME = bytearray([
-    129, 60, 106, 118, 190, 146, 212, 36, 123, 123, 129, 115, 223, 116, 34, 126,
-    122, # Head (index 16)
+    126, 65, 100, 127, 184, 141, 222, 26, 125, 116, 135, 120, 214, 146, 42, 99,
+    123, # Head (index 16)
     125, 125, 125, 125, 100, 100, 100,
     35   # Speed (index 24)
 ])
@@ -202,7 +202,7 @@ class RobosenBleDaemon:
             return
 
         elif action_key in ["head_center", "head_neutral"]:
-            await self.move_head_only(122, speed=35)
+            await self.move_head_only(123, speed=35)
             await asyncio.sleep(0.8)
             emit_event("action_completed", {"action": action_key})
             return
@@ -213,8 +213,17 @@ class RobosenBleDaemon:
             await asyncio.sleep(0.9)
             await self.move_head_only(202, speed=35)
             await asyncio.sleep(0.9)
-            await self.move_head_only(122, speed=35)
+            await self.move_head_only(123, speed=35)
             await asyncio.sleep(0.7)
+            emit_event("action_completed", {"action": action_key})
+            return
+
+        elif action_key in ["default_stand", "stand", "stand_posture"]:
+            # Reset all 17 servos to factory default standing posture
+            self.current_joints = bytearray(DEFAULT_STAND_FRAME)
+            pkt = build_packet(0xE8, bytes(DEFAULT_STAND_FRAME))
+            await self.client.write_gatt_char(CHARACTERISTIC_UUID, pkt, response=False)
+            await asyncio.sleep(1.0)
             emit_event("action_completed", {"action": action_key})
             return
 

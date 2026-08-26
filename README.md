@@ -226,14 +226,27 @@ python scripts/k1_action.py say_hello
 python scripts/k1_action.py celebrate
 python scripts/k1_action.py do_squats
 
-# Head Servo Articulations
+# Head Servo Articulations & Posture
+python scripts/k1_action.py default_stand
 python scripts/k1_action.py head_left
 python scripts/k1_action.py head_right
 python scripts/k1_action.py head_center
 python scripts/k1_action.py head_pan
 ```
 
-### 3. Interactive Telemetry & Control Suite ([`scripts/k1_ble_tester.py`](scripts/k1_ble_tester.py))
+### 3. Interactive Joint Kinematics Controller ([`scripts/k1_joint_controller.py`](scripts/k1_joint_controller.py))
+Interactive keyboard controller for all 17 digital servos with real-time safeguard limit enforcement, visual gauges, and error handling:
+```powershell
+python scripts/k1_joint_controller.py
+```
+- **Connection:** `C` (Connect/Reconnect) / `D` (Disconnect cleanly)
+- **Select Joint:** `↑` / `↓` or `[` / `]` or Number `0`–`9`
+- **Adjust Value:** `←` / `→` (or `PageDown` / `PageUp` for ±10)
+- **Step Size:** `+` / `-` (1, 2, 5, 10)
+- **Reset:** `R` (active joint) / `Shift+R` (all 17 stand pose)
+- **Torque:** `U` (free joints for manual posing) / `L` (lock holding torque)
+
+### 4. Interactive Telemetry & Control Suite ([`scripts/k1_ble_tester.py`](scripts/k1_ble_tester.py))
 ```powershell
 python scripts/k1_ble_tester.py
 ```
@@ -315,5 +328,12 @@ npm run k1:prompt
 
 ---
 
-## 📄 License
-This project is licensed under the Apache 2.0 License.
+## 📄 License & Attribution
+
+This project is licensed under the **[Apache License 2.0](LICENSE)**.
+
+- **Original Base Library:** Core reverse-engineered protocol parser derived from [RobosenJS](https://github.com/oklemenz/RobosenJS) by Oliver Klemenz (Apache-2.0 License).
+- **Physical Modular Tangible Coding Blocks:** Hardware specifications (CH32V003 single-wire bus, TP4056 power management) and 2-phase binary protocol with CRC-8 developed by [Nantaphat Yoktaworn](https://github.com/Nantaphat-Yoktaworn).
+- **Node-RED Palette:** [`node-red-contrib-robosen-block`](node-red-contrib-robosen-block/) simulator, physical master gateway, tester node, and live telemetry blocks developed by [Nantaphat Yoktaworn](https://github.com/Nantaphat-Yoktaworn).
+- **Python Subsystem:** Native background BLE daemon, IPC bridge, and interactive joint safeguard controller developed by [Nantaphat Yoktaworn](https://github.com/Nantaphat-Yoktaworn).
+- **Trademarks:** Robosen is a registered trademark of Robosen Robotics. This open-source project is independently developed and not officially affiliated with or endorsed by Robosen.

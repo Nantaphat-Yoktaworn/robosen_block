@@ -1,0 +1,12 @@
+Robosen Block & RobosenJS
+Copyright (c) 2026 Nantaphat Yoktaworn and Project Contributors.
+
+This product includes software originally developed as part of RobosenJS
+(https://github.com/oklemenz/RobosenJS)
+Copyright (c) Oliver Klemenz (Licensed under the Apache License, Version 2.0).
+
+Modifications and extensions by Nantaphat Yoktaworn:
+- Physical modular tangible block architecture and CH32V003 single-wire bus hardware specification.
+- Node-RED palette ('node-red-contrib-robosen-block') implementing 2-phase binary protocol with CRC-8.
+- Native Python BLE subsystem, background daemons, and interactive joint kinematics safeguard controllers.
+- Custom actions, posture calibration, and telemetry synchronization for Robosen biped robotics.

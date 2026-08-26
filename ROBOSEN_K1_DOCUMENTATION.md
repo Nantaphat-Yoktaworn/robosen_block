@@ -212,23 +212,23 @@ The Robosen K1 features **17 digital servos** mapped across 5 body groups. In ra
 
 | Servo ID | Joint Name | Byte Index | Default (Neutral) | Min Limit | Max Limit | Body Group |
 | :---: | :--- | :---: | :---: | :---: | :---: | :--- |
-| **0** | `leftThigh` | 0 | `129` | 29 | 229 | Left Leg |
-| **1** | `leftCalf` | 1 | `60` | 10 | 220 | Left Leg |
-| **2** | `leftAnkle` | 2 | `106` | 26 | 226 | Left Leg |
-| **3** | `rightThigh` | 3 | `118` | 18 | 218 | Right Leg |
-| **4** | `rightCalf` | 4 | `190` | 30 | 240 | Right Leg |
-| **5** | `rightAnkle` | 5 | `146` | 26 | 226 | Right Leg |
-| **6** | `leftShoulder` | 6 | `212` | 22 | 242 | Left Arm |
-| **7** | `rightShoulder` | 7 | `36` | 6 | 226 | Right Arm |
-| **8** | `leftHip` | 8 | `123` | 103 | 133 | Left Leg |
-| **9** | `leftFoot` | 9 | `123` | 93 | 133 | Left Leg |
-| **10** | `rightHip` | 10 | `129` | 119 | 149 | Right Leg |
-| **11** | `rightFoot` | 11 | `115` | 105 | 145 | Right Leg |
-| **12** | `leftArm` | 12 | `223` | 33 | 233 | Left Arm |
-| **13** | `leftHand` | 13 | `116` | 16 | 216 | Left Arm |
-| **14** | `rightArm` | 14 | `34` | 34 | 224 | Right Arm |
-| **15** | `rightHand` | 15 | `126` | 26 | 226 | Right Arm |
-| **16** | `head` | 16 | `122` | 42 | 202 | Head |
+| **0** | `leftThigh` | 0 | `126` | 29 | 229 | Left Leg |
+| **1** | `leftCalf` | 1 | `65` | 10 | 220 | Left Leg |
+| **2** | `leftAnkle` | 2 | `100` | 26 | 226 | Left Leg |
+| **3** | `rightThigh` | 3 | `127` | 18 | 218 | Right Leg |
+| **4** | `rightCalf` | 4 | `184` | 30 | 240 | Right Leg |
+| **5** | `rightAnkle` | 5 | `141` | 26 | 226 | Right Leg |
+| **6** | `leftShoulder` | 6 | `222` | 22 | 242 | Left Arm |
+| **7** | `rightShoulder` | 7 | `26` | 6 | 226 | Right Arm |
+| **8** | `leftHip` | 8 | `125` | 103 | 133 | Left Leg |
+| **9** | `leftFoot` | 9 | `116` | 93 | 133 | Left Leg |
+| **10** | `rightHip` | 10 | `135` | 119 | 149 | Right Leg |
+| **11** | `rightFoot` | 11 | `120` | 105 | 145 | Right Leg |
+| **12** | `leftArm` | 12 | `214` | 33 | 233 | Left Arm |
+| **13** | `leftHand` | 13 | `146` | 16 | 216 | Left Arm |
+| **14** | `rightArm` | 14 | `42` | 34 | 224 | Right Arm |
+| **15** | `rightHand` | 15 | `99` | 26 | 226 | Right Arm |
+| **16** | `head` | 16 | `123` | 42 | 202 | Head |
 | **17–23** | `padding / reserved`| 17–23 | `125` / `100` | 100 | 125 | Internal |
 | **24** | `speed` | 24 | `30` | 1 (Fast) | 100 (Slow)| Motion Speed |
 

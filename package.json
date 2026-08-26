@@ -24,6 +24,7 @@
     "k1": "k1",
     "k1:repl": "k1 repl",
     "k1:control": "k1 control",
+    "k1:joints": "python scripts/k1_joint_controller.py",
     "k1:run": "k1 run test",
     "k1:prompt": "k1 prompt",
     "k1:prompt:joint": "k1 prompt joint",
@@ -42,15 +43,16 @@
     "prettier": "prettier \"**/*.{js,json,md,yml,yaml}\" --write --log-level error",
     "prettier:ci": "prettier \"**/*.{js,json,md,yml,yaml}\" --check"
   },
+  "author": "Nantaphat Yoktaworn",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/oklemenz/RobosenJS.git"
+    "url": "git+https://github.com/Nantaphat-Yoktaworn/robosen_block.git"
   },
   "bugs": {
-    "url": "https://github.com/oklemenz/RobosenJS/issues"
+    "url": "https://github.com/Nantaphat-Yoktaworn/robosen_block/issues"
   },
-  "homepage": "https://github.com/oklemenz/RobosenJS#readme",
+  "homepage": "https://github.com/Nantaphat-Yoktaworn/robosen_block#readme",
   "engines": {
     "node": ">=22"
   },

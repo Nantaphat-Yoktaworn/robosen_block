@@ -27,8 +27,10 @@ robosen_block/
 │   ├── repl.js                           # Interactive REPL session (Node.js)
 │   ├── voice.js                          # Voice interaction session (Node.js)
 │   ├── k1_ble_daemon.py                  # Persistent background BLE daemon with dynamic 100% progress ACK (Python/Bleak)
+│   ├── k1_joint_controller.py            # Interactive 17-joint kinematics controller with safeguard limits (Python)
 │   ├── k1_ble_tester.py                  # Live interactive BLE test menu & telemetry monitor (Python/Bleak)
-│   └── k1_action.py                      # Fast one-shot action execution CLI & status query (Python/Bleak)
+│   ├── k1_action.py                      # Fast one-shot action execution CLI & status query (Python/Bleak)
+│   └── set_volume.py                     # Direct speaker volume configuration utility (Python/Bleak)
 ├── src/
 │   ├── K1/
 │   │   ├── llm/
@@ -202,23 +204,23 @@ The K1 possesses **17 digital servos** mapped across 5 body groups ($0-255$ inte
 
 | Servo ID | Joint Name | Byte Index | Default Center | Min Limit | Max Limit | Body Group |
 | :---: | :--- | :---: | :---: | :---: | :---: | :--- |
-| **0** | `leftThigh` | 0 | `129` | 29 | 229 | Left Leg |
-| **1** | `leftCalf` | 1 | `60` | 10 | 220 | Left Leg |
-| **2** | `leftAnkle` | 2 | `106` | 26 | 226 | Left Leg |
-| **3** | `rightThigh` | 3 | `118` | 18 | 218 | Right Leg |
-| **4** | `rightCalf` | 4 | `190` | 30 | 240 | Right Leg |
-| **5** | `rightAnkle` | 5 | `146` | 26 | 226 | Right Leg |
-| **6** | `leftShoulder` | 6 | `212` | 22 | 242 | Left Arm |
-| **7** | `rightShoulder` | 7 | `36` | 6 | 226 | Right Arm |
-| **8** | `leftHip` | 8 | `123` | 103 | 133 | Left Leg |
-| **9** | `leftFoot` | 9 | `123` | 93 | 133 | Left Leg |
-| **10** | `rightHip` | 10 | `129` | 119 | 149 | Right Leg |
-| **11** | `rightFoot` | 11 | `115` | 105 | 145 | Right Leg |
-| **12** | `leftArm` | 12 | `223` | 33 | 233 | Left Arm |
-| **13** | `leftHand` | 13 | `116` | 16 | 216 | Left Arm |
-| **14** | `rightArm` | 14 | `34` | 34 | 224 | Right Arm |
-| **15** | `rightHand` | 15 | `126` | 26 | 226 | Right Arm |
-| **16** | `head` | 16 | `122` | 42 (Left) | 202 (Right) | Head Pan |
+| **0** | `leftThigh` | 0 | `126` | 29 | 229 | Left Leg |
+| **1** | `leftCalf` | 1 | `65` | 10 | 220 | Left Leg |
+| **2** | `leftAnkle` | 2 | `100` | 26 | 226 | Left Leg |
+| **3** | `rightThigh` | 3 | `127` | 18 | 218 | Right Leg |
+| **4** | `rightCalf` | 4 | `184` | 30 | 240 | Right Leg |
+| **5** | `rightAnkle` | 5 | `141` | 26 | 226 | Right Leg |
+| **6** | `leftShoulder` | 6 | `222` | 22 | 242 | Left Arm |
+| **7** | `rightShoulder` | 7 | `26` | 6 | 226 | Right Arm |
+| **8** | `leftHip` | 8 | `125` | 103 | 133 | Left Leg |
+| **9** | `leftFoot` | 9 | `116` | 93 | 133 | Left Leg |
+| **10** | `rightHip` | 10 | `135` | 119 | 149 | Right Leg |
+| **11** | `rightFoot` | 11 | `120` | 105 | 145 | Right Leg |
+| **12** | `leftArm` | 12 | `214` | 33 | 233 | Left Arm |
+| **13** | `leftHand` | 13 | `146` | 16 | 216 | Left Arm |
+| **14** | `rightArm` | 14 | `42` | 34 | 224 | Right Arm |
+| **15** | `rightHand` | 15 | `99` | 26 | 226 | Right Arm |
+| **16** | `head` | 16 | `123` | 42 (Left) | 202 (Right) | Head Pan |
 | **17–23** | *Internal / Padding* | 17–23 | `125` / `100` | 100 | 125 | Padding |
 | **24** | `speed` | 24 | `30` | 1 (Fastest) | 100 (Slowest) | Transition Speed |
 
@@ -239,10 +241,11 @@ Because Node v24 on Windows requires MSVC C++ compilation for `@abandonware/nobl
 # Query Live Telemetry & Battery Status
 python scripts/k1_action.py status
 
-# Test Head Servo Articulations Individually
+# Test Head Servo Articulations & Posture
+python scripts/k1_action.py default_stand # Resets all 17 servos to default standing posture
 python scripts/k1_action.py head_left    # Turns head to the Left (angle 42)
 python scripts/k1_action.py head_right   # Turns head to the Right (angle 202)
-python scripts/k1_action.py head_center  # Returns head to Center (angle 122)
+python scripts/k1_action.py head_center  # Returns head to Center (calibrated angle 123)
 python scripts/k1_action.py head_pan     # Full Sweep (Left -> Right -> Center)
 
 # Martial Arts & Punches
@@ -265,7 +268,24 @@ python scripts/k1_action.py turn_left
 python scripts/k1_action.py turn_right
 ```
 
-### 3. Full Interactive Menu & Telemetry Stream ([`scripts/k1_ble_tester.py`](file:///C:/Users/poomz/nnnn/robosen_block/scripts/k1_ble_tester.py))
+### 3. Interactive Joint Kinematics Controller ([`scripts/k1_joint_controller.py`](file:///C:/Users/poomz/nnnn/robosen_block/scripts/k1_joint_controller.py))
+Real-time keyboard controller for all 17 digital servos with strict hardware safeguard limit enforcement, visual ASCII gauges, live telemetry, and zero-auto-connect on start:
+```powershell
+python scripts/k1_joint_controller.py
+```
+- **Connection:** `C` (Connect/Reconnect) | `D` (Disconnect cleanly)
+- **Selection (Vertical):** `↑` / `↓` (or `[` / `]`) to navigate through the 17 servos.
+- **Value Articulation (Horizontal):** `←` / `→` (or `PageDown` / `PageUp` for ±10) to adjust angle.
+- **Step Size:** `+` / `-` ($1, 2, 5, 10, 20$).
+- **Pose Resets:** `R` (selected joint) | `Shift+R` (ALL 17 calibrated standing posture).
+- **Torque:** `U` (free joints for manual posing) | `L` (lock holding torque).
+
+### 4. Direct Speaker Volume Utility ([`scripts/set_volume.py`](file:///C:/Users/poomz/nnnn/robosen_block/scripts/set_volume.py))
+```powershell
+python scripts/set_volume.py 20    # Sets volume to 20% (28/140)
+```
+
+### 5. Full Diagnostic Suite ([`scripts/k1_ble_tester.py`](file:///C:/Users/poomz/nnnn/robosen_block/scripts/k1_ble_tester.py))
 ```powershell
 python scripts/k1_ble_tester.py
 ```
@@ -377,3 +397,31 @@ The `assignments/` folder stores academic project coursework, literature reviews
 | **2** | **Evaluation of the Efficacy of Fine Motor Skill Practice by Using Tangible User Interface through Educational Games in Children with Intellectual Disability**<br>*(Teekeng et al., RMUTSVRJ 2020)* | Experimental study ($N=60$) comparing TUI manipulation against conventional therapy. Found significant hand grip gains ($p<0.05$) and superior motivation. | Provides empirical proof that physical Tangible User Interfaces (TUIs) overcome 2D touchscreen fatigue, boosting physical coordination and sustained attention. |
 | **3** | **หุ่นยนต์สื่อการเรียนรู้ปฐมวัย: กรณีศึกษา โรงเรียนเทศบาล 4 ฉลองรัตน (Kinder Bot)**<br>*(Phanpakdee et al., JSET 2025)* | Evaluated Thai early childhood teaching robot with Kindergarten 2 students. Demonstrated 100% functional reliability and top-tier user satisfaction. | Serves as a local Thai classroom benchmark; contrasts Kinder Bot's touchscreen/cloud architecture against our 100% screenless, local BLE closed-loop paradigm. |
 | **4** | **Early Childhood Computational Thinking through Tangible Floor-Robot Programming in an eTwinning Community of Practice**<br>*(Foti & Bratitsis, EJEL 2026)* | 24-week DBR study ($N=473$ Greek educators) on floor-robot programming for ages 4–6. Discovered 3 core design principles. | **Direct Pedagogical Justification:** Directly validates our system architecture: (1) physical magnetic blocks = *explicit sequencing supports*, (2) live pulsing green LED feedback = *testing and debugging cycles*. |
+
+---
+
+## 12. Open Source Licensing, Legal Memory & Compliance (Apache 2.0)
+
+### 12.1 Project Origin & Base License
+- **Origin / Upstream Base:** Core reverse-engineered Robosen BLE protocol parser derived from [`RobosenJS`](https://github.com/oklemenz/RobosenJS) by Oliver Klemenz.
+- **License Type:** **Apache License 2.0** (Open Source, Permissive, Commercial-Friendly).
+- **Public Fork / Repo Location:** [`https://github.com/Nantaphat-Yoktaworn/robosen_block.git`](https://github.com/Nantaphat-Yoktaworn/robosen_block.git)
+
+### 12.2 What You CAN Do (Permissions Granted by Apache 2.0)
+1. **Public Ownership & Forking:** You can publish and host this repository publicly on GitHub under your name/organization.
+2. **Package Publishing:** You can publish npm packages (`node-red-contrib-robosen-block`) and Python modules.
+3. **Commercial Exploitation:** You can sell physical tangible blocks, manufacture hardware, or sell software/services built on this repository.
+4. **Modifications & Extensions:** You own the copyright to your own original additions (physical block specs, Node-RED nodes, Python daemons, joint controllers, 2-phase CRC-8 protocol).
+5. **Private & Educational Use:** Free use for university research, coursework, and public demos without royalty fees.
+
+### 12.3 What You MUST Do (Compliance Obligations)
+1. **Retain `LICENSE` File:** Keep the root `LICENSE` file (Apache 2.0) in all distributions.
+2. **Maintain `NOTICE` File:** Retain the `NOTICE` file providing attribution to Oliver Klemenz for the original base and Nantaphat Yoktaworn for modular block extensions.
+3. **Notice of Modification:** Modified files and git history must indicate changes made to original files.
+4. **Include Disclaimer:** Provide software "AS IS" without warranty or contributor liability.
+
+### 12.4 What You CANNOT Do (Strict Prohibitions)
+1. **Do NOT Delete Copyright Notices:** Never remove existing copyright headers from inherited upstream source files.
+2. **Do NOT Claim Creation of the Base from Scratch:** Always acknowledge `RobosenJS` as the protocol origin while highlighting your own original architecture.
+3. **Do NOT Violate Trademarks:** Robosen is a registered trademark of Robosen Robotics. Software must be marketed as an independent compatible system, never as an official Robosen brand product.
+
