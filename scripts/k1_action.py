@@ -100,7 +100,7 @@ async def move_head_safely(client, target_angle: int, speed: int = 35):
     await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0xE8, bytes(frame)), response=False)
     current_joints[16] = frame[16]
 
-async def execute_action(action_key: str):
+async def execute_action(action_key: str, extra_arg: str = ""):
     device = await get_k1_device()
     if not device:
         print("[-] Robot not found. Make sure it is ON and not connected to the mobile app.")
@@ -180,7 +180,7 @@ async def execute_action(action_key: str):
             except ValueError:
                 raw_vol = 70
             print(f"[*] Setting Speaker Volume to raw {raw_vol} / 140 ({int(round(raw_vol/140*100))}%)...")
-            await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0x06, bytes([raw_vol])), response=False)
+            await client.write_gatt_char(CHARACTERISTIC_UUID, build_packet(0x0D, bytes([raw_vol])), response=False)
             await asyncio.sleep(0.8)
             print(f"[+] Volume updated to {raw_vol} / 140.")
             return

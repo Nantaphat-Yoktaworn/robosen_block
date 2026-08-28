@@ -1,8 +1,8 @@
 # RobosenJS & Tangible Coding Block System: Master Project Memory
 
 > **System Overview:** Programmatic Control (Node.js & Python SDK), Custom Node-RED Tangible Block Simulator Palette, and Bluetooth Low Energy (BLE) Reverse Engineering for the **Robosen K1 / Interstellar Scout K1 Series** Humanoid Robot.  
-> **Last Updated:** August 25, 2026  
-> **FCC ID:** `2ATNWK1` | **Live Verified Robot ID:** `K1-00457` (`3C:A5:51:94:97:70`) | **Firmware:** `VER:3.03L`
+> **Last Updated:** August 28, 2026  
+> **FCC ID:** `2ATNWK1` | **Live Verified Robot ID:** `K1-00457` (`3C:A5:51:94:97:70`) | **Firmware:** `VER:3.03L` (Build: `SH2022-07-23`)
 
 ---
 
@@ -178,17 +178,24 @@ All binary frames transmitted to Characteristic `0xFFE1` follow this structure:
 | `0x19` | `audio` | TX | String | Play audio track (e.g. `"AppSysMS/101"`) |
 | `0x1A` | `autoTurn` | TX | Boolean (`0x00`/`0x01`) | Toggle IMU yaw balance correction |
 | `0x1B` | `autoPose` | TX | Boolean (`0x00`/`0x01`) | Toggle autonomous idle poses |
-| `0xE6` | `program` | TX/RX | 25-byte struct | Enter programming mode & read initial pose |
+| `0xE0` | `readEE` | TX/RX | String | Internal EEPROM read check |
+| `0xE1` | `writeEE` | TX/RX | String | Internal EEPROM parameter write |
+| `0xE2` | `dirList` | TX/RX | Path string / Results | Filesystem directory & file explorer (Discovered `/AppSysMS`, `/ProAction`, `/SpeActions`, `/SysCF`, `/SysMS`, `/SysOS`, `/WarnSysMS`) |
+| `0xE3` | `fileCheck` | TX/RX | String / `OK` | File existence / checksum verification |
+| `0xE6` | `program` | TX/RX | 25-byte struct | Enter kinesthetic programming timeline & read frames |
 | `0xE7` | `programExit` | TX | None | Exit programming mode |
-| `0xE8` | `jointMove` | TX | 25-byte struct | Set 17 servos to target angles + speed |
-| `0xE9` | `jointSync` | TX/RX | 25-byte struct | Read real-time live angles from all 17 servos |
+| `0xE8` | `jointMove` | TX | 25-byte struct | Direct 17-servo coordinate command + speed |
+| `0xE9` | `jointSync` | TX/RX | 25-byte struct | Real-time live angle feedback of all 17 servos |
 | `0xEA` | `jointUnlockAll` | TX | None | Release motor torque on all joints for manual posing |
-| `0xEB` | `jointLockAll` | TX | None | Engage motor holding torque |
+| `0xEB` | `jointLockAll` | TX | None | Re-engage motor holding torque |
 | `0xED` | `jointLock` | TX | 17-byte bitmask | Lock/unlock individual joints |
 | `0xEE` | `play` | TX | Number | Trigger programmed sound index |
-| `0xF6` | `kind` | TX/RX | String | Returns model name (e.g. `"K1"`) |
+| `0xF0` | `imuStream` | RX | 50-byte struct | High-speed 6-axis IMU & joint telemetry packet |
+| `0xF1` | `imuQuery` | TX | None | Query 50-byte IMU / sensor telemetry buffer |
+| `0xF5` | `factoryTest` | TX/RX | Byte stream | Factory calibration & testing diagnostics |
+| `0xF6` | `kind` | TX/RX | String | Returns model name (`"K1"`) |
 | `0xF7` | `version` | TX/RX | String | Returns firmware version (`"VER:3.03L"`) |
-| `0xF8` | `date` | TX/RX | String | Returns firmware build date |
+| `0xF8` | `date` | TX/RX | String | Returns firmware build date (`"SH2022-07-23"`) |
 | `0xFA` | `shutdown` / `done` | TX/RX | None | Completion delimiter / power down |
 
 ---
