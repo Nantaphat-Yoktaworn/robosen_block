@@ -214,7 +214,7 @@ void loop() {
   }
   lastK2Clk = k2Clk;
 
-  // Knob 2 Click (Reset Parameter to Default)
+  // Knob 2 Click (Reset Parameter in Action Menu | Confirm & Save in Pairing Menu)
   static bool lastK2Sw = HIGH;
   bool k2Sw = digitalRead(PIN_K2_SW);
   if (lastK2Sw == HIGH && k2Sw == LOW) {
@@ -223,6 +223,22 @@ void loop() {
       act.paramVal = act.paramMin; // Reset to default minimum
       Serial.printf("\n>>> [KNOB 2 CLICK] Reset %s Parameter to %d %s <<<\n", 
                     act.name, act.paramVal, act.paramUnit);
+      renderActionMenu();
+    } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
+      // Save BLE Device into NVS Flash
+      pairedMAC  = bleList[currentBleIndex].address;
+      pairedName = bleList[currentBleIndex].name;
+      preferences.putString("paired_mac", pairedMAC);
+      preferences.putString("paired_name", pairedName);
+
+      Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
+      Serial.printf("║  [NVS FLASH SAVED via Knob 2] Paired to: %-30s║\n", pairedName.c_str());
+      Serial.printf("║  MAC Address:                            %-30s║\n", pairedMAC.c_str());
+      Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+
+      setStatusLED(0, 50, 0); // 🟢 Confirmed Green
+      currentState = STATE_ACTION_MENU;
+      delay(1000);
       renderActionMenu();
     }
     delay(200);
