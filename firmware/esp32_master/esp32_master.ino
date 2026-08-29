@@ -28,7 +28,7 @@ const int PIN_START_BTN = 14;
 
 void setStatusLED(uint8_t r, uint8_t g, uint8_t b) {
   #ifdef RGB_BUILTIN
-    neopixelWrite(RGB_BUILTIN, r, g, b);
+    rgbLedWrite(RGB_BUILTIN, r, g, b);
   #endif
 }
 
