@@ -390,13 +390,14 @@ When transitioning from this Prototype #01 to final injection-molded / 3D-printe
 ## 13. Phase 1 Master Hardware Verification Log (August 29, 2026)
 
 ### 13.1 Verified Master Block Subsystems
-The core input and wireless gateway stage of the Master Block was fully assembled on a solderless protoboard and verified live:
+The complete dual-knob tactile interface and wireless gateway stage of the Master Block was fully assembled on a solderless protoboard and verified live:
 
 * **Hardware Controller:** `ESP32-S3-DevKitC-1-WROOM-1-N16R8` (ESP32-S3 QFN56 v0.2, 240MHz, 16MB Flash, 8MB PSRAM).
-* **Tactile User Interface:**
-  * `KY-040` Rotary Encoder on `GPIO 8 (CLK)` (🟡 Yellow) and `GPIO 9 (DT)` (🟢 Green) with quadrature rotation debouncing.
-  * Encoder Push Switch on `GPIO 10 (SW)` (🔵 Blue) with internal pull-up and 200ms debounce.
-  * Tactile Start / Run Button on `GPIO 14` (🟠 Orange) wired diagonally to GND (⚫ Black) with short-press execution trigger and 3000ms long-press BLE discovery trigger.
+* **Tactile User Interface (Dual-Knob Master Interface):**
+  * **Knob 1 (Action Selector):** `KY-040` on `GPIO 8 (CLK)` (🟡 Yellow) & `GPIO 9 (DT)` (🟢 Green) with `GPIO 10 (SW)` (🔵 Blue) click confirmation.
+  * **Knob 2 (Parameter Adjuster):** `KY-040` on `GPIO 11 (CLK)` (⚪ White) & `GPIO 12 (DT)` (🟤 Brown) with `GPIO 13 (SW)` (🔘 Gray) parameter reset.
+  * **Master Start / Run Button:** Tactile button on `GPIO 14` (🟠 Orange) wired diagonally to GND (⚫ Black).
+  * **Status LED:** Onboard WS2812 NeoPixel on `GPIO 48` driven via `rgbLedWrite()`.
 * **Firmware Location:** [`firmware/esp32_master/esp32_master.ino`](file:///C:/Users/poomz/nnnn/robosen_block/firmware/esp32_master/esp32_master.ino).
 
 ### 13.2 Color-Coded Breadboard Wiring Reference
@@ -404,12 +405,19 @@ The core input and wireless gateway stage of the Master Block was fully assemble
   (+) Red Rail  (+3.3V) ◄═════════[ 🔴 RED ]════════ ESP32 3V3 Pin
   (-) Blue Rail (GND)   ◄═════════[ ⚫ BLACK ]══════ ESP32 GND Pin
 
-  [ KY-040 Rotary Encoder ]
+  [ KNOB 1: KY-040 Action Selector ]
    • VCC / +  ──► [ 🔴 RED ]    ──► (+) 3.3V Power Rail
    • GND      ──► [ ⚫ BLACK ]  ──► (-) Ground Rail
    • CLK      ──► [ 🟡 YELLOW ] ──► ESP32 GPIO 8
    • DT       ──► [ 🟢 GREEN ]  ──► ESP32 GPIO 9
    • SW       ──► [ 🔵 BLUE ]   ──► ESP32 GPIO 10
+
+  [ KNOB 2: KY-040 Parameter Adjuster ]
+   • VCC / +  ──► [ 🔴 RED ]    ──► (+) 3.3V Power Rail
+   • GND      ──► [ ⚫ BLACK ]  ──► (-) Ground Rail
+   • CLK      ──► [ ⚪ WHITE ]  ──► ESP32 GPIO 11
+   • DT       ──► [ 🟤 BROWN ]  ──► ESP32 GPIO 12
+   • SW       ──► [ 🔘 GRAY ]   ──► ESP32 GPIO 13
 
   [ Tactile Start Button (4-Pin DIP) ]
    • Top-Right Pin ──► [ 🟠 ORANGE ] ──► ESP32 GPIO 14 (Internal Pull-Up)

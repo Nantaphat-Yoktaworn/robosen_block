@@ -7,23 +7,24 @@
 #include <Preferences.h>
 
 // ==============================================================================
-// 1. PIN DEFINITIONS & COLOR-CODED WIRING MAP (PROTOTYPE #01 SPEC)
+// 1. PIN DEFINITIONS (PROTOTYPE #01 SPEC - DUAL-KNOB SYSTEM)
 // ==============================================================================
-// 🔴 Red:    +3.3V Power Rail (ESP32 3V3 -> Breadboard + Rail -> Encoder VCC)
-// ⚫ Black:  Common GND Rail  (ESP32 GND -> Breadboard - Rail -> Encoder GND / Button GND)
-// 🟡 Yellow: Rotary Encoder CLK (Phase A) -> GPIO 8
-// 🟢 Green:  Rotary Encoder DT  (Phase B) -> GPIO 9
-// 🔵 Blue:   Rotary Encoder SW  (Push Click) -> GPIO 10
-// 🟠 Orange: Tactile Start Button (Diagonal Trigger) -> GPIO 14
-// ==============================================================================
-const int PIN_ENC_CLK   = 8;
-const int PIN_ENC_DT    = 9;
-const int PIN_ENC_SW    = 10;
-const int PIN_START_BTN = 14;
+// --- KNOB 1: ACTION SELECTOR ---
+const int PIN_K1_CLK    = 8;   // 🟡 Yellow Wire
+const int PIN_K1_DT     = 9;   // 🟢 Green Wire
+const int PIN_K1_SW     = 10;  // 🔵 Blue Wire
 
-// Onboard WS2812 RGB LED (GPIO 48 on ESP32-S3 DevKitC-1)
+// --- KNOB 2: PARAMETER ADJUSTER ---
+const int PIN_K2_CLK    = 11;  // ⚪ White Wire
+const int PIN_K2_DT     = 12;  // 🟤 Brown Wire
+const int PIN_K2_SW     = 13;  // 🔘 Gray Wire
+
+// --- MASTER START BUTTON ---
+const int PIN_START_BTN = 14;  // 🟠 Orange Wire (Diagonal GND Return)
+
+// --- ONBOARD WS2812 RGB STATUS LED ---
 #ifndef RGB_BUILTIN
-  #define RGB_BUILTIN 48
+  #define RGB_BUILTIN 48       // ESP32-S3 DevKitC-1 onboard RGB
 #endif
 
 void setStatusLED(uint8_t r, uint8_t g, uint8_t b) {
@@ -39,28 +40,33 @@ static BLEUUID SERVICE_UUID("0000ffe0-0000-1000-8000-00805f9b34fb");
 static BLEUUID CHAR_UUID   ("0000ffe1-0000-1000-8000-00805f9b34fb");
 
 // ==============================================================================
-// 3. ROBOSEN ACTION LIBRARY CATALOG
+// 3. ACTION & PARAMETER DEFINITIONS
 // ==============================================================================
 struct RobosenAction {
   const char* name;
   uint8_t opcode;
   const char* payload;
+  const char* paramUnit;
+  int paramVal;
+  int paramMin;
+  int paramMax;
+  int paramStep;
 };
 
-const RobosenAction ACTIONS[] = {
-  {"01: Walk Forward",   0x01, ""},
-  {"02: Walk Backward",  0x05, ""},
-  {"03: Turn Left 90°",  0x08, ""},
-  {"04: Turn Right 90°", 0x02, ""},
-  {"05: Punch Left",     0x17, "ProAction/Left Punch"},
-  {"06: Push-ups",       0x17, "ProAction/Push Ups"},
-  {"07: Wave Hand",      0x17, "ProAction/Say Hello"}
+RobosenAction ACTIONS[] = {
+  {"01: Walk Forward",   0x01, "",                      "Steps", 1,   1,   5,   1},
+  {"02: Walk Backward",  0x05, "",                      "Steps", 1,   1,   5,   1},
+  {"03: Turn Left",      0x08, "",                      "Deg°",  90,  45,  180, 45},
+  {"04: Turn Right",     0x02, "",                      "Deg°",  90,  45,  180, 45},
+  {"05: Punch Left",     0x17, "ProAction/Left Punch",  "Reps",  1,   1,   3,   1},
+  {"06: Push-ups",       0x17, "ProAction/Push Ups",    "Reps",  1,   1,   3,   1},
+  {"07: Wave Hand",      0x17, "ProAction/Say Hello",   "Reps",  1,   1,   3,   1}
 };
 const int TOTAL_ACTIONS = sizeof(ACTIONS) / sizeof(ACTIONS[0]);
-int currentActionIndex = 4; // Default: Punch Left
+int currentActionIndex = 0; // Default: Walk Forward
 
 // ==============================================================================
-// 4. SYSTEM STATE MACHINE & STORAGE
+// 4. SYSTEM STATE & MEMORY
 // ==============================================================================
 enum SystemState { 
   STATE_ACTION_MENU, 
@@ -83,7 +89,9 @@ DiscoveredDevice bleList[MAX_BLE_DEVICES];
 int bleDeviceCount = 0;
 int currentBleIndex = 0;
 
-int lastClkState = HIGH;
+// Debounce & Timing States
+int lastK1Clk = HIGH;
+int lastK2Clk = HIGH;
 unsigned long startBtnPressTime = 0;
 bool startBtnHeld = false;
 
@@ -100,29 +108,36 @@ void setup() {
   Serial.begin(115200);
   delay(1500);
 
-  // Initialize Input Pins with Internal Pull-Up Resistors
-  pinMode(PIN_ENC_CLK, INPUT_PULLUP);
-  pinMode(PIN_ENC_DT, INPUT_PULLUP);
-  pinMode(PIN_ENC_SW, INPUT_PULLUP);
-  pinMode(PIN_START_BTN, INPUT_PULLUP);
-  lastClkState = digitalRead(PIN_ENC_CLK);
+  // Configure Internal Pull-Up Resistors for all inputs
+  pinMode(PIN_K1_CLK, INPUT_PULLUP);
+  pinMode(PIN_K1_DT,  INPUT_PULLUP);
+  pinMode(PIN_K1_SW,  INPUT_PULLUP);
 
-  // Load Saved Robot Binding from NVS Flash Partition
+  pinMode(PIN_K2_CLK, INPUT_PULLUP);
+  pinMode(PIN_K2_DT,  INPUT_PULLUP);
+  pinMode(PIN_K2_SW,  INPUT_PULLUP);
+
+  pinMode(PIN_START_BTN, INPUT_PULLUP);
+
+  lastK1Clk = digitalRead(PIN_K1_CLK);
+  lastK2Clk = digitalRead(PIN_K2_CLK);
+
+  // Load Saved Robot Binding from NVS Flash
   preferences.begin("robosen_cfg", false);
   pairedMAC  = preferences.getString("paired_mac", "None (Unpaired)");
   pairedName = preferences.getString("paired_name", "None");
 
-  // Initialize Bluetooth Low Energy Subsystem
+  // Initialize BLE Stack
   BLEDevice::init("Robosen_Master_Block");
 
-  // Update Status LED based on NVS State
+  // Set Status LED
   if (pairedMAC == "None (Unpaired)") {
     setStatusLED(30, 0, 0); // 🔴 Red: Unpaired
   } else {
-    setStatusLED(0, 30, 0); // 🟢 Emerald Green: Ready & Paired!
+    setStatusLED(0, 30, 0); // 🟢 Emerald Green: Ready
   }
 
-  Serial.println("\n[SYSTEM] ESP32-S3 Master Hardware Initialized.");
+  Serial.println("\n[SYSTEM] ESP32-S3 Dual-Knob Master Initialized.");
   renderActionMenu();
 }
 
@@ -130,58 +145,92 @@ void setup() {
 // 6. MAIN EVENT LOOP
 // ==============================================================================
 void loop() {
-  // --- 1. ROTARY ENCODER ROTATION (SHARED NAVIGATOR) ---
-  int clkState = digitalRead(PIN_ENC_CLK);
-  if (clkState != lastClkState && clkState == LOW) {
-    bool cw = (digitalRead(PIN_ENC_DT) != clkState);
-
+  // --------------------------------------------------------------------------
+  // --- KNOB 1: ACTION SELECTOR (CLK: 8, DT: 9, SW: 10) ---
+  // --------------------------------------------------------------------------
+  int k1Clk = digitalRead(PIN_K1_CLK);
+  if (k1Clk != lastK1Clk && k1Clk == LOW) {
+    bool cw = (digitalRead(PIN_K1_DT) != k1Clk);
     if (currentState == STATE_ACTION_MENU) {
       currentActionIndex = cw ? (currentActionIndex + 1) % TOTAL_ACTIONS 
                               : (currentActionIndex - 1 + TOTAL_ACTIONS) % TOTAL_ACTIONS;
       renderActionMenu();
-    } 
-    else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
+    } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
       currentBleIndex = cw ? (currentBleIndex + 1) % bleDeviceCount 
                            : (currentBleIndex - 1 + bleDeviceCount) % bleDeviceCount;
       renderPairingMenu();
     }
-    delay(5); // Quadrature debounce
+    delay(5);
   }
-  lastClkState = clkState;
+  lastK1Clk = k1Clk;
 
-  // --- 2. ENCODER PUSH BUTTON (SW) ---
-  static bool lastSwState = HIGH;
-  bool swState = digitalRead(PIN_ENC_SW);
-  if (lastSwState == HIGH && swState == LOW) {
+  // Knob 1 Click (Select Action / Confirm)
+  static bool lastK1Sw = HIGH;
+  bool k1Sw = digitalRead(PIN_K1_SW);
+  if (lastK1Sw == HIGH && k1Sw == LOW) {
     if (currentState == STATE_ACTION_MENU) {
-      Serial.printf("\n>>> [KNOB CLICKED] Selected: %s <<<\n", ACTIONS[currentActionIndex].name);
-      // Soft flash to acknowledge click
+      Serial.printf("\n>>> [KNOB 1 CLICK] Selected Action: %s <<<\n", ACTIONS[currentActionIndex].name);
       setStatusLED(0, 60, 30);
       delay(80);
       setStatusLED(0, 30, 0);
-    } 
-    else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
-      // Save selected device to NVS Flash memory
+    } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
+      // Save BLE Device
       pairedMAC  = bleList[currentBleIndex].address;
       pairedName = bleList[currentBleIndex].name;
       preferences.putString("paired_mac", pairedMAC);
       preferences.putString("paired_name", pairedName);
-
-      Serial.println("\n╔════════════════════════════════════════════════════════════════╗");
-      Serial.printf("║  [NVS FLASH SAVED] Paired to: %-33s║\n", pairedName.c_str());
-      Serial.printf("║  MAC Address:                 %-33s║\n", pairedMAC.c_str());
-      Serial.println("╚════════════════════════════════════════════════════════════════╝");
-
-      setStatusLED(0, 50, 0); // 🟢 Confirmed Green
+      setStatusLED(0, 50, 0);
       currentState = STATE_ACTION_MENU;
       delay(1000);
       renderActionMenu();
     }
-    delay(200); // Debounce
+    delay(200);
   }
-  lastSwState = swState;
+  lastK1Sw = k1Sw;
 
-  // --- 3. TACTILE START BUTTON (SHORT PRESS = RUN | 3s HOLD = PAIR) ---
+  // --------------------------------------------------------------------------
+  // --- KNOB 2: PARAMETER ADJUSTER (CLK: 11, DT: 12, SW: 13) ---
+  // --------------------------------------------------------------------------
+  int k2Clk = digitalRead(PIN_K2_CLK);
+  if (k2Clk != lastK2Clk && k2Clk == LOW) {
+    bool cw = (digitalRead(PIN_K2_DT) != k2Clk);
+    if (currentState == STATE_ACTION_MENU) {
+      RobosenAction& act = ACTIONS[currentActionIndex];
+      if (cw) {
+        act.paramVal += act.paramStep;
+        if (act.paramVal > act.paramMax) act.paramVal = act.paramMax;
+      } else {
+        act.paramVal -= act.paramStep;
+        if (act.paramVal < act.paramMin) act.paramVal = act.paramMin;
+      }
+      renderActionMenu();
+    } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
+      currentBleIndex = cw ? (currentBleIndex + 1) % bleDeviceCount 
+                           : (currentBleIndex - 1 + bleDeviceCount) % bleDeviceCount;
+      renderPairingMenu();
+    }
+    delay(5);
+  }
+  lastK2Clk = k2Clk;
+
+  // Knob 2 Click (Reset Parameter to Default)
+  static bool lastK2Sw = HIGH;
+  bool k2Sw = digitalRead(PIN_K2_SW);
+  if (lastK2Sw == HIGH && k2Sw == LOW) {
+    if (currentState == STATE_ACTION_MENU) {
+      RobosenAction& act = ACTIONS[currentActionIndex];
+      act.paramVal = act.paramMin; // Reset to default minimum
+      Serial.printf("\n>>> [KNOB 2 CLICK] Reset %s Parameter to %d %s <<<\n", 
+                    act.name, act.paramVal, act.paramUnit);
+      renderActionMenu();
+    }
+    delay(200);
+  }
+  lastK2Sw = k2Sw;
+
+  // --------------------------------------------------------------------------
+  // --- MASTER START BUTTON (TAP = RUN | 3s HOLD = PAIR) ---
+  // --------------------------------------------------------------------------
   int btnState = digitalRead(PIN_START_BTN);
   if (btnState == LOW) {
     if (startBtnPressTime == 0) {
@@ -211,27 +260,28 @@ void loop() {
 }
 
 // ==============================================================================
-// 7. BUILD & TRANSMIT ROBOSEN BINARY PACKET
+// 7. BUILD & TRANSMIT PARAMETERIZED ROBOSEN PACKET
 // ==============================================================================
 bool sendRobosenPacket(const RobosenAction& action) {
   if (pairedMAC == "None (Unpaired)") {
     Serial.println("\n[ERROR] No robot paired! Hold Start for 3s to pair.");
-    setStatusLED(40, 0, 0); // 🔴 Red error
+    setStatusLED(40, 0, 0);
     delay(500);
     return false;
   }
 
-  setStatusLED(40, 30, 0); // 🟡 Yellow: Active BLE Transmitting
+  setStatusLED(40, 30, 0); // 🟡 Active Transmitting
 
   Serial.println("\n╔════════════════════════════════════════════════════════════════╗");
   Serial.printf("║  [TRANSMITTING] Connecting to: %-32s║\n", pairedName.c_str());
   Serial.printf("║  Target MAC:                   %-32s║\n", pairedMAC.c_str());
   Serial.printf("║  Action:                       %-32s║\n", action.name);
+  Serial.printf("║  Configured Parameter:         %d %-28s║\n", action.paramVal, action.paramUnit);
   Serial.println("╚════════════════════════════════════════════════════════════════╝");
 
   // Construct Binary Packet: [0xFF, 0xFF, NumBytes, Opcode, Payload..., Checksum]
   uint8_t payloadLen = strlen(action.payload);
-  uint8_t numBytes = 1 + payloadLen + 1; // opcode + payload + checksum
+  uint8_t numBytes = 1 + payloadLen + 1;
   uint8_t totalPacketLen = 2 + numBytes + 1;
   uint8_t packet[totalPacketLen];
 
@@ -254,8 +304,6 @@ bool sendRobosenPacket(const RobosenAction& action) {
   Serial.println();
 
   BLEClient* pClient = BLEDevice::createClient();
-
-  // Support both Random Address (phone advertiser) and Public Address (real robot)
   BLEAddress pAddressRandom(pairedMAC.c_str(), BLE_ADDR_RANDOM);
   BLEAddress pAddressPublic(pairedMAC.c_str(), BLE_ADDR_PUBLIC);
 
@@ -266,7 +314,7 @@ bool sendRobosenPacket(const RobosenAction& action) {
 
   if (!connected) {
     Serial.println("[BLE] Connection failed. Make sure device is awake & connectable.");
-    setStatusLED(40, 0, 0); // 🔴 Flash red on fail
+    setStatusLED(40, 0, 0);
     delay(400);
     setStatusLED(0, 30, 0);
     delete pClient;
@@ -277,7 +325,7 @@ bool sendRobosenPacket(const RobosenAction& action) {
   BLERemoteService* pRemoteService = pClient->getService(SERVICE_UUID);
   if (pRemoteService == nullptr) {
     Serial.println("[BLE] Target connected successfully! (Service 0xFFE0 not active on target).");
-    setStatusLED(0, 30, 0); // 🟢 Back to green
+    setStatusLED(0, 30, 0);
     pClient->disconnect();
     delete pClient;
     return true;
@@ -285,22 +333,29 @@ bool sendRobosenPacket(const RobosenAction& action) {
 
   BLERemoteCharacteristic* pRemoteChar = pRemoteService->getCharacteristic(CHAR_UUID);
   if (pRemoteChar != nullptr && pRemoteChar->canWrite()) {
-    pRemoteChar->writeValue(packet, totalPacketLen);
-    Serial.println(">>> [SUCCESS] Binary packet written to remote characteristic! <<<");
+    // Send action with repetitions if configured > 1
+    for (int rep = 0; rep < action.paramVal; rep++) {
+      if (rep > 0) {
+        Serial.printf("[REPEAT] Transmitting Repetition %d of %d...\n", rep + 1, action.paramVal);
+        delay(1200); // Inter-command interval
+      }
+      pRemoteChar->writeValue(packet, totalPacketLen);
+    }
+    Serial.println(">>> [SUCCESS] All motion commands delivered to robot! <<<");
   }
 
-  setStatusLED(0, 40, 0); // 🟢 Solid emerald green
+  setStatusLED(0, 40, 0);
   pClient->disconnect();
   delete pClient;
   return true;
 }
 
 // ==============================================================================
-// 8. BLE SCANNING ROUTINE (DISCOVERY & RSSI PROXIMITY SORTING)
+// 8. BLE SCANNING ROUTINE
 // ==============================================================================
 void runBleScan() {
   currentState = STATE_BLE_SCANNING;
-  setStatusLED(0, 0, 40); // 🔵 Blue: Active BLE Scanning
+  setStatusLED(0, 0, 40); // 🔵 Active Scanning
 
   Serial.println("\n╔════════════════════════════════════════════════════════════════╗");
   Serial.println("║            [TEACHER PAIRING MODE: SCANNING BLE...]             ║");
@@ -326,7 +381,7 @@ void runBleScan() {
     bleDeviceCount++;
   }
 
-  // Sort devices by RSSI descending (strongest/closest signal at top)
+  // Sort by RSSI
   for (int i = 0; i < bleDeviceCount - 1; i++) {
     for (int j = 0; j < bleDeviceCount - i - 1; j++) {
       if (bleList[j].rssi < bleList[j + 1].rssi) {
@@ -340,52 +395,59 @@ void runBleScan() {
   pBLEScan->clearResults();
   currentBleIndex = 0;
   currentState = STATE_BLE_PAIRING_MENU;
-  setStatusLED(0, 0, 30); // 🔵 Soft blue in pairing menu
+  setStatusLED(0, 0, 30);
   renderPairingMenu();
 }
 
 // ==============================================================================
-// 9. SERIAL DISPLAY RENDERING
+// 9. DUAL-KNOB UI RENDERING
 // ==============================================================================
 void renderActionMenu() {
-  Serial.println("\n╔════════════════════════════════════════════════════════════════╗");
-  Serial.println("║              ROBOSEN K1 PHYSICAL BLOCK CONTROLLER              ║");
-  Serial.printf("║ Paired Target: %-47s ║\n", (pairedName + " (" + pairedMAC + ")").c_str());
-  Serial.println("╠════════════════════════════════════════════════════════════════╣");
+  Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
+  Serial.println("║              ROBOSEN K1 PHYSICAL BLOCK MASTER (DUAL-KNOB)              ║");
+  Serial.printf("║ Paired Target: %-55s ║\n", (pairedName + " (" + pairedMAC + ")").c_str());
+  Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
+  Serial.println("║   [KNOB 1: ACTION SELECT]             [KNOB 2: PARAMETER ADJUST]       ║");
+  Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
+  
   for (int i = 0; i < TOTAL_ACTIONS; i++) {
+    char line[100];
     if (i == currentActionIndex) {
-      Serial.printf("║  ► [%-20s]  ◄ (READY TO TRANSMIT)       ║\n", ACTIONS[i].name);
+      snprintf(line, sizeof(line), "║ ► [%-19s] ◄       Parameter: [ %3d %-6s ] (ACTIVE) ║", 
+               ACTIONS[i].name, ACTIONS[i].paramVal, ACTIONS[i].paramUnit);
     } else {
-      Serial.printf("║     %-58s ║\n", ACTIONS[i].name);
+      snprintf(line, sizeof(line), "║   %-23s             Parameter:   %3d %-6s          ║", 
+               ACTIONS[i].name, ACTIONS[i].paramVal, ACTIONS[i].paramUnit);
     }
+    Serial.println(line);
   }
-  Serial.println("╠════════════════════════════════════════════════════════════════╣");
-  Serial.println("║ • Turn Knob: Select Action      • Start Click: Transmit Action ║");
-  Serial.println("║ • Hold Start: Re-Pair BLE (3s)                                 ║");
-  Serial.println("╚════════════════════════════════════════════════════════════════╝");
+  Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
+  Serial.println("║ • Knob 1: Select Action        • Knob 2: Adjust Parameter Value        ║");
+  Serial.println("║ • Start Click: Execute Motion  • Hold Start: BLE Teacher Pairing (3s)  ║");
+  Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
 }
 
 void renderPairingMenu() {
-  Serial.println("\n╔════════════════════════════════════════════════════════════════╗");
-  Serial.println("║                TEACHER BLE PAIRING DISCOVERY                   ║");
-  Serial.println("╠════════════════════════════════════════════════════════════════╣");
+  Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
+  Serial.println("║                     TEACHER BLE PAIRING DISCOVERY                      ║");
+  Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
   if (bleDeviceCount == 0) {
-    Serial.println("║  No BLE devices discovered. Press Start button to exit.        ║");
+    Serial.println("║  No BLE devices discovered. Press Start button to exit.                ║");
   } else {
     for (int i = 0; i < bleDeviceCount; i++) {
-      char row[70];
+      char row[80];
       if (i == currentBleIndex) {
-        snprintf(row, sizeof(row), "║  ► [%d] %-18s (%3d dBm) %-17s ◄║", 
+        snprintf(row, sizeof(row), "║ ► [%d] %-18s (%3d dBm) %-17s ◄        ║", 
                  i + 1, bleList[i].name.substring(0, 18).c_str(), bleList[i].rssi, bleList[i].address.c_str());
       } else {
-        snprintf(row, sizeof(row), "║    [%d] %-18s (%3d dBm) %-17s  ║", 
+        snprintf(row, sizeof(row), "║   [%d] %-18s (%3d dBm) %-17s          ║", 
                  i + 1, bleList[i].name.substring(0, 18).c_str(), bleList[i].rssi, bleList[i].address.c_str());
       }
       Serial.println(row);
     }
   }
-  Serial.println("╠════════════════════════════════════════════════════════════════╣");
-  Serial.println("║ • Turn Knob: Scroll List       • Click Knob: Save to NVS Flash ║");
-  Serial.println("║ • Start Click: Cancel & Exit                                   ║");
-  Serial.println("╚════════════════════════════════════════════════════════════════╝");
+  Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
+  Serial.println("║ • Turn Knob: Scroll List       • Click Knob: Save to NVS Flash         ║");
+  Serial.println("║ • Start Click: Cancel & Exit                                           ║");
+  Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
 }
