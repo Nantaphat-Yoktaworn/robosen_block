@@ -98,28 +98,36 @@ Every active component in Prototype #01 runs natively on **+3.3V logic and power
 
 ## 5. Complete Breadboard Pinout & Wiring Specifications
 
-### 5.1 Master Controller (ESP32-S3 Pin Allocations)
+### 5.1 Master Controller (ESP32-S3 Pin & Wire Color Allocations)
 
-| Peripheral | Signal Name | ESP32-S3 GPIO Pin | Function / Description |
-| :--- | :--- | :---: | :--- |
-| **E-Ink Display (SPI)** | `BUSY` | **GPIO 4** | Active High/Low busy signal (indicates screen refresh in progress) |
-| | `RST` | **GPIO 5** | Hardware Reset line |
-| | `DC` | **GPIO 6** | Data / Command selection line |
-| | `CS` | **GPIO 7** | SPI Chip Select |
-| | `SCK` | **GPIO 15** | SPI Clock |
-| | `DIN (MOSI)` | **GPIO 16** | SPI Master Out Slave In |
-| **Knob 1 (Action Selector)** | `CLK (Phase A)` | **GPIO 8** | Quadrature encoder input A (Rotary direction detection) |
-| | `DT (Phase B)` | **GPIO 9** | Quadrature encoder input B |
-| | `SW (Push Switch)` | **GPIO 10** | Built-in shaft push-button (Action select confirmation) |
-| **Knob 2 (Param Adjuster)** | `CLK (Phase A)` | **GPIO 11** | Quadrature encoder input A (Parameter direction detection) |
-| | `DT (Phase B)` | **GPIO 12** | Quadrature encoder input B |
-| | `SW (Push Switch)` | **GPIO 13** | Built-in shaft push-button (Param select confirmation) |
-| **Start / Run Button** | `TRIG_BTN` | **GPIO 14** | Active Low push button with internal pull-up (Initiates sequence) |
-| **Master Status RGB LED** | `WS2812_DATA` | **GPIO 21** | Single-wire NRZ timing signal for WS2812 status LED |
-| **Config Port (Dock UART1)**| `CFG_TX` | **GPIO 17** | Sends Write Config (`0xCF`) packet to single docked block |
-| | `CFG_RX` | **GPIO 18** | Receives ACK response from docked block |
-| **Run Port (Chain UART2)** | `CHAIN_TX (Pin 3)`| **GPIO 43** | Emits Phase 1 compilation seed frame (`0xAA`) down the chain |
-| | `CHAIN_RX (Pin 4)`| **GPIO 44** | Receives Phase 1 return packet & broadcasts Phase 2 active steps (`0xBB`)|
+| Peripheral | Signal / Pin Name | ESP32-S3 GPIO | Wire Color | Breadboard Connection & Role |
+| :--- | :--- | :---: | :---: | :--- |
+| **Power Distribution** | `+3.3V DC` | **3V3 Pin** | 🔴 **Red** | Connects to Breadboard **(+) Red Rail** |
+| | `GND` | **GND Pin** | ⚫ **Black** | Connects to Breadboard **(-) Blue Rail** |
+| **Knob 1 (Action Selector)** | `CLK (Phase A)` | **GPIO 8** | 🟡 **Yellow** | Rotary encoder quadrature direction pulse A |
+| | `DT (Phase B)` | **GPIO 9** | 🟢 **Green** | Rotary encoder quadrature pulse B |
+| | `SW (Push Switch)` | **GPIO 10** | 🔵 **Blue** | Built-in shaft push-switch (Action select confirmation) |
+| | `VCC / +` | **3V3 Rail** | 🔴 **Red** | Encoder module power rail |
+| | `GND` | **GND Rail** | ⚫ **Black** | Encoder ground rail |
+| **Knob 2 (Param Adjuster)** | `CLK (Phase A)` | **GPIO 11** | ⚪ **White** | Rotary encoder quadrature direction pulse A (CW = Increase) |
+| | `DT (Phase B)` | **GPIO 12** | 🟤 **Brown** | Rotary encoder quadrature pulse B |
+| | `SW (Push Switch)` | **GPIO 13** | 🔘 **Gray** | Built-in shaft push-switch (Param reset / BLE save) |
+| | `VCC / +` | **3V3 Rail** | 🔴 **Red** | Encoder module power rail |
+| | `GND` | **GND Rail** | ⚫ **Black** | Encoder ground rail |
+| **Start / Run Button** | `TRIG_BTN` | **GPIO 14** | 🟠 **Orange** | Top-Right switch pin (Tap = Run, 3s Hold = BLE Scan) |
+| | `GND Return` | **GND Rail** | ⚫ **Black** | Bottom-Left switch pin (Diagonal GND return bridge) |
+| **Status RGB LED (Onboard)**| `RGB_BUILTIN` | **GPIO 48** | *Internal* | WS2812 NeoPixel (🟢 Green = Ready, 🔵 Blue = Scan, 🟡 Yellow = TX) |
+| **Status RGB LED (Master)** | `WS2812_DATA` | **GPIO 21** | 🟣 **Purple** | *(Reserved)* Discrete Master 5050 WS2812 status LED |
+| **Run Port (Chain Bus)** | `CHAIN_TX (Pin 3)` | **GPIO 43** | ⚪ **White** | *(Reserved)* Emits Phase 1 seed frame (`0xAA`) down the chain |
+| | `CHAIN_RX (Pin 4)` | **GPIO 44** | 🟤 **Brown** | *(Reserved)* Receives Phase 1 return & broadcasts Phase 2 active steps (`0xBB`) |
+| **Config Port (Dock UART)** | `CFG_TX` | **GPIO 17** | 🔘 **Gray** | *(Reserved)* Writes Action Config (`0xCF`) to docked block |
+| | `CFG_RX` | **GPIO 18** | 🟣 **Purple** | *(Reserved)* Receives ACK from docked block |
+| **E-Ink Display (SPI)** | `BUSY` | **GPIO 4** | 🔘 **Gray** | *(Reserved)* Active High/Low busy line |
+| | `RST` | **GPIO 5** | 🟤 **Brown** | *(Reserved)* Hardware reset line |
+| | `DC` | **GPIO 6** | 🟣 **Purple** | *(Reserved)* Data / Command line |
+| | `CS` | **GPIO 7** | 🟡 **Yellow** | *(Reserved)* SPI Chip Select |
+| | `SCK` | **GPIO 15** | 🟢 **Green** | *(Reserved)* SPI Clock line |
+| | `DIN (MOSI)` | **GPIO 16** | ⚪ **White** | *(Reserved)* SPI Master Out Slave In |
 
 ---
 

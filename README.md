@@ -254,10 +254,52 @@ python scripts/k1_ble_tester.py
 
 ## 🛠️ Hardware & Electrical Specifications
 
-Complete hardware specifications are detailed in [`PHYSICAL_BLOCK_SYSTEM_SPEC.md`](PHYSICAL_BLOCK_SYSTEM_SPEC.md):
+Complete hardware specifications are detailed in [`PHYSICAL_BLOCK_SYSTEM_SPEC.md`](PHYSICAL_BLOCK_SYSTEM_SPEC.md) and [`PROTOTYPE_01_SPEC.md`](PROTOTYPE_01_SPEC.md):
 
+### 1. Master Controller Breadboard Wiring & Pinout (Prototype #01)
+
+```text
+  (+) Red Rail  (+3.3V) ◄═════════[ 🔴 RED ]════════ ESP32 3V3 Pin
+  (-) Blue Rail (GND)   ◄═════════[ ⚫ BLACK ]══════ ESP32 GND Pin
+
+  [ KNOB 1: KY-040 Action Selector ]
+   • VCC / +  ──► [ 🔴 RED ]    ──► (+) 3.3V Power Rail
+   • GND      ──► [ ⚫ BLACK ]  ──► (-) Ground Rail
+   • CLK      ──► [ 🟡 YELLOW ] ──► ESP32 GPIO 8
+   • DT       ──► [ 🟢 GREEN ]  ──► ESP32 GPIO 9
+   • SW       ──► [ 🔵 BLUE ]   ──► ESP32 GPIO 10
+
+  [ KNOB 2: KY-040 Parameter Adjuster ]
+   • VCC / +  ──► [ 🔴 RED ]    ──► (+) 3.3V Power Rail
+   • GND      ──► [ ⚫ BLACK ]  ──► (-) Ground Rail
+   • CLK      ──► [ ⚪ WHITE ]  ──► ESP32 GPIO 11 (CW = Increase)
+   • DT       ──► [ 🟤 BROWN ]  ──► ESP32 GPIO 12
+   • SW       ──► [ 🔘 GRAY ]   ──► ESP32 GPIO 13
+
+  [ Tactile Start Button (4-Pin DIP) ]
+   • Top-Right Pin ──► [ 🟠 ORANGE ] ──► ESP32 GPIO 14 (Internal Pull-Up)
+   • Bottom-Left   ──► [ ⚫ BLACK ]  ──► (-) Ground Rail (Diagonal GND Return)
+```
+
+| Component / Function | ESP32-S3 GPIO | Wire Color | Role / Description | Status |
+| :--- | :---: | :---: | :--- | :---: |
+| **+3.3V Power Rail** | `3V3` | 🔴 **Red** | Unified 3.3V DC Power Bus | ✅ Verified |
+| **GND Common Rail** | `GND` | ⚫ **Black** | Common Ground Bus | ✅ Verified |
+| **Knob 1 CLK** | `GPIO 8` | 🟡 **Yellow** | Action Selection Direction A | ✅ Verified |
+| **Knob 1 DT** | `GPIO 9` | 🟢 **Green** | Action Selection Direction B | ✅ Verified |
+| **Knob 1 SW** | `GPIO 10` | 🔵 **Blue** | Action Select Confirmation | ✅ Verified |
+| **Knob 2 CLK** | `GPIO 11` | ⚪ **White** | Parameter Adjust Clock (CW = +) | ✅ Verified |
+| **Knob 2 DT** | `GPIO 12` | 🟤 **Brown** | Parameter Adjust Data | ✅ Verified |
+| **Knob 2 SW** | `GPIO 13` | 🔘 **Gray** | Parameter Reset / BLE Save | ✅ Verified |
+| **Start / Run Button** | `GPIO 14` | 🟠 **Orange** | Tap: Run Stream \| 3s: BLE Scan | ✅ Verified |
+| **Onboard Status RGB** | `GPIO 48` | *Internal* | 🟢 Ready \| 🔵 Scan \| 🟡 TX | ✅ Verified |
+| **E-Ink Display (SPI)** | `GPIO 4,5,6,7,15,16`| — | 2.13" SSD1680 Fast Partial Refresh | 📦 Reserved |
+| **Config Dock UART** | `GPIO 17, 18` | — | Write Action Packet (`0xCF`) | 📦 Reserved |
+| **Run Chain Bus UART**| `GPIO 43, 44` | — | Phase 1 Discovery (`0xAA`) & Run (`0xBB`)| 📦 Reserved |
+
+### 2. Block Hardware Specifications
 - **Master Block MCU:** ESP32-S3 (Dual-Core Xtensa LX7, Native Bluetooth BLE 5.0, SPI for E-Ink, and Dual UARTs for Config Dock & Run Chain).
-- **Master UI & Display:** 1.54"/2.13" E-Ink E-Paper display + Dual Rotary Dials (Action & Parameter) + Large tactile Start button.
+- **Master UI & Display:** 2.13" E-Ink E-Paper display + Dual Rotary Dials (Action & Parameter) + Tactile Start button.
 - **Visual Feedback (No Buzzer):** Master & Block WS2812B RGB LEDs with rich light choreography (emerald green flash ACK, data comet compilation wave, live step glowing green, rainbow victory sparkle).
 - **Solid Action Block MCUs:** Ultra-low-cost WCH CH32V003 (32-bit RISC-V, ~$0.15 in SOP-8 package) with internal non-volatile flash parameter storage. No potentiometers or buttons on individual blocks!
 - **Power & Charging:** Single 3.7V LiPo cell with onboard TP4056 USB-C charging and BMS protection.
