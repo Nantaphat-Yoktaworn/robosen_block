@@ -384,3 +384,49 @@ When transitioning from this Prototype #01 to final injection-molded / 3D-printe
    * 1x WS2812B RGB LED
 3. **Magnetic Pogo Pins:** Replace jumper wires with 4-pin self-aligning polarized magnetic pogo connectors.
 4. **Drop-Proof Durability:** Enclose electronics in ultrasonic-welded ABS/PLA blocks with zero moving parts.
+
+---
+
+## 13. Phase 1 Master Hardware Verification Log (August 29, 2026)
+
+### 13.1 Verified Master Block Subsystems
+The core input and wireless gateway stage of the Master Block was fully assembled on a solderless protoboard and verified live:
+
+* **Hardware Controller:** `ESP32-S3-DevKitC-1-WROOM-1-N16R8` (ESP32-S3 QFN56 v0.2, 240MHz, 16MB Flash, 8MB PSRAM).
+* **Tactile User Interface:**
+  * `KY-040` Rotary Encoder on `GPIO 8 (CLK)` (🟡 Yellow) and `GPIO 9 (DT)` (🟢 Green) with quadrature rotation debouncing.
+  * Encoder Push Switch on `GPIO 10 (SW)` (🔵 Blue) with internal pull-up and 200ms debounce.
+  * Tactile Start / Run Button on `GPIO 14` (🟠 Orange) wired diagonally to GND (⚫ Black) with short-press execution trigger and 3000ms long-press BLE discovery trigger.
+* **Firmware Location:** [`firmware/esp32_master/esp32_master.ino`](file:///C:/Users/poomz/nnnn/robosen_block/firmware/esp32_master/esp32_master.ino).
+
+### 13.2 Color-Coded Breadboard Wiring Reference
+```text
+  (+) Red Rail  (+3.3V) ◄═════════[ 🔴 RED ]════════ ESP32 3V3 Pin
+  (-) Blue Rail (GND)   ◄═════════[ ⚫ BLACK ]══════ ESP32 GND Pin
+
+  [ KY-040 Rotary Encoder ]
+   • VCC / +  ──► [ 🔴 RED ]    ──► (+) 3.3V Power Rail
+   • GND      ──► [ ⚫ BLACK ]  ──► (-) Ground Rail
+   • CLK      ──► [ 🟡 YELLOW ] ──► ESP32 GPIO 8
+   • DT       ──► [ 🟢 GREEN ]  ──► ESP32 GPIO 9
+   • SW       ──► [ 🔵 BLUE ]   ──► ESP32 GPIO 10
+
+  [ Tactile Start Button (4-Pin DIP) ]
+   • Top-Right Pin ──► [ 🟠 ORANGE ] ──► ESP32 GPIO 14 (Internal Pull-Up)
+   • Bottom-Left   ──► [ ⚫ BLACK ]  ──► (-) Ground Rail (Diagonal Return)
+```
+
+### 13.3 Test Results & Protocol Verification
+1. **Teacher BLE Scanner & Proximity Sorting:**
+   * Executed 4-second active BLE discovery (`BLEScan`).
+   * Captured live advertising beacons and sorted results descending by RSSI proximity (nearest target at top).
+2. **Persistent NVS Memory Binding:**
+   * Saved selected target MAC & Name into Non-Volatile Storage partition via ESP32 `Preferences` API.
+   * Target binding verified persistent across hardware resets (`EN` / `RST`) and power cycles.
+3. **End-to-End Binary Packet Transmission:**
+   * Connected as BLE Central client to GATT Service `0000ffe0-0000-1000-8000-00805f9b34fb` and Characteristic `0000ffe1-0000-1000-8000-00805f9b34fb`.
+   * Dual BLE Address Mode supported: `BLE_ADDR_RANDOM` (for mobile app simulator) and `BLE_ADDR_PUBLIC` (for Robosen K1 robot).
+   * Verified transmission of live motion packet:
+     $$\texttt{[FF FF 16 17 50 72 6F 41 63 74 69 6F 6E 2F 4C 65 66 74 20 50 75 6E 63 68 94]}$$
+   * Target GATT server successfully received and verified the raw hex payload and 8-bit checksum.
+

@@ -1,7 +1,7 @@
 # RobosenJS & Tangible Coding Block System: Master Project Memory
 
 > **System Overview:** Programmatic Control (Node.js & Python SDK), Custom Node-RED Tangible Block Simulator Palette, and Bluetooth Low Energy (BLE) Reverse Engineering for the **Robosen K1 / Interstellar Scout K1 Series** Humanoid Robot.  
-> **Last Updated:** August 28, 2026  
+> **Last Updated:** August 29, 2026  
 > **FCC ID:** `2ATNWK1` | **Live Verified Robot ID:** `K1-00457` (`3C:A5:51:94:97:70`) | **Firmware:** `VER:3.03L` (Build: `SH2022-07-23`)
 
 ---
@@ -15,6 +15,9 @@ robosen_block/
 │   └── RESEARCH_SUMMARY.md               # Presentation-ready markdown summary of AS01 research papers
 ├── bin/
 │   └── k1.js                             # Node.js CLI executable wrapper
+├── firmware/
+│   └── esp32_master/
+│       └── esp32_master.ino              # Master Block C++ firmware (ESP32-S3 BLE Central, NVS flash, Quadrature UI)
 ├── recordings/
 │   └── K1/
 │       └── test.json                     # Recorded joint keyframe motion sequences
@@ -67,6 +70,7 @@ robosen_block/
 ├── README.md                             # Comprehensive project master README
 ├── PROJECT_SUMMARY.md                    # Executive project summary & scope
 ├── PHYSICAL_BLOCK_SYSTEM_SPEC.md         # Hardware & electrical spec for modular tangible coding blocks (v3.0)
+├── PROTOTYPE_01_SPEC.md                  # Comprehensive prototype #01 engineering specification & breadboard pinouts
 ├── IMPROVEMENT_PLAN.md                   # 5-Pillar master improvement plan & roadmap
 ├── ROBOSEN_K1_DOCUMENTATION.md           # Complete official K1 documentation & user manual
 └── MEMORY.md                             # Master project memory & knowledge base (this file)
