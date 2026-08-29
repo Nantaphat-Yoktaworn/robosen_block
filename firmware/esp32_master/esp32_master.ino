@@ -273,14 +273,14 @@ bool sendRobosenPacket(const RobosenAction& action) {
 
   setStatusLED(40, 30, 0); // 🟡 Active Transmitting
 
-  Serial.println("\n╔════════════════════════════════════════════════════════════════╗");
-  Serial.printf("║  [TRANSMITTING] Connecting to: %-32s║\n", pairedName.c_str());
-  Serial.printf("║  Target MAC:                   %-32s║\n", pairedMAC.c_str());
-  Serial.printf("║  Action:                       %-32s║\n", action.name);
-  Serial.printf("║  Configured Parameter:         %d %-28s║\n", action.paramVal, action.paramUnit);
-  Serial.println("╚════════════════════════════════════════════════════════════════╝");
+  Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
+  Serial.printf("║  [TRANSMITTING] Connecting to: %-40s║\n", pairedName.c_str());
+  Serial.printf("║  Target MAC:                   %-40s║\n", pairedMAC.c_str());
+  Serial.printf("║  Action:                       %-40s║\n", action.name);
+  Serial.printf("║  Configured Parameter:         %d %-36s║\n", action.paramVal, action.paramUnit);
+  Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
 
-  // Construct Binary Packet: [0xFF, 0xFF, NumBytes, Opcode, Payload..., Checksum]
+  // Construct Primary Action Packet: [0xFF, 0xFF, NumBytes, Opcode, Payload..., Checksum]
   uint8_t payloadLen = strlen(action.payload);
   uint8_t numBytes = 1 + payloadLen + 1;
   uint8_t totalPacketLen = 2 + numBytes + 1;
@@ -298,11 +298,8 @@ bool sendRobosenPacket(const RobosenAction& action) {
   }
   packet[totalPacketLen - 1] = (uint8_t)(checksum % 256);
 
-  Serial.print("[HEX PACKET] ");
-  for (int i = 0; i < totalPacketLen; i++) {
-    Serial.printf("%02X ", packet[i]);
-  }
-  Serial.println();
+  // Construct Standard Stop Packet: [0xFF, 0xFF, 0x02, 0x0C, 0x0E]
+  uint8_t stopPacket[] = {0xFF, 0xFF, 0x02, 0x0C, 0x0E};
 
   BLEClient* pClient = BLEDevice::createClient();
   BLEAddress pAddressRandom(pairedMAC.c_str(), BLE_ADDR_RANDOM);
@@ -325,7 +322,20 @@ bool sendRobosenPacket(const RobosenAction& action) {
   Serial.println("[BLE] Connected! Discovering services...");
   BLERemoteService* pRemoteService = pClient->getService(SERVICE_UUID);
   if (pRemoteService == nullptr) {
-    Serial.println("[BLE] Target connected successfully! (Service 0xFFE0 not active on target).");
+    Serial.println("[BLE] Target connected! (Service 0xFFE0 not active on phone mock).");
+    
+    // Still print the simulated step-by-step stream for the user
+    for (int rep = 0; rep < action.paramVal; rep++) {
+      Serial.printf("  ► Step/Rep %d of %d: [HEX] ", rep + 1, action.paramVal);
+      for (int i = 0; i < totalPacketLen; i++) Serial.printf("%02X ", packet[i]);
+      Serial.println();
+      if (rep < action.paramVal - 1) delay(800);
+    }
+    if (action.opcode == 0x01 || action.opcode == 0x05 || action.opcode == 0x08 || action.opcode == 0x02) {
+      Serial.print("  ► Locomotion Stop: [HEX] FF FF 02 0C 0E (Gait Stand & Lock)\n");
+    }
+    Serial.println(">>> [SUCCESS] All motion commands simulated! <<<");
+
     setStatusLED(0, 30, 0);
     pClient->disconnect();
     delete pClient;
@@ -334,13 +344,21 @@ bool sendRobosenPacket(const RobosenAction& action) {
 
   BLERemoteCharacteristic* pRemoteChar = pRemoteService->getCharacteristic(CHAR_UUID);
   if (pRemoteChar != nullptr && pRemoteChar->canWrite()) {
-    // Send action with repetitions if configured > 1
+    // Send action repetitions
     for (int rep = 0; rep < action.paramVal; rep++) {
-      if (rep > 0) {
-        Serial.printf("[REPEAT] Transmitting Repetition %d of %d...\n", rep + 1, action.paramVal);
-        delay(1200); // Inter-command interval
-      }
+      Serial.printf("  ► Step/Rep %d of %d: [HEX] ", rep + 1, action.paramVal);
+      for (int i = 0; i < totalPacketLen; i++) Serial.printf("%02X ", packet[i]);
+      Serial.println();
+
       pRemoteChar->writeValue(packet, totalPacketLen);
+      if (rep < action.paramVal - 1) delay(1500); // Wait for physical leg cycle
+    }
+
+    // If locomotion (walk/turn), send stop frame at end of steps
+    if (action.opcode == 0x01 || action.opcode == 0x05 || action.opcode == 0x08 || action.opcode == 0x02) {
+      delay(800);
+      Serial.print("  ► Locomotion Stop: [HEX] FF FF 02 0C 0E (Gait Stand & Lock)\n");
+      pRemoteChar->writeValue(stopPacket, sizeof(stopPacket));
     }
     Serial.println(">>> [SUCCESS] All motion commands delivered to robot! <<<");
   }
