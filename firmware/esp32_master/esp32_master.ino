@@ -193,7 +193,8 @@ void loop() {
   // --------------------------------------------------------------------------
   int k2Clk = digitalRead(PIN_K2_CLK);
   if (k2Clk != lastK2Clk && k2Clk == LOW) {
-    bool cw = (digitalRead(PIN_K2_DT) != k2Clk);
+    // Inverted so Clockwise INCREASES the parameter
+    bool cw = (digitalRead(PIN_K2_DT) == k2Clk);
     if (currentState == STATE_ACTION_MENU) {
       RobosenAction& act = ACTIONS[currentActionIndex];
       if (cw) {
