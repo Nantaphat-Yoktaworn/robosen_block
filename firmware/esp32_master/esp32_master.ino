@@ -21,6 +21,17 @@ const int PIN_ENC_DT    = 9;
 const int PIN_ENC_SW    = 10;
 const int PIN_START_BTN = 14;
 
+// Onboard WS2812 RGB LED (GPIO 48 on ESP32-S3 DevKitC-1)
+#ifndef RGB_BUILTIN
+  #define RGB_BUILTIN 48
+#endif
+
+void setStatusLED(uint8_t r, uint8_t g, uint8_t b) {
+  #ifdef RGB_BUILTIN
+    neopixelWrite(RGB_BUILTIN, r, g, b);
+  #endif
+}
+
 // ==============================================================================
 // 2. ROBOSEN K1 BLE GATT PROTOCOL DEFINITIONS
 // ==============================================================================
@@ -104,6 +115,13 @@ void setup() {
   // Initialize Bluetooth Low Energy Subsystem
   BLEDevice::init("Robosen_Master_Block");
 
+  // Update Status LED based on NVS State
+  if (pairedMAC == "None (Unpaired)") {
+    setStatusLED(30, 0, 0); // 🔴 Red: Unpaired
+  } else {
+    setStatusLED(0, 30, 0); // 🟢 Emerald Green: Ready & Paired!
+  }
+
   Serial.println("\n[SYSTEM] ESP32-S3 Master Hardware Initialized.");
   renderActionMenu();
 }
@@ -137,6 +155,10 @@ void loop() {
   if (lastSwState == HIGH && swState == LOW) {
     if (currentState == STATE_ACTION_MENU) {
       Serial.printf("\n>>> [KNOB CLICKED] Selected: %s <<<\n", ACTIONS[currentActionIndex].name);
+      // Soft flash to acknowledge click
+      setStatusLED(0, 60, 30);
+      delay(80);
+      setStatusLED(0, 30, 0);
     } 
     else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
       // Save selected device to NVS Flash memory
@@ -150,6 +172,7 @@ void loop() {
       Serial.printf("║  MAC Address:                 %-33s║\n", pairedMAC.c_str());
       Serial.println("╚════════════════════════════════════════════════════════════════╝");
 
+      setStatusLED(0, 50, 0); // 🟢 Confirmed Green
       currentState = STATE_ACTION_MENU;
       delay(1000);
       renderActionMenu();
@@ -176,6 +199,8 @@ void loop() {
           sendRobosenPacket(ACTIONS[currentActionIndex]);
         } else if (currentState == STATE_BLE_PAIRING_MENU) {
           currentState = STATE_ACTION_MENU;
+          setStatusLED((pairedMAC == "None (Unpaired)") ? 30 : 0, 
+                       (pairedMAC == "None (Unpaired)") ? 0 : 30, 0);
           renderActionMenu();
         }
       }
@@ -191,8 +216,12 @@ void loop() {
 bool sendRobosenPacket(const RobosenAction& action) {
   if (pairedMAC == "None (Unpaired)") {
     Serial.println("\n[ERROR] No robot paired! Hold Start for 3s to pair.");
+    setStatusLED(40, 0, 0); // 🔴 Red error
+    delay(500);
     return false;
   }
+
+  setStatusLED(40, 30, 0); // 🟡 Yellow: Active BLE Transmitting
 
   Serial.println("\n╔════════════════════════════════════════════════════════════════╗");
   Serial.printf("║  [TRANSMITTING] Connecting to: %-32s║\n", pairedName.c_str());
@@ -237,6 +266,9 @@ bool sendRobosenPacket(const RobosenAction& action) {
 
   if (!connected) {
     Serial.println("[BLE] Connection failed. Make sure device is awake & connectable.");
+    setStatusLED(40, 0, 0); // 🔴 Flash red on fail
+    delay(400);
+    setStatusLED(0, 30, 0);
     delete pClient;
     return false;
   }
@@ -245,6 +277,7 @@ bool sendRobosenPacket(const RobosenAction& action) {
   BLERemoteService* pRemoteService = pClient->getService(SERVICE_UUID);
   if (pRemoteService == nullptr) {
     Serial.println("[BLE] Target connected successfully! (Service 0xFFE0 not active on target).");
+    setStatusLED(0, 30, 0); // 🟢 Back to green
     pClient->disconnect();
     delete pClient;
     return true;
@@ -256,6 +289,7 @@ bool sendRobosenPacket(const RobosenAction& action) {
     Serial.println(">>> [SUCCESS] Binary packet written to remote characteristic! <<<");
   }
 
+  setStatusLED(0, 40, 0); // 🟢 Solid emerald green
   pClient->disconnect();
   delete pClient;
   return true;
@@ -266,6 +300,8 @@ bool sendRobosenPacket(const RobosenAction& action) {
 // ==============================================================================
 void runBleScan() {
   currentState = STATE_BLE_SCANNING;
+  setStatusLED(0, 0, 40); // 🔵 Blue: Active BLE Scanning
+
   Serial.println("\n╔════════════════════════════════════════════════════════════════╗");
   Serial.println("║            [TEACHER PAIRING MODE: SCANNING BLE...]             ║");
   Serial.println("║  Scanning nearby Bluetooth devices for 4 seconds...            ║");
@@ -304,6 +340,7 @@ void runBleScan() {
   pBLEScan->clearResults();
   currentBleIndex = 0;
   currentState = STATE_BLE_PAIRING_MENU;
+  setStatusLED(0, 0, 30); // 🔵 Soft blue in pairing menu
   renderPairingMenu();
 }
 
