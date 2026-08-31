@@ -50,6 +50,34 @@ This project creates a **tangible, screenless, modular programming system**. Chi
 
 ## 2. System Architecture & Physical Hardware Components
 
+![Robosen Block System Diagram](docs/diagrams/robosen_system_block_diagram.png)
+
+```text
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                     RUN MODE BUS TOPOLOGY                                        │
+├──────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                  │
+│   Master Block                    Action Block                    Action Block        End Block  │
+│  ┌────────────┐                  ┌────────────┐                  ┌────────────┐      ┌────────┐  │
+│  │ V+      V+ ├──────────────────┤ V+      V+ ├──────────────────┤ V+      V+ ├──────┤ V+     │  │
+│  │ GND    GND ├──────────────────┤ GND    GND ├──────────────────┤ GND    GND ├──────┤ GND    │  │
+│  │ RX      TX ├──────────────────┤ RX      TX ├──────────────────┤ RX      TX ├──────┤ RX     │  │
+│  │ TX      RX ├──────────────────┤ PassThru/RX├──────────────────┤ PassThru/RX├──────┤ TX     │  │
+│  └────────────┘                  └────────────┘                  └────────────┘      └────────┘  │
+│                                                                                                  │
+│                                   CONFIG MODE BUS TOPOLOGY                                       │
+├──────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                  │
+│   Action Block                    Master Block                                                   │
+│  ┌────────────┐                  ┌────────────┐                                                  │
+│  │ V+      V+ ├──────────────────┤ V+      V+ │ (Dock Port)                                      │
+│  │ GND    GND ├──────────────────┤ GND    GND │                                                  │
+│  │ RX      TX ├──────────────────┤ RX      TX │                                                  │
+│  │ PassThru/RX├──────────────────┤ TX      RX │                                                  │
+│  └────────────┘                  └────────────┘                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
 The system is composed of four primary hardware elements:
 
 ```text
@@ -68,6 +96,7 @@ The system is composed of four primary hardware elements:
 │  2. SOLID SMART ACTION BLOCKS (The Modular Code Blocks)                                                │
 │     • Microcontroller: Ultra-low-cost WCH CH32V003 (32-bit RISC-V, ~$0.15 in SOP-8 package)            │
 │     • Solid Shell Design: ZERO buttons or knobs on individual blocks (drop-proof, indestructible)      │
+│     • Internal Wiring: 100% Planar (non-overlapping) PCB traces routing 3.3V, GND, UART, & LED data    │
 │     • Memory: Stored Action Token ID & Parameter inside 192-byte internal non-volatile flash           │
 │     • Visual Feedback: Addressable WS2812B RGB LED (indicates action color & glowing green execution)  │
 │                                                                                                        │
@@ -85,12 +114,12 @@ The system is composed of four primary hardware elements:
 ### 2.1 Standardized 4-Pin Magnetic Pogo Connector Pinout
 All blocks connect using child-friendly, polarized magnetic pogo pins:
 
-| Pin # | Signal Name | Type | Purpose |
-| :---: | :--- | :---: | :--- |
-| **Pin 1** | **`V+` (3.3V)** | Power | Regulated 3.3V power supplied by Master Block |
-| **Pin 2** | **`GND`** | Power | System common ground |
-| **Pin 3** | **`UART TX_DOWN`** | Data (Out) | Cascading downstream line (Master $\to$ Block 1 $\to$ Block 2 $\dots \to$ End) / Config TX |
-| **Pin 4** | **`UART RX_BUS`** | Bidirectional Bus | Continuous return rail for compiled program & active step broadcast bus / Config ACK |
+| Pin # | Signal Name | Type | Purpose in Config Port (Dock) | Purpose in Run Chain |
+| :---: | :--- | :---: | :--- | :--- |
+| **Pin 1** | **`V+` (3.3V)** | Power | Powers single docked block | Regulated 3.3V power supplied by Master Block |
+| **Pin 2** | **`GND`** | Power | System ground | Common system ground reference |
+| **Pin 3** | **`UART DATA`** | Bidirectional Point-to-Point | Master reads ACK from Block (`CFG_RX`) | Cascading downstream line (Master $\to$ B1 $\to$ B2 $\dots \to$ End) |
+| **Pin 4** | **`PASS_THRU / RX_BUS`**| Bidirectional Bus | Master writes Config Command (`CFG_TX`) | Continuous return rail for compiled program & active step broadcast bus |
 
 ---
 

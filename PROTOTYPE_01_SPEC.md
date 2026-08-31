@@ -29,20 +29,31 @@ This system provides a **100% screenless, tangible, modular physical coding expe
 
 Prototype #01 is an un-cased, breadboard-mounted proof-of-concept consisting of **5 distinct modular units**:
 
+![Robosen Block System Diagram](docs/diagrams/robosen_system_block_diagram.png)
+
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                               PROTOTYPE #01 HARDWARE TOPOLOGY                                    │
+│                                     RUN MODE BUS TOPOLOGY                                        │
+├──────────────────────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                                  │
-│   [ MASTER BLOCK ] ──► [ ACTION BLOCK 1 ] ──► [ ACTION BLOCK 2 ] ──► [ ACTION BLOCK 3 ] ──► [ END]
-│   • ESP32-S3 N16R8     • CH32V003F4P6         • CH32V003F4P6         • CH32V003F4P6         • CH32V003
-│   • 2.13" E-Ink        • WS2812B RGB          • WS2812B RGB          • WS2812B RGB          • WS2812B
-│   • 2x KY-040 Knobs    • Flash Action Memory  • Flash Action Memory  • Flash Action Memory  • CRC Loop
-│   • Start Button                                                                                 │
-│   • Config Port (Dock)                                                                           │
-│   • Run Port (Chain)                                                                             │
-│          │                                                                                       │
-│          ▼ (Bluetooth 5.0 BLE Stream)                                                            │
-│   [ ROBOSEN K1 BIPEDAL ROBOT ] ──────────────────────────────────────────────────────────────────┘
+│   Master Block                    Action Block                    Action Block        End Block  │
+│  ┌────────────┐                  ┌────────────┐                  ┌────────────┐      ┌────────┐  │
+│  │ V+      V+ ├──────────────────┤ V+      V+ ├──────────────────┤ V+      V+ ├──────┤ V+     │  │
+│  │ GND    GND ├──────────────────┤ GND    GND ├──────────────────┤ GND    GND ├──────┤ GND    │  │
+│  │ RX      TX ├──────────────────┤ RX      TX ├──────────────────┤ RX      TX ├──────┤ RX     │  │
+│  │ TX      RX ├──────────────────┤ PassThru/RX├──────────────────┤ PassThru/RX├──────┤ TX     │  │
+│  └────────────┘                  └────────────┘                  └────────────┘      └────────┘  │
+│                                                                                                  │
+│                                   CONFIG MODE BUS TOPOLOGY                                       │
+├──────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                  │
+│   Action Block                    Master Block                                                   │
+│  ┌────────────┐                  ┌────────────┐                                                  │
+│  │ V+      V+ ├──────────────────┤ V+      V+ │ (Dock Port)                                      │
+│  │ GND    GND ├──────────────────┤ GND    GND │                                                  │
+│  │ RX      TX ├──────────────────┤ RX      TX │                                                  │
+│  │ PassThru/RX├──────────────────┤ TX      RX │                                                  │
+│  └────────────┘                  └────────────┘                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -131,13 +142,47 @@ Every active component in Prototype #01 runs natively on **+3.3V logic and power
 
 ---
 
-### 5.2 Action Block & Smart End Block (CH32V003 Pin Allocations)
+#### 5.2 Action Block & Smart End Block Internal Wiring & Pin Allocations
+
+Every Action Block uses a 100% planar (non-overlapping) internal PCB wiring layout connecting Upstream Pogo Pins, CH32V003 RISC-V MCU, WS2812B RGB LED, and Downstream Pogo Pins:
+
+```text
+  UPSTREAM POGO PIN                                                                    DOWNSTREAM POGO PIN
+    (Left / Input)                                                                       (Right / Output)
+ ┌──────────────────┐                                                                  ┌──────────────────┐
+ │                  │                                                                  │                  │
+ │  [Pin 1: V+] ────┼───┬───────────────────────────────────────────────────────────┬──┼────► [Pin 1: V+] │
+ │                  │   │                                                           │  │                  │
+ │  [Pin 2: GND] ───┼───┼──────┬─────────────────────────────────────────────┬──────┼──┼────► [Pin 2: GND] │
+ │                  │   │      │                                             │      │  │                  │
+ │                  │   │      │          ┌───────────────────────┐          │      │  │                  │
+ │                  │   ├──┐   └───┐      │     CH32V003 MCU      │      ┌───┘   ┌──┤  │                  │
+ │                  │   │  │       │      │                       │      │       │  │  │                  │
+ │                  │   │  └──► [Pin 1]   │ [Pin 1: VDD] [Pin 20] ◄──────┘       │  │  │                  │
+ │                  │   │       (VDD)     │              (GND)    │              │  │  │                  │
+ │                  │   │                 │                       │              │  │  │                  │
+ │  [Pin 3: RX] ────┼───┼────────────────►│ [Pin 13: PD6] [Pin 9] ├──────────────┼──┼──┼────► [Pin 3: TX] │
+ │                  │   │                 │  (USART1 RX)  (PD5)   │  (USART1 TX) │  │  │                  │
+ │                  │   │                 │                       │              │  │  │                  │
+ │                  │   │                 │       [Pin 3: PA2]    │              │  │  │                  │
+ │                  │   │                 └───────────┬───────────┘              │  │  │                  │
+ │                  │   │                             │                          │  │  │                  │
+ │                  │   │                             ▼ (LED Data)               │  │  │                  │
+ │                  │   │                 ┌───────────────────────┐              │  │  │                  │
+ │                  │   │                 │      WS2812B RGB      │              │  │  │                  │
+ │                  │   └────────────────►│ [VCC]     [DIN]  [GND]├──────────────┘  │  │                  │
+ │                  │                     └───────────────────────┘                 │  │                  │
+ │                  │                                                               │  │                  │
+ │  [Pin 4: PASS] ──┼───────────────────────────────────────────────────────────────┴──┼────► [Pin 4: PASS│
+ │                  │                  (Direct Pass-Through Return Rail)               │       THROUGH]   │
+ └──────────────────┘                                                                  └──────────────────┘
+```
 
 The WCH CH32V003F4P6 runs a **single unified RISC-V firmware binary** configured dynamically by pin wiring:
 
 ```text
                       CH32V003F4P6 (TSSOP-20 / SOP-8)
-                              +-------------+
+                               +-------------+
               (V+ 3.3V)   1 --| VDD     GND |-- 20  (Common GND)
                (Unused)   2 --| PA1     PC4 |-- 19  (Unused)
           (WS2812 Data)   3 --| PA2     PC3 |-- 18  (Unused)
@@ -148,11 +193,11 @@ The WCH CH32V003F4P6 runs a **single unified RISC-V firmware binary** configured
                (Unused)   8 --| PD4     PD6 |-- 13  (UART RX - Pin 3 In / Config In)
     (UART TX - Pin 3 Out) 9 --| PD5     PD0 |-- 12  (Role Detect: GND=End, Float=Action)
                (Unused)  10 --| PA0     OSC |-- 11  (Internal 24MHz Oscillator)
-                              +-------------+
+                               +-------------+
 ```
 
-* **Pin `PD6` (UART RX):** Connected to upstream block's TX line.
-* **Pin `PD5` (UART TX):** Connected to downstream block's RX line.
+* **Pin `PD6` (UART RX):** Connected to upstream block's TX line (Pin 3 In).
+* **Pin `PD5` (UART TX):** Connected to downstream block's RX line (Pin 3 Out).
 * **Pin `PA2` (WS2812 DIN):** Connected to onboard WS2812 RGB LED data input.
 * **Pin `PD0` (Role Detect):** 
   * If left floating (internal pull-up High) $\to$ Operates as **Action Block**.

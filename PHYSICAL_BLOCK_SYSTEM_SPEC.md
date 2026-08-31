@@ -92,27 +92,49 @@ The End Block marks the physical end of the user's code sequence.
 
 ---
 
-## 3. Standardized 4-Pin Magnetic Pogo Connector Pinout
+## 3. Standardized 4-Pin Magnetic Pogo Connector Pinout & System Block Diagrams
 
-Both the **Config Port** and the **Run Port** (as well as all Action Blocks) share an identical 4-pin magnetic interface:
+Both the **Config Port** and the **Run Port** (as well as all Action Blocks) share a standardized 4-pin magnetic interface:
 
-| Pin # | Signal Name | Type | Purpose in Config Port | Purpose in Run Chain |
-| :---: | :--- | :---: | :--- | :--- |
-| **Pin 1** | **`V+` (3.3V)** | Power | Powers single docked block | Regulated 3.3V power rail for entire chain |
-| **Pin 2** | **`GND`** | Power | System ground | Common system ground |
-| **Pin 3** | **`UART TX_DOWN`** | Data Out | Config Command line (Master $\to$ Block) | Cascading downstream line (Master $\to$ B1 $\to$ B2 $\dots$) |
-| **Pin 4** | **`UART RX_BUS`** | Data In / Bus | Config Response / ACK line (Block $\to$ Master) | Continuous return rail & live step broadcast bus |
+![Robosen Block System Diagram](docs/diagrams/robosen_system_block_diagram.png)
 
 ```text
-                ┌────────────────────────────────┐
-                │ 4-PIN POGO PIN CONNECTOR       │
-                │                                │
-                │  (1) [ V+ 3.3V ] (Power)       │
-                │  (2) [ GND ]     (Ground)      │
-                │  (3) [ TX_DOWN ] (Downstream)  │
-                │  (4) [ RX_BUS ]  (Return Rail) │
-                └────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                     RUN MODE BUS TOPOLOGY                                        │
+├──────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                  │
+│   Master Block                    Action Block                    Action Block        End Block  │
+│  ┌────────────┐                  ┌────────────┐                  ┌────────────┐      ┌────────┐  │
+│  │ V+      V+ ├──────────────────┤ V+      V+ ├──────────────────┤ V+      V+ ├──────┤ V+     │  │
+│  │ GND    GND ├──────────────────┤ GND    GND ├──────────────────┤ GND    GND ├──────┤ GND    │  │
+│  │ RX      TX ├──────────────────┤ RX      TX ├──────────────────┤ RX      TX ├──────┤ RX     │  │
+│  │ TX      RX ├──────────────────┤ PassThru/RX├──────────────────┤ PassThru/RX├──────┤ TX     │  │
+│  └────────────┘                  └────────────┘                  └────────────┘      └────────┘  │
+│                                                                                                  │
+│                                   CONFIG MODE BUS TOPOLOGY                                       │
+├──────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                  │
+│   Action Block                    Master Block                                                   │
+│  ┌────────────┐                  ┌────────────┐                                                  │
+│  │ V+      V+ ├──────────────────┤ V+      V+ │ (Dock Port)                                      │
+│  │ GND    GND ├──────────────────┤ GND    GND │                                                  │
+│  │ RX      TX ├──────────────────┤ RX      TX │                                                  │
+│  │ PassThru/RX├──────────────────┤ TX      RX │                                                  │
+│  └────────────┘                  └────────────┘                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+| Pin # | Signal Name | Type | Purpose in Config Port (Dock) | Purpose in Run Chain |
+| :---: | :--- | :---: | :--- | :--- |
+| **Pin 1** | **`V+` (3.3V)** | Power | Powers single docked block | Regulated 3.3V power rail for entire chain |
+| **Pin 2** | **`GND`** | Power | System ground | Common system ground reference |
+| **Pin 3** | **`UART DATA`** | Bidirectional Point-to-Point | Master reads ACK from Block (`CFG_RX`) | Cascading downstream line (Master $\to$ B1 $\to$ B2 $\dots \to$ End) |
+| **Pin 4** | **`PASS_THRU / RX_BUS`**| Bidirectional Bus | Master writes Config Command (`CFG_TX`) | Continuous return rail (End $\to$ Master) & Live Step Broadcast Bus |
+
+### 3.1 Shared Pin 4 (Pass-Through / RX) Multidrop Electrical Safety
+- **High-Impedance (Hi-Z) Listeners:** During Run Mode, the End Block `TX` is the **only active output driver** on Pin 4. The Action Blocks and Master Block operate as High-Z inputs, drawing zero current ($\approx 1\,\mu\text{A}$) and causing no signal degradation or bus contention.
+- **Protocol Header Filtering:** Frames starting with `0xAA` (Return data) are parsed exclusively by the Master and ignored by Action Blocks. Frames starting with `0xBB` (Active step execution) are processed by Action Blocks to illuminate the active step LED in pulsing green.
+- **Pull-Up Resistor:** A single $10\,\text{k}\Omega$ pull-up resistor on the Master Block holds Pin 4 at clean logic HIGH during idle periods.
 
 ---
 
@@ -242,19 +264,52 @@ To eliminate disruptive audio beeping in busy classroom environments, the system
 
 ---
 
-## 7. Action Block CH32V003 SOP-8 Pinout
+## 7. Action Block Internal Wiring & CH32V003 Pinout
 
-Because knobs and buttons are eliminated from the action blocks, the **CH32V003 (SOP-8)** pin configuration is minimal, robust, and cost-effective:
+Every Action Block uses a 100% planar (non-overlapping) internal PCB wiring layout connecting the Upstream Pogo Pins, CH32V003 RISC-V MCU, WS2812B RGB LED, and Downstream Pogo Pins:
 
 ```text
-                  CH32V003 (SOP-8 Package)
-                        +-------------+
-        (V+ 3.3V)    ---| 1 VDD 8 GND |----  (GND)
-         (Unused)    ---| 2 PA1 7 PC4 |----  (Unused / Test Pad)
-    (WS2812B LED)    ---| 3 PA2 6 PD6 |----  (UART RX - Pin 3 In)
-    (SWIO / NRST)    ---| 4 PD1 5 PD5 |----  (UART TX - Pin 3 Out)
-                        +-------------+
+  UPSTREAM POGO PIN                                                                    DOWNSTREAM POGO PIN
+    (Left / Input)                                                                       (Right / Output)
+ ┌──────────────────┐                                                                  ┌──────────────────┐
+ │                  │                                                                  │                  │
+ │  [Pin 1: V+] ────┼───┬───────────────────────────────────────────────────────────┬──┼────► [Pin 1: V+] │
+ │                  │   │                                                           │  │                  │
+ │  [Pin 2: GND] ───┼───┼──────┬─────────────────────────────────────────────┬──────┼──┼────► [Pin 2: GND] │
+ │                  │   │      │                                             │      │  │                  │
+ │                  │   │      │          ┌───────────────────────┐          │      │  │                  │
+ │                  │   ├──┐   └───┐      │     CH32V003 MCU      │      ┌───┘   ┌──┤  │                  │
+ │                  │   │  │       │      │                       │      │       │  │  │                  │
+ │                  │   │  └──► [Pin 1]   │ [Pin 1: VDD] [Pin 20] ◄──────┘       │  │  │                  │
+ │                  │   │       (VDD)     │              (GND)    │              │  │  │                  │
+ │                  │   │                 │                       │              │  │  │                  │
+ │  [Pin 3: RX] ────┼───┼────────────────►│ [Pin 13: PD6] [Pin 9] ├──────────────┼──┼──┼────► [Pin 3: TX] │
+ │                  │   │                 │  (USART1 RX)  (PD5)   │  (USART1 TX) │  │  │                  │
+ │                  │   │                 │                       │              │  │  │                  │
+ │                  │   │                 │       [Pin 3: PA2]    │              │  │  │                  │
+ │                  │   │                 └───────────┬───────────┘              │  │  │                  │
+ │                  │   │                             │                          │  │  │                  │
+ │                  │   │                             ▼ (LED Data)               │  │  │                  │
+ │                  │   │                 ┌───────────────────────┐              │  │  │                  │
+ │                  │   │                 │      WS2812B RGB      │              │  │  │                  │
+ │                  │   └────────────────►│ [VCC]     [DIN]  [GND]├──────────────┘  │  │                  │
+ │                  │                     └───────────────────────┘                 │  │                  │
+ │                  │                                                               │  │                  │
+ │  [Pin 4: PASS] ──┼───────────────────────────────────────────────────────────────┴──┼────► [Pin 4: PASS│
+ │                  │                  (Direct Pass-Through Return Rail)               │       THROUGH]   │
+ └──────────────────┘                                                                  └──────────────────┘
 ```
+
+### 7.1 Pin-by-Pin Wiring & Package Mappings
+
+| Signal Name | Upstream (Left) Pogo | CH32V003 (TSSOP-20) | CH32V003 (SOP-8) | Downstream (Right) Pogo | Function & Routing |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| **`V+ (3.3V)`** | Pin 1 | Pin 1 (`VDD`) | Pin 1 (`VDD`) | Pin 1 | Powers MCU & `WS2812B VCC` |
+| **`GND`** | Pin 2 | Pin 20 (`GND`) | Pin 8 (`GND`) | Pin 2 | Common ground & `WS2812B GND` |
+| **`UART RX In`**| Pin 3 | Pin 13 (`PD6` RX) | Pin 6 (`PD6` RX) | — | Incoming command packet |
+| **`UART TX Out`**| — | Pin 9 (`PD5` TX) | Pin 5 (`PD5` TX) | Pin 3 | Transmits modified packet downstream |
+| **`LED DATA`** | — | Pin 3 (`PA2`) | Pin 3 (`PA2`) | — | Drives **WS2812B `DIN`** line |
+| **`PASS_THRU`** | Pin 4 | — | — | Pin 4 | Continuous direct bypass return rail & broadcast bus |
 
 ---
 

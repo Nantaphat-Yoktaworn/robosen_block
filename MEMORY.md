@@ -444,8 +444,11 @@ The `assignments/` folder stores academic project coursework, literature reviews
 3. **Repository State:** The repository [`https://github.com/Nantaphat-Yoktaworn/robosen_block.git`](https://github.com/Nantaphat-Yoktaworn/robosen_block.git) is strictly **PRIVATE**.
 
 ### 13.2 Consolidated Hardware & Protocol Decisions
+- **System Block Diagram:** Stored at `docs/diagrams/robosen_system_block_diagram.png` (`Robosen Block Diagram (1).png`).
 - **Master Block (ESP32-S3):**
   - **Dual Interfaces:** (1) **Config Port (Dock)** to program 1 block via UART `0xCF`, (2) **Run Port (Chain)** to execute the multi-block sequence (`0xAA`/`0xBB`).
+  - **Run Port Pinout (Right):** Pin 1 = `V+ (3.3V)`, Pin 2 = `GND`, Pin 3 = `TX` (Downstream Seed `0xAA`), Pin 4 = `RX` (Return Program `0xAA` & Step Broadcast `0xBB`).
+  - **Config Port Pinout (Dock/Left):** Pin 1 = `V+ (3.3V)`, Pin 2 = `GND`, Pin 3 = `RX` (Reads `0x06` ACK), Pin 4 = `TX` (Writes `0xCF` Config).
   - **User Interface:** High-contrast 1.54"/2.13" E-Ink display, Dual EC11 Incremental Rotary Encoders with detent clicks (Knob 1 = Action, Knob 2 = Parameter with bidirectional stepping & firmware bounds clamping), large tactile Start button.
   - **Silent Classroom Feedback:** No buzzer; multi-state WS2812B RGB light choreography (cyan dock pulse, color morph, parameter flash count, emerald green save pulse, comet compilation wave, glowing green active step, rainbow victory sparkle).
   - **Smart NVS BLE Pairing:** Stores last manually paired robot MAC in NVS. Direct instant boot in $<500\,\text{ms}$ with zero classroom crosstalk. Long-press (3s) opens E-Ink Teacher Pairing Menu sorted by RSSI proximity.
@@ -453,5 +456,38 @@ The `assignments/` folder stores academic project coursework, literature reviews
   - **Zero Moving Parts:** No buttons or potentiometers on individual blocks.
   - **Ultra-Low BOM:** CH32V003 (SOP-8, ~$0.15) + WS2812B RGB LED + 4-pin magnetic pogo connector (~$0.25–$0.35 total BOM).
   - **Non-Volatile Storage:** Action Token ID and Parameter stored inside internal 192-byte flash/EEPROM emulation; retains configuration indefinitely without battery power.
+  - **100% Planar Non-Overlapping Wiring:**
+    - Pin 1 (`V+ 3.3V`) $\rightarrow$ Top Rail straight pass-through $\rightarrow$ drops to `VDD` & `WS2812 VCC`.
+    - Pin 2 (`GND`) $\rightarrow$ Second Rail straight pass-through $\rightarrow$ connects to `GND` & `WS2812 GND`.
+    - Pin 3 (`UART In/Out`) $\rightarrow$ Upstream Pin 3 enters `PD6 (RX)`; `PD5 (TX)` exits to Downstream Pin 3.
+    - `PA2 (GPIO Data)` $\rightarrow$ drops directly down into `WS2812 DIN`.
+    - Pin 4 (`PASS_THRU / RX_BUS`) $\rightarrow$ Bottom Rail straight pass-through with zero line intersections.
+  - **Pin 4 Multidrop Electrical Safety:** High-impedance (Hi-Z) input during Run Mode. End Block `TX` is the sole active driver on Pin 4 during return; Action Blocks ignore `0xAA` frames and process `0xBB` execution frames.
+
+```text
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                     RUN MODE BUS TOPOLOGY                                        │
+├──────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                  │
+│   Master Block                    Action Block                    Action Block        End Block  │
+│  ┌────────────┐                  ┌────────────┐                  ┌────────────┐      ┌────────┐  │
+│  │ V+      V+ ├──────────────────┤ V+      V+ ├──────────────────┤ V+      V+ ├──────┤ V+     │  │
+│  │ GND    GND ├──────────────────┤ GND    GND ├──────────────────┤ GND    GND ├──────┤ GND    │  │
+│  │ RX      TX ├──────────────────┤ RX      TX ├──────────────────┤ RX      TX ├──────┤ RX     │  │
+│  │ TX      RX ├──────────────────┤ PassThru/RX├──────────────────┤ PassThru/RX├──────┤ TX     │  │
+│  └────────────┘                  └────────────┘                  └────────────┘      └────────┘  │
+│                                                                                                  │
+│                                   CONFIG MODE BUS TOPOLOGY                                       │
+├──────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                  │
+│   Action Block                    Master Block                                                   │
+│  ┌────────────┐                  ┌────────────┐                                                  │
+│  │ V+      V+ ├──────────────────┤ V+      V+ │ (Dock Port)                                      │
+│  │ GND    GND ├──────────────────┤ GND    GND │                                                  │
+│  │ RX      TX ├──────────────────┤ RX      TX │                                                  │
+│  │ PassThru/RX├──────────────────┤ TX      RX │                                                  │
+│  └────────────┘                  └────────────┘                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
 

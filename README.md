@@ -50,6 +50,34 @@ This project creates a **tangible, screenless, modular physical block programmin
 
 ## ⚡ System Architecture & Signal Flow
 
+![Robosen Block System Diagram](docs/diagrams/robosen_system_block_diagram.png)
+
+```text
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                     RUN MODE BUS TOPOLOGY                                        │
+├──────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                  │
+│   Master Block                    Action Block                    Action Block        End Block  │
+│  ┌────────────┐                  ┌────────────┐                  ┌────────────┐      ┌────────┐  │
+│  │ V+      V+ ├──────────────────┤ V+      V+ ├──────────────────┤ V+      V+ ├──────┤ V+     │  │
+│  │ GND    GND ├──────────────────┤ GND    GND ├──────────────────┤ GND    GND ├──────┤ GND    │  │
+│  │ RX      TX ├──────────────────┤ RX      TX ├──────────────────┤ RX      TX ├──────┤ RX     │  │
+│  │ TX      RX ├──────────────────┤ PassThru/RX├──────────────────┤ PassThru/RX├──────┤ TX     │  │
+│  └────────────┘                  └────────────┘                  └────────────┘      └────────┘  │
+│                                                                                                  │
+│                                   CONFIG MODE BUS TOPOLOGY                                       │
+├──────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                  │
+│   Action Block                    Master Block                                                   │
+│  ┌────────────┐                  ┌────────────┐                                                  │
+│  │ V+      V+ ├──────────────────┤ V+      V+ │ (Dock Port)                                      │
+│  │ GND    GND ├──────────────────┤ GND    GND │                                                  │
+│  │ RX      TX ├──────────────────┤ RX      TX │                                                  │
+│  │ PassThru/RX├──────────────────┤ TX      RX │                                                  │
+│  └────────────┘                  └────────────┘                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
 The system operates across three interconnected layers:
 1. **Physical Modular Block Bus (4-Pin Magnetic Interface):** Master Block (ESP32-S3 with E-Ink & Config Dock) $\longleftrightarrow$ Solid Smart Blocks (WCH CH32V003 RISC-V) $\longleftrightarrow$ Smart End Block.
 2. **Simulation & Orchestration Layer (Node-RED v2.0):** Custom palette simulating hardware blocks, serial bus signals, protocol validation, and execution queues.
