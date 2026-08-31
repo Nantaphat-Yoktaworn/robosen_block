@@ -48,7 +48,11 @@ This project creates a **tangible, screenless, modular physical block programmin
 
 ## ⚡ System Architecture & Signal Flow
 
+### 1. Dual-Mode Hardware Bus & Port Architecture
 ![Robosen Block System Diagram](docs/diagrams/robosen_system_block_diagram.png)
+
+### 2. End-to-End Data Flow & Protocol Execution
+![Robosen Coding & Protocol Data Flow](docs/diagrams/robosen_coding_data_flow.svg)
 
 The system operates across three interconnected layers:
 1. **Physical Modular Block Bus (4-Pin Magnetic Interface):** Master Block (ESP32-S3 with E-Ink & Config Dock) $\longleftrightarrow$ Solid Smart Blocks (WCH CH32V003 RISC-V) $\longleftrightarrow$ Smart End Block.
@@ -92,8 +96,9 @@ sequenceDiagram
     Master->>Robot: Send BLE Action "ProAction/Left Punch" (Opcode 0x17)
     Robot->>Master: Robot streams progress -> reaches 100% ACK (0x64)
 
-    Note over Master,EndBlock: PROGRAM COMPLETE
-    Master-->>EndBlock: Broadcast [0xBB, 0xFF] (All Block LEDs sparkle rainbow victory!)
+    Note over Master,Robot: SEQUENCE EXECUTION COMPLETED
+    Master->>Master: E-Ink Display: 'MISSION COMPLETE 🎉'
+    Robot->>Robot: Stabilizes into Safe Stand Posture & Idles
 ```
 
 ---
