@@ -11,12 +11,10 @@
 1. [Executive Overview & Educational Mission](#-executive-overview--educational-mission)
 2. [System Architecture & Signal Flow](#-system-architecture--signal-flow)
 3. [2-Phase Bi-Directional Bus Protocol (CRC-8)](#-2-phase-bi-directional-bus-protocol-crc-8)
-4. [Node-RED Custom Palette (`node-red-contrib-robosen-block` v2.0)](#-node-red-custom-palette-node-red-contrib-robosen-block-v20)
-5. [Python Native BLE Subsystem & Daemon](#-python-native-ble-subsystem--daemon)
-6. [Hardware & Electrical Specifications](#-hardware--electrical-specifications)
-7. [Academic Research & Pedagogical Foundation](#-academic-research--pedagogical-foundation)
-8. [Project Documentation Sitemap](#-project-documentation-sitemap)
-9. [Developer Guide & Upstream RobosenJS SDK](#-developer-guide--upstream-robosenjs-sdk)
+4. [Python Native BLE Subsystem & Daemon](#-python-native-ble-subsystem--daemon)
+5. [Hardware & Electrical Specifications](#-hardware--electrical-specifications)
+6. [Project Documentation Sitemap](#-project-documentation-sitemap)
+7. [Developer Guide & Upstream RobosenJS SDK](#-developer-guide--upstream-robosenjs-sdk)
 
 ---
 
@@ -52,41 +50,15 @@ This project creates a **tangible, screenless, modular physical block programmin
 
 ![Robosen Block System Diagram](docs/diagrams/robosen_system_block_diagram.png)
 
-```text
-┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                     RUN MODE BUS TOPOLOGY                                        │
-├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                                  │
-│   Master Block                    Action Block                    Action Block        End Block  │
-│  ┌────────────┐                  ┌────────────┐                  ┌────────────┐      ┌────────┐  │
-│  │ V+      V+ ├──────────────────┤ V+      V+ ├──────────────────┤ V+      V+ ├──────┤ V+     │  │
-│  │ GND    GND ├──────────────────┤ GND    GND ├──────────────────┤ GND    GND ├──────┤ GND    │  │
-│  │ RX      TX ├──────────────────┤ RX      TX ├──────────────────┤ RX      TX ├──────┤ RX     │  │
-│  │ TX      RX ├──────────────────┤ PassThru/RX├──────────────────┤ PassThru/RX├──────┤ TX     │  │
-│  └────────────┘                  └────────────┘                  └────────────┘      └────────┘  │
-│                                                                                                  │
-│                                   CONFIG MODE BUS TOPOLOGY                                       │
-├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                                  │
-│   Action Block                    Master Block                                                   │
-│  ┌────────────┐                  ┌────────────┐                                                  │
-│  │ V+      V+ ├──────────────────┤ V+      V+ │ (Dock Port)                                      │
-│  │ GND    GND ├──────────────────┤ GND    GND │                                                  │
-│  │ RX      TX ├──────────────────┤ RX      TX │                                                  │
-│  │ PassThru/RX├──────────────────┤ TX      RX │                                                  │
-│  └────────────┘                  └────────────┘                                                  │
-└──────────────────────────────────────────────────────────────────────────────────────────────────┘
-```
-
 The system operates across three interconnected layers:
 1. **Physical Modular Block Bus (4-Pin Magnetic Interface):** Master Block (ESP32-S3 with E-Ink & Config Dock) $\longleftrightarrow$ Solid Smart Blocks (WCH CH32V003 RISC-V) $\longleftrightarrow$ Smart End Block.
-2. **Simulation & Orchestration Layer (Node-RED v2.0):** Custom palette simulating hardware blocks, serial bus signals, protocol validation, and execution queues.
+2. **Master Embedded & Control Gateway:** Master ESP32-S3 coordinates discovery frames (`0xAA`), CRC-8 validation, step broadcasts (`0xBB`), and non-blocking BLE command dispatch.
 3. **Hardware Gateway & Robot Layer (Python BLE Daemon & Robosen K1):** Persistent BLE connection to Robosen K1 with dynamic 100% action completion ACK resolution.
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Master as Master Block (ESP32-S3 / Node-RED)
+    participant Master as Master Block (ESP32-S3)
     participant Docked as Action Block (At Config Dock)
     participant B1 as Smart Block 1 (Walk 3 Steps)
     participant B2 as Smart Block 2 (Punch Left)
@@ -171,51 +143,6 @@ All serial transmissions use binary frames protected by **CRC-8** (Polynomial: $
 | `0x20` | `HEAD_MOVE` | Pan Angle (`42`–`202`)| `0xE8` (Servo index 16) | 🩵 Teal (`#00897B`) |
 | `0x30` | `WAIT_DELAY` | Seconds (`1`–`5`s) | Master sleep delay timer | 🟡 Yellow (`#FBC02D`) |
 | `0x40` | `REPEAT_LOOP`| Iterations (`2x`–`5x`)| Master sub-queue loop | 🟢 Lime (`#7CB342`) |
-
----
-
-## 🎛️ Node-RED Custom Palette (`node-red-contrib-robosen-block` v2.0)
-
-A comprehensive Node-RED node suite located at [`node-red-contrib-robosen-block/`](node-red-contrib-robosen-block/):
-
-```text
-node-red-contrib-robosen-block/
-├── lib/
-│   └── protocol.js                       # Protocol encoder, decoder, CRC-8, and token catalog
-├── nodes/
-│   ├── robosen-master.js / .html         # Smart Master Block controller (2-Phase Binary V2)
-│   ├── robosen-smart-block.js / .html    # Smart Action Block (CH32V003 flash model & LED feedback)
-│   ├── robosen-smart-end.js / .html      # Active Smart End Terminator with CRC validation
-│   ├── robosen-protocol-monitor.js / .html # Serial Protocol Analyzer & Packet Sniffer
-│   └── robosen-tester.js / .html         # Standalone Action Tester & Direct Controller
-├── examples/
-│   └── robosen_smart_block_flow.json     # Ready-to-import 2-Phase Smart Block simulation flow
-├── package.json                          # Palette metadata (v2.0.0)
-└── README.md                             # Palette user guide & API documentation
-```
-
-### Palette Nodes Overview:
-1. **`robosen-master` (Smart Master Block Controller - V2):**
-   - Clickable start button emits Phase 1 seed frame (`0xAA`) on Pin 3 TX (Output 1).
-   - Verifies CRC-8 on Pin 4 Return RX (Input 1), coordinates BLE execution queue, and broadcasts Phase 2 execution frames (`0xBB`) on Pin 4 (Output 3).
-   - Contains live properties dashboard card with robot status, battery level, firmware version, and manual controls.
-2. **`robosen-smart-block` (Smart Action Block):**
-   - Simulates the CH32V003 RISC-V smart block with flash parameter model.
-   - Illuminates **bright pulsating green** during active step execution.
-3. **`robosen-smart-end` (Smart Active Terminator):**
-   - Validates CRC-8 checksum, appends `0x55` framing footer, and loops signal back to Pin 4 Return RX rail.
-   - Includes fault injection toggle to simulate CRC corruption for error testing.
-4. **`robosen-protocol-monitor` (Bus Analyzer & Packet Inspector):**
-   - Sniffs serial frames on the bus in real time.
-   - Displays raw hex bytes, decoded tokens, parameter values, and CRC integrity status.
-5. **`robosen-tester` (Direct Controller & Tester):**
-   - Standalone testing node for one-click action triggering and live battery monitoring.
-
-### Import Simulation Flow in Node-RED:
-1. Open Node-RED (`http://127.0.0.1:1880`).
-2. Click **Menu** $\to$ **Import** $\to$ Select [`node-red-contrib-robosen-block/examples/robosen_smart_block_flow.json`](node-red-contrib-robosen-block/examples/robosen_smart_block_flow.json).
-3. Click **Deploy**.
-4. Click the button on the **Master Block** to watch the sequence compile and run!
 
 ---
 
@@ -335,28 +262,16 @@ Complete hardware specifications are detailed in [`PHYSICAL_BLOCK_SYSTEM_SPEC.md
 
 ---
 
-## 🎓 Academic Research & Pedagogical Foundation
-
-The project architecture is grounded in academic research documented in [`assignments/RESEARCH_SUMMARY.md`](assignments/RESEARCH_SUMMARY.md) and [`assignments/as01_เอกสารสรุปงานวิจัยที่เกี่ยวข้อง.pdf`](assignments/as01_เอกสารสรุปงานวิจัยที่เกี่ยวข้อง.pdf):
-
-1. **ELLA: Generative AI-Powered Social Robots for Early Language Development at Home** *(Antony et al., IDC 2026 / arXiv:2603.12508)*: Proves the power of physical robot embodiment over 2D screen media for early childhood engagement.
-2. **Evaluation of Fine Motor Skill Practice Using Tangible User Interfaces** *(Teekeng et al., RMUTSVRJ 2020)*: Empirical proof that physical manipulation (TUIs) improves motor coordination and attention over touchscreens.
-3. **Kinder Bot: Early Childhood Learning Media Robot** *(Phanpakdee et al., JSET 2025)*: Thai early childhood classroom benchmark; contrasts tablet/cloud setups against our 100% screenless, local BLE closed-loop paradigm.
-4. **Early Childhood Computational Thinking through Tangible Floor-Robot Programming** *(Foti & Bratitsis, EJEL 2026)*: Directly validates our core design: (1) physical magnetic blocks = *Explicit Sequencing Supports*, (2) live pulsing green LED feedback = *Structured Testing & Debugging Cycles*.
-
----
-
 ## 📚 Project Documentation Sitemap
 
 | Document | Description |
 | :--- | :--- |
 | [`PROJECT_SUMMARY.md`](PROJECT_SUMMARY.md) | Comprehensive executive project summary, mission, and comparison matrix |
 | [`PHYSICAL_BLOCK_SYSTEM_SPEC.md`](PHYSICAL_BLOCK_SYSTEM_SPEC.md) | Hardware, electrical, connector pinout, and 2-phase protocol specifications |
+| [`PROTOTYPE_01_SPEC.md`](PROTOTYPE_01_SPEC.md) | Prototype 01 hardware breadboard wiring, firmware, and test guides |
 | [`IMPROVEMENT_PLAN.md`](IMPROVEMENT_PLAN.md) | 5-Pillar Master Improvement Plan and future production roadmap |
 | [`MEMORY.md`](MEMORY.md) | Master technical knowledge base, verified hardware diagnostics, and opcode catalog |
 | [`ROBOSEN_K1_DOCUMENTATION.md`](ROBOSEN_K1_DOCUMENTATION.md) | Official Robosen K1 reference manual, kinematics, voice commands, and safety guide |
-| [`assignments/RESEARCH_SUMMARY.md`](assignments/RESEARCH_SUMMARY.md) | Academic literature review and presentation summary (AS01) |
-| [`node-red-contrib-robosen-block/README.md`](node-red-contrib-robosen-block/README.md) | Node-RED custom palette user guide, node reference, and REST API documentation |
 
 ---
 
@@ -403,7 +318,7 @@ npm run k1:prompt
 This project is licensed under the **[Apache License 2.0](LICENSE)**.
 
 - **Original Base Library:** Core reverse-engineered protocol parser derived from [RobosenJS](https://github.com/oklemenz/RobosenJS) by Oliver Klemenz (Apache-2.0 License).
-- **Physical Modular Tangible Coding Blocks:** Hardware specifications (CH32V003 single-wire bus, TP4056 power management) and 2-phase binary protocol with CRC-8 developed by [Nantaphat Yoktaworn](https://github.com/Nantaphat-Yoktaworn).
-- **Node-RED Palette:** [`node-red-contrib-robosen-block`](node-red-contrib-robosen-block/) simulator, physical master gateway, tester node, and live telemetry blocks developed by [Nantaphat Yoktaworn](https://github.com/Nantaphat-Yoktaworn).
+- **Physical Modular Tangible Coding Blocks:** Hardware specifications (CH32V003 bus, TP4056 power management) and 2-phase binary protocol with CRC-8 developed by [Nantaphat Yoktaworn](https://github.com/Nantaphat-Yoktaworn).
 - **Python Subsystem:** Native background BLE daemon, IPC bridge, and interactive joint safeguard controller developed by [Nantaphat Yoktaworn](https://github.com/Nantaphat-Yoktaworn).
 - **Trademarks:** Robosen is a registered trademark of Robosen Robotics. This open-source project is independently developed and not officially affiliated with or endorsed by Robosen.
+

@@ -464,30 +464,5 @@ The `assignments/` folder stores academic project coursework, literature reviews
     - Pin 4 (`PASS_THRU / RX_BUS`) $\rightarrow$ Bottom Rail straight pass-through with zero line intersections.
   - **Pin 4 Multidrop Electrical Safety:** High-impedance (Hi-Z) input during Run Mode. End Block `TX` is the sole active driver on Pin 4 during return; Action Blocks ignore `0xAA` frames and process `0xBB` execution frames.
 
-```text
-┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                     RUN MODE BUS TOPOLOGY                                        │
-├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                                  │
-│   Master Block                    Action Block                    Action Block        End Block  │
-│  ┌────────────┐                  ┌────────────┐                  ┌────────────┐      ┌────────┐  │
-│  │ V+      V+ ├──────────────────┤ V+      V+ ├──────────────────┤ V+      V+ ├──────┤ V+     │  │
-│  │ GND    GND ├──────────────────┤ GND    GND ├──────────────────┤ GND    GND ├──────┤ GND    │  │
-│  │ RX      TX ├──────────────────┤ RX      TX ├──────────────────┤ RX      TX ├──────┤ RX     │  │
-│  │ TX      RX ├──────────────────┤ PassThru/RX├──────────────────┤ PassThru/RX├──────┤ TX     │  │
-│  └────────────┘                  └────────────┘                  └────────────┘      └────────┘  │
-│                                                                                                  │
-│                                   CONFIG MODE BUS TOPOLOGY                                       │
-├──────────────────────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                                  │
-│   Action Block                    Master Block                                                   │
-│  ┌────────────┐                  ┌────────────┐                                                  │
-│  │ V+      V+ ├──────────────────┤ V+      V+ │ (Dock Port)                                      │
-│  │ GND    GND ├──────────────────┤ GND    GND │                                                  │
-│  │ RX      TX ├──────────────────┤ RX      TX │                                                  │
-│  │ PassThru/RX├──────────────────┤ TX      RX │                                                  │
-│  └────────────┘                  └────────────┘                                                  │
-└──────────────────────────────────────────────────────────────────────────────────────────────────┘
-```
 
 
