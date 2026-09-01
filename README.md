@@ -51,7 +51,10 @@ This project creates a **tangible, screenless, modular physical block programmin
 ### 1. Dual-Mode Hardware Bus & Port Architecture
 ![Robosen Block System Diagram](docs/diagrams/robosen_system_block_diagram.png)
 
-### 2. End-to-End Data Flow & Protocol Execution
+### 2. Config Mode: Flash Programming & Data Flow
+![Robosen Config Dock Data Flow](docs/diagrams/robosen_config_data_flow.svg)
+
+### 3. Run Mode: End-to-End Execution & Protocol Data Flow
 ![Robosen Coding & Protocol Data Flow](docs/diagrams/robosen_coding_data_flow.svg)
 
 The system operates across three interconnected layers:
