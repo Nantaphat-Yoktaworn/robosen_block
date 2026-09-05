@@ -66,7 +66,7 @@ const int TOTAL_ACTIONS = sizeof(ACTIONS) / sizeof(ACTIONS[0]);
 int currentActionIndex = 0; // Default: Walk Forward
 
 // ==============================================================================
-// 4. SYSTEM STATE & MEMORY
+// 4. SYSTEM STATE & PERSISTENT BLE CONNECTION HANDLES
 // ==============================================================================
 enum SystemState { 
   STATE_ACTION_MENU, 
@@ -89,20 +89,171 @@ DiscoveredDevice bleList[MAX_BLE_DEVICES];
 int bleDeviceCount = 0;
 int currentBleIndex = 0;
 
-// Debounce & Timing States
+// Persistent BLE Connection Instances & Flags
+BLEClient* pClient = nullptr;
+BLERemoteCharacteristic* pRemoteChar = nullptr;
+volatile bool isConnected = false;
+
+// Retry Timing: 1s fast scan + 2s pause between attempts
+const unsigned long RETRY_INTERVAL_MS = 2000;
+unsigned long lastConnectAttemptTime = 0;
+int connectAttemptCounter = 0;
+
+// Debounce, Activity & Timing States
 int lastK1Clk = HIGH;
 int lastK2Clk = HIGH;
 unsigned long startBtnPressTime = 0;
 bool startBtnHeld = false;
+unsigned long lastUserActivity = 0;
+unsigned long lastHeartbeatTime = 0;
 
 // Forward Declarations
 void renderActionMenu();
 void renderPairingMenu();
 void runBleScan();
+bool connectToRobot();
 bool sendRobosenPacket(const RobosenAction& action);
+void updateStatusLED();
+
+// BLE Client Callbacks for Connection Life-Cycle Management
+class RobosenClientCallback : public BLEClientCallbacks {
+  void onConnect(BLEClient* pclient) {
+    isConnected = true;
+    Serial.println("\n[BLE STATUS] 🟢 Physical connection established with robot!");
+  }
+
+  void onDisconnect(BLEClient* pclient) {
+    isConnected = false;
+    pRemoteChar = nullptr;
+    Serial.println("\n[BLE STATUS] 🔴 Robot disconnected / link lost! Resuming retry loop...");
+    if (currentState == STATE_ACTION_MENU) {
+      updateStatusLED();
+    }
+  }
+};
+
+void updateStatusLED() {
+  if (currentState == STATE_BLE_SCANNING) {
+    setStatusLED(0, 0, 40);  // 🔵 Vivid Blue: Active Scanning
+  } else if (currentState == STATE_BLE_PAIRING_MENU) {
+    setStatusLED(0, 0, 30);  // 🔵 Soft Blue: Pairing Menu Selection
+  } else if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
+    setStatusLED(30, 0, 0);  // 🔴 Red: Unpaired
+  } else if (!isConnected) {
+    setStatusLED(30, 15, 0); // 🟠 Amber/Orange: Paired, waiting / reconnecting
+  } else {
+    setStatusLED(0, 30, 0);  // 🟢 Emerald Green: Connected & Ready
+  }
+}
 
 // ==============================================================================
-// 5. HARDWARE SETUP
+// 5. DIRECT PERSISTENT BLE CONNECTION MANAGER (FAST 1s NON-BLOCKING SCAN CHECK)
+// ==============================================================================
+bool connectToRobot() {
+  if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
+    Serial.println("[BLE STATUS] ⚠️ No robot paired in NVS flash. Hold Start for 3s to pair.");
+    updateStatusLED();
+    return false;
+  }
+
+  // If already connected with valid characteristic handle, do nothing
+  if (isConnected && pClient != nullptr && pClient->isConnected() && pRemoteChar != nullptr) {
+    return true;
+  }
+
+  setStatusLED(40, 30, 0); // 🟡 Yellow: Scanning / Connecting
+
+  if (pClient != nullptr && pClient->isConnected()) {
+    pClient->disconnect();
+    delay(50);
+  }
+
+  // --------------------------------------------------------------------------
+  // STEP 1: Fast 1-Second BLE Scan to verify robot is powered on and advertising.
+  // (This eliminates the 60-second blocking timeout when the robot is OFF!)
+  // --------------------------------------------------------------------------
+  BLEScan* pScan = BLEDevice::getScan();
+  pScan->setActiveScan(true);
+  pScan->setInterval(50);
+  pScan->setWindow(40);
+
+  BLEScanResults* results = pScan->start(1, false); // Exactly 1.0 second scan
+  BLEAdvertisedDevice targetDevice;
+  bool found = false;
+
+  int count = results->getCount();
+  for (int i = 0; i < count; i++) {
+    BLEAdvertisedDevice d = results->getDevice(i);
+    String dAddr = d.getAddress().toString().c_str();
+    if (dAddr.equalsIgnoreCase(pairedMAC)) {
+      targetDevice = d;
+      found = true;
+      break;
+    }
+  }
+  pScan->clearResults();
+
+  if (!found) {
+    // Robot is OFF or not advertising — return immediately in 1s without hanging!
+    isConnected = false;
+    pRemoteChar = nullptr;
+    updateStatusLED();
+    return false;
+  }
+
+  // --------------------------------------------------------------------------
+  // STEP 2: Robot detected online! Establish immediate direct connection (<200ms)
+  // --------------------------------------------------------------------------
+  Serial.println("[BLE STATUS] 🎯 Robot advertising detected! Establishing link...");
+
+  if (pClient == nullptr) {
+    pClient = BLEDevice::createClient();
+    pClient->setClientCallbacks(new RobosenClientCallback());
+  }
+
+  bool ok = pClient->connect(&targetDevice);
+  if (!ok) {
+    BLEAddress addr(targetDevice.getAddress());
+    ok = pClient->connect(addr);
+  }
+
+  if (!ok) {
+    Serial.println("[BLE STATUS] ❌ Link handshake failed.");
+    isConnected = false;
+    pRemoteChar = nullptr;
+    updateStatusLED();
+    return false;
+  }
+
+  Serial.println("[BLE STATUS] 🔗 Link established! Discovering GATT Service (0xFFE0)...");
+  BLERemoteService* pRemoteService = pClient->getService(SERVICE_UUID);
+  if (pRemoteService == nullptr) {
+    Serial.println("[BLE STATUS] ⚠️ Service 0xFFE0 not found (Phone mock / simulation device).");
+    isConnected = true;
+    updateStatusLED();
+    return true;
+  }
+
+  pRemoteChar = pRemoteService->getCharacteristic(CHAR_UUID);
+  if (pRemoteChar == nullptr) {
+    Serial.println("[BLE STATUS] ❌ Characteristic 0xFFE1 not found.");
+    pClient->disconnect();
+    isConnected = false;
+    updateStatusLED();
+    return false;
+  }
+
+  isConnected = true;
+  Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
+  Serial.printf("║  [BLE STATUS: CONNECTED] Target: %-38s║\n", pairedName.c_str());
+  Serial.println("║  Persistent link ACTIVE! Ready for instant commands.                   ║");
+  Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+  updateStatusLED();
+  return true;
+}
+
+// ==============================================================================
+// 6. HARDWARE SETUP
 // ==============================================================================
 void setup() {
   Serial.begin(115200);
@@ -124,32 +275,151 @@ void setup() {
 
   // Load Saved Robot Binding from NVS Flash
   preferences.begin("robosen_cfg", false);
-  pairedMAC  = preferences.getString("paired_mac", "None (Unpaired)");
-  pairedName = preferences.getString("paired_name", "None");
+  pairedMAC = preferences.getString("paired_mac", "");
+  if (pairedMAC == "" || pairedMAC == "None (Unpaired)") {
+    pairedMAC = preferences.getString("last_paired_mac", "None (Unpaired)");
+  }
+  pairedName = preferences.getString("paired_name", "Robosen Robot");
 
   // Initialize BLE Stack
   BLEDevice::init("Robosen_Master_Block");
+  pClient = BLEDevice::createClient();
+  pClient->setClientCallbacks(new RobosenClientCallback());
 
-  // Set Status LED
-  if (pairedMAC == "None (Unpaired)") {
-    setStatusLED(30, 0, 0); // 🔴 Red: Unpaired
-  } else {
-    setStatusLED(0, 30, 0); // 🟢 Emerald Green: Ready
-  }
+  updateStatusLED();
 
   Serial.println("\n[SYSTEM] ESP32-S3 Dual-Knob Master Initialized.");
+
+  // Fast auto-connect check on boot (takes only 1s if robot is off!)
+  if (pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
+    connectAttemptCounter = 1;
+    Serial.printf("\n[BLE STATUS] 🔌 Saved Robot Target: %s (%s)\n", pairedName.c_str(), pairedMAC.c_str());
+    Serial.printf("[BLE STATUS] ⏳ [Attempt #%d] Auto-connecting on boot (1s check)...\n", connectAttemptCounter);
+    if (connectToRobot()) {
+      connectAttemptCounter = 0;
+    } else {
+      Serial.printf("[BLE STATUS] ❌ Attempt #%d: Robot is OFF or not advertising.\n", connectAttemptCounter);
+      Serial.println("[BLE STATUS] 🔄 Will retry every 2 seconds. Hold Start 3s to switch robot.\n");
+    }
+  } else {
+    Serial.println("[BLE STATUS] ⚠️ No paired robot configured in flash. Hold Start for 3s to pair.");
+  }
+
   renderActionMenu();
+  lastUserActivity = millis();
+  lastConnectAttemptTime = millis();
 }
 
 // ==============================================================================
-// 6. MAIN EVENT LOOP
+// 7. MAIN EVENT LOOP
 // ==============================================================================
 void loop() {
+  unsigned long now = millis();
+
   // --------------------------------------------------------------------------
-  // --- KNOB 1: ACTION SELECTOR (CLK: 8, DT: 9, SW: 10) ---
+  // --- 1. MASTER START BUTTON (CHECKED FIRST: INSTANT 3s HOLD DETECTION) ---
+  // --------------------------------------------------------------------------
+  int btnState = digitalRead(PIN_START_BTN);
+  if (btnState == LOW) {
+    lastUserActivity = now;
+    if (startBtnPressTime == 0) {
+      startBtnPressTime = millis();
+      startBtnHeld = false;
+      Serial.println("\n[BUTTON] Start button pressed... (Hold 3s to switch robot)");
+    } else if (!startBtnHeld) {
+      unsigned long heldDuration = millis() - startBtnPressTime;
+
+      // Print live hold countdown every 700ms so user has real-time feedback
+      static unsigned long lastHoldPrint = 0;
+      if (millis() - lastHoldPrint >= 700) {
+        lastHoldPrint = millis();
+        Serial.printf("[BUTTON] Holding: %lu / 3000 ms...\n", heldDuration);
+      }
+
+      if (heldDuration >= 3000) {
+        startBtnHeld = true;
+        Serial.println("\n[SYSTEM] 🎯 3-Second Hold Confirmed! Opening Teacher Pairing Menu...");
+        runBleScan();
+        startBtnPressTime = 0;
+        return; // Return immediately to avoid processing other logic
+      }
+    }
+    // While button is held, return early to prevent BLE retry from interrupting!
+    delay(10);
+    return;
+  } else {
+    // Button was released
+    if (startBtnPressTime > 0) {
+      lastUserActivity = now;
+      unsigned long duration = millis() - startBtnPressTime;
+      startBtnPressTime = 0;
+
+      if (duration < 3000 && !startBtnHeld) {
+        if (currentState == STATE_ACTION_MENU) {
+          sendRobosenPacket(ACTIONS[currentActionIndex]);
+        } else if (currentState == STATE_BLE_PAIRING_MENU) {
+          currentState = STATE_ACTION_MENU;
+          renderActionMenu();
+          if (pairedMAC != "None (Unpaired)" && !isConnected) {
+            connectToRobot();
+          } else {
+            updateStatusLED();
+          }
+        }
+      }
+      startBtnHeld = false;
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // --- 2. CONTINUOUS AUTO-RECONNECT & BACKGROUND HEARTBEAT ---
+  // --------------------------------------------------------------------------
+  if (currentState == STATE_ACTION_MENU) {
+    if (isConnected && pRemoteChar != nullptr && pClient != nullptr && pClient->isConnected()) {
+      connectAttemptCounter = 0;
+      // Send handshake ping (0x0B) every 5 seconds when idle to keep Robosen awake
+      if (now - lastHeartbeatTime >= 5000) {
+        lastHeartbeatTime = now;
+        uint8_t pingPacket[] = {0xFF, 0xFF, 0x02, 0x0B, 0x0D};
+        if (pRemoteChar->canWrite()) {
+          pRemoteChar->writeValue(pingPacket, sizeof(pingPacket));
+        }
+      }
+    } else {
+      // Disconnected: CONTINUOUSLY retry with 1s scan + 2s pause
+      if (pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
+        // Only retry if user is not actively tweaking knobs in the last 1.5s
+        if (now - lastUserActivity > 1500) {
+          if (now - lastConnectAttemptTime >= RETRY_INTERVAL_MS) {
+            connectAttemptCounter++;
+            Serial.printf("[BLE STATUS] ⏳ [Attempt #%d] Checking for %s (%s)... (1s scan)\n", 
+                          connectAttemptCounter, pairedName.c_str(), pairedMAC.c_str());
+
+            bool success = connectToRobot();
+
+            // Set timestamp AFTER scan finishes so there is ALWAYS a full 2000ms pause!
+            lastConnectAttemptTime = millis();
+
+            if (success) {
+              connectAttemptCounter = 0;
+              Serial.println("[BLE STATUS] ✅ Successfully connected to robot!");
+              renderActionMenu();
+            } else {
+              Serial.printf("[BLE STATUS] ❌ Attempt #%d: Robot not detected. Pausing 2s... (Hold Start 3s to switch)\n",
+                            connectAttemptCounter);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // --- 3. KNOB 1: ACTION SELECTOR (CLK: 8, DT: 9, SW: 10) ---
   // --------------------------------------------------------------------------
   int k1Clk = digitalRead(PIN_K1_CLK);
   if (k1Clk != lastK1Clk && k1Clk == LOW) {
+    lastUserActivity = now;
     bool cw = (digitalRead(PIN_K1_DT) != k1Clk);
     if (currentState == STATE_ACTION_MENU) {
       currentActionIndex = cw ? (currentActionIndex + 1) % TOTAL_ACTIONS 
@@ -168,31 +438,50 @@ void loop() {
   static bool lastK1Sw = HIGH;
   bool k1Sw = digitalRead(PIN_K1_SW);
   if (lastK1Sw == HIGH && k1Sw == LOW) {
+    lastUserActivity = now;
     if (currentState == STATE_ACTION_MENU) {
       Serial.printf("\n>>> [KNOB 1 CLICK] Selected Action: %s <<<\n", ACTIONS[currentActionIndex].name);
-      setStatusLED(0, 60, 30);
-      delay(80);
-      setStatusLED(0, 30, 0);
+      if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
+        Serial.println("[BLE STATUS] ⚡ Knob clicked while disconnected: Immediate connection attempt...");
+        if (connectToRobot()) {
+          connectAttemptCounter = 0;
+          renderActionMenu();
+        }
+        lastConnectAttemptTime = millis();
+      } else {
+        setStatusLED(0, 60, 30);
+        delay(80);
+        updateStatusLED();
+      }
     } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
-      // Save BLE Device
+      // Save BLE Device & Switch Target
       pairedMAC  = bleList[currentBleIndex].address;
       pairedName = bleList[currentBleIndex].name;
       preferences.putString("paired_mac", pairedMAC);
       preferences.putString("paired_name", pairedName);
-      setStatusLED(0, 50, 0);
+
+      Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
+      Serial.printf("║  [BLE STATUS] Selected Robot: %-41s║\n", pairedName.c_str());
+      Serial.printf("║  Target MAC:                  %-41s║\n", pairedMAC.c_str());
+      Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+
       currentState = STATE_ACTION_MENU;
-      delay(1000);
+      connectAttemptCounter = 0;
       renderActionMenu();
+      Serial.println("[BLE STATUS] ⏳ Connecting to newly selected robot...");
+      connectToRobot();
+      lastConnectAttemptTime = millis();
     }
     delay(200);
   }
   lastK1Sw = k1Sw;
 
   // --------------------------------------------------------------------------
-  // --- KNOB 2: PARAMETER ADJUSTER (CLK: 11, DT: 12, SW: 13) ---
+  // --- 4. KNOB 2: PARAMETER ADJUSTER (CLK: 11, DT: 12, SW: 13) ---
   // --------------------------------------------------------------------------
   int k2Clk = digitalRead(PIN_K2_CLK);
   if (k2Clk != lastK2Clk && k2Clk == LOW) {
+    lastUserActivity = now;
     // Inverted so Clockwise INCREASES the parameter
     bool cw = (digitalRead(PIN_K2_DT) == k2Clk);
     if (currentState == STATE_ACTION_MENU) {
@@ -218,6 +507,7 @@ void loop() {
   static bool lastK2Sw = HIGH;
   bool k2Sw = digitalRead(PIN_K2_SW);
   if (lastK2Sw == HIGH && k2Sw == LOW) {
+    lastUserActivity = now;
     if (currentState == STATE_ACTION_MENU) {
       RobosenAction& act = ACTIONS[currentActionIndex];
       act.paramVal = act.paramMin; // Reset to default minimum
@@ -225,72 +515,56 @@ void loop() {
                     act.name, act.paramVal, act.paramUnit);
       renderActionMenu();
     } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
-      // Save BLE Device into NVS Flash
+      // Save BLE Device into NVS Flash & Switch Target
       pairedMAC  = bleList[currentBleIndex].address;
       pairedName = bleList[currentBleIndex].name;
       preferences.putString("paired_mac", pairedMAC);
       preferences.putString("paired_name", pairedName);
 
       Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
-      Serial.printf("║  [NVS FLASH SAVED via Knob 2] Paired to: %-30s║\n", pairedName.c_str());
-      Serial.printf("║  MAC Address:                            %-30s║\n", pairedMAC.c_str());
+      Serial.printf("║  [BLE STATUS] Selected Robot: %-41s║\n", pairedName.c_str());
+      Serial.printf("║  Target MAC:                  %-41s║\n", pairedMAC.c_str());
       Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
 
       setStatusLED(0, 50, 0); // 🟢 Confirmed Green
       currentState = STATE_ACTION_MENU;
-      delay(1000);
+      connectAttemptCounter = 0;
+      delay(200);
       renderActionMenu();
+      Serial.println("[BLE STATUS] ⏳ Connecting to newly selected robot...");
+      connectToRobot();
+      lastConnectAttemptTime = millis();
     }
     delay(200);
   }
   lastK2Sw = k2Sw;
-
-  // --------------------------------------------------------------------------
-  // --- MASTER START BUTTON (TAP = RUN | 3s HOLD = PAIR) ---
-  // --------------------------------------------------------------------------
-  int btnState = digitalRead(PIN_START_BTN);
-  if (btnState == LOW) {
-    if (startBtnPressTime == 0) {
-      startBtnPressTime = millis();
-      startBtnHeld = false;
-    } else if (!startBtnHeld && (millis() - startBtnPressTime >= 3000)) {
-      startBtnHeld = true;
-      runBleScan();
-    }
-  } else {
-    if (startBtnPressTime > 0) {
-      unsigned long duration = millis() - startBtnPressTime;
-      if (duration < 3000 && !startBtnHeld) {
-        if (currentState == STATE_ACTION_MENU) {
-          sendRobosenPacket(ACTIONS[currentActionIndex]);
-        } else if (currentState == STATE_BLE_PAIRING_MENU) {
-          currentState = STATE_ACTION_MENU;
-          setStatusLED((pairedMAC == "None (Unpaired)") ? 30 : 0, 
-                       (pairedMAC == "None (Unpaired)") ? 0 : 30, 0);
-          renderActionMenu();
-        }
-      }
-      startBtnPressTime = 0;
-      startBtnHeld = false;
-    }
-  }
 }
 
 // ==============================================================================
-// 7. BUILD & TRANSMIT PARAMETERIZED ROBOSEN PACKET
+// 8. BUILD & TRANSMIT PARAMETERIZED ROBOSEN PACKET (PERSISTENT CONNECTION)
 // ==============================================================================
 bool sendRobosenPacket(const RobosenAction& action) {
-  if (pairedMAC == "None (Unpaired)") {
-    Serial.println("\n[ERROR] No robot paired! Hold Start for 3s to pair.");
+  if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
+    Serial.println("\n[BLE STATUS] ⚠️ No robot paired! Hold Start for 3s to pair.");
     setStatusLED(40, 0, 0);
     delay(500);
+    updateStatusLED();
     return false;
+  }
+
+  // Re-establish link if connection was lost
+  if (!isConnected || pClient == nullptr || !pClient->isConnected() || pRemoteChar == nullptr) {
+    Serial.println("\n[BLE STATUS] ⚡ Connection inactive. Quick scan to connect before dispatch...");
+    if (!connectToRobot()) {
+      Serial.println("[BLE STATUS] ❌ Failed to connect to robot. Make sure robot is powered ON.");
+      return false;
+    }
   }
 
   setStatusLED(40, 30, 0); // 🟡 Active Transmitting
 
   Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
-  Serial.printf("║  [TRANSMITTING] Connecting to: %-40s║\n", pairedName.c_str());
+  Serial.printf("║  [TRANSMITTING] Target:        %-40s║\n", pairedName.c_str());
   Serial.printf("║  Target MAC:                   %-40s║\n", pairedMAC.c_str());
   Serial.printf("║  Action:                       %-40s║\n", action.name);
   Serial.printf("║  Configured Parameter:         %d %-36s║\n", action.paramVal, action.paramUnit);
@@ -317,80 +591,130 @@ bool sendRobosenPacket(const RobosenAction& action) {
   // Construct Standard Stop Packet: [0xFF, 0xFF, 0x02, 0x0C, 0x0E]
   uint8_t stopPacket[] = {0xFF, 0xFF, 0x02, 0x0C, 0x0E};
 
-  BLEClient* pClient = BLEDevice::createClient();
-  BLEAddress pAddressRandom(pairedMAC.c_str(), BLE_ADDR_RANDOM);
-  BLEAddress pAddressPublic(pairedMAC.c_str(), BLE_ADDR_PUBLIC);
+  bool isTurn = (action.opcode == 0x08 || action.opcode == 0x02);
+  bool isWalk = (action.opcode == 0x01 || action.opcode == 0x05);
+  bool isPredefined = (action.opcode == 0x17);
 
-  bool connected = pClient->connect(pAddressRandom);
-  if (!connected) {
-    connected = pClient->connect(pAddressPublic);
-  }
-
-  if (!connected) {
-    Serial.println("[BLE] Connection failed. Make sure device is awake & connectable.");
-    setStatusLED(40, 0, 0);
-    delay(400);
-    setStatusLED(0, 30, 0);
-    delete pClient;
-    return false;
-  }
-
-  Serial.println("[BLE] Connected! Discovering services...");
-  BLERemoteService* pRemoteService = pClient->getService(SERVICE_UUID);
-  if (pRemoteService == nullptr) {
-    Serial.println("[BLE] Target connected! (Service 0xFFE0 not active on phone mock).");
-    
-    // Still print the simulated step-by-step stream for the user
-    for (int rep = 0; rep < action.paramVal; rep++) {
-      Serial.printf("  ► Step/Rep %d of %d: [HEX] ", rep + 1, action.paramVal);
-      for (int i = 0; i < totalPacketLen; i++) Serial.printf("%02X ", packet[i]);
-      Serial.println();
-      if (rep < action.paramVal - 1) delay(800);
-    }
-    if (action.opcode == 0x01 || action.opcode == 0x05 || action.opcode == 0x08 || action.opcode == 0x02) {
-      Serial.print("  ► Locomotion Stop: [HEX] FF FF 02 0C 0E (Gait Stand & Lock)\n");
-    }
-    Serial.println(">>> [SUCCESS] All motion commands simulated! <<<");
-
-    setStatusLED(0, 30, 0);
-    pClient->disconnect();
-    delete pClient;
-    return true;
-  }
-
-  BLERemoteCharacteristic* pRemoteChar = pRemoteService->getCharacteristic(CHAR_UUID);
   if (pRemoteChar != nullptr && pRemoteChar->canWrite()) {
-    // Send action repetitions
-    for (int rep = 0; rep < action.paramVal; rep++) {
-      Serial.printf("  ► Step/Rep %d of %d: [HEX] ", rep + 1, action.paramVal);
+    if (isTurn) {
+      // Turn Left (0x08) vs Turn Right (0x02): paramVal is Angle in Degrees (45°, 90°, 135°, 180°)
+      // Turn Left turns at ~1600ms per 90 degrees.
+      // Turn Right on K1 hardware has a slower angular rate, requiring ~3200ms per 90 degrees (2x duration).
+      unsigned long turnDurationMs = (action.opcode == 0x08) 
+                                      ? ((action.paramVal * 1600UL) / 90) 
+                                      : ((action.paramVal * 3200UL) / 90);
+
+      Serial.printf("  ► Turn Command: [HEX] ");
       for (int i = 0; i < totalPacketLen; i++) Serial.printf("%02X ", packet[i]);
-      Serial.println();
+      Serial.printf("(Direction: %s, Target: %d Deg°, Duration: %lu ms)\n", 
+                    (action.opcode == 0x08 ? "Left" : "Right"), action.paramVal, turnDurationMs);
 
+      // Start continuous turn
       pRemoteChar->writeValue(packet, totalPacketLen);
-      if (rep < action.paramVal - 1) delay(1500); // Wait for physical leg cycle
-    }
+      delay(turnDurationMs);
 
-    // If locomotion (walk/turn), send stop frame at end of steps
-    if (action.opcode == 0x01 || action.opcode == 0x05 || action.opcode == 0x08 || action.opcode == 0x02) {
-      delay(800);
+      // IMMEDIATELY Send Locomotion Stop (0x0C) to lock robot at desired angle!
       Serial.print("  ► Locomotion Stop: [HEX] FF FF 02 0C 0E (Gait Stand & Lock)\n");
       pRemoteChar->writeValue(stopPacket, sizeof(stopPacket));
+      Serial.printf(">>> [SUCCESS] Turned %s %d Deg° and locked position! <<<\n", 
+                    (action.opcode == 0x08 ? "Left" : "Right"), action.paramVal);
+
+    } else if (isWalk) {
+      // Walk Forward (0x01) or Walk Backward (0x05): paramVal is Steps (1 to 5)
+      // ~1400ms per walking stride
+      unsigned long walkDurationMs = action.paramVal * 1400UL;
+      Serial.printf("  ► Walk Command: [HEX] ");
+      for (int i = 0; i < totalPacketLen; i++) Serial.printf("%02X ", packet[i]);
+      Serial.printf("(Target: %d Steps, Duration: %lu ms)\n", action.paramVal, walkDurationMs);
+
+      // Start continuous walk
+      pRemoteChar->writeValue(packet, totalPacketLen);
+      delay(walkDurationMs);
+
+      // Send Locomotion Stop (0x0C) to end walking
+      Serial.print("  ► Locomotion Stop: [HEX] FF FF 02 0C 0E (Gait Stand & Lock)\n");
+      pRemoteChar->writeValue(stopPacket, sizeof(stopPacket));
+      Serial.printf(">>> [SUCCESS] Walked %d Steps and locked position! <<<\n", action.paramVal);
+
+    } else if (isPredefined) {
+      // Predefined Action (0x17): paramVal is Repetitions (1 to 3)
+      unsigned long animDurationMs = 4000;
+      if (strstr(action.payload, "Push Ups") != nullptr)       animDurationMs = 12000;
+      else if (strstr(action.payload, "Say Hello") != nullptr) animDurationMs = 8000;
+      else if (strstr(action.payload, "Left Punch") != nullptr) animDurationMs = 4000;
+
+      for (int rep = 0; rep < action.paramVal; rep++) {
+        Serial.printf("  ► Rep %d of %d: [HEX] ", rep + 1, action.paramVal);
+        for (int i = 0; i < totalPacketLen; i++) Serial.printf("%02X ", packet[i]);
+        Serial.printf("(Duration: %lu ms)\n", animDurationMs);
+
+        pRemoteChar->writeValue(packet, totalPacketLen);
+        delay(animDurationMs);
+      }
+      Serial.println(">>> [SUCCESS] All action repetitions completed! <<<");
+
+    } else {
+      pRemoteChar->writeValue(packet, totalPacketLen);
+      delay(1000);
     }
-    Serial.println(">>> [SUCCESS] All motion commands delivered to robot! <<<");
+  } else {
+    // Simulated output for phone mock / debug
+    if (isTurn) {
+      unsigned long turnDurationMs = (action.opcode == 0x08) 
+                                      ? ((action.paramVal * 1600UL) / 90) 
+                                      : ((action.paramVal * 3200UL) / 90);
+      Serial.printf("  ► Turn Command (Simulated): [HEX] ");
+      for (int i = 0; i < totalPacketLen; i++) Serial.printf("%02X ", packet[i]);
+      Serial.printf("(Direction: %s, Target: %d Deg°, Duration: %lu ms)\n", 
+                    (action.opcode == 0x08 ? "Left" : "Right"), action.paramVal, turnDurationMs);
+      delay(turnDurationMs);
+      Serial.print("  ► Locomotion Stop (Simulated): [HEX] FF FF 02 0C 0E (Gait Stand & Lock)\n");
+      Serial.printf(">>> [SUCCESS] Simulated %s %d Deg° Turn! <<<\n", 
+                    (action.opcode == 0x08 ? "Left" : "Right"), action.paramVal);
+    } else if (isWalk) {
+      unsigned long walkDurationMs = action.paramVal * 1400UL;
+      Serial.printf("  ► Walk Command (Simulated): [HEX] ");
+      for (int i = 0; i < totalPacketLen; i++) Serial.printf("%02X ", packet[i]);
+      Serial.printf("(Target: %d Steps, Duration: %lu ms)\n", action.paramVal, walkDurationMs);
+      delay(walkDurationMs);
+      Serial.print("  ► Locomotion Stop (Simulated): [HEX] FF FF 02 0C 0E (Gait Stand & Lock)\n");
+      Serial.printf(">>> [SUCCESS] Simulated %d Steps Walk! <<<\n", action.paramVal);
+    } else {
+      for (int rep = 0; rep < action.paramVal; rep++) {
+        Serial.printf("  ► Step/Rep %d of %d (Simulated): [HEX] ", rep + 1, action.paramVal);
+        for (int i = 0; i < totalPacketLen; i++) Serial.printf("%02X ", packet[i]);
+        Serial.println();
+        if (rep < action.paramVal - 1) delay(800);
+      }
+      Serial.println(">>> [SUCCESS] All motion commands simulated! <<<");
+    }
   }
 
-  setStatusLED(0, 40, 0);
-  pClient->disconnect();
-  delete pClient;
+  // Refresh timers so keepalive heartbeat doesn't collide
+  lastHeartbeatTime = millis();
+  lastUserActivity  = millis();
+
+  // KEEP CONNECTION ALIVE! NO DISCONNECT OR DELETE CLIENT!
+  updateStatusLED(); // 🟢 Emerald Green: Persistent Link Active
+  Serial.println("[BLE STATUS] 🟢 Link remains ACTIVE & ready for subsequent commands.\n");
   return true;
 }
 
 // ==============================================================================
-// 8. BLE SCANNING ROUTINE
+// 9. BLE SCANNING ROUTINE (TEACHER PAIRING / SWITCH ROBOT)
 // ==============================================================================
 void runBleScan() {
+  // If actively connected, disconnect so the robot resumes advertising
+  if (pClient != nullptr && pClient->isConnected()) {
+    Serial.println("\n[BLE STATUS] Disconnecting from current robot before scan...");
+    pClient->disconnect();
+    isConnected = false;
+    pRemoteChar = nullptr;
+    delay(200);
+  }
+
   currentState = STATE_BLE_SCANNING;
-  setStatusLED(0, 0, 40); // 🔵 Active Scanning
+  updateStatusLED(); // 🔵 Active Scanning
 
   Serial.println("\n╔════════════════════════════════════════════════════════════════╗");
   Serial.println("║            [TEACHER PAIRING MODE: SCANNING BLE...]             ║");
@@ -410,13 +734,13 @@ void runBleScan() {
     BLEAdvertisedDevice device = results->getDevice(i);
     String devName = device.getName().c_str();
     if (devName.length() == 0) devName = "Unknown Device";
-    bleList[bleDeviceCount].name    = devName;
-    bleList[bleDeviceCount].address = device.getAddress().toString().c_str();
-    bleList[bleDeviceCount].rssi    = device.getRSSI();
+    bleList[bleDeviceCount].name     = devName;
+    bleList[bleDeviceCount].address  = device.getAddress().toString().c_str();
+    bleList[bleDeviceCount].rssi     = device.getRSSI();
     bleDeviceCount++;
   }
 
-  // Sort by RSSI
+  // Sort by RSSI (strongest signal first)
   for (int i = 0; i < bleDeviceCount - 1; i++) {
     for (int j = 0; j < bleDeviceCount - i - 1; j++) {
       if (bleList[j].rssi < bleList[j + 1].rssi) {
@@ -430,17 +754,31 @@ void runBleScan() {
   pBLEScan->clearResults();
   currentBleIndex = 0;
   currentState = STATE_BLE_PAIRING_MENU;
-  setStatusLED(0, 0, 30);
+  updateStatusLED();
   renderPairingMenu();
 }
 
 // ==============================================================================
-// 9. DUAL-KNOB UI RENDERING
+// 10. DUAL-KNOB UI RENDERING
 // ==============================================================================
 void renderActionMenu() {
   Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
   Serial.println("║              ROBOSEN K1 PHYSICAL BLOCK MASTER (DUAL-KNOB)              ║");
-  Serial.printf("║ Paired Target: %-55s ║\n", (pairedName + " (" + pairedMAC + ")").c_str());
+  String targetStr = pairedName + " (" + pairedMAC + ")";
+  if (targetStr.length() > 34) targetStr = targetStr.substring(0, 31) + "...";
+
+  char statusStr[24];
+  if (isConnected) {
+    snprintf(statusStr, sizeof(statusStr), "CONNECTED 🟢");
+  } else if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
+    snprintf(statusStr, sizeof(statusStr), "UNPAIRED 🔴");
+  } else if (connectAttemptCounter > 0) {
+    snprintf(statusStr, sizeof(statusStr), "RETRY #%-3d ⏳", connectAttemptCounter);
+  } else {
+    snprintf(statusStr, sizeof(statusStr), "SEARCHING 🟠");
+  }
+
+  Serial.printf("║ Target: %-36s Status: %-17s ║\n", targetStr.c_str(), statusStr);
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
   Serial.println("║   [KNOB 1: ACTION SELECT]             [KNOB 2: PARAMETER ADJUST]       ║");
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
