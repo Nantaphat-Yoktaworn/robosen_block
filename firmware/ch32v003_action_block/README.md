@@ -22,10 +22,14 @@ Firmware for the **TENSTAR CH32V003F4P6** (32-bit RISC-V microcontroller @ 24MHz
 ## 2. Protocols Supported
 
 ### Protocol 1: Master Config Dock Protocol (`0xCF`)
-* Master writes: `[ 0xCF, 0x02, ACTION_ID, PARAM_VAL, CRC8, 0x55 ]`
-* Action Block saves configuration to non-volatile flash page (`0x08003FC0`).
-* Action Block replies: `[ 0xCF, 0x06, CRC8, 0x55 ]` (ACK).
-* Visual feedback: **Emerald Green Success Flash** (`ws2812_set(0, 255, 40)`).
+* **Read Stored Config (Query)**:
+  * Master sends: `[ 0xCF, 0x01, 0x07, 0x55 ]`
+  * Block replies: `[ 0xCF, 0x81, ACTION_ID, PARAM_VAL, CRC8, 0x55 ]`
+* **Write New Config**:
+  * Master sends: `[ 0xCF, 0x02, ACTION_ID, PARAM_VAL, CRC8, 0x55 ]`
+  * Action Block saves configuration to non-volatile flash page (`0x08003FC0`).
+  * Action Block replies: `[ 0xCF, 0x06, CRC8, 0x55 ]` (ACK).
+  * Visual feedback: **Emerald Green Success Flash** (`ws2812_set(0, 255, 40)`).
 
 ### Protocol 2: Run Chain Phase 1 Discovery (`0xAA`)
 * Master seeds: `[ 0xAA, Len=0, Count=0, CRC8, 0x55 ]`

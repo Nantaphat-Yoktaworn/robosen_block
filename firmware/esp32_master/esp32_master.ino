@@ -22,6 +22,10 @@ const int PIN_K2_SW     = 13;  // 🔘 Gray Wire
 // --- MASTER START BUTTON ---
 const int PIN_START_BTN = 14;  // 🟠 Orange Wire (Diagonal GND Return)
 
+// --- CONFIG DOCK (UART) ---
+const int PIN_CFG_TX    = 17;  // 🔘 Gray Wire (Master TX -> Action Block RX / PD6)
+const int PIN_CFG_RX    = 18;  // 🟣 Purple Wire (Master RX <- Action Block TX / PD5)
+
 // --- ONBOARD WS2812 RGB STATUS LED ---
 #ifndef RGB_BUILTIN
   #define RGB_BUILTIN 48       // ESP32-S3 DevKitC-1 onboard RGB
@@ -51,19 +55,88 @@ struct RobosenAction {
   int paramMin;
   int paramMax;
   int paramStep;
+  uint8_t tokenID; // Stored Action Block Token for CH32V003
 };
 
 RobosenAction ACTIONS[] = {
-  {"01: Walk Forward",   0x01, "",                      "Steps", 1,   1,   5,   1},
-  {"02: Walk Backward",  0x05, "",                      "Steps", 1,   1,   5,   1},
-  {"03: Turn Left",      0x08, "",                      "Deg°",  90,  45,  180, 45},
-  {"04: Turn Right",     0x02, "",                      "Deg°",  90,  45,  180, 45},
-  {"05: Punch Left",     0x17, "ProAction/Left Punch",  "Reps",  1,   1,   3,   1},
-  {"06: Push-ups",       0x17, "ProAction/Push Ups",    "Reps",  1,   1,   3,   1},
-  {"07: Wave Hand",      0x17, "ProAction/Say Hello",   "Reps",  1,   1,   3,   1}
+  {"01: Walk Forward",   0x01, "",                      "Steps", 1,   1,   5,   1,  0x01},
+  {"02: Walk Backward",  0x05, "",                      "Steps", 1,   1,   5,   1,  0x02},
+  {"03: Turn Left",      0x08, "",                      "Deg°",  90,  45,  180, 45, 0x03},
+  {"04: Turn Right",     0x02, "",                      "Deg°",  90,  45,  180, 45, 0x04},
+  {"05: Punch Left",     0x17, "ProAction/Left Punch",  "Reps",  1,   1,   3,   1,  0x10},
+  {"06: Push-ups",       0x17, "ProAction/Push Ups",    "Reps",  1,   1,   3,   1,  0x14},
+  {"07: Wave Hand",      0x17, "ProAction/Say Hello",   "Reps",  1,   1,   3,   1,  0x18}
 };
 const int TOTAL_ACTIONS = sizeof(ACTIONS) / sizeof(ACTIONS[0]);
 int currentActionIndex = 0; // Default: Walk Forward
+
+// ==============================================================================
+// 3.1 CONFIG DOCK PROTOCOL & DOCKED BLOCK STATE (0xCF)
+// ==============================================================================
+bool isBlockDocked = false;
+uint8_t dockedActionId = 0;
+uint8_t dockedParamVal = 0;
+unsigned long lastConfigPollTime = 0;
+unsigned long lastDockResponseTime = 0;
+const unsigned long CONFIG_POLL_INTERVAL_MS = 350;
+
+uint8_t calcCrc8(const uint8_t *data, size_t len) {
+  uint8_t crc = 0x00;
+  for (size_t i = 0; i < len; i++) {
+    crc ^= data[i];
+    for (int j = 0; j < 8; j++) {
+      if (crc & 0x80) {
+        crc = ((crc << 1) ^ 0x07) & 0xFF;
+      } else {
+        crc = (crc << 1) & 0xFF;
+      }
+    }
+  }
+  return crc;
+}
+
+const char* getActionNameByToken(uint8_t token) {
+  switch (token) {
+    case 0x01: return "Walk Forward";
+    case 0x02: return "Walk Backward";
+    case 0x03: return "Turn Left";
+    case 0x04: return "Turn Right";
+    case 0x07: return "Side-step Left";
+    case 0x08: return "Side-step Right";
+    case 0x10: return "Left Punch";
+    case 0x11: return "Right Punch";
+    case 0x12: return "Kung Fu";
+    case 0x13: return "Dance";
+    case 0x14: return "Push-ups";
+    case 0x15: return "Handstand";
+    case 0x16: return "Single Kick";
+    case 0x17: return "Squats";
+    case 0x18: return "Wave Hand";
+    case 0x19: return "Celebrate";
+    default:   return "Unknown Action";
+  }
+}
+
+const char* getParamUnitByToken(uint8_t token) {
+  switch (token) {
+    case 0x01:
+    case 0x02:
+    case 0x07:
+    case 0x08: return "Steps";
+    case 0x03:
+    case 0x04: return "Deg°";
+    default:   return "Reps";
+  }
+}
+
+void writeConfigToDockedBlock(uint8_t actionToken, uint8_t param) {
+  uint8_t payload[3] = { 0x02, actionToken, param };
+  uint8_t crc = calcCrc8(payload, 3);
+  uint8_t packet[6] = { 0xCF, 0x02, actionToken, param, crc, 0x55 };
+  Serial1.write(packet, 6);
+  Serial.printf("\n[CONFIG DOCK] ⚡ Flashing Action 0x%02X (%s, %d %s) to docked block...\n", 
+                actionToken, getActionNameByToken(actionToken), param, getParamUnitByToken(actionToken));
+}
 
 // ==============================================================================
 // 4. SYSTEM STATE & PERSISTENT BLE CONNECTION HANDLES
@@ -114,6 +187,7 @@ void runBleScan();
 bool connectToRobot();
 bool sendRobosenPacket(const RobosenAction& action);
 void updateStatusLED();
+void pollConfigDock();
 
 // BLE Client Callbacks for Connection Life-Cycle Management
 class RobosenClientCallback : public BLEClientCallbacks {
@@ -253,11 +327,113 @@ bool connectToRobot() {
 }
 
 // ==============================================================================
+// 5.1 CONFIG DOCK UART MONITOR & POLLING ENGINE
+// ==============================================================================
+void pollConfigDock() {
+  unsigned long now = millis();
+
+  // 1. Process incoming UART response bytes from Config Dock
+  while (Serial1.available() > 0) {
+    uint8_t b = Serial1.peek();
+    if (b != 0xCF) {
+      Serial1.read(); // Discard noise / unaligned byte
+      Serial.printf("[DOCK RAW: 0x%02X] ", b);
+      continue;
+    }
+
+    if (Serial1.available() < 2) break; // Wait for header + cmd
+
+    uint8_t peekBuf[2];
+    Serial1.readBytes(peekBuf, 2); // Read [0xCF, cmd]
+    uint8_t cmd = peekBuf[1];
+
+    if (cmd == 0x81) {
+      // Query Response: [0xCF, 0x81, ActionID, ParamVal, CRC8, 0x55]
+      // Wait up to 60ms for remaining 4 bytes: [act, par, rxCrc, footer]
+      unsigned long t0 = millis();
+      while (Serial1.available() < 4 && (millis() - t0 < 60)) {
+        delay(1);
+      }
+      if (Serial1.available() >= 4) {
+        uint8_t act = Serial1.read();
+        uint8_t par = Serial1.read();
+        uint8_t rxCrc = Serial1.read();
+        uint8_t footer = Serial1.read();
+
+        uint8_t checkPayload[3] = { 0x81, act, par };
+        uint8_t calcCrc = calcCrc8(checkPayload, 3);
+        if (calcCrc == rxCrc && footer == 0x55) {
+          bool stateChanged = (!isBlockDocked || dockedActionId != act || dockedParamVal != par);
+          isBlockDocked = true;
+          dockedActionId = act;
+          dockedParamVal = par;
+          lastDockResponseTime = now;
+
+          if (stateChanged && currentState == STATE_ACTION_MENU && (now - lastUserActivity > 250)) {
+            Serial.printf("\n[CONFIG DOCK] 🟢 Action Block detected: Token 0x%02X (%s, %d %s)\n",
+                          dockedActionId, getActionNameByToken(dockedActionId),
+                          dockedParamVal, getParamUnitByToken(dockedActionId));
+            renderActionMenu();
+          }
+        } else {
+          Serial.printf("\n[DOCK CRC ERROR] Act=0x%02X Par=%d CRC=0x%02X (calc=0x%02X) Footer=0x%02X\n",
+                        act, par, rxCrc, calcCrc, footer);
+        }
+      }
+    } else if (cmd == 0x06) {
+      // ACK Response: [0xCF, 0x06, CRC8, 0x55]
+      // Wait up to 60ms for remaining 2 bytes: [rxCrc, footer]
+      unsigned long t0 = millis();
+      while (Serial1.available() < 2 && (millis() - t0 < 60)) {
+        delay(1);
+      }
+      if (Serial1.available() >= 2) {
+        uint8_t rxCrc = Serial1.read();
+        uint8_t footer = Serial1.read();
+        uint8_t ackPayload[1] = { 0x06 };
+        if (calcCrc8(ackPayload, 1) == rxCrc && footer == 0x55) {
+          Serial.println("\n[CONFIG DOCK] 💾 Flash Write Confirmed! (ACK 0x06 received from Block)");
+          // Query again immediately to refresh docked block display
+          uint8_t queryPkt[4] = { 0xCF, 0x01, 0x07, 0x55 };
+          Serial1.write(queryPkt, 4);
+          Serial1.flush();
+        }
+      }
+    }
+  }
+
+  // 2. Timeout check: if no query response received for 1200ms, mark block as undocked
+  if (isBlockDocked && (now - lastDockResponseTime > 1200)) {
+    isBlockDocked = false;
+    dockedActionId = 0;
+    dockedParamVal = 0;
+    Serial.println("\n[CONFIG DOCK] ⚪ Action Block undocked / disconnected.");
+    if (currentState == STATE_ACTION_MENU && (now - lastUserActivity > 250)) {
+      renderActionMenu();
+    }
+  }
+
+  // 3. Periodic query ping (only in ACTION_MENU state)
+  if (currentState == STATE_ACTION_MENU) {
+    if (now - lastConfigPollTime >= CONFIG_POLL_INTERVAL_MS) {
+      lastConfigPollTime = now;
+      uint8_t queryPkt[4] = { 0xCF, 0x01, 0x07, 0x55 };
+      Serial1.write(queryPkt, 4);
+      Serial1.flush();
+    }
+  }
+}
+
+// ==============================================================================
 // 6. HARDWARE SETUP
 // ==============================================================================
 void setup() {
   Serial.begin(115200);
   delay(1500);
+
+  // Initialize Config Dock UART (Serial1 on Pins 18 RX, 17 TX @ 115200)
+  pinMode(PIN_CFG_RX, INPUT_PULLUP);
+  Serial1.begin(115200, SERIAL_8N1, PIN_CFG_RX, PIN_CFG_TX);
 
   // Configure Internal Pull-Up Resistors for all inputs
   pinMode(PIN_K1_CLK, INPUT_PULLUP);
@@ -315,6 +491,24 @@ void setup() {
 // ==============================================================================
 void loop() {
   unsigned long now = millis();
+
+  // --------------------------------------------------------------------------
+  // --- 0. CONFIG DOCK MONITORING & ACTION QUERY ENGINE ---
+  // --------------------------------------------------------------------------
+  pollConfigDock();
+
+  // Serial Monitor Interactive Test ('t' = Ping Config Dock)
+  if (Serial.available() > 0) {
+    char c = Serial.read();
+    if (c == 't' || c == 'T') {
+      Serial.println("\n[DOCK TEST] 📡 Manual Ping [0xCF, 0x01, 0x07, 0x55] sent to GPIO 17...");
+      uint8_t qPkt[4] = { 0xCF, 0x01, 0x07, 0x55 };
+      Serial1.write(qPkt, 4);
+      Serial1.flush();
+      delay(30);
+      Serial.printf("[DOCK TEST] Serial1 buffer has %d bytes waiting on GPIO 18\n", Serial1.available());
+    }
+  }
 
   // --------------------------------------------------------------------------
   // --- 1. MASTER START BUTTON (CHECKED FIRST: INSTANT 3s HOLD DETECTION) ---
@@ -440,18 +634,29 @@ void loop() {
   if (lastK1Sw == HIGH && k1Sw == LOW) {
     lastUserActivity = now;
     if (currentState == STATE_ACTION_MENU) {
-      Serial.printf("\n>>> [KNOB 1 CLICK] Selected Action: %s <<<\n", ACTIONS[currentActionIndex].name);
-      if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
-        Serial.println("[BLE STATUS] ⚡ Knob clicked while disconnected: Immediate connection attempt...");
-        if (connectToRobot()) {
-          connectAttemptCounter = 0;
-          renderActionMenu();
-        }
-        lastConnectAttemptTime = millis();
-      } else {
-        setStatusLED(0, 60, 30);
-        delay(80);
+      if (isBlockDocked) {
+        // Write the currently selected action & parameter to the docked Action Block!
+        RobosenAction& act = ACTIONS[currentActionIndex];
+        Serial.printf("\n>>> [CONFIG DOCK] Flashing '%s' (%d %s) into docked Action Block... <<<\n",
+                      act.name, act.paramVal, act.paramUnit);
+        writeConfigToDockedBlock(act.tokenID, (uint8_t)act.paramVal);
+        setStatusLED(0, 80, 40); // Emerald Green Flash
+        delay(100);
         updateStatusLED();
+      } else {
+        Serial.printf("\n>>> [KNOB 1 CLICK] Selected Action: %s <<<\n", ACTIONS[currentActionIndex].name);
+        if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
+          Serial.println("[BLE STATUS] ⚡ Knob clicked while disconnected: Immediate connection attempt...");
+          if (connectToRobot()) {
+            connectAttemptCounter = 0;
+            renderActionMenu();
+          }
+          lastConnectAttemptTime = millis();
+        } else {
+          setStatusLED(0, 60, 30);
+          delay(80);
+          updateStatusLED();
+        }
       }
     } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
       // Save BLE Device & Switch Target
@@ -780,6 +985,18 @@ void renderActionMenu() {
 
   Serial.printf("║ Target: %-36s Status: %-17s ║\n", targetStr.c_str(), statusStr);
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
+  if (isBlockDocked) {
+    char dockInfo[80];
+    snprintf(dockInfo, sizeof(dockInfo), "DOCKED 🟢 [0x%02X] %s (%d %s)", 
+             dockedActionId, getActionNameByToken(dockedActionId),
+             dockedParamVal, getParamUnitByToken(dockedActionId));
+    char dockLine[120];
+    snprintf(dockLine, sizeof(dockLine), "║ Config Dock: %-54s ║", dockInfo);
+    Serial.println(dockLine);
+  } else {
+    Serial.println("║ Config Dock: EMPTY ⚪ (No Action Block Connected)                      ║");
+  }
+  Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
   Serial.println("║   [KNOB 1: ACTION SELECT]             [KNOB 2: PARAMETER ADJUST]       ║");
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
   
@@ -795,8 +1012,12 @@ void renderActionMenu() {
     Serial.println(line);
   }
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
-  Serial.println("║ • Knob 1: Select Action        • Knob 2: Adjust Parameter Value        ║");
-  Serial.println("║ • Start Click: Execute Motion  • Hold Start: BLE Teacher Pairing (3s)  ║");
+  if (isBlockDocked) {
+    Serial.println("║ • Knob 1: Select | Click: Burn Config • Knob 2: Adjust Parameter Value ║");
+  } else {
+    Serial.println("║ • Knob 1: Select Action (Click: Retry)• Knob 2: Adjust Parameter Value ║");
+  }
+  Serial.println("║ • Start Click: Execute Motion         • Hold Start: BLE Pairing (3s)   ║");
   Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
 }
 

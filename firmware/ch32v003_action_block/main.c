@@ -202,7 +202,10 @@ void set_action_idle_color() {
 // 4. UART DRIVER (PD5 = TX, PD6 = RX @ 115200 Baud)
 // ==============================================================================
 void uart_init() {
-    RCC->APB2PCENR |= RCC_APB2Periph_GPIOD | RCC_APB2Periph_USART1;
+    RCC->APB2PCENR |= RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOD | RCC_APB2Periph_USART1;
+
+    // Explicitly ensure USART1 remap is set to default 0b00 (PD5=TX, PD6=RX)
+    AFIO->PCFR1 &= ~(AFIO_PCFR1_USART1_REMAP | AFIO_PCFR1_USART1_REMAP_1);
 
     // PD5: USART1_TX (Alternate Function Push-Pull, 10MHz)
     funPinMode(PD5, GPIO_CFGLR_OUT_10Mhz_AF_PP);
@@ -211,8 +214,8 @@ void uart_init() {
     funPinMode(PD6, GPIO_CFGLR_IN_PUPD);
     funDigitalWrite(PD6, FUN_HIGH);
 
-    // 115200 Baud @ 24MHz Clock: BRR = 24000000 / 115200 = 208 (0xD0)
-    USART1->BRR = 208;
+    // 115200 Baud BRR calculation from system core clock
+    USART1->BRR = ((FUNCONF_SYSTEM_CORE_CLOCK) + (115200 / 2)) / 115200;
     USART1->CTLR1 = USART_CTLR1_TE | USART_CTLR1_RE | USART_CTLR1_UE;
 }
 
@@ -231,11 +234,9 @@ static inline uint8_t uart_rx_byte() {
 }
 
 bool uart_rx_timeout(uint8_t *b, uint32_t timeout_us) {
-    uint32_t start = SysTick->CNT;
-    // 24 cycles per microsecond
-    uint32_t ticks = timeout_us * 24;
+    volatile uint32_t count = timeout_us * 8;
     while (!uart_rx_available()) {
-        if ((uint32_t)(SysTick->CNT - start) > ticks) return false;
+        if (--count == 0) return false;
     }
     *b = (uint8_t)(USART1->DATAR & 0xFF);
     return true;
@@ -258,9 +259,11 @@ int main() {
     funPinMode(PD0, GPIO_CFGLR_IN_PUPD);
     funDigitalWrite(PD0, FUN_HIGH);
 
-    // Setup PD4 for Activity Indicator (Output PP)
+    // Setup PD4 & PC0 for Activity Indicator (Output PP)
     funPinMode(PD4, GPIO_CFGLR_OUT_10Mhz_PP);
+    funPinMode(PC0, GPIO_CFGLR_OUT_10Mhz_PP);
     funDigitalWrite(PD4, FUN_LOW);
+    funDigitalWrite(PC0, FUN_LOW);
 
     // Load saved configuration from flash
     load_config();
@@ -273,29 +276,90 @@ int main() {
     Delay_Ms(300);
     set_action_idle_color();
 
+    // Transmit boot announcement on Config Dock (PD5 = TX)
+    uint8_t boot_payload[3] = { 0x81, g_action_id, g_param_val };
+    uint8_t boot_crc = crc8(boot_payload, 3);
+    uart_tx(0xCF);
+    uart_tx(0x81);
+    uart_tx(g_action_id);
+    uart_tx(g_param_val);
+    uart_tx(boot_crc);
+    uart_tx(0x55);
+
     uint8_t rx_buf[64];
+    uint32_t last_heartbeat = SysTick->CNT;
+    uint8_t hb_phase = 0;
 
     while (1) {
+        // Non-blocking 500ms Heartbeat:
+        // 1. Toggles onboard LED (PD4 / PC0) so user can see CH32V003 is actively running
+        // 2. Broadcasts announcement frame [0xCF, 0x81, ActionID, ParamVal, CRC, 0x55] every 1000ms
+        uint32_t now = SysTick->CNT;
+        if (TimeElapsed32u(now, last_heartbeat) >= Ticks_from_Ms(500)) {
+            last_heartbeat = now;
+            hb_phase++;
+            funDigitalWrite(PD4, (hb_phase & 1) ? FUN_HIGH : FUN_LOW);
+            funDigitalWrite(PC0, (hb_phase & 1) ? FUN_HIGH : FUN_LOW);
+
+            // Announce on Config Dock TX every 1000ms (every 2 toggles)
+            if (hb_phase & 1) {
+                uint8_t hb_payload[3] = { 0x81, g_action_id, g_param_val };
+                uint8_t hb_crc = crc8(hb_payload, 3);
+                uart_tx(0xCF);
+                uart_tx(0x81);
+                uart_tx(g_action_id);
+                uart_tx(g_param_val);
+                uart_tx(hb_crc);
+                uart_tx(0x55);
+            }
+        }
+
         if (!uart_rx_available()) continue;
 
         uint8_t header = uart_rx_byte();
 
         // ----------------------------------------------------------------------
         // PROTOCOL 1: CONFIG DOCK (0xCF)
-        // [ 0xCF, 0x02, ACTION_ID, PARAM_VAL, CRC8, 0x55 ]
+        // Read:  Master -> Block: [ 0xCF, 0x01, CRC8, 0x55 ]
+        //        Block  -> Master: [ 0xCF, 0x81, ACTION_ID, PARAM_VAL, CRC8, 0x55 ]
+        // Write: Master -> Block: [ 0xCF, 0x02, ACTION_ID, PARAM_VAL, CRC8, 0x55 ]
+        //        Block  -> Master: [ 0xCF, 0x06, CRC8, 0x55 ] (ACK)
         // ----------------------------------------------------------------------
         if (header == 0xCF) {
             funDigitalWrite(PD4, FUN_HIGH);
-            uint8_t len = 0;
-            if (!uart_rx_timeout(&len, 10000)) continue;
-            if (len == 0x02) {
+            uint8_t cmd = 0;
+            if (!uart_rx_timeout(&cmd, 10000)) {
+                funDigitalWrite(PD4, FUN_LOW);
+                continue;
+            }
+
+            // Subcommand 0x01 (or 0x00): Query / Read Current Stored Action Config
+            if (cmd == 0x01 || cmd == 0x00) {
+                uint8_t rx_crc = 0, footer = 0;
+                if (uart_rx_timeout(&rx_crc, 10000) && uart_rx_timeout(&footer, 10000)) {
+                    uint8_t q_payload[1] = { cmd };
+                    uint8_t exp_crc = crc8(q_payload, 1);
+                    if (exp_crc == rx_crc && footer == 0x55) {
+                        uint8_t resp_payload[3] = { 0x81, g_action_id, g_param_val };
+                        uint8_t resp_crc = crc8(resp_payload, 3);
+                        uart_tx(0xCF);
+                        uart_tx(0x81);
+                        uart_tx(g_action_id);
+                        uart_tx(g_param_val);
+                        uart_tx(resp_crc);
+                        uart_tx(0x55);
+                    }
+                }
+            }
+            // Subcommand 0x02: Write New Configuration to Non-Volatile Flash
+            else if (cmd == 0x02) {
                 uint8_t act = 0, par = 0, rx_crc = 0, footer = 0;
                 if (uart_rx_timeout(&act, 10000) &&
                     uart_rx_timeout(&par, 10000) &&
                     uart_rx_timeout(&rx_crc, 10000) &&
                     uart_rx_timeout(&footer, 10000)) {
                     
-                    uint8_t payload[3] = { len, act, par };
+                    uint8_t payload[3] = { cmd, act, par };
                     uint8_t calc_crc = crc8(payload, 3);
 
                     if (calc_crc == rx_crc && footer == 0x55) {

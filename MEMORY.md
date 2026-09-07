@@ -502,3 +502,21 @@ The `assignments/` folder stores academic project coursework, literature reviews
   - Config Port Protocol (`0xCF`): Non-volatile flash parameter storage at `0x08003FC0`, ACK transmission, and emerald green save animation.
   - Run Chain Phase 1 (`0xAA`): Dynamic discovery, indexing (`g_my_index`), token appending, and CRC-8 recalculation.
   - Run Chain Phase 2 (`0xBB`): Real-time step tracking (bright green pulse when active), idle action colors, and rainbow victory sparkle on `0xFF`.
+
+---
+
+## 15. Master Config Dock Live Action Block Detection & Query
+
+- **Config Port Interface:** Master `Serial1` on `GPIO 17` (`CFG_TX`) and `GPIO 18` (`CFG_RX`) @ 115200 baud.
+- **Protocol Subcommands (`0xCF`):**
+  - **Read Stored Config Query (`0x01`):** Master sends `[0xCF, 0x01, 0x07, 0x55]`. Action Block replies with `[0xCF, 0x81, ACTION_ID, PARAM_VAL, CRC8, 0x55]`.
+  - **Write New Config (`0x02`):** Master sends `[0xCF, 0x02, ACTION_ID, PARAM_VAL, CRC8, 0x55]`. Action Block writes to flash, flashes WS2812B emerald green, and replies with ACK `[0xCF, 0x06, CRC8, 0x55]`.
+- **Master UI Display:**
+  - When docked: `║ Config Dock: DOCKED 🟢 [0x01] Walk Forward (1 Steps) ║`
+  - When empty: `║ Config Dock: EMPTY ⚪ (No Action Block Connected) ║`
+- **Knob 1 Interaction:** When a block is docked, clicking Knob 1 burns the Master's selected action & parameter directly into that block.
+- **Hardware Verification (September 7, 2026):**
+  - ✅ **Physical Silicon End-to-End Success:** Verified live detection of TENSTAR CH32V003 (`[0x10] Left Punch`), burning new action (`0x14: Push-ups, 1 Reps`), receiving flash write ACK `0x06`, and real-time Master UI update to `Config Dock: DOCKED 🟢 [0x14] Push-ups (1 Reps)`.
+  - **Linker Script Bug Resolution:** Identified and resolved memory map collision in bare-metal toolchain where unpreprocessed `ch32fun.ld` assigned `sp = 0x20180000` (causing immediate HardFault on boot). Implemented automated preprocessor stage in `build.ps1` generating `ch32fun_003.ld` with valid 2KB SRAM boundaries (`0x20000000 - 0x20000800`).
+  - **AFIO Peripheral Clock:** Enabled `RCC_APB2Periph_AFIO` to ensure alternate function multiplexer routes USART1 TX/RX cleanly to `PD5` / `PD6`.
+

@@ -7,9 +7,13 @@ if (-not (Test-Path $gcc)) {
     exit 1
 }
 
+# Preprocess linker script specifically for CH32V003 target (Target 0: 16K Flash, 2K RAM)
+& $gcc -E -P -x c-header -DCH32V003=1 -DTARGET_MCU_LD=0 -I "$currentDir" "$currentDir\ch32fun.ld" -o "$currentDir\ch32fun_003.ld"
+
 $params = @(
     "-march=rv32ec_zicsr",
     "-mabi=ilp32e",
+    "-DCH32V003=1",
     "-Os",
     "-flto",
     "-ffunction-sections",
@@ -17,7 +21,7 @@ $params = @(
     "-Wl,--gc-sections",
     "-nostdlib",
     "-I$currentDir",
-    "-T$currentDir\ch32fun.ld",
+    "-T$currentDir\ch32fun_003.ld",
     "$currentDir\ch32fun.c",
     "$currentDir\main.c",
     "-o", "$currentDir\action_block.elf"
