@@ -268,6 +268,16 @@ Complete hardware specifications are detailed in [`PHYSICAL_BLOCK_SYSTEM_SPEC.md
 - **Power & Charging:** Single 3.7V LiPo cell with onboard TP4056 USB-C charging and BMS protection.
 - **Physical Connector:** Standardized 4-pin polarized magnetic pogo connector with reverse-polarity protection and RC debouncing filters.
 
+### 3. Firmware Deliverables & Hardware Verification
+
+| Module | Hardware Target | Source Location | Description | Status |
+| :--- | :--- | :--- | :--- | :---: |
+| **Master Controller** | ESP32-S3 | [`firmware/esp32_master/esp32_master.ino`](firmware/esp32_master/esp32_master.ino) | BLE Central, persistent NVS pairing, dual-knob UI | ✅ Verified |
+| **Action Block Firmware** | WCH CH32V003 | [`firmware/ch32v003_action_block/`](firmware/ch32v003_action_block/) | Unified C RISC-V firmware (2-Phase Binary V2, Config Dock, WS2812B) | ✅ **Flashed on Silicon** |
+| **ESP32 SWIO Programmer** | ESP32 / ESP32-S3 | [`firmware/esp32_ch32v003_programmer/`](firmware/esp32_ch32v003_programmer/) | High-speed 1-wire SWIO debugger & chunked Python flasher (`flash_tool.py`) | ✅ Verified |
+| **Arduino Uno Programmer** | Arduino Uno R3 | [`firmware/arduino_uno_ch32v003_programmer/`](firmware/arduino_uno_ch32v003_programmer/) | Ardulink 16MHz assembly bit-banging flasher for `minichlink` | ✅ Verified |
+
+
 ---
 
 ## 📚 Project Documentation Sitemap

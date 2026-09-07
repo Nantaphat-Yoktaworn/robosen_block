@@ -16,6 +16,21 @@ robosen_block/
 ├── bin/
 │   └── k1.js                             # Node.js CLI executable wrapper
 ├── firmware/
+│   ├── arduino_uno_ch32v003_programmer/
+│   │   ├── arduino_uno_ch32v003_programmer.ino # Arduino Uno R3 Ardulink SWIO flasher
+│   │   └── README.md
+│   ├── ch32v003_action_block/
+│   │   ├── main.c                        # Unified CH32V003 Action Block firmware (2-Phase Binary V2, Config Dock, WS2812B)
+│   │   ├── funconfig.h                   # CH32V003 configuration header
+│   │   ├── ch32fun.c / .h / .ld / hw.h   # Core register & startup layer
+│   │   ├── build.ps1                     # Native RISC-V build script (2380-byte binary)
+│   │   ├── action_block.bin              # Pre-compiled ready-to-flash binary
+│   │   └── README.md
+│   ├── esp32_ch32v003_programmer/
+│   │   ├── esp32_ch32v003_programmer.ino # ESP32 / ESP32-S3 SWIO programmer firmware
+│   │   ├── dmi.cpp / .h, swio.cpp / .h, target.cpp / .h # DMI / SWIO physical protocol stack
+│   │   ├── flash_tool.py                 # Python host CLI flasher with chunked flashing & verification
+│   │   └── README.md
 │   └── esp32_master/
 │       └── esp32_master.ino              # Master Block C++ firmware (ESP32-S3 BLE Central, NVS flash, Quadrature UI)
 ├── recordings/
@@ -464,5 +479,26 @@ The `assignments/` folder stores academic project coursework, literature reviews
     - Pin 4 (`PASS_THRU / RX_BUS`) $\rightarrow$ Bottom Rail straight pass-through with zero line intersections.
   - **Pin 4 Multidrop Electrical Safety:** High-impedance (Hi-Z) input during Run Mode. End Block `TX` is the sole active driver on Pin 4 during return; Action Blocks ignore `0xAA` frames and process `0xBB` execution frames.
 
+---
 
+## 14. Physical Silicon Milestone: CH32V003 Action Block & ESP32-S3 Programmer
 
+- **Flashing Date:** September 7, 2026
+- **Target Microcontroller:** TENSTAR CH32V003F4P6 (TSSOP-20 breakout, 32-bit RISC-V QingKe V2A core @ 24MHz).
+- **Physical Programmer:** ESP32-S3 DevKit on `COM3` running [`esp32_ch32v003_programmer.ino`](file:///C:/Users/nnnn/Projects/robosen_block/firmware/esp32_ch32v003_programmer/esp32_ch32v003_programmer.ino).
+- **Wiring Setup:**
+  - ESP32-S3 `GPIO 10` $\longleftrightarrow$ CH32V003 `PD1 (SWIO)` with 4.7kΩ–10kΩ pull-up to 3.3V.
+  - ESP32-S3 `3.3V` & `GND` $\longleftrightarrow$ CH32V003 `V` & `G`.
+- **Toolchain Environment:**
+  - Local `riscv32-esp-elf-gcc` (v14.2.0) compiling bare-metal with `-march=rv32ec_zicsr -mabi=ilp32e`.
+  - Binary size: `2,380 bytes` (out of 16,384 bytes flash capacity).
+- **Verification Results:**
+  - SWIO 1-wire synchronization: `0x5AA50401`
+  - Chip ID readback: `0xF8076713`
+  - Memory write: 10 chunks (256 bytes each) programmed into flash `0x08000000`.
+  - Byte-for-byte readback verification: **100% MATCH (0 mismatches)**.
+  - Target execution resumed via `targetResetRun()`.
+- **Firmware Capabilities:**
+  - Config Port Protocol (`0xCF`): Non-volatile flash parameter storage at `0x08003FC0`, ACK transmission, and emerald green save animation.
+  - Run Chain Phase 1 (`0xAA`): Dynamic discovery, indexing (`g_my_index`), token appending, and CRC-8 recalculation.
+  - Run Chain Phase 2 (`0xBB`): Real-time step tracking (bright green pulse when active), idle action colors, and rainbow victory sparkle on `0xFF`.

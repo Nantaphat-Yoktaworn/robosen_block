@@ -234,8 +234,12 @@ The project is currently in an **advanced software, protocol simulation, and liv
 ## 7. Recommended Next Steps
 
 1. **PCB Schematic & Layout:** Design the 4-pin magnetic PCB for the ESP32-S3 Master Block (with E-Ink & dual knobs) and solid CH32V003 Action Block.
-2. **C++ Master Firmware:** Port the asynchronous queue engine and E-Ink UI into ESP-IDF / Arduino for ESP32-S3.
-3. **CH32V003 Slave Firmware:** Implement the Config Port flash writer (`0xCF`), Phase 1 flash reader (`0xAA`), and Phase 2 LED tracker (`0xBB`) in RISC-V C.
+2. **C++ Master Firmware:** Port the asynchronous queue engine and E-Ink UI into ESP-IDF / Arduino for ESP32-S3 (`firmware/esp32_master`).
+3. **CH32V003 Action Block Firmware:** ✅ **COMPLETED & VERIFIED ON PHYSICAL HARDWARE (Sept 7, 2026):**
+   - Built with native `riscv32-esp-elf-gcc` (`2,380 bytes`).
+   - Implemented Config Port flash writer (`0xCF`), Phase 1 discovery relay (`0xAA`), and Phase 2 step tracking (`0xBB`) in RISC-V C.
+   - Verified byte-for-byte readback on physical TENSTAR CH32V003F4P6 board via ESP32-S3 programmer on `COM3`.
 4. **3D Casing Prototypes:** 3D print initial snap-fit solid block shells with magnetic polarity channels and light pipes for the WS2812B LEDs.
 5. **Classroom User Testing:** Pilot test 5-block sets with 5–7 year old children to validate physical usability and E-Ink dock ergonomics.
+
 

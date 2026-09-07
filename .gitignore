@@ -28,4 +28,13 @@ __pycache__/
 BOM*
 P01BOM*
 
+# Project Planning & Spreadsheets
+plans/*.csv
+plans/*.xlsx
+
+# Binary build artifacts
+*.elf
+*.o
+
+
 

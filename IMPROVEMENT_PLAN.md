@@ -196,11 +196,12 @@ To prevent noisy distractions in classrooms with multiple student groups, all so
 
 ## 7. Phased Implementation Roadmap
 
-| Phase | Milestone | Focus Areas | Deliverables |
-| :---: | :--- | :--- | :--- |
-| **Phase 1** | **ESP32-S3 Master Firmware & E-Ink GUI** | Dual UART handlers (Config Dock + Run Chain), E-Ink partial refresh UI, BLE queue engine | Complete ESP32-S3 Arduino/IDF firmware |
-| **Phase 2** | **CH32V003 Unified Slave Firmware** | Config Port UART flash writer, Phase 1 flash reader, Phase 2 LED tracker | C/C++ RISC-V firmware (MounRiver/WCH) |
-| **Phase 3** | **Light Language Choreography** | Emerald green success pulse, data comet wave, rainbow sparkle | WS2812B animation state machine |
-| **Phase 4** | **Solid Enclosure & PCB Layout** | 4-pin magnetic PCB for Master & Action blocks, solid drop-proof shells | KiCad PCB design + 3D CAD (.STL/.STEP) |
+| Phase | Milestone | Focus Areas | Deliverables | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| **Phase 1** | **ESP32-S3 Master Firmware & E-Ink GUI** | Dual UART handlers (Config Dock + Run Chain), E-Ink partial refresh UI, BLE queue engine | Complete ESP32-S3 Arduino/IDF firmware | In Progress |
+| **Phase 2** | **CH32V003 Unified Action Block Firmware** | Config Port UART flash writer (`0xCF`), Phase 1 flash reader (`0xAA`), Phase 2 LED tracker (`0xBB`) | C/C++ RISC-V firmware (`firmware/ch32v003_action_block`) | ✅ **Verified on Hardware** |
+| **Phase 3** | **Light Language Choreography** | Emerald green success pulse, active glowing green step tracking, rainbow victory sparkle | WS2812B animation state machine | ✅ **Verified on Hardware** |
+| **Phase 4** | **Solid Enclosure & PCB Layout** | 4-pin magnetic PCB for Master & Action blocks, solid drop-proof shells | KiCad PCB design + 3D CAD (.STL/.STEP) | Planned |
+
 
 
