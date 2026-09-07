@@ -38,29 +38,15 @@
 #define FLASH_CFG_ADDR 0x08003FC0UL  // Top 64-byte page of 16KB flash
 #define CFG_MAGIC      0xA55A0002UL
 
-typedef struct {
-    volatile uint32_t ACTLR;
-    volatile uint32_t KEYR;
-    volatile uint32_t OBKEYR;
-    volatile uint32_t STATR;
-    volatile uint32_t CTLR;
-    volatile uint32_t ADDR;
-    volatile uint32_t OBR;
-    volatile uint32_t WPR;
-    volatile uint32_t RESERVED[2];
-    volatile uint32_t MODEKEYR;
-} FlashController;
-#define FLASH_CTRL ((FlashController *)0x40022000UL)
-
 static uint8_t g_action_id = 0x01; // Default: Walk Forward
 static uint8_t g_param_val = 0x01; // Default: 1 Step
 static uint8_t g_my_index  = 0;    // Assigned dynamically during Phase 1
 
 void flash_unlock() {
-    FLASH_CTRL->KEYR = 0x45670123UL;
-    FLASH_CTRL->KEYR = 0xCDEF89ABUL;
-    FLASH_CTRL->MODEKEYR = 0x45670123UL;
-    FLASH_CTRL->MODEKEYR = 0xCDEF89ABUL;
+    FLASH->KEYR = FLASH_KEY1;
+    FLASH->KEYR = FLASH_KEY2;
+    FLASH->MODEKEYR = FLASH_KEY1;
+    FLASH->MODEKEYR = FLASH_KEY2;
 }
 
 void load_config() {
@@ -79,29 +65,41 @@ void save_config(uint8_t action, uint8_t param) {
     g_param_val = param;
 
     flash_unlock();
-    while (FLASH_CTRL->STATR & 0x01); // Wait for busy
+    while (FLASH->STATR & FLASH_STATR_BSY);
 
-    // 64-byte page erase
-    FLASH_CTRL->CTLR |= 0x00020000UL; // CR_PAGE_ER
-    FLASH_CTRL->ADDR = FLASH_CFG_ADDR;
-    FLASH_CTRL->CTLR |= 0x00000040UL; // STRT
-    while (FLASH_CTRL->STATR & 0x01);
-    FLASH_CTRL->CTLR &= ~0x00020000UL;
+    volatile uint32_t *ptr = (volatile uint32_t *)FLASH_CFG_ADDR;
 
-    // Buffer reset & write
-    FLASH_CTRL->CTLR |= 0x00010000UL; // CR_PAGE_PG
-    FLASH_CTRL->CTLR |= 0x00080000UL; // CR_BUF_RST
+    // 1. Erase 64-byte Page
+    FLASH->CTLR = FLASH_CTLR_PAGE_ER;
+    FLASH->ADDR = (uint32_t)ptr;
+    FLASH->CTLR = FLASH_CTLR_STRT | FLASH_CTLR_PAGE_ER;
+    while (FLASH->STATR & FLASH_STATR_BSY);
 
-    volatile uint32_t *p = (volatile uint32_t *)FLASH_CFG_ADDR;
-    p[0] = CFG_MAGIC;
-    p[1] = ((uint32_t)param << 8) | (uint32_t)action;
+    // 2. Clear buffer and prepare for page programming
+    FLASH->CTLR = FLASH_CTLR_PAGE_PG;
+    FLASH->CTLR = FLASH_CTLR_BUF_RST | FLASH_CTLR_PAGE_PG;
+    FLASH->ADDR = (uint32_t)ptr;
+    while (FLASH->STATR & FLASH_STATR_BSY);
 
-    FLASH_CTRL->ADDR = FLASH_CFG_ADDR;
-    FLASH_CTRL->CTLR |= 0x00000040UL; // STRT
-    while (FLASH_CTRL->STATR & 0x01);
+    // 3. Write 16 words (64 bytes) into row buffer with BUF_LOAD
+    for (int i = 0; i < 16; i++) {
+        if (i == 0) {
+            ptr[i] = CFG_MAGIC;
+        } else if (i == 1) {
+            ptr[i] = ((uint32_t)param << 8) | (uint32_t)action;
+        } else {
+            ptr[i] = 0xFFFFFFFFUL;
+        }
+        FLASH->CTLR = FLASH_CTLR_PAGE_PG | FLASH_CTLR_BUF_LOAD;
+        while (FLASH->STATR & FLASH_STATR_BSY);
+    }
 
-    FLASH_CTRL->CTLR &= ~0x00010000UL;
-    FLASH_CTRL->CTLR |= 0x00000080UL; // Lock
+    // 4. Trigger actual write to flash
+    FLASH->CTLR = FLASH_CTLR_PAGE_PG | FLASH_CTLR_STRT;
+    while (FLASH->STATR & FLASH_STATR_BSY);
+
+    // 5. Lock flash controller
+    FLASH->CTLR |= FLASH_CTLR_LOCK;
 }
 
 // ==============================================================================
@@ -276,42 +274,20 @@ int main() {
     Delay_Ms(300);
     set_action_idle_color();
 
-    // Transmit boot announcement on Config Dock (PD5 = TX)
-    uint8_t boot_payload[3] = { 0x81, g_action_id, g_param_val };
-    uint8_t boot_crc = crc8(boot_payload, 3);
-    uart_tx(0xCF);
-    uart_tx(0x81);
-    uart_tx(g_action_id);
-    uart_tx(g_param_val);
-    uart_tx(boot_crc);
-    uart_tx(0x55);
-
     uint8_t rx_buf[64];
     uint32_t last_heartbeat = SysTick->CNT;
     uint8_t hb_phase = 0;
 
     while (1) {
         // Non-blocking 500ms Heartbeat:
-        // 1. Toggles onboard LED (PD4 / PC0) so user can see CH32V003 is actively running
-        // 2. Broadcasts announcement frame [0xCF, 0x81, ActionID, ParamVal, CRC, 0x55] every 1000ms
+        // Toggles onboard LED (PD4 / PC0) as a visual liveness indicator.
+        // UART TX remains completely silent until queried by Master or relaying Run Chain frames.
         uint32_t now = SysTick->CNT;
         if (TimeElapsed32u(now, last_heartbeat) >= Ticks_from_Ms(500)) {
             last_heartbeat = now;
             hb_phase++;
             funDigitalWrite(PD4, (hb_phase & 1) ? FUN_HIGH : FUN_LOW);
             funDigitalWrite(PC0, (hb_phase & 1) ? FUN_HIGH : FUN_LOW);
-
-            // Announce on Config Dock TX every 1000ms (every 2 toggles)
-            if (hb_phase & 1) {
-                uint8_t hb_payload[3] = { 0x81, g_action_id, g_param_val };
-                uint8_t hb_crc = crc8(hb_payload, 3);
-                uart_tx(0xCF);
-                uart_tx(0x81);
-                uart_tx(g_action_id);
-                uart_tx(g_param_val);
-                uart_tx(hb_crc);
-                uart_tx(0x55);
-            }
         }
 
         if (!uart_rx_available()) continue;

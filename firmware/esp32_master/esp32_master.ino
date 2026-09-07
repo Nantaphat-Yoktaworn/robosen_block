@@ -565,13 +565,16 @@ void loop() {
       lastUserActivity = now;
       unsigned long duration = millis() - startBtnPressTime;
       startBtnPressTime = 0;
-
       if (duration < 3000 && !startBtnHeld) {
         if (currentState == STATE_ACTION_MENU) {
-          Serial.println("\n[SYSTEM] Start clicked: Probing Run Chain bus (GPIO 15/16)...");
+          Serial.println("\n[SYSTEM] Start button pressed: Initiating Run Chain (GPIO 15/16)...");
           if (!executeRunChain()) {
-            Serial.println("[SYSTEM] No physical chain detected. Executing single knob action...");
-            sendRobosenPacket(ACTIONS[currentActionIndex]);
+            Serial.println("\n[SYSTEM] ⚠️ Chain execution aborted: No valid return packet received from return rail!");
+            Serial.println("[SYSTEM] Ensure all blocks and the Smart End Block are connected magnetically.\n");
+            // Flash red on onboard status LED to warn user of broken chain
+            setStatusLED(50, 0, 0);
+            delay(500);
+            updateStatusLED();
           }
         } else if (currentState == STATE_BLE_PAIRING_MENU) {
           currentState = STATE_ACTION_MENU;
@@ -819,7 +822,7 @@ bool sendRobosenPacket(const RobosenAction& action) {
   uint8_t stopPacket[] = {0xFF, 0xFF, 0x02, 0x0C, 0x0E};
 
   bool isTurn = (action.opcode == 0x08 || action.opcode == 0x02);
-  bool isWalk = (action.opcode == 0x01 || action.opcode == 0x05);
+  bool isWalk = (action.opcode == 0x01 || action.opcode == 0x05 || action.opcode == 0x07 || action.opcode == 0x03);
   bool isPredefined = (action.opcode == 0x17);
 
   if (pRemoteChar != nullptr && pRemoteChar->canWrite()) {
@@ -843,39 +846,42 @@ bool sendRobosenPacket(const RobosenAction& action) {
       // IMMEDIATELY Send Locomotion Stop (0x0C) to lock robot at desired angle!
       Serial.print("  ► Locomotion Stop: [HEX] FF FF 02 0C 0E (Gait Stand & Lock)\n");
       pRemoteChar->writeValue(stopPacket, sizeof(stopPacket));
+      delay(1000); // Allow gait engine to stabilize feet into neutral stand posture
       Serial.printf(">>> [SUCCESS] Turned %s %d Deg° and locked position! <<<\n", 
                     (action.opcode == 0x08 ? "Left" : "Right"), action.paramVal);
 
     } else if (isWalk) {
-      // Walk Forward (0x01) or Walk Backward (0x05): paramVal is Steps (1 to 5)
-      // ~1400ms per walking stride
+      // Walk Forward (0x01), Walk Backward (0x05), Side-step Left (0x07), Side-step Right (0x03)
+      // ~1400ms per walking/stepping stride
       unsigned long walkDurationMs = action.paramVal * 1400UL;
-      Serial.printf("  ► Walk Command: [HEX] ");
+      Serial.printf("  ► Locomotion Command: [HEX] ");
       for (int i = 0; i < totalPacketLen; i++) Serial.printf("%02X ", packet[i]);
       Serial.printf("(Target: %d Steps, Duration: %lu ms)\n", action.paramVal, walkDurationMs);
 
-      // Start continuous walk
+      // Start continuous locomotion
       pRemoteChar->writeValue(packet, totalPacketLen);
       delay(walkDurationMs);
 
-      // Send Locomotion Stop (0x0C) to end walking
+      // Send Locomotion Stop (0x0C) to end locomotion
       Serial.print("  ► Locomotion Stop: [HEX] FF FF 02 0C 0E (Gait Stand & Lock)\n");
       pRemoteChar->writeValue(stopPacket, sizeof(stopPacket));
-      Serial.printf(">>> [SUCCESS] Walked %d Steps and locked position! <<<\n", action.paramVal);
+      delay(1200); // Allow gait engine to stabilize feet into neutral stand posture
+      Serial.printf(">>> [SUCCESS] Locomotion completed (%d Steps) and locked position! <<<\n", action.paramVal);
 
     } else if (isPredefined) {
       // Predefined Action (0x17): paramVal is Repetitions (1 to 3)
       unsigned long animDurationMs = 4000;
       if (strstr(action.payload, "Push Ups") != nullptr)       animDurationMs = 12000;
-      else if (strstr(action.payload, "Say Hello") != nullptr) animDurationMs = 8000;
-      else if (strstr(action.payload, "Handstand") != nullptr) animDurationMs = 8000;
-      else if (strstr(action.payload, "Kung Fu") != nullptr)   animDurationMs = 6000;
-      else if (strstr(action.payload, "Dance") != nullptr)     animDurationMs = 6000;
-      else if (strstr(action.payload, "Squat") != nullptr)     animDurationMs = 5000;
-      else if (strstr(action.payload, "Celebrate") != nullptr) animDurationMs = 5000;
-      else if (strstr(action.payload, "Left Punch") != nullptr) animDurationMs = 4000;
-      else if (strstr(action.payload, "Right Punch") != nullptr) animDurationMs = 4000;
-      else if (strstr(action.payload, "Single Kick") != nullptr) animDurationMs = 4000;
+      else if (strstr(action.payload, "Say Hello") != nullptr) animDurationMs = 8500;
+      else if (strstr(action.payload, "Handstand") != nullptr) animDurationMs = 18000;
+      else if (strstr(action.payload, "Kung Fu") != nullptr)   animDurationMs = 11000;
+      else if (strstr(action.payload, "Boogaloo") != nullptr)  animDurationMs = 55000;
+      else if (strstr(action.payload, "Dance") != nullptr)     animDurationMs = 10000;
+      else if (strstr(action.payload, "Squat") != nullptr)     animDurationMs = 20000;
+      else if (strstr(action.payload, "Celebrate") != nullptr) animDurationMs = 8000;
+      else if (strstr(action.payload, "Left Punch") != nullptr) animDurationMs = 2500;
+      else if (strstr(action.payload, "Right Punch") != nullptr) animDurationMs = 2500;
+      else if (strstr(action.payload, "Kick") != nullptr)      animDurationMs = 7000;
 
       for (int rep = 0; rep < action.paramVal; rep++) {
         Serial.printf("  ► Rep %d of %d: [HEX] ", rep + 1, action.paramVal);
@@ -884,6 +890,9 @@ bool sendRobosenPacket(const RobosenAction& action) {
 
         pRemoteChar->writeValue(packet, totalPacketLen);
         delay(animDurationMs);
+        if (rep < action.paramVal - 1) {
+          delay(400); // Inter-repetition settling pause
+        }
       }
       Serial.println(">>> [SUCCESS] All action repetitions completed! <<<");
 
@@ -903,30 +912,39 @@ bool sendRobosenPacket(const RobosenAction& action) {
                     (action.opcode == 0x08 ? "Left" : "Right"), action.paramVal, turnDurationMs);
       delay(turnDurationMs);
       Serial.print("  ► Locomotion Stop (Simulated): [HEX] FF FF 02 0C 0E (Gait Stand & Lock)\n");
+      delay(1000);
       Serial.printf(">>> [SUCCESS] Simulated %s %d Deg° Turn! <<<\n", 
                     (action.opcode == 0x08 ? "Left" : "Right"), action.paramVal);
     } else if (isWalk) {
       unsigned long walkDurationMs = action.paramVal * 1400UL;
-      Serial.printf("  ► Walk Command (Simulated): [HEX] ");
+      Serial.printf("  ► Locomotion Command (Simulated): [HEX] ");
       for (int i = 0; i < totalPacketLen; i++) Serial.printf("%02X ", packet[i]);
       Serial.printf("(Target: %d Steps, Duration: %lu ms)\n", action.paramVal, walkDurationMs);
       delay(walkDurationMs);
       Serial.print("  ► Locomotion Stop (Simulated): [HEX] FF FF 02 0C 0E (Gait Stand & Lock)\n");
-      Serial.printf(">>> [SUCCESS] Simulated %d Steps Walk! <<<\n", action.paramVal);
+      delay(1200);
+      Serial.printf(">>> [SUCCESS] Simulated %d Steps Locomotion! <<<\n", action.paramVal);
     } else if (isPredefined) {
       unsigned long animDurationMs = 4000;
       if (strstr(action.payload, "Push Ups") != nullptr)       animDurationMs = 12000;
-      else if (strstr(action.payload, "Say Hello") != nullptr) animDurationMs = 8000;
-      else if (strstr(action.payload, "Handstand") != nullptr) animDurationMs = 8000;
-      else if (strstr(action.payload, "Kung Fu") != nullptr)   animDurationMs = 6000;
-      else if (strstr(action.payload, "Dance") != nullptr)     animDurationMs = 6000;
-      else if (strstr(action.payload, "Squat") != nullptr)     animDurationMs = 5000;
-      else if (strstr(action.payload, "Celebrate") != nullptr) animDurationMs = 5000;
+      else if (strstr(action.payload, "Say Hello") != nullptr) animDurationMs = 8500;
+      else if (strstr(action.payload, "Handstand") != nullptr) animDurationMs = 18000;
+      else if (strstr(action.payload, "Kung Fu") != nullptr)   animDurationMs = 11000;
+      else if (strstr(action.payload, "Boogaloo") != nullptr)  animDurationMs = 55000;
+      else if (strstr(action.payload, "Dance") != nullptr)     animDurationMs = 10000;
+      else if (strstr(action.payload, "Squat") != nullptr)     animDurationMs = 20000;
+      else if (strstr(action.payload, "Celebrate") != nullptr) animDurationMs = 8000;
+      else if (strstr(action.payload, "Left Punch") != nullptr) animDurationMs = 2500;
+      else if (strstr(action.payload, "Right Punch") != nullptr) animDurationMs = 2500;
+      else if (strstr(action.payload, "Kick") != nullptr)      animDurationMs = 7000;
       for (int rep = 0; rep < action.paramVal; rep++) {
         Serial.printf("  ► Action Rep %d of %d (Simulated): [HEX] ", rep + 1, action.paramVal);
         for (int i = 0; i < totalPacketLen; i++) Serial.printf("%02X ", packet[i]);
         Serial.printf("(Duration: %lu ms)\n", animDurationMs);
         delay(animDurationMs);
+        if (rep < action.paramVal - 1) {
+          delay(400);
+        }
       }
       Serial.println(">>> [SUCCESS] All action repetitions simulated! <<<");
     } else {
@@ -1030,7 +1048,7 @@ RobosenAction getActionObjByToken(uint8_t token, int param) {
     case 0x13: // Dance
       act.name = "Dance";
       act.opcode = 0x17;
-      act.payload = "ProAction/Dance";
+      act.payload = "Action/Boogaloo";
       act.paramUnit = "Reps";
       act.paramMin = 1; act.paramMax = 3; act.paramStep = 1;
       break;
@@ -1051,14 +1069,14 @@ RobosenAction getActionObjByToken(uint8_t token, int param) {
     case 0x16: // Single Kick
       act.name = "Single Kick";
       act.opcode = 0x17;
-      act.payload = "ProAction/Single Kick";
+      act.payload = "ProAction/Left Kick";
       act.paramUnit = "Reps";
       act.paramMin = 1; act.paramMax = 3; act.paramStep = 1;
       break;
     case 0x17: // Squats
       act.name = "Squats";
       act.opcode = 0x17;
-      act.payload = "ProAction/Squat";
+      act.payload = "ProAction/Do Squats";
       act.paramUnit = "Reps";
       act.paramMin = 1; act.paramMax = 3; act.paramStep = 1;
       break;
@@ -1221,7 +1239,7 @@ bool executeRunChain() {
     sendRobosenPacket(actionObj);
 
     // Inter-step settling delay
-    delay(400);
+    delay(500);
   }
 
   // 9. PHASE 3: PROGRAM COMPLETE & RAINBOW VICTORY CELEBRATION (ActiveStep = 0xFF)
@@ -1362,7 +1380,7 @@ void renderActionMenu() {
   } else {
     Serial.println("║ • Knob 1: Select Action (Click: Retry)• Knob 2: Adjust Parameter Value ║");
   }
-  Serial.println("║ • Start Click: Run Chain / Action     • Hold Start: BLE Pairing (3s)   ║");
+  Serial.println("║ • Start Click: Run Chain Sequence     • Hold Start: BLE Pairing (3s)   ║");
   Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
 }
 

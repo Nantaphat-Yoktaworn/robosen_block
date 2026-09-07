@@ -178,42 +178,20 @@ int main() {
     Delay_Ms(150);
     set_end_idle_color();
 
-    // Boot Announcement on Config Dock / Return Rail
-    uint8_t boot_payload[3] = { 0x81, END_BLOCK_TOKEN, 0x00 };
-    uint8_t boot_crc = crc8(boot_payload, 3);
-    uart_tx(0xCF);
-    uart_tx(0x81);
-    uart_tx(END_BLOCK_TOKEN);
-    uart_tx(0x00);
-    uart_tx(boot_crc);
-    uart_tx(0x55);
-
     uint8_t rx_buf[64];
     uint32_t last_heartbeat = SysTick->CNT;
     uint8_t hb_phase = 0;
 
     while (1) {
         // Non-blocking 500ms Heartbeat:
-        // 1. Toggles onboard LEDs (PD4 / PC0)
-        // 2. Broadcasts announcement frame [0xCF, 0x81, 0xEE, 0x00, CRC, 0x55] every 1000ms
+        // Toggles onboard LEDs (PD4 / PC0) as a visual liveness indicator.
+        // Return Rail TX remains completely silent until queried by Master or looping back 0xAA frames.
         uint32_t now = SysTick->CNT;
         if (TimeElapsed32u(now, last_heartbeat) >= Ticks_from_Ms(500)) {
             last_heartbeat = now;
             hb_phase++;
             funDigitalWrite(PD4, (hb_phase & 1) ? FUN_HIGH : FUN_LOW);
             funDigitalWrite(PC0, (hb_phase & 1) ? FUN_HIGH : FUN_LOW);
-
-            // Announce on Config Dock / Return Rail every 1000ms
-            if (hb_phase & 1) {
-                uint8_t hb_payload[3] = { 0x81, END_BLOCK_TOKEN, 0x00 };
-                uint8_t hb_crc = crc8(hb_payload, 3);
-                uart_tx(0xCF);
-                uart_tx(0x81);
-                uart_tx(END_BLOCK_TOKEN);
-                uart_tx(0x00);
-                uart_tx(hb_crc);
-                uart_tx(0x55);
-            }
         }
 
         if (!uart_rx_available()) continue;

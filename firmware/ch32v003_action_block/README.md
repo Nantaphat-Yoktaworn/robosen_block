@@ -27,7 +27,7 @@ Firmware for the **TENSTAR CH32V003F4P6** (32-bit RISC-V microcontroller @ 24MHz
   * Block replies: `[ 0xCF, 0x81, ACTION_ID, PARAM_VAL, CRC8, 0x55 ]`
 * **Write New Config**:
   * Master sends: `[ 0xCF, 0x02, ACTION_ID, PARAM_VAL, CRC8, 0x55 ]`
-  * Action Block saves configuration to non-volatile flash page (`0x08003FC0`).
+  * Action Block saves configuration permanently to non-volatile flash page (`0x08003FC0`) using CH32V003 64-byte Fast Page Programming (`FLASH_CTLR_BUF_LOAD` + `FLASH_CTLR_STRT`).
   * Action Block replies: `[ 0xCF, 0x06, CRC8, 0x55 ]` (ACK).
   * Visual feedback: **Emerald Green Success Flash** (`ws2812_set(0, 255, 40)`).
 
@@ -41,6 +41,10 @@ Firmware for the **TENSTAR CH32V003F4P6** (32-bit RISC-V microcontroller @ 24MHz
 * If `ACTIVE_STEP == g_my_index`: Block glows **Bright Pulsing Green (100%)**!
 * If `ACTIVE_STEP == 0xFF`: Program complete! All blocks play **Rainbow Sparkle**!
 * Otherwise: Block glows at dim 20% in its designated Action color.
+
+### Silent Bus Architecture
+* UART TX remains 100% silent during idle to prevent line contention in daisy-chained configurations.
+* Onboard activity LEDs (`PD4` / `PC0`) toggle non-blockingly every 500ms as a visual liveness heartbeat without transmitting over UART.
 
 ---
 

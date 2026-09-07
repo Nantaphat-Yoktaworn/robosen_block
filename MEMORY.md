@@ -564,7 +564,79 @@ The `assignments/` folder stores academic project coursework, literature reviews
      - Master broadcasts completion frame `[0xBB, ActiveStep=0xFF, Total=1, CRC8, 0x55]`.
      - Block 1, Smart End Block, and Master onboard WS2812B simultaneously trigger synchronized **Rainbow Victory Sparkle**!
 - **Control Interface:**
-  - Single tap on physical Start Button (`GPIO 14`) probes the Run Chain; falls back to single knob action if open-circuit.
+  - Single tap on physical Start Button (`GPIO 14`) probes the Run Chain; aborts and warns if chain is open-circuit.
   - Manual `'r'` / `'R'` command in Serial Monitor enables interactive diagnostic testing.
+
+---
+
+## 18. Multi-Block Daisy Chain Silicon Verification & Silent Bus
+
+- **Verification Date:** September 8, 2026
+- **Topology:** Master (ESP32-S3) $\longrightarrow$ Action Block 1 (`0x01` Walk Forward, 1 step) $\longrightarrow$ Action Block 2 (`0x10` Left Punch, 2 reps) $\longrightarrow$ Smart End Block (`0xEE`) $\longrightarrow$ Master Return Rail (`GPIO 16`).
+- **Compiled Sequence on Silicon:**
+  ```text
+  ╔════════════════════════════════════════════════════════════════════════╗
+  ║                 [RUN CHAIN ENGINE] PHASE 1: DISCOVERY                  ║
+  ╠════════════════════════════════════════════════════════════════════════╣
+  ║ Emitting Discovery Seed [0xAA, 0, 0, 0, 0x55] on GPIO 15 (TX)...       ║
+  ║ 🟢 Loopback Verified! Sequence Compiled: 2 Steps, CRC: 0x44 (VALID ✓) ║
+  ╠════════════════════════════════════════════════════════════════════════╣
+  ║  Step 1: [0x01] Walk Forward         Parameter:   1 Steps         ║
+  ║  Step 2: [0x10] Left Punch           Parameter:   2 Reps          ║
+  ╚════════════════════════════════════════════════════════════════════════╝
+  ```
+- **Silent Bus Architecture:**
+  - Eliminated periodic 1000ms `0xCF` broadcast announcement frames and boot spam from both Action Block and End Block firmware.
+  - UART TX lines remain 100% silent during idle periods, preventing bus contention and corruption when multiple blocks are connected in series.
+  - Blocks transmit on TX *only* when queried by Master (`0xCF`) or when forwarding/terminating Run Chain packets (`0xAA` / `0xBB`).
+- **Strict Chain Verification:**
+  - Master strictly requires a valid loopback packet from the return rail. If open-circuit or corrupted, Master aborts execution and flashes status LED red (single-knob fallback removed).
+
+---
+
+## 19. CH32V003 Non-Volatile Flash Memory Persistence Fix
+
+- **Root Cause Analysis:**
+  - In `firmware/ch32v003_action_block/main.c`, a custom `FlashController` struct omitted a 4-byte `RESERVED` register at offset `0x18`.
+  - This shifted `MODEKEYR` to offset `0x28` (`BOOT_MODEKEYR`) instead of `0x24` (`MODEKEYR`). As a result, `MODEKEYR` was never unlocked (`FLASH->CTLR & 0x8080` remained locked), causing all flash writes to be silently discarded.
+  - Furthermore, CH32V003 64-byte Fast Page Programming requires loading all 16 words into the hardware row buffer accompanied by `FLASH_CTLR_PAGE_PG | FLASH_CTLR_BUF_LOAD` before triggering `FLASH_CTLR_STRT`.
+- **Silicon Fix Applied:**
+  - Migrated to the native `FLASH` peripheral defined in `ch32v003hw.h`.
+  - Proper unlock sequence: write `FLASH_KEY1` and `FLASH_KEY2` to both `FLASH->KEYR` and `FLASH->MODEKEYR`.
+  - Implemented full FPEC sequence: Page Erase (`FLASH_CTLR_PAGE_ER`) $\longrightarrow$ Buffer Reset (`FLASH_CTLR_BUF_RST`) $\longrightarrow$ 16-word Row Buffer Load (`FLASH_CTLR_BUF_LOAD`) $\longrightarrow$ Page Write (`FLASH_CTLR_STRT`) $\longrightarrow$ Re-lock (`FLASH_CTLR_LOCK`).
+  - Storage location: Top 64-byte page of 16KB flash (`0x08003FC0`).
+- **Verification:** Verified live on silicon across full power-cycles (unplugging 3.3V/GND and reconnecting); Action Block permanently retains burned action and parameter.
+
+---
+
+## 20. Robot Locomotion Settling & Full Multi-Action Timing Calibration
+
+- **Root Cause of Skipped Action in Multi-Step Chains:**
+  - When transitioning from a locomotion command (e.g. `Walk Forward`) to a predefined motion (e.g. `Left Punch`), Master sent `Locomotion Stop` (`0x0C`: Gait Stand & Lock), but had 0ms settling delay after transmitting the stop packet.
+  - The bipedal robot's physical gait requires ~1000–1200ms to decelerate, place swinging foot flat on the floor, and engage standing balance PID.
+  - Receiving an action command (`0x17`) while the robot is still transitioning from gait to stand causes the K1's onboard firmware to **silently drop/reject** the action command.
+  - In a 2-rep punch sequence, Rep 1 was dropped while the robot finished stopping; Rep 2 was sent 4000ms later when the robot was idle, causing the robot to execute only Rep 2 (skipping Rep 1).
+- **Engine Resolution in `esp32_master.ino`:**
+  1. **Post-Locomotion Settling Delay:**
+     - Added **1200ms delay** after `stopPacket` (`0x0C`) in `isWalk` (Walk Forward, Walk Backward, Side-step Left, Side-step Right).
+     - Added **1000ms delay** after `stopPacket` (`0x0C`) in `isTurn` (Turn Left, Turn Right).
+  2. **Inter-Repetition Pause:**
+     - Added **400ms settling pause** between consecutive repetitions of predefined actions.
+  3. **Action Duration Calibration:**
+     - `Left Punch` / `Right Punch`: 2500ms
+     - `Single Kick` / `Left Kick`: 7000ms
+     - `Push Ups`: 12000ms
+     - `Handstand`: 18000ms
+     - `Kung Fu`: 11000ms
+     - `Boogaloo` (Dance): 55000ms (or 10000ms)
+     - `Do Squats`: 20000ms
+     - `Say Hello` (Wave Hand): 8500ms
+     - `Celebrate`: 8000ms
+  4. **Payload & Opcode Corrections:**
+     - Added lateral side-step opcodes `0x07` (Move Left) and `0x03` (Move Right) to the locomotion handler with proper `0x0C` stop and 1200ms settling delay.
+     - Corrected string payloads in `getActionObjByToken()`: Dance $\longrightarrow$ `"Action/Boogaloo"`, Single Kick $\longrightarrow$ `"ProAction/Left Kick"`, Squats $\longrightarrow$ `"ProAction/Do Squats"`.
+  5. **Chain Inter-Step Settling:** Increased inter-step delay in `executeRunChain()` to **500ms**.
+- **Live Hardware Verification:** Walk Forward 1 step followed by Left Punch 2 reps confirmed executing flawlessly on physical Robosen K1 robot.
+
 
 

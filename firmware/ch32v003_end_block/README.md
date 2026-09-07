@@ -13,6 +13,7 @@ In the 4-Pin Magnetic Physical Bus:
   - **Idle / Connected**: Soft Emerald Green (`0, 45, 10`) glowing calm and ready.
   - **Chain Verified & Ready**: Vivid Emerald Green (`0, 255, 30`) pulse (350ms).
   - **Program Complete**: Celebration **Rainbow Victory Sparkle** (`0xFF`).
+* **Silent Return Rail Architecture**: Pin 4 Return Rail TX (`PD5`) remains 100% silent during idle to avoid bus contention, transmitting only when looping back verified Phase 1 (`0xAA`) sequences or responding to Config Dock queries (`0xCF`). Onboard LEDs toggle every 500ms as a silent liveness heartbeat.
 
 ---
 
