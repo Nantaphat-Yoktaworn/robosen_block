@@ -234,14 +234,16 @@ The project is currently in an **advanced software, protocol simulation, and liv
 ## 7. Recommended Next Steps
 
 1. **PCB Schematic & Layout:** Design the 4-pin magnetic PCB for the ESP32-S3 Master Block (with E-Ink & dual knobs) and solid CH32V003 Action Block.
-2. **C++ Master Firmware:** ✅ **COMPLETED & VERIFIED ON PHYSICAL HARDWARE (Sept 7, 2026):**
-   - Implemented dual-knob rotary encoders, BLE auto-reconnect, and Config Dock UART driver on ESP32-S3 (`firmware/esp32_master`).
+2. **C++ Master Firmware:** ✅ **COMPLETED & VERIFIED ON PHYSICAL HARDWARE (Sept 7–8, 2026):**
+   - Implemented dual-knob rotary encoders, persistent BLE auto-reconnect, Config Dock UART driver, and Run Chain Engine (`0xAA`/`0xBB`/`0xFF`) on ESP32-S3 (`firmware/esp32_master`).
    - Verified live detection and non-volatile flash burning into docked CH32V003 Action Blocks.
-3. **CH32V003 Action Block Firmware:** ✅ **COMPLETED & VERIFIED ON PHYSICAL HARDWARE (Sept 7, 2026):**
-   - Built with native `riscv32-esp-elf-gcc` (`2,764 bytes`).
-   - Implemented Config Port flash writer (`0xCF`), Phase 1 discovery relay (`0xAA`), and Phase 2 step tracking (`0xBB`) in RISC-V C.
-   - Verified byte-for-byte readback on physical TENSTAR CH32V003F4P6 board via ESP32-S3 programmer on `COM3`.
-   - Verified live bidirectional UART communications with ESP32-S3 Master Config Dock.
+   - Verified full daisy-chain discovery, cumulative CRC-8 validation, real-time step tracking, and rainbow celebration sparkle.
+3. **CH32V003 Action Block & Smart End Block Firmware:** ✅ **COMPLETED & VERIFIED ON PHYSICAL HARDWARE (Sept 7–8, 2026):**
+   - Built with native `riscv32-esp-elf-gcc` (`action_block.bin`: 2,804 bytes; `end_block.bin`: 2,016 bytes).
+   - Implemented Config Port flash writer (`0xCF`), Phase 1 discovery relay (`0xAA`), and Phase 2 step tracking (`0xBB`) with downstream forwarding in RISC-V C.
+   - Implemented Smart End Block active digital line driver with loopback, CRC-8 validation, and rainbow sparkle.
+   - Verified byte-for-byte readback on physical TENSTAR CH32V003F4P6 chips via ESP32-S3 programmer on `COM3`.
+   - Verified live 2-block run chain executing locomotion on Robosen K1 robot.
 4. **3D Casing Prototypes:** 3D print initial snap-fit solid block shells with magnetic polarity channels and light pipes for the WS2812B LEDs.
 5. **Classroom User Testing:** Pilot test 5-block sets with 5–7 year old children to validate physical usability and E-Ink dock ergonomics.
 

@@ -256,9 +256,9 @@ Complete hardware specifications are detailed in [`PHYSICAL_BLOCK_SYSTEM_SPEC.md
 | **Knob 2 SW** | `GPIO 13` | 🔘 **Gray** | Parameter Reset / BLE Save | ✅ Verified |
 | **Start / Run Button** | `GPIO 14` | 🟠 **Orange** | Tap: Run Stream \| 3s: BLE Scan | ✅ Verified |
 | **Onboard Status RGB** | `GPIO 48` | *Internal* | 🟢 Ready \| 🔵 Scan \| 🟡 TX | ✅ Verified |
-| **E-Ink Display (SPI)** | `GPIO 4,5,6,7,15,16`| — | 2.13" SSD1680 Fast Partial Refresh | 📦 Reserved |
-| **Config Dock UART** | `GPIO 17, 18` | — | Write Action Packet (`0xCF`) | 📦 Reserved |
-| **Run Chain Bus UART**| `GPIO 43, 44` | — | Phase 1 Discovery (`0xAA`) & Run (`0xBB`)| 📦 Reserved |
+| **Config Dock UART** | `GPIO 17, 18` | 🔘 Gray / 🟣 Purple | Write Action (`0xCF`) & Read ACK | ✅ Verified |
+| **Run Chain Bus UART**| `GPIO 15, 16` | 🟢 Green / ⚪ White | Phase 1 Discovery (`0xAA`) & Run (`0xBB`)| ✅ Verified |
+| **E-Ink Display (SPI)** | `GPIO 4,5,6,7,21,38`| — | 2.13" SSD1680 Fast Partial Refresh | 📦 Reserved |
 
 ### 2. Block Hardware Specifications
 - **Master Block MCU:** ESP32-S3 (Dual-Core Xtensa LX7, Native Bluetooth BLE 5.0, SPI for E-Ink, and Dual UARTs for Config Dock & Run Chain).
@@ -272,8 +272,9 @@ Complete hardware specifications are detailed in [`PHYSICAL_BLOCK_SYSTEM_SPEC.md
 
 | Module | Hardware Target | Source Location | Description | Status |
 | :--- | :--- | :--- | :--- | :---: |
-| **Master Controller** | ESP32-S3 | [`firmware/esp32_master/esp32_master.ino`](firmware/esp32_master/esp32_master.ino) | BLE Central, persistent NVS pairing, dual-knob UI | ✅ Verified |
+| **Master Controller** | ESP32-S3 | [`firmware/esp32_master/esp32_master.ino`](firmware/esp32_master/esp32_master.ino) | BLE Central, NVS pairing, Dual-Knob UI, Run Chain Engine (`0xAA`/`0xBB`) | ✅ Verified |
 | **Action Block Firmware** | WCH CH32V003 | [`firmware/ch32v003_action_block/`](firmware/ch32v003_action_block/) | Unified C RISC-V firmware (2-Phase Binary V2, Config Dock, WS2812B) | ✅ **Flashed on Silicon** |
+| **Smart End Block Firmware** | WCH CH32V003 | [`firmware/ch32v003_end_block/`](firmware/ch32v003_end_block/) | Active loopback line driver, CRC-8 validation, rainbow sparkle (`0xEE`) | ✅ **Flashed on Silicon** |
 | **ESP32 SWIO Programmer** | ESP32 / ESP32-S3 | [`firmware/esp32_ch32v003_programmer/`](firmware/esp32_ch32v003_programmer/) | High-speed 1-wire SWIO debugger & chunked Python flasher (`flash_tool.py`) | ✅ Verified |
 | **Arduino Uno Programmer** | Arduino Uno R3 | [`firmware/arduino_uno_ch32v003_programmer/`](firmware/arduino_uno_ch32v003_programmer/) | Ardulink 16MHz assembly bit-banging flasher for `minichlink` | ✅ Verified |
 

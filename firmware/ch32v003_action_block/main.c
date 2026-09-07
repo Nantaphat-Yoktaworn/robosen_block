@@ -475,6 +475,13 @@ int main() {
                 
                 uint8_t check[2] = { active_step, total_steps };
                 if (crc8(check, 2) == rx_crc && footer == 0x55) {
+                    // Forward 0xBB frame downstream to subsequent blocks in the chain
+                    uart_tx(0xBB);
+                    uart_tx(active_step);
+                    uart_tx(total_steps);
+                    uart_tx(rx_crc);
+                    uart_tx(0x55);
+
                     if (active_step == 0xFF) {
                         // Program Complete: Celebration Rainbow Sparkle!
                         for (int k = 0; k < 3; k++) {

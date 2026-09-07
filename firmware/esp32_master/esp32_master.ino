@@ -22,9 +22,14 @@ const int PIN_K2_SW     = 13;  // 🔘 Gray Wire
 // --- MASTER START BUTTON ---
 const int PIN_START_BTN = 14;  // 🟠 Orange Wire (Diagonal GND Return)
 
-// --- CONFIG DOCK (UART) ---
+// --- CONFIG DOCK (UART1) ---
 const int PIN_CFG_TX    = 17;  // 🔘 Gray Wire (Master TX -> Action Block RX / PD6)
 const int PIN_CFG_RX    = 18;  // 🟣 Purple Wire (Master RX <- Action Block TX / PD5)
+
+// --- RUN CHAIN BUS (UART2) ---
+const int PIN_CHAIN_TX  = 15;  // Master Run Chain Output -> Block 1 RX (PD6)
+const int PIN_CHAIN_RX  = 16;  // Master Return Rail Input <- Smart End Block TX (PD5)
+HardwareSerial ChainSerial(2);
 
 // --- ONBOARD WS2812 RGB STATUS LED ---
 #ifndef RGB_BUILTIN
@@ -113,6 +118,7 @@ const char* getActionNameByToken(uint8_t token) {
     case 0x17: return "Squats";
     case 0x18: return "Wave Hand";
     case 0x19: return "Celebrate";
+    case 0xEE: return "End Terminator";
     default:   return "Unknown Action";
   }
 }
@@ -125,6 +131,7 @@ const char* getParamUnitByToken(uint8_t token) {
     case 0x08: return "Steps";
     case 0x03:
     case 0x04: return "Deg°";
+    case 0xEE: return "Cap";
     default:   return "Reps";
   }
 }
@@ -188,6 +195,8 @@ bool connectToRobot();
 bool sendRobosenPacket(const RobosenAction& action);
 void updateStatusLED();
 void pollConfigDock();
+bool executeRunChain();
+RobosenAction getActionObjByToken(uint8_t token, int param);
 
 // BLE Client Callbacks for Connection Life-Cycle Management
 class RobosenClientCallback : public BLEClientCallbacks {
@@ -435,6 +444,10 @@ void setup() {
   pinMode(PIN_CFG_RX, INPUT_PULLUP);
   Serial1.begin(115200, SERIAL_8N1, PIN_CFG_RX, PIN_CFG_TX);
 
+  // Initialize Run Chain UART (ChainSerial on Pins 16 RX, 15 TX @ 115200)
+  pinMode(PIN_CHAIN_RX, INPUT_PULLUP);
+  ChainSerial.begin(115200, SERIAL_8N1, PIN_CHAIN_RX, PIN_CHAIN_TX);
+
   // Configure Internal Pull-Up Resistors for all inputs
   pinMode(PIN_K1_CLK, INPUT_PULLUP);
   pinMode(PIN_K1_DT,  INPUT_PULLUP);
@@ -497,7 +510,7 @@ void loop() {
   // --------------------------------------------------------------------------
   pollConfigDock();
 
-  // Serial Monitor Interactive Test ('t' = Ping Config Dock)
+  // Serial Monitor Interactive Test ('t' = Ping Config Dock, 'r' = Run Chain)
   if (Serial.available() > 0) {
     char c = Serial.read();
     if (c == 't' || c == 'T') {
@@ -507,6 +520,11 @@ void loop() {
       Serial1.flush();
       delay(30);
       Serial.printf("[DOCK TEST] Serial1 buffer has %d bytes waiting on GPIO 18\n", Serial1.available());
+    } else if (c == 'r' || c == 'R') {
+      Serial.println("\n[RUN CHAIN TEST] 🚀 Manual trigger executeRunChain()...");
+      if (!executeRunChain()) {
+        Serial.println("[RUN CHAIN TEST] ⚠️ Run chain execution failed (No blocks / End block found).");
+      }
     }
   }
 
@@ -550,7 +568,11 @@ void loop() {
 
       if (duration < 3000 && !startBtnHeld) {
         if (currentState == STATE_ACTION_MENU) {
-          sendRobosenPacket(ACTIONS[currentActionIndex]);
+          Serial.println("\n[SYSTEM] Start clicked: Probing Run Chain bus (GPIO 15/16)...");
+          if (!executeRunChain()) {
+            Serial.println("[SYSTEM] No physical chain detected. Executing single knob action...");
+            sendRobosenPacket(ACTIONS[currentActionIndex]);
+          }
         } else if (currentState == STATE_BLE_PAIRING_MENU) {
           currentState = STATE_ACTION_MENU;
           renderActionMenu();
@@ -846,7 +868,14 @@ bool sendRobosenPacket(const RobosenAction& action) {
       unsigned long animDurationMs = 4000;
       if (strstr(action.payload, "Push Ups") != nullptr)       animDurationMs = 12000;
       else if (strstr(action.payload, "Say Hello") != nullptr) animDurationMs = 8000;
+      else if (strstr(action.payload, "Handstand") != nullptr) animDurationMs = 8000;
+      else if (strstr(action.payload, "Kung Fu") != nullptr)   animDurationMs = 6000;
+      else if (strstr(action.payload, "Dance") != nullptr)     animDurationMs = 6000;
+      else if (strstr(action.payload, "Squat") != nullptr)     animDurationMs = 5000;
+      else if (strstr(action.payload, "Celebrate") != nullptr) animDurationMs = 5000;
       else if (strstr(action.payload, "Left Punch") != nullptr) animDurationMs = 4000;
+      else if (strstr(action.payload, "Right Punch") != nullptr) animDurationMs = 4000;
+      else if (strstr(action.payload, "Single Kick") != nullptr) animDurationMs = 4000;
 
       for (int rep = 0; rep < action.paramVal; rep++) {
         Serial.printf("  ► Rep %d of %d: [HEX] ", rep + 1, action.paramVal);
@@ -884,6 +913,22 @@ bool sendRobosenPacket(const RobosenAction& action) {
       delay(walkDurationMs);
       Serial.print("  ► Locomotion Stop (Simulated): [HEX] FF FF 02 0C 0E (Gait Stand & Lock)\n");
       Serial.printf(">>> [SUCCESS] Simulated %d Steps Walk! <<<\n", action.paramVal);
+    } else if (isPredefined) {
+      unsigned long animDurationMs = 4000;
+      if (strstr(action.payload, "Push Ups") != nullptr)       animDurationMs = 12000;
+      else if (strstr(action.payload, "Say Hello") != nullptr) animDurationMs = 8000;
+      else if (strstr(action.payload, "Handstand") != nullptr) animDurationMs = 8000;
+      else if (strstr(action.payload, "Kung Fu") != nullptr)   animDurationMs = 6000;
+      else if (strstr(action.payload, "Dance") != nullptr)     animDurationMs = 6000;
+      else if (strstr(action.payload, "Squat") != nullptr)     animDurationMs = 5000;
+      else if (strstr(action.payload, "Celebrate") != nullptr) animDurationMs = 5000;
+      for (int rep = 0; rep < action.paramVal; rep++) {
+        Serial.printf("  ► Action Rep %d of %d (Simulated): [HEX] ", rep + 1, action.paramVal);
+        for (int i = 0; i < totalPacketLen; i++) Serial.printf("%02X ", packet[i]);
+        Serial.printf("(Duration: %lu ms)\n", animDurationMs);
+        delay(animDurationMs);
+      }
+      Serial.println(">>> [SUCCESS] All action repetitions simulated! <<<");
     } else {
       for (int rep = 0; rep < action.paramVal; rep++) {
         Serial.printf("  ► Step/Rep %d of %d (Simulated): [HEX] ", rep + 1, action.paramVal);
@@ -902,6 +947,306 @@ bool sendRobosenPacket(const RobosenAction& action) {
   // KEEP CONNECTION ALIVE! NO DISCONNECT OR DELETE CLIENT!
   updateStatusLED(); // 🟢 Emerald Green: Persistent Link Active
   Serial.println("[BLE STATUS] 🟢 Link remains ACTIVE & ready for subsequent commands.\n");
+  return true;
+}
+
+// ==============================================================================
+// 8.1 TOKEN TO ACTION OBJECT MAPPER
+// ==============================================================================
+RobosenAction getActionObjByToken(uint8_t token, int param) {
+  RobosenAction act;
+  act.tokenID   = token;
+  act.paramVal  = (param <= 0) ? 1 : param;
+  act.paramMin  = 1;
+  act.paramMax  = 5;
+  act.paramStep = 1;
+
+  switch (token) {
+    case 0x01: // Walk Forward
+      act.name = "Walk Forward";
+      act.opcode = 0x01;
+      act.payload = "";
+      act.paramUnit = "Steps";
+      act.paramMin = 1; act.paramMax = 5; act.paramStep = 1;
+      break;
+    case 0x02: // Walk Backward
+      act.name = "Walk Backward";
+      act.opcode = 0x05;
+      act.payload = "";
+      act.paramUnit = "Steps";
+      act.paramMin = 1; act.paramMax = 5; act.paramStep = 1;
+      break;
+    case 0x03: // Turn Left
+      act.name = "Turn Left";
+      act.opcode = 0x08;
+      act.payload = "";
+      act.paramUnit = "Deg°";
+      act.paramMin = 45; act.paramMax = 180; act.paramStep = 45;
+      if (param < 45) act.paramVal = 90;
+      break;
+    case 0x04: // Turn Right
+      act.name = "Turn Right";
+      act.opcode = 0x02;
+      act.payload = "";
+      act.paramUnit = "Deg°";
+      act.paramMin = 45; act.paramMax = 180; act.paramStep = 45;
+      if (param < 45) act.paramVal = 90;
+      break;
+    case 0x07: // Side-step Left
+      act.name = "Side-step Left";
+      act.opcode = 0x07;
+      act.payload = "";
+      act.paramUnit = "Steps";
+      act.paramMin = 1; act.paramMax = 5; act.paramStep = 1;
+      break;
+    case 0x08: // Side-step Right
+      act.name = "Side-step Right";
+      act.opcode = 0x03;
+      act.payload = "";
+      act.paramUnit = "Steps";
+      act.paramMin = 1; act.paramMax = 5; act.paramStep = 1;
+      break;
+    case 0x10: // Left Punch
+      act.name = "Left Punch";
+      act.opcode = 0x17;
+      act.payload = "ProAction/Left Punch";
+      act.paramUnit = "Reps";
+      act.paramMin = 1; act.paramMax = 3; act.paramStep = 1;
+      break;
+    case 0x11: // Right Punch
+      act.name = "Right Punch";
+      act.opcode = 0x17;
+      act.payload = "ProAction/Right Punch";
+      act.paramUnit = "Reps";
+      act.paramMin = 1; act.paramMax = 3; act.paramStep = 1;
+      break;
+    case 0x12: // Kung Fu
+      act.name = "Kung Fu";
+      act.opcode = 0x17;
+      act.payload = "ProAction/Kung Fu";
+      act.paramUnit = "Reps";
+      act.paramMin = 1; act.paramMax = 3; act.paramStep = 1;
+      break;
+    case 0x13: // Dance
+      act.name = "Dance";
+      act.opcode = 0x17;
+      act.payload = "ProAction/Dance";
+      act.paramUnit = "Reps";
+      act.paramMin = 1; act.paramMax = 3; act.paramStep = 1;
+      break;
+    case 0x14: // Push-ups
+      act.name = "Push-ups";
+      act.opcode = 0x17;
+      act.payload = "ProAction/Push Ups";
+      act.paramUnit = "Reps";
+      act.paramMin = 1; act.paramMax = 3; act.paramStep = 1;
+      break;
+    case 0x15: // Handstand
+      act.name = "Handstand";
+      act.opcode = 0x17;
+      act.payload = "ProAction/Handstand";
+      act.paramUnit = "Reps";
+      act.paramMin = 1; act.paramMax = 3; act.paramStep = 1;
+      break;
+    case 0x16: // Single Kick
+      act.name = "Single Kick";
+      act.opcode = 0x17;
+      act.payload = "ProAction/Single Kick";
+      act.paramUnit = "Reps";
+      act.paramMin = 1; act.paramMax = 3; act.paramStep = 1;
+      break;
+    case 0x17: // Squats
+      act.name = "Squats";
+      act.opcode = 0x17;
+      act.payload = "ProAction/Squat";
+      act.paramUnit = "Reps";
+      act.paramMin = 1; act.paramMax = 3; act.paramStep = 1;
+      break;
+    case 0x18: // Wave Hand
+      act.name = "Wave Hand";
+      act.opcode = 0x17;
+      act.payload = "ProAction/Say Hello";
+      act.paramUnit = "Reps";
+      act.paramMin = 1; act.paramMax = 3; act.paramStep = 1;
+      break;
+    case 0x19: // Celebrate
+      act.name = "Celebrate";
+      act.opcode = 0x17;
+      act.payload = "ProAction/Celebrate";
+      act.paramUnit = "Reps";
+      act.paramMin = 1; act.paramMax = 3; act.paramStep = 1;
+      break;
+    default:
+      act.name = "Custom Action";
+      act.opcode = 0x00;
+      act.payload = "";
+      act.paramUnit = "Reps";
+      act.paramMin = 1; act.paramMax = 3; act.paramStep = 1;
+      break;
+  }
+  return act;
+}
+
+// ==============================================================================
+// 8.2 RUN CHAIN ENGINE: PHASE 1 (DISCOVERY 0xAA) & PHASE 2 (EXECUTION 0xBB)
+// ==============================================================================
+bool executeRunChain() {
+  Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
+  Serial.println("║                 [RUN CHAIN ENGINE] PHASE 1: DISCOVERY                  ║");
+  Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
+  Serial.println("║ Emitting Discovery Seed [0xAA, 0, 0, 0, 0x55] on GPIO 15 (TX)...       ║");
+
+  // 1. Flush any residual noise or old bytes on Chain Return Rail
+  while (ChainSerial.available() > 0) {
+    ChainSerial.read();
+  }
+
+  // 2. Dispatch Phase 1 Discovery Seed Frame: [0xAA, Len=0, Count=0, CRC=0, Footer=0x55]
+  uint8_t seedPkt[5] = { 0xAA, 0x00, 0x00, 0x00, 0x55 };
+  ChainSerial.write(seedPkt, 5);
+  ChainSerial.flush();
+
+  // 3. Await header (0xAA) on Return Rail (PIN_CHAIN_RX = GPIO 16) with 350ms timeout
+  unsigned long t0 = millis();
+  bool headerFound = false;
+  while (millis() - t0 < 350) {
+    if (ChainSerial.available() > 0) {
+      uint8_t b = ChainSerial.read();
+      if (b == 0xAA) {
+        headerFound = true;
+        break;
+      }
+    }
+    delay(1);
+  }
+
+  if (!headerFound) {
+    Serial.println("║ ❌ Return Rail: No response / open circuit. (No blocks or no End Block)║");
+    Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+    return false;
+  }
+
+  // 4. Read Len and Count
+  unsigned long t1 = millis();
+  while (ChainSerial.available() < 2 && (millis() - t1 < 100)) delay(1);
+  if (ChainSerial.available() < 2) {
+    Serial.println("║ ❌ Incomplete response: Timeout waiting for length and count.          ║");
+    Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+    return false;
+  }
+
+  uint8_t len = ChainSerial.read();
+  uint8_t count = ChainSerial.read();
+
+  if (count == 0 || len != count * 2 || len > 60) {
+    Serial.printf("║ ❌ Invalid chain frame dimensions: Len=%d, Count=%d                       ║\n", len, count);
+    Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+    return false;
+  }
+
+  // 5. Read payload (len bytes) + CRC8 (1 byte) + Footer (1 byte)
+  uint8_t rxBuf[64];
+  unsigned long t2 = millis();
+  int bytesRead = 0;
+  while (bytesRead < (len + 2) && (millis() - t2 < 200)) {
+    if (ChainSerial.available() > 0) {
+      rxBuf[bytesRead++] = ChainSerial.read();
+    } else {
+      delay(1);
+    }
+  }
+
+  if (bytesRead < (len + 2)) {
+    Serial.printf("║ ❌ Frame truncated: Expected %d bytes, only received %d.                 ║\n", len + 2, bytesRead);
+    Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+    return false;
+  }
+
+  uint8_t rxCrc = rxBuf[len];
+  uint8_t footer = rxBuf[len + 1];
+
+  // 6. Verify cumulative CRC-8 (covers [len, count, payload...])
+  uint8_t checkBuf[64];
+  checkBuf[0] = len;
+  checkBuf[1] = count;
+  for (int i = 0; i < len; i++) {
+    checkBuf[2 + i] = rxBuf[i];
+  }
+  uint8_t calcCrc = calcCrc8(checkBuf, 2 + len);
+
+  if (calcCrc != rxCrc || footer != 0x55) {
+    Serial.printf("║ ❌ CRC-8 Mismatch! Calc: 0x%02X, Recv: 0x%02X, Footer: 0x%02X                   ║\n",
+                  calcCrc, rxCrc, footer);
+    Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+    return false;
+  }
+
+  // 7. Compilation Success! Print complete program sequence
+  Serial.printf("║ 🟢 Loopback Verified! Sequence Compiled: %d Steps, CRC: 0x%02X (VALID ✓) ║\n", count, rxCrc);
+  Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
+  for (int i = 0; i < count; i++) {
+    uint8_t actId = rxBuf[i * 2];
+    uint8_t parVal = rxBuf[i * 2 + 1];
+    Serial.printf("║  Step %d: [0x%02X] %-20s Parameter: %3d %-6s        ║\n",
+                  i + 1, actId, getActionNameByToken(actId), parVal, getParamUnitByToken(actId));
+  }
+  Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+
+  // Brief pause before execution begins
+  delay(400);
+
+  // 8. PHASE 2: REAL-TIME STEP EXECUTION & WS2812B STEP TRACKING (0xBB)
+  Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
+  Serial.println("║                 [RUN CHAIN ENGINE] PHASE 2: EXECUTION                  ║");
+  Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+
+  for (int s = 1; s <= count; s++) {
+    uint8_t actId  = rxBuf[(s - 1) * 2];
+    uint8_t parVal = rxBuf[(s - 1) * 2 + 1];
+    RobosenAction actionObj = getActionObjByToken(actId, parVal);
+
+    // Broadcast Step Execution Frame: [0xBB, ActiveStep, TotalSteps, CRC8, 0x55]
+    uint8_t stepPayload[2] = { (uint8_t)s, (uint8_t)count };
+    uint8_t stepCrc = calcCrc8(stepPayload, 2);
+    uint8_t stepPkt[5] = { 0xBB, (uint8_t)s, (uint8_t)count, stepCrc, 0x55 };
+    ChainSerial.write(stepPkt, 5);
+    ChainSerial.flush();
+
+    setStatusLED(0, 100, 20); // Vivid Green: Active step
+    Serial.printf("\n>>> [STEP %d of %d] Block #%d ACTIVE (Glowing Bright Green) <<<\n", s, count, s);
+    Serial.printf(">>> Executing: '%s' (%d %s) on Robot <<<\n", 
+                  actionObj.name, actionObj.paramVal, actionObj.paramUnit);
+
+    // Dispatch BLE motion command to physical robot
+    sendRobosenPacket(actionObj);
+
+    // Inter-step settling delay
+    delay(400);
+  }
+
+  // 9. PHASE 3: PROGRAM COMPLETE & RAINBOW VICTORY CELEBRATION (ActiveStep = 0xFF)
+  uint8_t endPayload[2] = { 0xFF, (uint8_t)count };
+  uint8_t endCrc = calcCrc8(endPayload, 2);
+  uint8_t endPkt[5] = { 0xBB, 0xFF, (uint8_t)count, endCrc, 0x55 };
+  ChainSerial.write(endPkt, 5);
+  ChainSerial.flush();
+
+  Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
+  Serial.println("║  🎉 [MISSION COMPLETE] All chain steps successfully executed!          ║");
+  Serial.println("║  Triggering Rainbow Victory Sparkle across all connected blocks!       ║");
+  Serial.println("╚════════════════════════════════════════════════════════════════════════╝\n");
+
+  // Master RGB LED Rainbow Sparkle
+  for (int k = 0; k < 3; k++) {
+    setStatusLED(100, 0, 0);   delay(80);
+    setStatusLED(100, 50, 0);  delay(80);
+    setStatusLED(100, 100, 0); delay(80);
+    setStatusLED(0, 100, 0);   delay(80);
+    setStatusLED(0, 0, 100);   delay(80);
+    setStatusLED(50, 0, 100);  delay(80);
+  }
+  updateStatusLED();
+
   return true;
 }
 
@@ -1017,7 +1362,7 @@ void renderActionMenu() {
   } else {
     Serial.println("║ • Knob 1: Select Action (Click: Retry)• Knob 2: Adjust Parameter Value ║");
   }
-  Serial.println("║ • Start Click: Execute Motion         • Hold Start: BLE Pairing (3s)   ║");
+  Serial.println("║ • Start Click: Run Chain / Action     • Hold Start: BLE Pairing (3s)   ║");
   Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
 }
 

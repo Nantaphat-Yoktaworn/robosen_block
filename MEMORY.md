@@ -23,8 +23,14 @@ robosen_block/
 │   │   ├── main.c                        # Unified CH32V003 Action Block firmware (2-Phase Binary V2, Config Dock, WS2812B)
 │   │   ├── funconfig.h                   # CH32V003 configuration header
 │   │   ├── ch32fun.c / .h / .ld / hw.h   # Core register & startup layer
-│   │   ├── build.ps1                     # Native RISC-V build script (2380-byte binary)
+│   │   ├── build.ps1                     # Native RISC-V build script (2804-byte binary)
 │   │   ├── action_block.bin              # Pre-compiled ready-to-flash binary
+│   │   └── README.md
+│   ├── ch32v003_end_block/
+│   │   ├── main.c                        # Smart End Block RISC-V firmware (Active loopback line driver, CRC validation, WS2812B)
+│   │   ├── funconfig.h                   # CH32V003 configuration header
+│   │   ├── build.ps1                     # Native RISC-V build script (2016-byte binary)
+│   │   ├── end_block.bin                 # Pre-compiled ready-to-flash binary (Token 0xEE)
 │   │   └── README.md
 │   ├── esp32_ch32v003_programmer/
 │   │   ├── esp32_ch32v003_programmer.ino # ESP32 / ESP32-S3 SWIO programmer firmware
@@ -32,7 +38,7 @@ robosen_block/
 │   │   ├── flash_tool.py                 # Python host CLI flasher with chunked flashing & verification
 │   │   └── README.md
 │   └── esp32_master/
-│       └── esp32_master.ino              # Master Block C++ firmware (ESP32-S3 BLE Central, NVS flash, Quadrature UI)
+│       └── esp32_master.ino              # Master Block C++ firmware (ESP32-S3 BLE Central, NVS flash, Dual-Knob UI, Run Chain Engine)
 ├── recordings/
 │   └── K1/
 │       └── test.json                     # Recorded joint keyframe motion sequences
@@ -519,4 +525,46 @@ The `assignments/` folder stores academic project coursework, literature reviews
   - ✅ **Physical Silicon End-to-End Success:** Verified live detection of TENSTAR CH32V003 (`[0x10] Left Punch`), burning new action (`0x14: Push-ups, 1 Reps`), receiving flash write ACK `0x06`, and real-time Master UI update to `Config Dock: DOCKED 🟢 [0x14] Push-ups (1 Reps)`.
   - **Linker Script Bug Resolution:** Identified and resolved memory map collision in bare-metal toolchain where unpreprocessed `ch32fun.ld` assigned `sp = 0x20180000` (causing immediate HardFault on boot). Implemented automated preprocessor stage in `build.ps1` generating `ch32fun_003.ld` with valid 2KB SRAM boundaries (`0x20000000 - 0x20000800`).
   - **AFIO Peripheral Clock:** Enabled `RCC_APB2Periph_AFIO` to ensure alternate function multiplexer routes USART1 TX/RX cleanly to `PD5` / `PD6`.
+
+---
+
+## 16. CH32V003 Smart End Block Firmware Architecture & Silicon Flash
+
+- **Flashing Date:** September 7, 2026
+- **Firmware Location:** [`firmware/ch32v003_end_block/`](firmware/ch32v003_end_block/) (`main.c`, `build.ps1`, `end_block.bin` = 2016 bytes).
+- **Architecture & Electrical Design:**
+  - Unlike a passive U-turn copper bridge (which suffers from cumulative contact resistance over $2 \times N$ magnetic pogo joints), the **Smart End Block** functions as an **active digital line driver**.
+  - Internal pull-up role select: `PD0` tied to `GND` configures the chip as End Terminator (Token `0xEE`).
+  - Validates cumulative CRC-8 checksum of incoming Phase 1 (`0xAA`) frames before retransmitting them onto Pin 4 Return Rail directly to Master.
+  - Visual Feedback: Calm emerald green glow on boot and valid loopback; synchronized rainbow sparkle upon receiving Phase 3 (`0xBB 0xFF`) completion broadcast.
+- **Config Dock Recognition:** Docked End Block is immediately identified by Master UI as `Config Dock: DOCKED 🟢 [0xEE] End Terminator (0 Cap)`.
+- **Silicon Flash Verification:** Flashed onto IC #2 via `flash_tool.py` on `COM3`. 100% byte-for-byte readback verification confirmed.
+
+---
+
+## 17. Run Chain Engine End-to-End Hardware Verification
+
+- **Verification Date:** September 8, 2026
+- **Hardware Topology:**
+  - ESP32-S3 Master: `GPIO 15` (Chain TX) and `GPIO 16` (Chain RX) @ 115200 baud.
+  - Action Block 1 (IC #1): `PD6` (RX) $\longleftarrow$ Master `GPIO 15`; `PD5` (TX) $\longrightarrow$ End Block `PD6`.
+  - Smart End Block (IC #2): `PD6` (RX) $\longleftarrow$ Block 1 `PD5`; `PD5` (TX) $\longrightarrow$ Master `GPIO 16`.
+  - Common 3.3V & GND across breadboards.
+- **Verified Protocol Execution:**
+  1. **Phase 1: Discovery & Compilation (`0xAA`):**
+     - Master emits seed `[0xAA, Len=0, Count=0, CRC=0x00, 0x55]`.
+     - Block 1 appends stored action `0x14` (Push-ups) and param `1`, increments count to 1, updates CRC-8.
+     - Smart End Block validates cumulative CRC-8 and actively transmits sequence over Pin 4 return rail to Master `GPIO 16`.
+     - Master logs: `🟢 Loopback Verified! Sequence Compiled: 1 Steps, CRC: 0xXX (VALID ✓)`.
+  2. **Phase 2: Real-Time Step Execution (`0xBB`):**
+     - Master broadcasts active step frame `[0xBB, ActiveStep=1, Total=1, CRC8, 0x55]`.
+     - Block 1 WS2812B illuminates in **Bright Pulsating Green (100% brightness)**.
+     - Master dispatches BLE motion packet to Robosen K1 robot over persistent BLE link.
+  3. **Phase 3: Mission Complete Celebration (`0xBB 0xFF`):**
+     - Master broadcasts completion frame `[0xBB, ActiveStep=0xFF, Total=1, CRC8, 0x55]`.
+     - Block 1, Smart End Block, and Master onboard WS2812B simultaneously trigger synchronized **Rainbow Victory Sparkle**!
+- **Control Interface:**
+  - Single tap on physical Start Button (`GPIO 14`) probes the Run Chain; falls back to single knob action if open-circuit.
+  - Manual `'r'` / `'R'` command in Serial Monitor enables interactive diagnostic testing.
+
 

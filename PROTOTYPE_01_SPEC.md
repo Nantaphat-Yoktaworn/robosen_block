@@ -103,17 +103,17 @@ Every active component in Prototype #01 runs natively on **+3.3V logic and power
 | **Start / Run Button** | `TRIG_BTN` | **GPIO 14** | 🟠 **Orange** | Top-Right switch pin (Tap = Run, 3s Hold = BLE Scan) |
 | | `GND Return` | **GND Rail** | ⚫ **Black** | Bottom-Left switch pin (Diagonal GND return bridge) |
 | **Status RGB LED (Onboard)**| `RGB_BUILTIN` | **GPIO 48** | *Internal* | WS2812 NeoPixel (🟢 Green = Ready, 🔵 Blue = Scan, 🟡 Yellow = TX) |
-| **Status RGB LED (Master)** | `WS2812_DATA` | **GPIO 21** | 🟣 **Purple** | *(Reserved)* Discrete Master 5050 WS2812 status LED |
-| **Run Port (Chain Bus)** | `CHAIN_TX (Pin 3)` | **GPIO 43** | ⚪ **White** | *(Reserved)* Emits Phase 1 seed frame (`0xAA`) down the chain |
-| | `CHAIN_RX (Pin 4)` | **GPIO 44** | 🟤 **Brown** | *(Reserved)* Receives Phase 1 return & broadcasts Phase 2 active steps (`0xBB`) |
-| **Config Port (Dock UART)** | `CFG_TX` | **GPIO 17** | 🔘 **Gray** | *(Reserved)* Writes Action Config (`0xCF`) to docked block |
-| | `CFG_RX` | **GPIO 18** | 🟣 **Purple** | *(Reserved)* Receives ACK from docked block |
+| **Status RGB LED (Master)** | `WS2812_DATA` | **GPIO 48** | *Internal* | Onboard WS2812 status LED (🟢 Ready, 🔵 Scan, 🟡 TX) |
+| **Run Port (Chain Bus)** | `CHAIN_TX (Pin 3)` | **GPIO 15** | 🟢 **Green** | Emits Phase 1 seed (`0xAA`) & broadcasts Phase 2 steps (`0xBB`) (✅ Verified) |
+| | `CHAIN_RX (Pin 4)` | **GPIO 16** | ⚪ **White** | Receives Phase 1 return rail from Smart End Block (✅ Verified) |
+| **Config Port (Dock UART)** | `CFG_TX` | **GPIO 17** | 🔘 **Gray** | Writes Action Config (`0xCF`) to docked block (✅ Verified) |
+| | `CFG_RX` | **GPIO 18** | 🟣 **Purple** | Receives Query & ACK from docked block (✅ Verified) |
 | **E-Ink Display (SPI)** | `BUSY` | **GPIO 4** | 🔘 **Gray** | *(Reserved)* Active High/Low busy line |
 | | `RST` | **GPIO 5** | 🟤 **Brown** | *(Reserved)* Hardware reset line |
 | | `DC` | **GPIO 6** | 🟣 **Purple** | *(Reserved)* Data / Command line |
 | | `CS` | **GPIO 7** | 🟡 **Yellow** | *(Reserved)* SPI Chip Select |
-| | `SCK` | **GPIO 15** | 🟢 **Green** | *(Reserved)* SPI Clock line |
-| | `DIN (MOSI)` | **GPIO 16** | ⚪ **White** | *(Reserved)* SPI Master Out Slave In |
+| | `SCK` | **GPIO 21** | 🟢 **Green** | *(Reserved)* SPI Clock line |
+| | `DIN (MOSI)` | **GPIO 38** | ⚪ **White** | *(Reserved)* SPI Master Out Slave In |
 
 ---
 
