@@ -638,5 +638,140 @@ The `assignments/` folder stores academic project coursework, literature reviews
   5. **Chain Inter-Step Settling:** Increased inter-step delay in `executeRunChain()` to **500ms**.
 - **Live Hardware Verification:** Walk Forward 1 step followed by Left Punch 2 reps confirmed executing flawlessly on physical Robosen K1 robot.
 
+---
 
+## 21. Master Block Battery & Power Management Subsystem Architecture
 
+- **Documentation Date:** September 22, 2026
+- **Subsystem Scope:** Standalone battery power supply, USB-C charging, BMS protection, and regulated 3.3V DC-DC power delivery for the Master Block (ESP32-S3), Config Dock, and Run Chain daisy-bus.
+
+### 21.1 Selected Bill of Materials (BOM)
+
+| Item # | Component | Specification | Qty | Role & Electrical Notes |
+| :---: | :--- | :--- | :---: | :--- |
+| **1** | **TP4056 USB-C Charger Board with Protection** | 5V 1A Li-ion charger with integrated **DW01A** + **FS8205A** | 1 | Handles USB-C charging, overcharge ($4.28\text{V}$), overdischarge ($2.4\text{V}$), and short-circuit cutoff. (No need for discrete DW01/FS8205A chips). |
+| **2** | **LG Chem INR18650-MJ1 Cell** | 3.7V nominal, 3500mAh, 10A discharge | 1 | High-capacity power source providing ~25 to 45+ hours of continuous classroom operation. |
+| **3** | **TPS63020 Buck-Boost Module** | Synchronous DC-DC regulator, 1.8V–5.5V input $\to$ **3.3V fixed output** (up to 2A buck / 1.2A boost) | 1 | Seamlessly bucks down (4.2V $\to$ 3.3V) and boosts up (3.0V $\to$ 3.3V), eliminating ESP32-S3 brownouts during BLE RF bursts. |
+| **4** | **18650 Battery Holder** | Single-slot 18650 holder with pre-soldered wire leads | 1 | Safe mechanical battery mounting without soldering directly onto cell terminals. |
+| **5** | **SPST Slide / Toggle Switch** | Mini 2-position slide switch ($\ge 0.5\text{A}$) | 1 | System Power ON/OFF switch placed between TP4056 `OUT+` and TPS63020 `VIN`. |
+| **6** | **Hookup Wire** | 22–24 AWG stranded copper wire (Red & Black) | ~1m | Power rail connections between modules and to ESP32-S3. |
+
+### 21.2 Power Budget & Runtime Analysis (3500mAh @ 3.3V)
+
+- **Total Usable Energy at 3.3V:** $\approx \frac{3.7\text{V} \times 3500\text{mAh} \times 0.90}{3.3\text{V}} \approx \mathbf{3{,}530\text{ mAh}}$.
+- **Average Current Draw:**
+  - **Idle / Config Mode:** ~80 mA (ESP32-S3 BLE idle + 1 docked block + E-Ink static) $\longrightarrow$ **~44 Hours**.
+  - **Typical Classroom Use (5-Block Chain):** ~140 mA (ESP32-S3 + 5 Action Blocks + Smart End Block + LEDs) $\longrightarrow$ **~25 Hours** (~4 full school days).
+  - **Heavy / Continuous Execution (8-Block Chain):** ~220 mA (Continuous BLE stream + 8 blocks + max LED pulse) $\longrightarrow$ **~16 Hours**.
+  - **Deep Sleep:** $< 50\,\mu\text{A}$ $\longrightarrow$ **> 2 Years** shelf life.
+
+### 21.3 Full System Wiring & Schematic Diagram
+
+```text
+====================================================================================================
+                                      MASTER BLOCK FULL WIRING
+====================================================================================================
+
+ [ 18650 LG MJ1 3500mAh ]
+    (+) Red wire   (-) Black wire
+     │                 │
+     ▼                 ▼
+   [ B+ ]            [ B- ]
+ ┌───────────────────────────────┐
+ │ TP4056 + DW01A + FS8205A      │◄─── [ USB-C 5V Input ] (Charging Port)
+ │ (Protected Charger Board)     │
+ └───────┬───────────────┬───────┘
+       [OUT+]          [OUT-] (BMS GND)
+         │               │
+         ▼               │
+  [SPST Power Switch]    │
+         │               │
+         ▼               ▼
+       [VIN]           [GND]
+ ┌───────────────────────────────┐
+ │ TPS63020 Buck-Boost Module    │
+ │ (Tie EN -> VIN to enable)     │
+ │ (Tie PS -> GND for power save)│
+ └───────┬───────────────┬───────┘
+       [VOUT]          [GND]
+         │ (Clean 3.3V)  │ (Common Ground)
+         │               │
+ ════════╪═══════════════╪═════════════════════════════════════════════════════════════════════════
+         │               │                     COMMON POWER RAILS (+3.3V & GND)
+ ════════╪═══════════════╪═════════════════════════════════════════════════════════════════════════
+         │               │
+         ├───────────────┼──────────────────────┐
+         │               │                      │
+         ▼               ▼                      │
+    ┌─────────┐     ┌─────────┐                 │
+    │   3V3   │     │   GND   │                 │
+ ┌──┴─────────┴─────┴─────────┴────────────────┐│
+ │                                             ││
+ │         ESP32-S3 MASTER CONTROLLER          ││
+ │                                             ││
+ │   GPIO 8  (PIN_K1_CLK) ──► Knob 1 CLK       ││
+ │   GPIO 9  (PIN_K1_DT)  ──► Knob 1 DT        ││
+ │   GPIO 10 (PIN_K1_SW)  ──► Knob 1 Switch    ││
+ │                                             ││
+ │   GPIO 11 (PIN_K2_CLK) ──► Knob 2 CLK       ││
+ │   GPIO 12 (PIN_K2_DT)  ──► Knob 2 DT        ││
+ │   GPIO 13 (PIN_K2_SW)  ──► Knob 2 Switch    ││
+ │                                             ││
+ │   GPIO 14 (PIN_START)  ──► Start Button (NO)││
+ │                                             ││
+ │   GPIO 17 (CFG_TX) ────┐                    ││
+ │   GPIO 18 (CFG_RX) ──┐ │                    ││
+ │                      │ │                    ││
+ │   GPIO 15 (CHAIN_TX) ┼─┼───────┐            ││
+ │   GPIO 16 (CHAIN_RX) ┼─┼─────┐ │            ││
+ └──────────────────────┼─┼─────┼─┼────────────┘│
+                        │ │     │ │             │
+                        │ │     │ │             ▼
+ ┌──────────────────────┼─┼─────┼─┼─────────────┐
+ │                      │ │     │ │             │
+ │   KNOBS & BUTTON:    │ │     │ │             │
+ │   • Knob 1 VCC / + ──┼─┼─────┼─┼─────────────┼──► +3.3V Rail
+ │   • Knob 1 GND ──────┼─┼─────┼─┼─────────────┴──► GND Rail
+ │   • Knob 2 VCC / + ──┼─┼─────┼─┼─────────────┬──► +3.3V Rail
+ │   • Knob 2 GND ──────┼─┼─────┼─┼─────────────┴──► GND Rail
+ │   • Start Btn Return ┼─┼─────┼─┼────────────────► GND Rail
+ │                      │ │     │ │
+ │   CONFIG DOCK PORT:  │ │     │ │
+ │   • Pin 1 (V+) ──────┼─┼─────┼─┼─────────────┬──► +3.3V Rail
+ │   • Pin 2 (GND) ─────┼─┼─────┼─┼─────────────┴──► GND Rail
+ │   • Pin 3 (CFG_RX) ◄─┘ │     │ │                  (Receives ACK from docked block)
+ │   • Pin 4 (CFG_TX) ◄───┘     │ │                  (Flashes config to docked block)
+ │                              │ │
+ │   RUN CHAIN PORT:            │ │
+ │   • Pin 1 (V+) ──────────────┼─┼─────────────┬──► +3.3V Rail (Powers whole chain)
+ │   • Pin 2 (GND) ─────────────┼─┼─────────────┴──► GND Rail
+ │   • Pin 3 (CHAIN_TX) ◄───────┘ │                  (Sends 0xAA discovery seed)
+ │   • Pin 4 (CHAIN_RX) ◄─────────┘                  (Receives loopback from End Block)
+ └──────────────────────────────────────────────┘
+```
+
+### 21.4 Pin-to-Pin Reference Table
+
+| Subsystem | Source Component & Pin | Target Pin | Wire Color / Notes |
+| :--- | :--- | :--- | :--- |
+| **Battery In** | 18650 Battery (+) | TP4056 **`B+`** | 🔴 Red |
+| | 18650 Battery (-) | TP4056 **`B-`** | ⚫ Black |
+| **Power Switch**| TP4056 **`OUT+`** | SPST Switch Terminal 1 | 🔴 Red |
+| | SPST Switch Terminal 2 | TPS63020 **`VIN`** & **`EN`** | 🔴 Red *(Tying EN to VIN turns regulator on with switch)* |
+| **Regulator In**| TP4056 **`OUT-`** | TPS63020 **`GND`** | ⚫ Black *(Protected ground)* |
+| | TPS63020 **`PS`** | TPS63020 **`GND`** | 🔵 Blue *(Enables Power Save Mode)* |
+| **Regulator Out**| TPS63020 **`VOUT`** | ESP32-S3 **`3V3`** & Common Rail | 🔴 Red *(Regulated 3.3V DC)* |
+| | TPS63020 **`GND`** | ESP32-S3 **`GND`** & Common Rail | ⚫ Black |
+| **Knob 1 (Action)**| `PIN_K1_CLK` | ESP32-S3 **GPIO 8** | 🟡 Yellow |
+| | `PIN_K1_DT` | ESP32-S3 **GPIO 9** | 🟢 Green |
+| | `PIN_K1_SW` | ESP32-S3 **GPIO 10** | 🔵 Blue |
+| **Knob 2 (Param)** | `PIN_K2_CLK` | ESP32-S3 **GPIO 11** | ⚪ White |
+| | `PIN_K2_DT` | ESP32-S3 **GPIO 12** | 🟤 Brown |
+| | `PIN_K2_SW` | ESP32-S3 **GPIO 13** | 🔘 Gray |
+| **Start Button** | `PIN_START_BTN` | ESP32-S3 **GPIO 14** & `GND` | 🟠 Orange *(Active LOW)* |
+| **Config Dock** | `PIN_CFG_TX` | Dock Pin 4 (`CFG_TX`) | ESP32-S3 **GPIO 17** |
+| | `PIN_CFG_RX` | Dock Pin 3 (`CFG_RX`) | ESP32-S3 **GPIO 18** |
+| | Power Rails | Dock Pin 1 (`V+`) & Pin 2 (`GND`) | Connected to 3.3V & GND |
+| **Run Port** | `PIN_CHAIN_TX` | Run Pin 3 (`DATA`) | ESP32-S3 **GPIO 15** |
+| | `PIN_CHAIN_RX` | Run Pin 4 (`PASS_THRU`) | ESP32-S3 **GPIO 16** |
+| | Power Rails | Run Pin 1 (`V+`) & Pin 2 (`GND`) | Connected to 3.3V & GND |
