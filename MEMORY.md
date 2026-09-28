@@ -775,3 +775,34 @@ The `assignments/` folder stores academic project coursework, literature reviews
 | **Run Port** | `PIN_CHAIN_TX` | Run Pin 3 (`DATA`) | ESP32-S3 **GPIO 15** |
 | | `PIN_CHAIN_RX` | Run Pin 4 (`PASS_THRU`) | ESP32-S3 **GPIO 16** |
 | | Power Rails | Run Pin 1 (`V+`) & Pin 2 (`GND`) | Connected to 3.3V & GND |
+| **E-Ink Display** | `PIN_EPD_BUSY` | Display `BUSY` | ESP32-S3 **GPIO 4** (🔘 Gray) |
+| | `PIN_EPD_RES` | Display `RES` / `RST` | ESP32-S3 **GPIO 5** (🟤 Brown) |
+| | `PIN_EPD_DC` | Display `DC` | ESP32-S3 **GPIO 6** (🟣 Purple) |
+| | `PIN_EPD_CS` | Display `CS` | ESP32-S3 **GPIO 7** (🟡 Yellow) |
+| | `PIN_EPD_SCL` | Display `SCL` (SPI Clock) | ESP32-S3 **GPIO 21** (🟢 Green) |
+| | `PIN_EPD_SDA` | Display `SDA` (SPI MOSI/DIN) | ESP32-S3 **GPIO 38** (⚪ White) |
+| | Power Rails | Display `VCC` & `GND` | Strictly 3.3V DC & GND |
+
+---
+
+## 22. Master Block 2.13" E-Ink Display (DEPG0213BN / SSD1680) Silicon Verification
+
+- **Verification Date:** September 28, 2026
+- **Firmware Location:** [`firmware/standalone_eink_test/`](firmware/standalone_eink_test/) (`standalone_eink_test.ino`, `README.md`).
+- **Hardware Silicon Identification:**
+  - **Panel Model:** DEPG0213BN (DKE / GoodDisplay, 122x250, monochrome black/white).
+  - **Controller IC:** SSD1680 / JD79661 with factory OTP ROM Look-Up Tables.
+  - **Wiring:** SPI SCL on GPIO 21, SDA on GPIO 38, CS on GPIO 7, DC on GPIO 6, RES on GPIO 5, BUSY on GPIO 4.
+- **Key Breakthroughs & Engineering Solutions:**
+  1. **Zero-Blink Instant Boot Mode (`SKIP_BOOT_BLINKING = 1`):**
+     - Default GxEPD2 initialization (`initial = true`) causes a violent black/white invert strobe and triggers a 10-second `Busy Timeout!` on DEPG0213BN panels.
+     - Resolved by calling `display.init(115200, false, 2, false)` (`initial = false`) and rendering the baseline UI using `display.setPartialWindow(0, 0, width, height)`.
+     - Result: Display boots instantly in `< 750 ms` with zero screen flickering and zero bus timeouts.
+  2. **Driver Compatibility Discovery:**
+     - Tested `GxEPD2_213_B74` for potential ~300ms fast partial refresh; confirmed that DEPG0213BN silicon rejects B74 initialization commands and freezes.
+     - Production driver is strictly locked to `GxEPD2_BW<GxEPD2_213_BN, GxEPD2_213_BN::HEIGHT>`.
+  3. **Silicon Performance Benchmark Results:**
+     - SPI Transfer Overhead: **~19 ms** (ESP32-S3 hardware SPI @ 4 MHz).
+     - Glass Particle Migration Waveform (`_Update_Part`): **727 ms** (`726998 µs`).
+     - Total Frame Cycle Time: **746 ms** $\longrightarrow$ **1.34 updates/sec (1.34 Hz)** maximum physical panel capability.
+     - Fully verified for responsive parameter tweaking via rotary encoders and live menu navigation without eye fatigue.

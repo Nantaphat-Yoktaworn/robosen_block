@@ -108,12 +108,12 @@ Every active component in Prototype #01 runs natively on **+3.3V logic and power
 | | `CHAIN_RX (Pin 4)` | **GPIO 16** | ⚪ **White** | Receives Phase 1 return rail from Smart End Block (✅ Verified) |
 | **Config Port (Dock UART)** | `CFG_TX` | **GPIO 17** | 🔘 **Gray** | Writes Action Config (`0xCF`) to docked block (✅ Verified) |
 | | `CFG_RX` | **GPIO 18** | 🟣 **Purple** | Receives Query & ACK from docked block (✅ Verified) |
-| **E-Ink Display (SPI)** | `BUSY` | **GPIO 4** | 🔘 **Gray** | *(Reserved)* Active High/Low busy line |
-| | `RST` | **GPIO 5** | 🟤 **Brown** | *(Reserved)* Hardware reset line |
-| | `DC` | **GPIO 6** | 🟣 **Purple** | *(Reserved)* Data / Command line |
-| | `CS` | **GPIO 7** | 🟡 **Yellow** | *(Reserved)* SPI Chip Select |
-| | `SCK` | **GPIO 21** | 🟢 **Green** | *(Reserved)* SPI Clock line |
-| | `DIN (MOSI)` | **GPIO 38** | ⚪ **White** | *(Reserved)* SPI Master Out Slave In |
+| **E-Ink Display (SPI)** | `BUSY` | **GPIO 4** | 🔘 **Gray** | Active High/Low busy line (✅ Verified) |
+| | `RST` | **GPIO 5** | 🟤 **Brown** | Hardware reset line (✅ Verified) |
+| | `DC` | **GPIO 6** | 🟣 **Purple** | Data / Command line (✅ Verified) |
+| | `CS` | **GPIO 7** | 🟡 **Yellow** | SPI Chip Select (✅ Verified) |
+| | `SCK` | **GPIO 21** | 🟢 **Green** | SPI Clock line (`SCL`) (✅ Verified) |
+| | `DIN (MOSI)` | **GPIO 38** | ⚪ **White** | SPI Master Out Slave In (`SDA`) (✅ Verified) |
 
 ---
 
@@ -178,6 +178,32 @@ The WCH CH32V003F4P6 runs a **single unified RISC-V firmware binary** configured
   * If left floating (internal pull-up High) $\to$ Operates as **Action Block**.
   * If tied to GND $\to$ Operates as **Smart End Block** (validates CRC-8 and loops TX to Pin 4 return rail).
 * **Pin `PD1` (SWIO):** 1-wire programming line used for initial factory firmware flashing.
+
+---
+
+### 5.3 Master Block E-Ink Display Interface & Control Architecture
+
+The Master Block user interface incorporates an ultra-low-power **2.13" E-Paper Display (DEPG0213BN / SSD1680)** for sunlight-readable visual feedback:
+
+* **Panel Model:** DEPG0213BN (DKE / GoodDisplay, 122x250 pixels, Active Matrix Electrophoretic).
+* **Driver Silicon:** SSD1680 / JD79661 with factory One-Time Programmable (OTP) waveform Look-Up Table (LUT).
+* **Verified ESP32-S3 Pin Mapping:**
+  * `SCL` (Clock): **GPIO 21**
+  * `SDA` (Data In / MOSI): **GPIO 38**
+  * `CS` (Chip Select): **GPIO 7**
+  * `DC` (Data / Command): **GPIO 6**
+  * `RES` (Reset): **GPIO 5**
+  * `BUSY` (Status Flag): **GPIO 4**
+  * `VCC` & `GND`: Strictly **3.3V DC** & GND.
+* **Driver Software:** Arduino `GxEPD2` library with `GxEPD2_213_BN` driver class.
+* **Zero-Flicker Boot Technique (`SKIP_BOOT_BLINKING`):**
+  * Invokes `display.init(115200, false, 2, false)` with `initial = false` to eliminate the disruptive black/white strobe flash and 10-second `Busy Timeout!` delays.
+  * Baseline UI rendered using `display.setPartialWindow(0, 0, width, height)` for an instant, smooth boot transition in `< 750 ms`.
+* **Hardware Refresh Benchmark Results (Verified on Silicon):**
+  * SPI transmission: ~19 ms.
+  * Glass particle migration (`_Update_Part`): **727 ms** (`726998 µs`).
+  * Total frame duration: **746 ms** $\longrightarrow$ **1.34 updates/sec** maximum physical speed.
+  * *Note:* Alternative driver classes (e.g. `GxEPD2_213_B74`) are rejected by the DEPG0213BN silicon controller; `GxEPD2_213_BN` is the strictly validated production driver.
 
 ---
 
@@ -372,12 +398,12 @@ To avoid disruptive classroom audio noise, all sound buzzers are eliminated in f
 STEP 1: MASTER BREADBOARD WIRING
   1. Mount the ESP32-S3 Dev Board on Breadboard #1.
   2. Connect ESP32-S3 3V3 pin to Breadboard Red (+) Rail; GND pin to Blue (-) Rail.
-  3. Wire the 2.13" E-Ink SPI lines:
-     BUSY -> GPIO 4, RST -> GPIO 5, DC -> GPIO 6, CS -> GPIO 7, SCK -> GPIO 15, DIN -> GPIO 16.
+  3. Wire the 2.13" E-Ink SPI lines (DEPG0213BN / SSD1680):
+     BUSY -> GPIO 4, RST -> GPIO 5, DC -> GPIO 6, CS -> GPIO 7, SCL (SCK) -> GPIO 21, SDA (DIN) -> GPIO 38.
   4. Wire Knob 1 (KY-040): CLK -> GPIO 8, DT -> GPIO 9, SW -> GPIO 10, VCC -> 3.3V, GND -> GND.
   5. Wire Knob 2 (KY-040): CLK -> GPIO 11, DT -> GPIO 12, SW -> GPIO 13, VCC -> 3.3V, GND -> GND.
   6. Wire Start Button: Pin 1 -> GPIO 14, Pin 2 -> GND.
-  7. Wire Master WS2812 LED: DIN -> GPIO 21, VCC -> 3.3V, GND -> GND.
+  7. Master Status RGB LED: Uses onboard WS2812 NeoPixel on GPIO 48.
 
 STEP 2: ACTION & END BLOCK WIRING
   1. Place 1x TENSTAR CH32V003 board on each of Breadboards #2, #3, #4, #5.
