@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Robosen K1 Modular Block — 14-Week Horizontal Master Timeline Infographic</title>
+    <style>
+        @page {
+            size: 5200px 1580px;
+            margin: 0;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html, body {
+            width: 5200px;
+            height: 1580px;
+            overflow: hidden;
+            background-color: #090D16;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Leelawadee UI", "Tahoma", sans-serif;
+            color: #F8FAFC;
+            position: relative;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        
+        /* High-tech Blueprint background */
+        .bg-grid {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(30, 41, 59, 0.35) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(30, 41, 59, 0.35) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 0;
+        }
+
+        /* Header Canvas */
+        header {
+            position: absolute;
+            top: 25px;
+            left: 50px;
+            right: 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+            padding-bottom: 20px;
+        }
+        .header-title-box {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .logo-box {
+            background: linear-gradient(135deg, #06B6D4, #3B82F6);
+            width: 54px;
+            height: 54px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 900;
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
+        }
+        .title-main {
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            background: linear-gradient(90deg, #38BDF8, #818CF8, #EC4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .title-sub {
+            font-size: 14px;
+            color: #94A3B8;
+            margin-top: 3px;
+        }
+        .legend-box {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            background: rgba(15, 23, 42, 0.85);
+            padding: 10px 24px;
+            border-radius: 30px;
+            border: 1px solid #334155;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        /* SVG Spine Layer */
+        .svg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5200px;
+            height: 1580px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Week Cards */
+        .week-card {
+            position: absolute;
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.94), rgba(30, 41, 59, 0.94));
+            backdrop-filter: blur(16px);
+            border-radius: 16px;
+            padding: 16px 18px;
+            z-index: 5;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+        }
+        .card-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        .week-badge {
+            font-size: 12px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            font-family: monospace;
+        }
+        .date-badge {
+            font-size: 11px;
+            color: #94A3B8;
+            font-family: monospace;
+        }
+        .status-badge {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+        }
+        .star-pill {
+            display: inline-block;
+            background: #EC4899;
+            color: #FFFFFF;
+            font-size: 10px;
+            font-weight: 900;
+            padding: 2px 7px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            align-self: flex-start;
+            box-shadow: 0 0 10px rgba(236, 72, 153, 0.6);
+        }
+        .milestone-title {
+            font-size: 14.5px;
+            font-weight: 800;
+            color: #38BDF8;
+            line-height: 1.3;
+            margin-bottom: 3px;
+        }
+        .milestone-sub {
+            font-size: 11px;
+            color: #64748B;
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+        .items-list {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            overflow: hidden;
+        }
+        .item-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 7px;
+            font-size: 12px;
+            line-height: 1.32;
+            color: #CBD5E1;
+        }
+        .item-icon {
+            font-size: 13px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .item-tag {
+            color: #94A3B8;
+            font-weight: 800;
+            font-size: 10.5px;
+            margin-right: 2px;
+        }
+
+        /* Footer */
+        footer {
+            position: absolute;
+            bottom: 20px;
+            left: 50px;
+            right: 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(51, 65, 85, 0.6);
+            padding-top: 15px;
+            font-size: 13px;
+            color: #64748B;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+
+    <header>
+        <div class="header-title-box">
+            <div class="logo-box">🤖</div>
+            <div>
+                <div class="title-main">ROBOSEN K1 MODULAR PROGRAMMING BLOCKS — 14-WEEK INFOGRAPHIC</div>
+                <div class="title-sub">Physical Tangible Coding Blocks Project • Single Horizontal Spine (Left-to-Right Progression)</div>
+            </div>
+        </div>
+        <div class="legend-box">
+            <div class="legend-item"><div class="dot" style="background:#10B981;"></div><span style="color:#34D399;">DONE (เสร็จสิ้น): W1-W3</span></div>
+            <div class="legend-item"><div class="dot" style="background:#F59E0B;"></div><span style="color:#FCD34D;">IN PROGRESS (กำลังดำเนินการ): W4</span></div>
+            <div class="legend-item"><div class="dot" style="background:#38BDF8;"></div><span style="color:#7DD3FC;">SCHEDULED (ตามแผนงาน): W5-W14</span></div>
+            <div class="legend-item"><div class="dot" style="background:#EC4899;"></div><span style="color:#F472B6;">★ KEY MILESTONES (W7, W10, W12, W14)</span></div>
+        </div>
+    </header>
+
+    <!-- SVG Spine Layer -->
+    <svg class="svg-canvas" viewBox="0 0 5200 1580">
+        <defs>
+            <linearGradient id="spineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#10B981" />
+                <stop offset="25%" stop-color="#10B981" />
+                <stop offset="30%" stop-color="#F59E0B" />
+                <stop offset="50%" stop-color="#38BDF8" />
+                <stop offset="85%" stop-color="#818CF8" />
+                <stop offset="100%" stop-color="#EC4899" />
+            </linearGradient>
+            <filter id="glowFilter" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="5" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+        </defs>
+
+        <!-- Main Horizontal Spine Line -->
+        <line x1="80" y1="780" x2="5110" y2="780" stroke="url(#spineGrad)" stroke-width="8" stroke-linecap="round" />
+        <line x1="80" y1="780" x2="5110" y2="780" stroke="#FFFFFF" stroke-width="2" stroke-opacity="0.4" stroke-linecap="round" />
+        
+        <!-- Forward Arrowhead -->
+        <polygon points="5120,780 5095,768 5095,792" fill="#EC4899" />
+
+        <!-- Milestone Connectors & Central Dots -->
+        
+        <!-- Branch Week 1 -->
+        <line x1="220" y1="780" x2="220" y2="715" stroke="#10B981" stroke-width="3" stroke-dasharray="none" />
+        <path d="M 214 723 L 220 715 L 226 723" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" />
+        <circle cx="220" cy="780" r="18" fill="rgba(16, 185, 129, 0.5)" opacity="0.35" />
+        <circle cx="220" cy="780" r="11" fill="#0F172A" stroke="#10B981" stroke-width="4" />
+        <circle cx="220" cy="780" r="4" fill="#10B981" />
+        <text x="220" y="784" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W1</text>
+        
+        <!-- Branch Week 2 -->
+        <line x1="586" y1="780" x2="586" y2="845" stroke="#10B981" stroke-width="3" stroke-dasharray="none" />
+        <path d="M 580 837 L 586 845 L 592 837" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" />
+        <circle cx="586" cy="780" r="18" fill="rgba(16, 185, 129, 0.5)" opacity="0.35" />
+        <circle cx="586" cy="780" r="11" fill="#0F172A" stroke="#10B981" stroke-width="4" />
+        <circle cx="586" cy="780" r="4" fill="#10B981" />
+        <text x="586" y="762" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W2</text>
+        
+        <!-- Branch Week 3 -->
+        <line x1="952" y1="780" x2="952" y2="715" stroke="#10B981" stroke-width="3" stroke-dasharray="none" />
+        <path d="M 946 723 L 952 715 L 958 723" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" />
+        <circle cx="952" cy="780" r="18" fill="rgba(16, 185, 129, 0.5)" opacity="0.35" />
+        <circle cx="952" cy="780" r="11" fill="#0F172A" stroke="#10B981" stroke-width="4" />
+        <circle cx="952" cy="780" r="4" fill="#10B981" />
+        <text x="952" y="784" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W3</text>
+        
+        <!-- Branch Week 4 -->
+        <line x1="1318" y1="780" x2="1318" y2="845" stroke="#F59E0B" stroke-width="3" stroke-dasharray="none" />
+        <path d="M 1312 837 L 1318 845 L 1324 837" fill="none" stroke="#F59E0B" stroke-width="3" stroke-linecap="round" />
+        <circle cx="1318" cy="780" r="18" fill="rgba(245, 158, 11, 0.7)" opacity="0.35" />
+        <circle cx="1318" cy="780" r="11" fill="#0F172A" stroke="#F59E0B" stroke-width="4" />
+        <circle cx="1318" cy="780" r="4" fill="#F59E0B" />
+        <text x="1318" y="762" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W4</text>
+        
+        <!-- Branch Week 5 -->
+        <line x1="1684" y1="780" x2="1684" y2="715" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" />
+        <path d="M 1678 723 L 1684 715 L 1690 723" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
+        <circle cx="1684" cy="780" r="18" fill="rgba(56, 189, 248, 0.4)" opacity="0.35" />
+        <circle cx="1684" cy="780" r="11" fill="#0F172A" stroke="#38BDF8" stroke-width="4" />
+        <circle cx="1684" cy="780" r="4" fill="#38BDF8" />
+        <text x="1684" y="784" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W5</text>
+        
+        <!-- Branch Week 6 -->
+        <line x1="2050" y1="780" x2="2050" y2="845" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" />
+        <path d="M 2044 837 L 2050 845 L 2056 837" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
+        <circle cx="2050" cy="780" r="18" fill="rgba(56, 189, 248, 0.4)" opacity="0.35" />
+        <circle cx="2050" cy="780" r="11" fill="#0F172A" stroke="#38BDF8" stroke-width="4" />
+        <circle cx="2050" cy="780" r="4" fill="#38BDF8" />
+        <text x="2050" y="762" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W6</text>
+        
+        <!-- Branch Week 7 -->
+        <line x1="2416" y1="780" x2="2416" y2="715" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" />
+        <path d="M 2410 723 L 2416 715 L 2422 723" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
+        <circle cx="2416" cy="780" r="18" fill="rgba(56, 189, 248, 0.4)" opacity="0.35" />
+        <circle cx="2416" cy="780" r="11" fill="#0F172A" stroke="#38BDF8" stroke-width="4" />
+        <circle cx="2416" cy="780" r="4" fill="#38BDF8" />
+        <text x="2416" y="784" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W7</text>
+        
+        <!-- Branch Week 8 -->
+        <line x1="2782" y1="780" x2="2782" y2="845" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" />
+        <path d="M 2776 837 L 2782 845 L 2788 837" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
+        <circle cx="2782" cy="780" r="18" fill="rgba(56, 189, 248, 0.4)" opacity="0.35" />
+        <circle cx="2782" cy="780" r="11" fill="#0F172A" stroke="#38BDF8" stroke-width="4" />
+        <circle cx="2782" cy="780" r="4" fill="#38BDF8" />
+        <text x="2782" y="762" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W8</text>
+        
+        <!-- Branch Week 9 -->
+        <line x1="3148" y1="780" x2="3148" y2="715" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" />
+        <path d="M 3142 723 L 3148 715 L 3154 723" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
+        <circle cx="3148" cy="780" r="18" fill="rgba(56, 189, 248, 0.4)" opacity="0.35" />
+        <circle cx="3148" cy="780" r="11" fill="#0F172A" stroke="#38BDF8" stroke-width="4" />
+        <circle cx="3148" cy="780" r="4" fill="#38BDF8" />
+        <text x="3148" y="784" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W9</text>
+        
+        <!-- Branch Week 10 -->
+        <line x1="3514" y1="780" x2="3514" y2="845" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" />
+        <path d="M 3508 837 L 3514 845 L 3520 837" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
+        <circle cx="3514" cy="780" r="18" fill="rgba(56, 189, 248, 0.4)" opacity="0.35" />
+        <circle cx="3514" cy="780" r="11" fill="#0F172A" stroke="#38BDF8" stroke-width="4" />
+        <circle cx="3514" cy="780" r="4" fill="#38BDF8" />
+        <text x="3514" y="762" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W10</text>
+        
+        <!-- Branch Week 11 -->
+        <line x1="3880" y1="780" x2="3880" y2="715" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" />
+        <path d="M 3874 723 L 3880 715 L 3886 723" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
+        <circle cx="3880" cy="780" r="18" fill="rgba(56, 189, 248, 0.4)" opacity="0.35" />
+        <circle cx="3880" cy="780" r="11" fill="#0F172A" stroke="#38BDF8" stroke-width="4" />
+        <circle cx="3880" cy="780" r="4" fill="#38BDF8" />
+        <text x="3880" y="784" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W11</text>
+        
+        <!-- Branch Week 12 -->
+        <line x1="4246" y1="780" x2="4246" y2="845" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" />
+        <path d="M 4240 837 L 4246 845 L 4252 837" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
+        <circle cx="4246" cy="780" r="18" fill="rgba(56, 189, 248, 0.4)" opacity="0.35" />
+        <circle cx="4246" cy="780" r="11" fill="#0F172A" stroke="#38BDF8" stroke-width="4" />
+        <circle cx="4246" cy="780" r="4" fill="#38BDF8" />
+        <text x="4246" y="762" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W12</text>
+        
+        <!-- Branch Week 13 -->
+        <line x1="4612" y1="780" x2="4612" y2="715" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" />
+        <path d="M 4606 723 L 4612 715 L 4618 723" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
+        <circle cx="4612" cy="780" r="18" fill="rgba(56, 189, 248, 0.4)" opacity="0.35" />
+        <circle cx="4612" cy="780" r="11" fill="#0F172A" stroke="#38BDF8" stroke-width="4" />
+        <circle cx="4612" cy="780" r="4" fill="#38BDF8" />
+        <text x="4612" y="784" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W13</text>
+        
+        <!-- Branch Week 14 -->
+        <line x1="4978" y1="780" x2="4978" y2="845" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" />
+        <path d="M 4972 837 L 4978 845 L 4984 837" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
+        <circle cx="4978" cy="780" r="18" fill="rgba(56, 189, 248, 0.4)" opacity="0.35" />
+        <circle cx="4978" cy="780" r="11" fill="#0F172A" stroke="#38BDF8" stroke-width="4" />
+        <circle cx="4978" cy="780" r="4" fill="#38BDF8" />
+        <text x="4978" y="762" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W14</text>
+        
+    </svg>
+
+    <!-- Week Cards -->
+    
+        <!-- CARD W1 -->
+        <div class="week-card status-done" style="left: 52px; top: 240px; width: 336px; height: 475px; 1px solid rgba(16, 185, 129, 0.55);">
+            <div class="card-head">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="week-badge" style="background:#065F46; color:#34D399;">WEEK 01</span>
+                    <span class="date-badge">16/08/2026 - 22/08/2026</span>
+                </div>
+                <span class="status-badge" style="background:#065F46; color:#34D399; border: 1px solid #10B981;">
+                    DONE
+                </span>
+            </div>
+            
+            <div class="milestone-title">วางรากฐานระบบ & บลูทูธเบื้องต้น</div>
+            <div class="milestone-sub">System Foundation & Initial BLE</div>
+            <div class="items-list">
+                
+            <div class="item-row">
+                <span class="item-icon">⚡</span>
+                <div class="item-body">
+                    <span class="item-tag">[HW]</span>
+                    <span class="item-text">ร่างโครงสร้างระบบจ่ายไฟ & หน้าสัมผัสเชื่อมต่อระหว่างบล็อก</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🧊</span>
+                <div class="item-body">
+                    <span class="item-tag">[3D]</span>
+                    <span class="item-text">กำหนดขนาดและสัดส่วนตัวบล็อกให้จับถือถนัดมือ & วางจุดต่อ</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">💻</span>
+                <div class="item-body">
+                    <span class="item-tag">[FW]</span>
+                    <span class="item-text">ถอดรหัสคำสั่งบลูทูธพื้นฐานของหุ่นยนต์ K1 (เดิน/ถอย/เลี้ยว)</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🎨</span>
+                <div class="item-body">
+                    <span class="item-tag">[UX]</span>
+                    <span class="item-text">ศึกษาหลักสรีรศาสตร์เด็ก & การใช้สี/รูปทรงสื่อความหมาย</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🛡️</span>
+                <div class="item-body">
+                    <span class="item-tag">[QA]</span>
+                    <span class="item-text">กำหนดเกณฑ์ความปลอดภัย: แรงยึดแม่เหล็ก & กันลัดวงจร</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+        <!-- CARD W2 -->
+        <div class="week-card status-done" style="left: 418px; top: 845px; width: 336px; height: 475px; 1px solid rgba(16, 185, 129, 0.55);">
+            <div class="card-head">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="week-badge" style="background:#065F46; color:#34D399;">WEEK 02</span>
+                    <span class="date-badge">23/08/2026 - 29/08/2026</span>
+                </div>
+                <span class="status-badge" style="background:#065F46; color:#34D399; border: 1px solid #10B981;">
+                    DONE
+                </span>
+            </div>
+            
+            <div class="milestone-title">ถอดรหัสคำสั่งครบวงจร & ระบบจำลอง</div>
+            <div class="milestone-sub">Protocol Reverse-Engineering & Sim</div>
+            <div class="items-list">
+                
+            <div class="item-row">
+                <span class="item-icon">⚡</span>
+                <div class="item-body">
+                    <span class="item-tag">[HW]</span>
+                    <span class="item-text">วิเคราะห์วงจรชาร์จไฟหุ่นยนต์ & จัดเตรียมชุดไฟล์เสียงคำสั่ง</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🧊</span>
+                <div class="item-body">
+                    <span class="item-tag">[3D]</span>
+                    <span class="item-text">สรุปรายการชิ้นส่วนต้นแบบ & วัดขนาดจริงของแผงวงจร</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">💻</span>
+                <div class="item-body">
+                    <span class="item-tag">[FW]</span>
+                    <span class="item-text">ถอดรหัสคำสั่งขั้นสูงกว่า 25 รูปแบบ & ระบบตอบกลับ ACK</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🎨</span>
+                <div class="item-body">
+                    <span class="item-tag">[UX]</span>
+                    <span class="item-text">วางลำดับโฟลว์: เสียบแท่น Dock -> ต่อแม่เหล็ก -> ไฟสถานะ</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🛡️</span>
+                <div class="item-body">
+                    <span class="item-tag">[QA]</span>
+                    <span class="item-text">พัฒนาระบบจำลองการสื่อสารทดสอบรับส่งข้อมูลความถูกต้อง</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+        <!-- CARD W3 -->
+        <div class="week-card status-done" style="left: 784px; top: 240px; width: 336px; height: 475px; 1px solid rgba(16, 185, 129, 0.55);">
+            <div class="card-head">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="week-badge" style="background:#065F46; color:#34D399;">WEEK 03</span>
+                    <span class="date-badge">30/08/2026 - 05/09/2026</span>
+                </div>
+                <span class="status-badge" style="background:#065F46; color:#34D399; border: 1px solid #10B981;">
+                    DONE
+                </span>
+            </div>
+            
+            <div class="milestone-title">โปรแกรมควบคุมหลัก & สรุปรายการ BOM</div>
+            <div class="milestone-sub">Master Controller Core & Hardware BOM</div>
+            <div class="items-list">
+                
+            <div class="item-row">
+                <span class="item-icon">⚡</span>
+                <div class="item-body">
+                    <span class="item-tag">[HW]</span>
+                    <span class="item-text">สรุป BOM หลัก: ไมโครคอนโทรลเลอร์, ไฟ RGB, จอ, ปุ่มปรับ, แบตเตอรี่</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🧊</span>
+                <div class="item-body">
+                    <span class="item-tag">[3D]</span>
+                    <span class="item-text">ร่างแบบแท่นยึดอุปกรณ์สำหรับชุดทดลองต้นแบบ & พอร์ตเชื่อมต่อ</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">💻</span>
+                <div class="item-body">
+                    <span class="item-tag">[FW]</span>
+                    <span class="item-text">โปรแกรม Master: ค้นหาและเชื่อมต่อหุ่นยนต์อัตโนมัติ + Watchdog</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🎨</span>
+                <div class="item-body">
+                    <span class="item-tag">[UX]</span>
+                    <span class="item-text">จัดทำแผนภาพสรุปโฟลว์ขั้นตอนการส่งผ่านคำสั่งของระบบบล็อก</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🛡️</span>
+                <div class="item-body">
+                    <span class="item-tag">[QA]</span>
+                    <span class="item-text">ทดสอบฟิลเตอร์ตัดสัญญาณกวนปุ่มหมุน Rotary & ลิมิตขอบเขตค่า</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+        <!-- CARD W4 -->
+        <div class="week-card status-progress" style="left: 1150px; top: 845px; width: 336px; height: 475px; 2px solid #F59E0B;">
+            <div class="card-head">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="week-badge" style="background:#92400E; color:#FCD34D;">WEEK 04</span>
+                    <span class="date-badge">06/09/2026 - 12/09/2026</span>
+                </div>
+                <span class="status-badge" style="background:#92400E; color:#FCD34D; border: 1px solid #F59E0B;">
+                    PROGRESS
+                </span>
+            </div>
+            
+            <div class="milestone-title">ผังวงจรไฟฟ้าครบชุด & โมเดล 3D</div>
+            <div class="milestone-sub">Schematics Design & 3D Enclosure CAD</div>
+            <div class="items-list">
+                
+            <div class="item-row">
+                <span class="item-icon">⚡</span>
+                <div class="item-body">
+                    <span class="item-tag">[HW]</span>
+                    <span class="item-text">ออกแบบวงจรไฟฟ้าครบ 3 ส่วน: Master Block, Action, End Block</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🧊</span>
+                <div class="item-body">
+                    <span class="item-tag">[3D]</span>
+                    <span class="item-text">ออกแบบ 3D: แม่เหล็กป้องกันต่อกลับด้าน, ท่อนำแสง & เคสหลัก</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">💻</span>
+                <div class="item-body">
+                    <span class="item-tag">[FW]</span>
+                    <span class="item-text">ทดสอบเชื่อมต่อส่งคำสั่ง BLE หุ่นยนต์จริงบนชุดทดลอง</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🎨</span>
+                <div class="item-body">
+                    <span class="item-tag">[UX]</span>
+                    <span class="item-text">ออกแบบกราฟิกตัวบล็อก/หน้าจอ: ไอคอนอ่านง่าย, แถบสี & ลูกศร</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🛡️</span>
+                <div class="item-body">
+                    <span class="item-tag">[QA]</span>
+                    <span class="item-text">ตรวจความปลอดภัยไฟฟ้าและวงจรควบคุมการชาร์จแบตเตอรี่</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+        <!-- CARD W5 -->
+        <div class="week-card status-scheduled" style="left: 1516px; top: 240px; width: 336px; height: 475px; 1px solid rgba(56, 189, 248, 0.35);">
+            <div class="card-head">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="week-badge" style="background:#0F172A; color:#7DD3FC;">WEEK 05</span>
+                    <span class="date-badge">13/09/2026 - 19/09/2026</span>
+                </div>
+                <span class="status-badge" style="background:#0F172A; color:#7DD3FC; border: 1px solid #38BDF8;">
+                    SCHEDULED
+                </span>
+            </div>
+            
+            <div class="milestone-title">ออกแบบแผ่น PCB & พิมพ์ 3D ทดสอบ</div>
+            <div class="milestone-sub">PCB Layout & 3D Prototype Fit Check</div>
+            <div class="items-list">
+                
+            <div class="item-row">
+                <span class="item-icon">⚡</span>
+                <div class="item-body">
+                    <span class="item-tag">[HW]</span>
+                    <span class="item-text">ออกแบบลายวงจร PCB บล็อกทั้ง 3 แบบให้กะทัดรัดลงตัว</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🧊</span>
+                <div class="item-body">
+                    <span class="item-tag">[3D]</span>
+                    <span class="item-text">พิมพ์ 3D เคสทดสอบ: ตรวจความกระชับ, แรงดูดแม่เหล็ก & แสงไฟ</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">💻</span>
+                <div class="item-body">
+                    <span class="item-tag">[FW]</span>
+                    <span class="item-text">เฟิร์มแวร์ Action Block: บันทึกค่าลง Flash & คุมไฟสถานะ</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🎨</span>
+                <div class="item-body">
+                    <span class="item-tag">[UX]</span>
+                    <span class="item-text">ออกแบบสัญลักษณ์ระบุทิศทางเสียบต่อ & สเกลรอบปุ่มหมุน</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🛡️</span>
+                <div class="item-body">
+                    <span class="item-tag">[QA]</span>
+                    <span class="item-text">รันชุดทดสอบสื่อสารอัตโนมัติ: รับมือกรณีขั้วสัมผัสหลวม</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+        <!-- CARD W6 -->
+        <div class="week-card status-scheduled" style="left: 1882px; top: 845px; width: 336px; height: 475px; 1px solid rgba(56, 189, 248, 0.35);">
+            <div class="card-head">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="week-badge" style="background:#0F172A; color:#7DD3FC;">WEEK 06</span>
+                    <span class="date-badge">20/09/2026 - 26/09/2026</span>
+                </div>
+                <span class="status-badge" style="background:#0F172A; color:#7DD3FC; border: 1px solid #38BDF8;">
+                    SCHEDULED
+                </span>
+            </div>
+            
+            <div class="milestone-title">สั่งผลิต PCB & กราฟิกหน้าจอแสดงผล</div>
+            <div class="milestone-sub">PCB Fabrication & OLED UI Graphics</div>
+            <div class="items-list">
+                
+            <div class="item-row">
+                <span class="item-icon">⚡</span>
+                <div class="item-body">
+                    <span class="item-tag">[HW]</span>
+                    <span class="item-text">ตรวจสอบความถูกต้องวงจร & สั่งผลิต PCB พร้อมจัดซื้ออุปกรณ์</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🧊</span>
+                <div class="item-body">
+                    <span class="item-tag">[3D]</span>
+                    <span class="item-text">จัดซื้อแม่เหล็ก N52 แรงสูง, พินสปริง (Pogo Pin), ลูกบิด, แบตเตอรี่</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">💻</span>
+                <div class="item-body">
+                    <span class="item-tag">[FW]</span>
+                    <span class="item-text">พัฒนาระบบแสดงผล OLED: ไอคอนคำสั่งใหญ่ชัดเจน & แถบระดับค่า</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🎨</span>
+                <div class="item-body">
+                    <span class="item-tag">[UX]</span>
+                    <span class="item-text">ผลิตตัวอย่างสติกเกอร์สัญลักษณ์: ตรวจสอบความคมชัดและกันรอย</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🛡️</span>
+                <div class="item-body">
+                    <span class="item-tag">[QA]</span>
+                    <span class="item-text">สเตรสเทสประมวลผลคำสั่งต่อเนื่องกว่า 100 รอบโดยไม่สะดุด</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+        <!-- CARD W7 -->
+        <div class="week-card status-scheduled" style="left: 2248px; top: 240px; width: 336px; height: 475px; 2px solid #EC4899;">
+            <div class="card-head">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="week-badge" style="background:#0F172A; color:#7DD3FC;">WEEK 07</span>
+                    <span class="date-badge">27/09/2026 - 03/10/2026</span>
+                </div>
+                <span class="status-badge" style="background:#0F172A; color:#7DD3FC; border: 1px solid #38BDF8;">
+                    SCHEDULED
+                </span>
+            </div>
+            <span class="star-pill">★ KEY MILESTONE</span>
+            <div class="milestone-title">🎯 ประเมินผลกลางภาค (Midterm)</div>
+            <div class="milestone-sub">Midterm Progress Review & Evaluation</div>
+            <div class="items-list">
+                
+            <div class="item-row">
+                <span class="item-icon">⚡</span>
+                <div class="item-body">
+                    <span class="item-tag">[HW]</span>
+                    <span class="item-text">จัดเตรียมห้องแล็บและเครื่องมือสำหรับประกอบชิ้นส่วนอิเล็กทรอนิกส์</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🧊</span>
+                <div class="item-body">
+                    <span class="item-tag">[3D]</span>
+                    <span class="item-text">พิมพ์เคส 3D ชุดจริงความทนทานสูงครบเซต 5 บล็อก (1+3+1)</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">💻</span>
+                <div class="item-body">
+                    <span class="item-tag">[FW]</span>
+                    <span class="item-text">เชื่อมต่อ State Machine: สลับเมนู, โหมดตั้งค่าที่แท่น & โหมดต่อบล็อก</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🎨</span>
+                <div class="item-body">
+                    <span class="item-tag">[UX]</span>
+                    <span class="item-text">ประเมินความโค้งมนไม่บาดมือ, ความหนืดลูกบิด & ความชัดหน้าจอ</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🎯</span>
+                <div class="item-body">
+                    <span class="item-tag">[MILESTONE]</span>
+                    <span class="item-text">【ประเมินผลกลางภาค】: ส่งรายงานความก้าวหน้า & สอบประเมินผล</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+        <!-- CARD W8 -->
+        <div class="week-card status-scheduled" style="left: 2614px; top: 845px; width: 336px; height: 475px; 1px solid rgba(56, 189, 248, 0.35);">
+            <div class="card-head">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="week-badge" style="background:#0F172A; color:#7DD3FC;">WEEK 08</span>
+                    <span class="date-badge">04/10/2026 - 10/10/2026</span>
+                </div>
+                <span class="status-badge" style="background:#0F172A; color:#7DD3FC; border: 1px solid #38BDF8;">
+                    SCHEDULED
+                </span>
+            </div>
+            
+            <div class="milestone-title">ประกอบ บัดกรี & ระบบจ่ายไฟ</div>
+            <div class="milestone-sub">PCB Assembly & Power Rail Qualification</div>
+            <div class="items-list">
+                
+            <div class="item-row">
+                <span class="item-icon">⚡</span>
+                <div class="item-body">
+                    <span class="item-tag">[HW]</span>
+                    <span class="item-text">บัดกรี SMD/THT ชิ้นส่วนอิเล็กทรอนิกส์, พินสปริง, จอภาพ, สวิตช์</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🧊</span>
+                <div class="item-body">
+                    <span class="item-tag">[3D]</span>
+                    <span class="item-text">ขัดเก็บผิวสัมผัสเคส 3D ให้เรียบเนียน & Dry-fit แผงวงจรลงในเคส</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">💻</span>
+                <div class="item-body">
+                    <span class="item-tag">[FW]</span>
+                    <span class="item-text">ติดตั้งโปรแกรมทดสอบลงบอร์ด Master: ตรวจสอบจอ OLED และลูกบิด</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🎨</span>
+                <div class="item-body">
+                    <span class="item-tag">[UX]</span>
+                    <span class="item-text">ติดสติกเกอร์สัญลักษณ์คำสั่งเคลือบผิวพิเศษลงบนตัวบล็อกจริง</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🛡️</span>
+                <div class="item-body">
+                    <span class="item-tag">[QA]</span>
+                    <span class="item-text">ทดสอบความปลอดภัยระบบไฟ: แรงดันไฟเลี้ยง, ตัดชาร์จ & ไฟสแตนด์บาย</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+        <!-- CARD W9 -->
+        <div class="week-card status-scheduled" style="left: 2980px; top: 240px; width: 336px; height: 475px; 1px solid rgba(56, 189, 248, 0.35);">
+            <div class="card-head">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="week-badge" style="background:#0F172A; color:#7DD3FC;">WEEK 09</span>
+                    <span class="date-badge">11/10/2026 - 17/10/2026</span>
+                </div>
+                <span class="status-badge" style="background:#0F172A; color:#7DD3FC; border: 1px solid #38BDF8;">
+                    SCHEDULED
+                </span>
+            </div>
+            
+            <div class="milestone-title">แฟลชบอร์ดจริง & แท่น Dock</div>
+            <div class="milestone-sub">Firmware Bring-up & Config Dock Test</div>
+            <div class="items-list">
+                
+            <div class="item-row">
+                <span class="item-icon">⚡</span>
+                <div class="item-body">
+                    <span class="item-tag">[HW]</span>
+                    <span class="item-text">ตรวจสอบความต่อเนื่องลายวงจร & ระดับความเรียบของพินสปริง</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🧊</span>
+                <div class="item-body">
+                    <span class="item-tag">[3D]</span>
+                    <span class="item-text">ติดตั้งแม่เหล็กเข้าเคสตามแนวขั้ว ดูดประกบแม่นยำไม่กลับด้าน</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">💻</span>
+                <div class="item-body">
+                    <span class="item-tag">[FW]</span>
+                    <span class="item-text">แฟลชโปรแกรมลง 4 Action Blocks & ทดสอบตั้งค่าผ่านแท่น Dock</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🎨</span>
+                <div class="item-body">
+                    <span class="item-tag">[UX]</span>
+                    <span class="item-text">จัดทำแบบประเมินความสะดวกการใช้งาน (Usability Rubric)</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🛡️</span>
+                <div class="item-body">
+                    <span class="item-tag">[QA]</span>
+                    <span class="item-text">ตรวจวัดสัญญาณข้อมูลด้วย Oscilloscope พร้อมทดสอบขยับโยกบล็อก</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+        <!-- CARD W10 -->
+        <div class="week-card status-scheduled" style="left: 3346px; top: 845px; width: 336px; height: 475px; 2px solid #EC4899;">
+            <div class="card-head">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="week-badge" style="background:#0F172A; color:#7DD3FC;">WEEK 10</span>
+                    <span class="date-badge">18/10/2026 - 24/10/2026</span>
+                </div>
+                <span class="status-badge" style="background:#0F172A; color:#7DD3FC; border: 1px solid #38BDF8;">
+                    SCHEDULED
+                </span>
+            </div>
+            <span class="star-pill">★ KEY MILESTONE</span>
+            <div class="milestone-title">🤖 ประกอบครบ 5 บล็อก & สั่งหุ่นยนต์</div>
+            <div class="milestone-sub">5-Block Integration & K1 Live Run</div>
+            <div class="items-list">
+                
+            <div class="item-row">
+                <span class="item-icon">⚡</span>
+                <div class="item-body">
+                    <span class="item-tag">[HW]</span>
+                    <span class="item-text">ติดตั้งแบตเตอรี่และสวิตช์ปิด-เปิดเข้ากับ Master Block พร้อมระบบป้องกัน</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🧊</span>
+                <div class="item-body">
+                    <span class="item-tag">[3D]</span>
+                    <span class="item-text">ประกอบวงจร, จอภาพ, ปุ่มหมุน, ช่องไฟเข้าเคสสมบูรณ์ครบทั้ง 5 บล็อก</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">💻</span>
+                <div class="item-body">
+                    <span class="item-tag">[FW]</span>
+                    <span class="item-text">ทดสอบครบวงจร: Dock -> ต่อบล็อก -> กด Run -> สั่งงานหุ่นสำเร็จ</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🎨</span>
+                <div class="item-body">
+                    <span class="item-tag">[UX]</span>
+                    <span class="item-text">จัดเซตกล่องบล็อกครบ 5 ชิ้น พร้อมจัดทำคู่มือการใช้งานเบื้องต้น</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🛡️</span>
+                <div class="item-body">
+                    <span class="item-tag">[QA]</span>
+                    <span class="item-text">ตรวจไฟแสดงผลวิ่งตามจังหวะหุ่นยนต์ & ยืนยันความแม่นยำ 100%</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+        <!-- CARD W11 -->
+        <div class="week-card status-scheduled" style="left: 3712px; top: 240px; width: 336px; height: 475px; 1px solid rgba(56, 189, 248, 0.35);">
+            <div class="card-head">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="week-badge" style="background:#0F172A; color:#7DD3FC;">WEEK 11</span>
+                    <span class="date-badge">25/10/2026 - 31/10/2026</span>
+                </div>
+                <span class="status-badge" style="background:#0F172A; color:#7DD3FC; border: 1px solid #38BDF8;">
+                    SCHEDULED
+                </span>
+            </div>
+            
+            <div class="milestone-title">Drop Test, E-Stop & ซ้อมใหญ่</div>
+            <div class="milestone-sub">Durability Test, Emergency E-Stop & Prep</div>
+            <div class="items-list">
+                
+            <div class="item-row">
+                <span class="item-icon">⚡</span>
+                <div class="item-body">
+                    <span class="item-tag">[HW]</span>
+                    <span class="item-text">ตรวจวัดความร้อนขณะใช้งานต่อเนื่อง & แรงดันตกคร่อมเมื่อต่อบล็อกยาวสุด</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🧊</span>
+                <div class="item-body">
+                    <span class="item-tag">[3D]</span>
+                    <span class="item-text">ทดสอบตกกระแทก Drop Test 1 ม.: เคสและพินขั้วสัมผัสไม่เสียหาย</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">💻</span>
+                <div class="item-body">
+                    <span class="item-tag">[FW]</span>
+                    <span class="item-text">ทดสอบความปลอดภัยเมื่อดึงบล็อกออกขณะทำงาน: หุ่นหยุดทันทีอัตโนมัติ</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🎨</span>
+                <div class="item-body">
+                    <span class="item-tag">[UX]</span>
+                    <span class="item-text">ตรวจมาตรฐานความปลอดภัย: ขอบมนปลอดภัย, วัสดุไร้สารพิษ & แม่เหล็กแน่น</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🛡️</span>
+                <div class="item-body">
+                    <span class="item-tag">[QA]</span>
+                    <span class="item-text">ซักซ้อมขั้นตอนทดสอบภาคสนามเสมือนจริง: เตรียมอุปกรณ์สำรอง & กล้อง</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+        <!-- CARD W12 -->
+        <div class="week-card status-scheduled" style="left: 4078px; top: 845px; width: 336px; height: 475px; 2px solid #EC4899;">
+            <div class="card-head">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="week-badge" style="background:#0F172A; color:#7DD3FC;">WEEK 12</span>
+                    <span class="date-badge">01/11/2026 - 07/11/2026</span>
+                </div>
+                <span class="status-badge" style="background:#0F172A; color:#7DD3FC; border: 1px solid #38BDF8;">
+                    SCHEDULED
+                </span>
+            </div>
+            <span class="star-pill">★ KEY MILESTONE</span>
+            <div class="milestone-title">🌟 ทดสอบกับผู้ใช้จริง (Pilot Test)</div>
+            <div class="milestone-sub">Weekend Field Pilot & User Experience</div>
+            <div class="items-list">
+                
+            <div class="item-row">
+                <span class="item-icon">⚡</span>
+                <div class="item-body">
+                    <span class="item-tag">[HW]</span>
+                    <span class="item-text">สแตนด์บายดูแลฮาร์ดแวร์: ติดตามแบตเตอรี่, ทำความสะอาดขั้ว & อะไหล่สำรอง</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🧊</span>
+                <div class="item-body">
+                    <span class="item-tag">[3D]</span>
+                    <span class="item-text">ประเมินการใช้งานจริง: ความง่ายในการต่อแม่เหล็ก & ความถนัดลูกบิด</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">💻</span>
+                <div class="item-body">
+                    <span class="item-tag">[FW]</span>
+                    <span class="item-text">ติดตามระบบควบคุมและการสื่อสาร: ตรวจสอบความเสถียร BLE สด</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🎨</span>
+                <div class="item-body">
+                    <span class="item-tag">[UX]</span>
+                    <span class="item-text">จัดกิจกรรมให้ผู้ใช้ทดลองต่อบล็อกสั่งงานหุ่นยนต์อิสระ & ประเมินความพึงพอใจ</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🛡️</span>
+                <div class="item-body">
+                    <span class="item-tag">[QA]</span>
+                    <span class="item-text">บันทึกข้อมูลเชิงประจักษ์: เวลาประมวลผล, ไฟสถานะ & บันทึกปัญหา</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+        <!-- CARD W13 -->
+        <div class="week-card status-scheduled" style="left: 4444px; top: 240px; width: 336px; height: 475px; 1px solid rgba(56, 189, 248, 0.35);">
+            <div class="card-head">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="week-badge" style="background:#0F172A; color:#7DD3FC;">WEEK 13</span>
+                    <span class="date-badge">08/11/2026 - 14/11/2026</span>
+                </div>
+                <span class="status-badge" style="background:#0F172A; color:#7DD3FC; border: 1px solid #38BDF8;">
+                    SCHEDULED
+                </span>
+            </div>
+            
+            <div class="milestone-title">ปรับปรุงตามฟีดแบ็ก & จูนระบบ</div>
+            <div class="milestone-sub">Feedback Refinement & System Polish</div>
+            <div class="items-list">
+                
+            <div class="item-row">
+                <span class="item-icon">⚡</span>
+                <div class="item-body">
+                    <span class="item-tag">[HW]</span>
+                    <span class="item-text">ตรวจสภาพจุดต่อและแบตเตอรี่หลังผ่านงานหนัก & โหมดประหยัดพลังงาน</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🧊</span>
+                <div class="item-body">
+                    <span class="item-tag">[3D]</span>
+                    <span class="item-text">ปรับปรุงเคส: เพิ่มลายกันลื่นลูกบิดหมุน & ปรับมุมลาดเอียงให้ต่อง่าย</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">💻</span>
+                <div class="item-body">
+                    <span class="item-tag">[FW]</span>
+                    <span class="item-text">ปรับแต่งโปรแกรม: ปรับความลื่นไหลลูกบิด & คอนทราสต์ไอคอนหน้าจอ</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🎨</span>
+                <div class="item-body">
+                    <span class="item-tag">[UX]</span>
+                    <span class="item-text">วิเคราะห์ผลผู้ใช้: สรุปคะแนน SUS Usability & จัดทำแผนภูมิสรุป</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🛡️</span>
+                <div class="item-body">
+                    <span class="item-tag">[QA]</span>
+                    <span class="item-text">ทดสอบรันคำสั่งผสมผสานต่อเนื่อง 50+ รอบ ยืนยันความเสถียรสูงสุด</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+        <!-- CARD W14 -->
+        <div class="week-card status-scheduled" style="left: 4810px; top: 845px; width: 336px; height: 475px; 2px solid #EC4899;">
+            <div class="card-head">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="week-badge" style="background:#0F172A; color:#7DD3FC;">WEEK 14</span>
+                    <span class="date-badge">15/11/2026 - 21/11/2026</span>
+                </div>
+                <span class="status-badge" style="background:#0F172A; color:#7DD3FC; border: 1px solid #38BDF8;">
+                    SCHEDULED
+                </span>
+            </div>
+            <span class="star-pill">★ KEY MILESTONE</span>
+            <div class="milestone-title">🏆 ส่งมอบสมบูรณ์ & สอบป้องกันโครงงาน</div>
+            <div class="milestone-sub">Final Release, Demo Reel & Project Defense</div>
+            <div class="items-list">
+                
+            <div class="item-row">
+                <span class="item-icon">⚡</span>
+                <div class="item-body">
+                    <span class="item-tag">[HW]</span>
+                    <span class="item-text">รวบรวมเอกสารวิศวกรรมฮาร์ดแวร์: Schematic, PCB Gerber, BOM ครบชุด</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🧊</span>
+                <div class="item-body">
+                    <span class="item-tag">[3D]</span>
+                    <span class="item-text">ทำความสะอาดเคส, ติดสติกเกอร์สัญลักษณ์ & บรรจุลงกล่องจัดแสดง</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">💻</span>
+                <div class="item-body">
+                    <span class="item-tag">[FW]</span>
+                    <span class="item-text">จัดเก็บซอร์สโค้ดและโครงสร้างเวอร์ชันสมบูรณ์ (Release v1.0.0)</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🎨</span>
+                <div class="item-body">
+                    <span class="item-tag">[UX]</span>
+                    <span class="item-text">จัดทำเล่มรายงานวิชาการฉบับสมบูรณ์ & สไลด์นำเสนอภาษาไทย/อังกฤษ</span>
+                </div>
+            </div>
+            
+            <div class="item-row">
+                <span class="item-icon">🏆</span>
+                <div class="item-body">
+                    <span class="item-tag">[MILESTONE]</span>
+                    <span class="item-text">【สอบป้องกันโครงงาน】: ฉายวิดีโอสาธิต & สมาชิกทุกคนร่วมสาธิตสด</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+
+    <footer>
+        <div>Capstone Senior Project 2026 • Department of Computer Engineering &amp; Robotics • Focus on System Deliverables &amp; Milestones</div>
+        <div>Source: 14 Weeks Plan Google Spreadsheet • Generated High-Resolution Infographic PDF</div>
+    </footer>
+</body>
+</html>

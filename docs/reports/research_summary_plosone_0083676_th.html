@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>รายงานสรุปงานวิจัย: เครื่องอ่านหนังสืออิเล็กทรอนิกส์ (E-Readers) กับความล้าของสายตา (PLOS ONE 2013)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 11mm 15mm 11mm 15mm;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    body {
+      font-family: 'Sarabun', 'Leelawadee UI', 'Tahoma', sans-serif;
+      font-size: 11px;
+      line-height: 1.5;
+      color: #1e293b;
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+    }
+    h1, h2, h3, h4 {
+      font-family: 'Prompt', 'Leelawadee UI', 'Tahoma', sans-serif;
+      color: #0f172a;
+      margin-top: 0;
+    }
+    .page-container {
+      position: relative;
+    }
+    .page-break {
+      page-break-before: always;
+      padding-top: 2px;
+    }
+    
+    /* Header Styles */
+    .header {
+      border-bottom: 2px solid #0284c7;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+    .badge {
+      display: inline-block;
+      background-color: #e0f2fe;
+      color: #0369a1;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    h1 {
+      font-size: 17px;
+      line-height: 1.35;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #0f172a;
+    }
+    .subtitle {
+      font-size: 11.5px;
+      color: #475569;
+      font-weight: 400;
+      margin-bottom: 0;
+    }
+
+    /* Metadata Card */
+    .meta-card {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 6px 14px;
+      font-size: 10.5px;
+    }
+    .meta-item strong {
+      color: #334155;
+      display: inline-block;
+    }
+    .meta-item a {
+      color: #0284c7;
+      text-decoration: none;
+    }
+
+    /* Stat Banner */
+    .stat-banner {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 13px;
+    }
+    .stat-box {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      border: 1px solid #bae6fd;
+      border-radius: 6px;
+      padding: 8px 6px;
+      text-align: center;
+    }
+    .stat-number {
+      font-family: 'Prompt', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #0284c7;
+      line-height: 1.1;
+    }
+    .stat-label {
+      font-size: 10px;
+      color: #0369a1;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .stat-desc {
+      font-size: 9px;
+      color: #475569;
+      margin-top: 2px;
+      line-height: 1.25;
+    }
+
+    /* Headings & Text */
+    h2 {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #0369a1;
+      border-left: 3.5px solid #0284c7;
+      padding-left: 7px;
+      margin-top: 11px;
+      margin-bottom: 6px;
+    }
+    h3 {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 7px;
+      margin-bottom: 3px;
+    }
+    p {
+      margin: 0 0 6px 0;
+      text-align: justify;
+    }
+    ul {
+      margin: 0 0 7px 0;
+      padding-left: 16px;
+    }
+    li {
+      margin-bottom: 2.5px;
+    }
+
+    /* Tables */
+    .table-container {
+      margin: 6px 0 9px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10px;
+    }
+    th {
+      background-color: #0f172a;
+      color: #ffffff;
+      font-family: 'Prompt', sans-serif;
+      font-weight: 500;
+      padding: 5px 7px;
+      text-align: left;
+      border: 1px solid #0f172a;
+    }
+    td {
+      padding: 4px 7px;
+      border: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+    tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+    .highlight-cell {
+      background-color: #f0fdf4 !important;
+      color: #166534;
+      font-weight: 500;
+    }
+    .alert-cell {
+      background-color: #fef2f2 !important;
+      color: #991b1b;
+      font-weight: 500;
+    }
+
+    /* Callout Boxes */
+    .callout {
+      border-radius: 6px;
+      padding: 6px 10px;
+      margin: 6px 0;
+      font-size: 10px;
+    }
+    .callout-info {
+      background-color: #f0fdf4;
+      border-left: 3.5px solid #16a34a;
+      color: #14532d;
+    }
+    .callout-warning {
+      background-color: #fefce8;
+      border-left: 3.5px solid #ca8a04;
+      color: #713f12;
+    }
+
+    /* Footers */
+    .page-footer {
+      border-top: 1px solid #e2e8f0;
+      padding-top: 5px;
+      margin-top: 9px;
+      font-size: 9px;
+      color: #64748b;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== หน้าที่ 1 ==================== -->
+  <div class="page-container">
+    <div class="header">
+      <div class="badge">เอกสารวิชาการสรุปงานวิจัย (Executive Research Brief)</div>
+      <h1>เครื่องอ่านหนังสืออิเล็กทรอนิกส์กับความล้าของสายตา: การศึกษาเปรียบเทียบจอ LCD, จอ E-ink และหนังสือกระดาษ</h1>
+      <div class="subtitle">สรุปสาระสำคัญเชิงลึกจากการวิจัยแบบติดตามผลระยะยาวที่ตีพิมพ์ในวารสารระดับนานาชาติ PLOS ONE (2013)</div>
+    </div>
+
+    <div class="meta-card">
+      <div>
+        <div class="meta-item"><strong>ชื่อบทความวิจัย:</strong> E-Readers and Visual Fatigue</div>
+        <div class="meta-item" style="margin-top: 4px;"><strong>คณะผู้วิจัย:</strong> Simone Benedetto<sup>1</sup>, Véronique Drai-Zerbib<sup>2</sup>, Marco Pedrotti<sup>2</sup>, Geoffrey Tissier<sup>1</sup>, Thierry Baccino<sup>1</sup></div>
+        <div class="meta-item" style="margin-top: 2px;"><strong>หน่วยงานวิจัย:</strong> <sup>1</sup>CHArt/LUTIN, Université Paris 8 | <sup>2</sup>CHArt/LUTIN, Université Paris 6 (Sorbonne), Paris, France</div>
+      </div>
+      <div>
+        <div class="meta-item"><strong>วารสารที่ตีพิมพ์:</strong> PLOS ONE (Public Library of Science)</div>
+        <div class="meta-item" style="margin-top: 4px;"><strong>ฉบับเผยแพร่:</strong> Vol. 8, Issue 12, e83676 (ธันวาคม 2013)</div>
+        <div class="meta-item" style="margin-top: 4px;"><strong>เลข DOI:</strong> <a href="https://doi.org/10.1371/journal.pone.0083676">10.1371/journal.pone.0083676</a> (Open Access)</div>
+      </div>
+    </div>
+
+    <div class="stat-banner">
+      <div class="stat-box">
+        <div class="stat-number">0.43 vs 0.61</div>
+        <div class="stat-label">การกะพริบตา (BPS)</div>
+        <div class="stat-desc">จอ LCD ส่องหลังลดอัตราการกะพริบตาลงเหลือ 0.43 ครั้ง/วิ เทียบกับ 0.61 ครั้ง/วิ บน E-ink และกระดาษ</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">+91%</div>
+        <div class="stat-label">ความล้าสายตาบน LCD</div>
+        <div class="stat-desc">คะแนนประเมินความล้าสายตา (VFS) บน LCD พุ่งสูงขึ้นอย่างมีนัยสำคัญหลังอ่านนาน ~73 นาที</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">p > 0.05</div>
+        <div class="stat-label">E-ink เทียบเท่ากระดาษ</div>
+        <div class="stat-desc">ไม่พบความแตกต่างทางสถิติระหว่างจอ E-ink และหนังสือกระดาษ ทั้งอัตราการกะพริบตาและคะแนนความล้า</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">6.64 / 7</div>
+        <div class="stat-label">หนังสือเล่มยังครองใจ</div>
+        <div class="stat-desc">ผู้อ่านที่ไม่มีประสบการณ์ e-reader มาก่อนยังคงพึงพอใจหนังสือกระดาษจริงสูงสุดอย่างมีนัยสำคัญ</div>
+      </div>
+    </div>
+
+    <h2>1. ที่มา ความสำคัญ และวัตถุประสงค์ของการวิจัย</h2>
+    <p>
+      การแปลงหนังสือเป็นดิจิทัล (Mass Digitization) ก่อให้เกิดการเปลี่ยนแปลงครั้งใหญ่ในวิถีการเข้าถึงและอ่านสารสนเทศ โดยมีเทคโนโลยีจอภาพ 2 รูปแบบหลักในการอ่าน e-book ได้แก่ <strong>จอคริสตัลเหลวแบบเปล่งแสง (Liquid Crystal Display: LCD)</strong> ซึ่งนิยมใช้ในแท็บเล็ตมัลติฟังก์ชัน และ <strong>จอหมึกอิเล็กทรอนิกส์แบบสะท้อนแสง (Electronic Ink: E-ink)</strong> ที่ออกแบบมาเลียนแบบการพิมพ์หมึกบนกระดาษ
+    </p>
+    <p>
+      แม้จะมีข้อถกเถียงมากมายในสังคมว่าจอประเภทใดก่อให้เกิด <strong>ความล้าของสายตา (Visual Fatigue / Eye Strain)</strong> น้อยกว่ากัน แต่หลักฐานเชิงประจักษ์ทางวิทยาศาสตร์ในอดีตยังกระจัดกระจายและผลลัพธ์มักขึ้นกับรุ่นของอุปกรณ์ (Device-dependent) งานวิจัยนี้จึงมุ่งศึกษาแบบติดตามผลระยะยาว (Longitudinal Within-Subjects Study) ในสภาวะการอ่านต่อเนื่องนานกว่า 1 ชั่วโมง โดยควบคุมปัจจัยด้านตัวอักษร การจัดหน้า และสภาพแสงอย่างเข้มงวด เพื่อตรวจวัดผลกระทบทั้งในมิติสรีรวิทยาเชิงปรวิสัยและการรับรู้เชิงอัตวิสัย
+    </p>
+
+    <h2>2. ระเบียบวิธีวิจัย การออกแบบการทดลอง และอุปกรณ์ทดสอบ</h2>
+    <ul>
+      <li><strong>กลุ่มตัวอย่าง:</strong> อาสาสมัคร 12 คน (ชาย 5, หญิง 7, อายุเฉลี่ย 27 ปี, SD = 4) มีสายตาปกติหรือไม่พบความผิดปกติหลังแก้ไข ไม่เคยใช้อุปกรณ์ e-reader มาก่อน และไม่ทราบสมมติฐานของการวิจัย (Naïve participants)</li>
+      <li><strong>การออกแบบการทดลอง:</strong> ใช้การทดลองแบบวัดซ้ำสมบูรณ์ (Full Within-Subjects Design) 3 รอบ แต่ละรอบห่างกันเฉลี่ย 10 วัน เพื่อขจัดผลกระทบตกค้าง (Carryover effects) และสุ่มลำดับอุปกรณ์ (Counterbalanced order)</li>
+      <li><strong>การควบคุมสิ่งเร้าและสภาพแวดล้อม:</strong> อ่านนวนิยายภาษาฝรั่งเศส "Bel-Ami" (ภาษาแม่ของกลุ่มตัวอย่าง) กำหนดขนาดตัวอักษร ชนิดฟอนต์ และจำนวนคำต่อหน้าให้เหมือนกันทุกประการ ควบคุมความสว่างสภาพแวดล้อมคงที่ 54 lx บนหน้าผาก นั่งอ่านระยะ 60 ซม. ทำมุม 45° และมีแบบทดสอบความเข้าใจเนื้อหา (Comprehension Test: CT) ยืนยันการอ่านจริง (ผ่าน 100%) ระยะเวลาอ่านเฉลี่ย 73 นาที (SD 10 นาที)</li>
+      <li><strong>เครื่องมือตรวจวัด:</strong> แว่นติดตามการเคลื่อนไหวของดวงตาอินฟราเรด 30 Hz (SMI Eye Tracking Glasses - ETG) พร้อมการสอบเทียบอย่างแม่นยำ</li>
+    </ul>
+
+    <div class="table-container">
+      <div style="font-size: 10.5px; font-weight: 600; margin-bottom: 4px; color: #334155;">ตารางที่ 1: รายละเอียดคุณสมบัติทางเทคนิคและการวัดระดับความสว่าง/คอนทราสต์ของอุปกรณ์ทั้ง 3 ชนิด</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 22%;">อุปกรณ์ที่นำมาทดสอบ</th>
+            <th style="width: 14%;">ขนาดหน้าจอ</th>
+            <th style="width: 18%;">เทคโนโลยีหน้าจอ</th>
+            <th style="width: 15%;">ความละเอียด</th>
+            <th style="width: 16%;">Michelson Contrast (Contact)</th>
+            <th style="width: 15%;">Michelson Contrast (ที่ระยะ 60 ซม.)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Kindle Fire HD</strong></td>
+            <td>7 นิ้ว</td>
+            <td>Color HD LCD (IPS)</td>
+            <td>216 ppi</td>
+            <td class="alert-cell">0.99 (Lmax 20 cd/m²)</td>
+            <td class="alert-cell">0.96 (Lmax 27.77 cd/m²)</td>
+          </tr>
+          <tr>
+            <td><strong>Kindle Paperwhite</strong></td>
+            <td>6 นิ้ว</td>
+            <td>E-ink (Frontlight)</td>
+            <td>212 ppi</td>
+            <td class="highlight-cell">0.91 (Lmax 2.1 cd/m²)</td>
+            <td class="highlight-cell">0.77 (Lmax 11.27 cd/m²)</td>
+          </tr>
+          <tr>
+            <td><strong>หนังสือกระดาษจริง (Paper Book)</strong></td>
+            <td>6 นิ้ว (เข้าเล่มห่วงสปริง)</td>
+            <td>กระดาษพิมพ์จริง</td>
+            <td>300 dpi</td>
+            <td>- (อาศัยแสงสะท้อน)</td>
+            <td class="highlight-cell">0.90 (Lmax 16.42 cd/m²)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="page-footer">
+      <div>เอกสารสรุปงานวิจัย: PLOS ONE 2013 (Benedetto et al.) | DOI: 10.1371/journal.pone.0083676</div>
+      <div>หน้าที่ 1 จาก 2</div>
+    </div>
+  </div>
+
+  <!-- ==================== หน้าที่ 2 ==================== -->
+  <div class="page-container page-break">
+    <h2>3. ผลการทดลองสำคัญและการวิเคราะห์เชิงลึก (Results & Deep Analysis)</h2>
+    
+    <h3>3.1 การกะพริบตาและขนาดรูม่านตา (Eye Blinks & Pupil Constriction)</h3>
+    <ul>
+      <li><strong>อัตราการกะพริบตาต่อวินาที (BPS):</strong> การอ่านบนจอ LCD ทำให้อัตราการกะพริบตาลดลงอย่างมีนัยสำคัญทางสถิติ (เฉลี่ย <strong>0.43 ครั้ง/วินาที</strong>) เมื่อเทียบกับจอ E-ink (<strong>0.61 ครั้ง/วินาที</strong>, <em>F</em>(1, 11) = 6.30, <em>p</em> &lt; .05, η<sub>p</sub>² = .36) และหนังสือกระดาษ (<strong>0.61 ครั้ง/วินาที</strong>, <em>F</em>(1, 11) = 6.59, <em>p</em> &lt; .05, η<sub>p</sub>² = .38)</li>
+      <li><strong>พฤติกรรมกะพริบตาระหว่าง E-ink กับกระดาษ:</strong> ผลวิเคราะห์ Contrast ไม่พบความแตกต่างอย่างมีนัยสำคัญ (<em>F</em>(1, 11) = 0.06, n.s.) โดยทั้งสองสื่อสร้างอัตราการกะพริบตาที่สม่ำเสมอและเท่ากันอย่างสมบูรณ์</li>
+      <li><strong>กลไกพยาธิสรีรวิทยา:</strong> การจ้องมองจอเปล่งแสงส่องหลัง (Backlit) ก่อให้เกิดภาวะกะพริบตาลดลง (Incomplete/Reduced Blinking) ทำให้น้ำตาระเหยเร็ว ฟิล์มน้ำตาฉีกขาด (Tear Film Instability) และผิวกระจกตาสัมผัสอากาศยาวนาน เป็นสาเหตุรากฐานของอาการตาแห้งและกลุ่มอาการจอภาพคอมพิวเตอร์ (Computer Vision Syndrome: CVS)</li>
+      <li><strong>ขนาดรูม่านตาเฉลี่ย (APS):</strong> รูม่านตาบนจอ LCD หดตัวเล็กลงอย่างมีนัยสำคัญเมื่อเทียบกับ E-ink (<em>p</em> &lt; .001) และกระดาษ (<em>p</em> &lt; .05) เพื่อตอบสนองต่อระดับ Luminance ที่เปล่งเข้าตาม่านตาโดยตรง</li>
+    </ul>
+
+    <h3>3.2 ความล้าสายตาและการรับรู้ของผู้ใช้งาน (Visual Fatigue Scale & Preferences)</h3>
+    <ul>
+      <li><strong>คะแนนประเมินความล้าสายตา (VFS):</strong> เฉพาะการอ่านบนจอ LCD เท่านั้นที่พบการพุ่งสูงขึ้นของคะแนนความล้าสายตาอย่างมีนัยสำคัญ (จาก 1.76 เป็น <strong>3.36 คะแนน</strong>, Wilcoxon <em>Z</em> = 2.93, <em>p</em> &lt; .01, <em>r</em> = .60) ในขณะที่จอ E-ink (จาก 1.85 เป็น 2.90, <em>Z</em> = 2.12, n.s.) และหนังสือกระดาษ (จาก 1.79 เป็น 2.44, <em>Z</em> = 2.00, n.s.) ไม่พบความแตกต่างอย่างมีนัยสำคัญหลังอ่านนานกว่า 1 ชั่วโมง</li>
+      <li><strong>ความถี่การกระพริบวิกฤต (CFF):</strong> พบการลดลงของระดับ CFF หลังการอ่านในทุกอุปกรณ์ (Time Effect, <em>p</em> &lt; .005) สะท้อนถึงความตื่นตัวของระบบประสาทรับรู้ที่ลดลงตามธรรมชาติจากการอ่านต่อเนื่อง แต่ไม่พบความแตกต่างระหว่างชนิดอุปกรณ์ (No Device Effect)</li>
+      <li><strong>ความพึงพอใจส่วนบุคคล:</strong> ผู้เข้าร่วมวิจัยให้คะแนนความพึงพอใจต่อหนังสือกระดาษจริงสูงสุด (6.64 คะแนน) สูงกว่า E-ink (4.45 คะแนน) และ LCD (3.55 คะแนน) อย่างมีนัยสำคัญ ชี้ให้เห็นถึงความผูกพันทางพฤติกรรมและอารมณ์ความรู้สึกต่อหนังสือเล่มจริง</li>
+    </ul>
+
+    <div class="table-container">
+      <div style="font-size: 10.5px; font-weight: 600; margin-bottom: 4px; color: #334155;">ตารางที่ 2: สรุปค่าเฉลี่ยและค่าเบี่ยงเบนมาตรฐาน (SD) ของตัวแปรตามทั้งหมดในการทดลอง</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 28%;">ตัวแปรตาม (Dependent Variable)</th>
+            <th style="width: 22%;">Kindle Fire HD (LCD)</th>
+            <th style="width: 25%;">Kindle Paperwhite (E-ink)</th>
+            <th style="width: 25%;">หนังสือกระดาษ (Paper Book)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>อัตราการกะพริบตา (BPS - ครั้ง/วินาที)</strong></td>
+            <td class="alert-cell"><strong>0.43</strong> (0.19) <em>*ลดลงอย่างมีนัยสำคัญ</em></td>
+            <td class="highlight-cell"><strong>0.61</strong> (0.25)</td>
+            <td class="highlight-cell"><strong>0.61</strong> (0.32)</td>
+          </tr>
+          <tr>
+            <td><strong>ความล้าสายตา (VFS: 1–10) ก่อนอ่าน</strong></td>
+            <td>1.76 (0.62)</td>
+            <td>1.85 (0.89)</td>
+            <td>1.79 (1.00)</td>
+          </tr>
+          <tr>
+            <td><strong>ความล้าสายตา (VFS: 1–10) หลังอ่าน</strong></td>
+            <td class="alert-cell"><strong>3.36</strong> (1.55) <em>*เพิ่มขึ้นอย่างมีนัยสำคัญ</em></td>
+            <td class="highlight-cell">2.90 (1.65) <em>[n.s.]</em></td>
+            <td class="highlight-cell">2.44 (1.58) <em>[n.s.]</em></td>
+          </tr>
+          <tr>
+            <td><strong>Critical Flicker Fusion (CFF: Hz) ก่อนอ่าน</strong></td>
+            <td>41.60 (1.66)</td>
+            <td>41.54 (1.65)</td>
+            <td>41.82 (1.70)</td>
+          </tr>
+          <tr>
+            <td><strong>Critical Flicker Fusion (CFF: Hz) หลังอ่าน</strong></td>
+            <td>40.65 (1.48) <em>(ลดลงตามเวลา)</em></td>
+            <td>41.00 (1.76) <em>(ลดลงตามเวลา)</em></td>
+            <td>41.28 (1.44) <em>(ลดลงตามเวลา)</em></td>
+          </tr>
+          <tr>
+            <td><strong>ความพึงพอใจส่วนบุคคล (1–7)</strong></td>
+            <td>3.55 (1.44)</td>
+            <td>4.45 (1.88)</td>
+            <td class="highlight-cell"><strong>6.64</strong> (0.64) <em>*พึงพอใจสูงสุด</em></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>4. ข้อสรุปและคำแนะนำเชิงปฏิบัติ (Conclusions & Practical Takeaways)</h2>
+    <div class="callout callout-info">
+      <strong>ข้อสรุปหลักของงานวิจัย:</strong> ผลการทดลองทั้งในเชิงปรวิสัย (อัตราการกะพริบตา BPS) และเชิงอัตวิสัย (แบบประเมินความล้าสายตา VFS) ชี้ชัดตรงกันว่า <strong>การอ่านบนจอ LCD แบบส่องหลังก่อให้เกิดความล้าสายตาสูงกว่าอย่างชัดเจน</strong> เมื่อเทียบกับจอ E-ink และหนังสือกระดาษจริง ในขณะที่จอ E-ink แสดงผลลัพธ์ที่ใกล้เคียงกับหนังสือกระดาษอย่างยิ่ง โดยไม่พบความแตกต่างของความล้าสายตา
+    </div>
+
+    <ul>
+      <li><strong>การเลือกใช้อุปกรณ์สำหรับการอ่านระยะยาว:</strong> สำหรับการอ่านต่อเนื่องเกิน 1 ชั่วโมง (เช่น งานวิจัย ตำราเรียน หรือวรรณกรรม) การเลือกใช้จอสะท้อนแสง E-ink (เช่น Kindle Paperwhite) หรือหนังสือกระดาษ ช่วยลดการเกิดตาแห้งและปกป้องสายตาได้ดีกว่าแท็บเล็ต LCD อย่างมีนัยสำคัญ</li>
+      <li><strong>เทคโนโลยีไฟส่องหน้า (Frontlight):</strong> การนำไฟส่องหน้าผิวด้านบนมาใช้ใน E-ink ยุคใหม่ช่วยให้สามารถอ่านในที่มืดได้ โดยยังคงรักษาอัตราการกะพริบตาและความสบายตาในระดับที่ใกล้เคียงกับกระดาษจริง</li>
+      <li><strong>ข้อควรปฏิบัติเมื่อจำเป็นต้องอ่านบนจอ LCD:</strong> หากต้องอ่านเอกสารบนแท็บเล็ต ควรปรับลดความสว่างหน้าจอให้ใกล้เคียงสภาพแวดล้อม กะพริบตาให้ถี่ขึ้น และหยุดพักสายตาเป็นระยะเพื่อป้องกันการฉีกขาดของฟิล์มน้ำตา</li>
+    </ul>
+
+    <div class="callout callout-warning">
+      <strong>ข้อพิจารณาทางวิชาการ (Academic Context):</strong> แม้กลุ่มตัวอย่าง 12 คนจะได้รับการศึกษาอย่างลึกซึ้งด้วยระเบียบวิธี Longitudinal Within-Subjects ที่มีความรัดกุมสูง แต่ผลลัพธ์ยังคงขึ้นกับเทคโนโลยีของรุ่นอุปกรณ์ (Kindle Fire HD vs Kindle Paperwhite) ข้อจำกัดด้าน CFF แสดงให้เห็นว่าเครื่องมือนี้อาจไม่ไวพอสำหรับวัดความล้าสายตาเฉพาะที่ และควรพิจารณาปัจจัยด้านสภาวะการมองสองตา (Binocular Coordination) ในการวิจัยขั้นต่อไป
+    </div>
+
+    <div class="page-footer">
+      <div>แหล่งอ้างอิง: Benedetto, S., Drai-Zerbib, V., Pedrotti, M., Tissier, G., & Baccino, T. (2013). PLoS ONE, 8(12), e83676. | DOI: 10.1371/journal.pone.0083676</div>
+      <div>หน้าที่ 2 จาก 2</div>
+    </div>
+  </div>
+
+</body>
+</html>

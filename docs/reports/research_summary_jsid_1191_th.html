@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>รายงานสรุปงานวิจัย: การเปรียบเทียบผลกระทบของแสงสีฟ้าจากจอภาพต่อเซลล์จอประสาทตา (JSID 2023)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 11mm 15mm 11mm 15mm;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    body {
+      font-family: 'Sarabun', 'Leelawadee UI', 'Tahoma', sans-serif;
+      font-size: 11px;
+      line-height: 1.5;
+      color: #1e293b;
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+    }
+    h1, h2, h3, h4 {
+      font-family: 'Prompt', 'Leelawadee UI', 'Tahoma', sans-serif;
+      color: #0f172a;
+      margin-top: 0;
+    }
+    .page-container {
+      position: relative;
+    }
+    .page-break {
+      page-break-before: always;
+      padding-top: 2px;
+    }
+    
+    /* Header Styles */
+    .header {
+      border-bottom: 2px solid #0284c7;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+    .badge {
+      display: inline-block;
+      background-color: #e0f2fe;
+      color: #0369a1;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    h1 {
+      font-size: 17px;
+      line-height: 1.35;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #0f172a;
+    }
+    .subtitle {
+      font-size: 11.5px;
+      color: #475569;
+      font-weight: 400;
+      margin-bottom: 0;
+    }
+
+    /* Metadata Card */
+    .meta-card {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 6px 14px;
+      font-size: 10.5px;
+    }
+    .meta-item strong {
+      color: #334155;
+      display: inline-block;
+    }
+    .meta-item a {
+      color: #0284c7;
+      text-decoration: none;
+    }
+
+    /* Stat Banner */
+    .stat-banner {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .stat-box {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      border: 1px solid #bae6fd;
+      border-radius: 6px;
+      padding: 8px 6px;
+      text-align: center;
+    }
+    .stat-number {
+      font-family: 'Prompt', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #0284c7;
+      line-height: 1.1;
+    }
+    .stat-label {
+      font-size: 10px;
+      color: #0369a1;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .stat-desc {
+      font-size: 9px;
+      color: #475569;
+      margin-top: 2px;
+      line-height: 1.25;
+    }
+
+    /* Headings & Text */
+    h2 {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #0369a1;
+      border-left: 3.5px solid #0284c7;
+      padding-left: 7px;
+      margin-top: 12px;
+      margin-bottom: 6px;
+    }
+    h3 {
+      font-size: 12px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 8px;
+      margin-bottom: 4px;
+    }
+    p {
+      margin: 0 0 6px 0;
+      text-align: justify;
+    }
+    ul {
+      margin: 0 0 8px 0;
+      padding-left: 16px;
+    }
+    li {
+      margin-bottom: 3px;
+    }
+
+    /* Tables */
+    .table-container {
+      margin: 6px 0 10px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10px;
+    }
+    th {
+      background-color: #0f172a;
+      color: #ffffff;
+      font-family: 'Prompt', sans-serif;
+      font-weight: 500;
+      padding: 5px 7px;
+      text-align: left;
+      border: 1px solid #0f172a;
+    }
+    td {
+      padding: 4px 7px;
+      border: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+    tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+    .highlight-cell {
+      background-color: #f0fdf4 !important;
+      color: #166534;
+      font-weight: 500;
+    }
+    .alert-cell {
+      background-color: #fef2f2 !important;
+      color: #991b1b;
+    }
+
+    /* Callout Boxes */
+    .callout {
+      border-radius: 6px;
+      padding: 6px 10px;
+      margin: 6px 0;
+      font-size: 10px;
+    }
+    .callout-info {
+      background-color: #f0fdf4;
+      border-left: 3.5px solid #16a34a;
+      color: #14532d;
+    }
+    .callout-warning {
+      background-color: #fefce8;
+      border-left: 3.5px solid #ca8a04;
+      color: #713f12;
+    }
+
+    /* Footers */
+    .page-footer {
+      border-top: 1px solid #e2e8f0;
+      padding-top: 5px;
+      margin-top: 10px;
+      font-size: 9px;
+      color: #64748b;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== หน้าที่ 1 ==================== -->
+  <div class="page-container">
+    <div class="header">
+      <div class="badge">เอกสารวิชาการสรุปงานวิจัย (Executive Research Brief)</div>
+      <h1>การเปรียบเทียบผลกระทบของแสงสีฟ้าจากจอภาพแบบเปล่งแสง (LCD) และจอภาพแบบสะท้อนแสง (E Ink) ต่อเซลล์จอประสาทตา</h1>
+      <div class="subtitle">สรุปสาระสำคัญเชิงลึกจากบทความวิจัยที่ตีพิมพ์ในวารสาร Journal of the Society for Information Display (JSID 2023)</div>
+    </div>
+
+    <div class="meta-card">
+      <div>
+        <div class="meta-item"><strong>ชื่อบทความวิจัย:</strong> Comparison of oxidative stress response of in vitro retinal cells exposed to blue light from emissive versus reflective displays</div>
+        <div class="meta-item" style="margin-top: 4px;"><strong>คณะผู้วิจัย:</strong> Xiaodong Wang<sup>1</sup>, Dirk Hertel<sup>2</sup>, Lynne C. Garone<sup>2</sup>, Rick A. Rogers<sup>1</sup></div>
+        <div class="meta-item" style="margin-top: 2px;"><strong>หน่วยงานวิจัย:</strong> <sup>1</sup>Harvard T.H. Chan School of Public Health, Boston, MA | <sup>2</sup>E Ink Corporation, Billerica, MA</div>
+      </div>
+      <div>
+        <div class="meta-item"><strong>วารสารที่ตีพิมพ์:</strong> Journal of the Society for Information Display (JSID)</div>
+        <div class="meta-item" style="margin-top: 4px;"><strong>ฉบับเผยแพร่:</strong> Vol. 31, Issue 3, pp. 112–124 (มีนาคม 2023)</div>
+        <div class="meta-item" style="margin-top: 4px;"><strong>เลข DOI:</strong> <a href="https://doi.org/10.1002/jsid.1191">10.1002/jsid.1191</a> (Open Access)</div>
+      </div>
+    </div>
+
+    <div class="stat-banner">
+      <div class="stat-box">
+        <div class="stat-number">2 - 3 เท่า</div>
+        <div class="stat-label">ROS สะสมช้ากว่า</div>
+        <div class="stat-desc">เมื่อเปิดโหมดเดียวกัน เซลล์ที่รับแสงจาก EPD สะสมสารอนุมูลอิสระช้ากว่า LCD ถึง 2-3 เท่า</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">423 cd/m²</div>
+        <div class="stat-label">ความสว่างสูงสุด LCD</div>
+        <div class="stat-desc">จอแท็บเล็ต LCD เปล่งแสงตรงเข้าตาสูงกว่าจอสะท้อนแสง EPD ถึง 3.6-4.7 เท่า</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">คงสภาพ</div>
+        <div class="stat-label">โครงข่ายไมโทคอนเดรีย</div>
+        <div class="stat-desc">เซลล์ที่รับแสงจาก EPD ยังคงโครงสร้างร่างแหท่อยาวสมบูรณ์ ไม่แตกหัก</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">460 nm</div>
+        <div class="stat-label">การขยับสเปกตรัม LED</div>
+        <div class="stat-desc">การขยับพีคแสงสีฟ้าไปที่ 460 nm ช่วยเลี่ยงช่วงอันตรายสูงสุด (Hazard peak) ได้ดียิ่งขึ้น</div>
+      </div>
+    </div>
+
+    <h2>1. ที่มา ความสำคัญ และบริบททางสาธารณสุข</h2>
+    <p>
+      จากการเปลี่ยนแปลงวิถีชีวิตหลังช่วงการระบาดของ COVID-19 การใช้หน้าจอขนาดพกพา (เช่น แท็บเล็ตและเครื่องอ่านหนังสือ) เพิ่มสูงขึ้นอย่างมากทั้งในการทำงานและการศึกษาของเยาวชน ซึ่งมีความกังวลเพิ่มขึ้นอย่างต่อเนื่องเกี่ยวกับผลกระทบของ <strong>แสงสีฟ้าพลังงานสูง (High-Energy Visible / HEV Light, ช่วงความยาวคลื่น 400–500 นาโนเมตร)</strong> จากหลอด LED ของหน้าจอ โดยเฉพาะในเด็กซึ่งกระจกตาและเลนส์ตายังกรองแสงคลื่นสั้นได้น้อยกว่าผู้ใหญ่ ทำให้แสงสีฟ้าผ่านไปยังจอประสาทตาได้มากกว่า
+    </p>
+    <p>
+      การดูดซับแสงสีฟ้าของเซลล์เยื่อบุผิวเม็ดสีจอประสาทตา (RPE) ก่อให้เกิด <strong>สารอนุมูลอิสระ (Reactive Oxygen Species: ROS)</strong> และความเครียดออกซิเดชัน (Oxidative Stress) รบกวนกระบวนการสร้างพลังงานของไมโทคอนเดรีย และอาจนำไปสู่ภาวะจอประสาทตาเสื่อมในระยะยาว งานวิจัยนี้จึงมุ่งศึกษาและวัดผลทางชีววิทยาโดยตรงเพื่อเปรียบเทียบระหว่างเทคโนโลยีจอเปล่งแสง (Emissive) กับจอสะท้อนแสง (Reflective)
+    </p>
+
+    <h2>2. อุปกรณ์ที่ใช้และระเบียบวิธีวิจัย (Materials & Methods)</h2>
+    <ul>
+      <li><strong>แบบจำลองเซลล์:</strong> ใช้เซลล์เยื่อบุผิวเม็ดสีจอประสาทตามนุษย์ในหลอดทดลอง (<strong>ARPE-19</strong>) ซึ่งเป็นเซลล์มาตรฐานที่ได้รับการยอมรับระดับสากลในการศึกษาความเป็นพิษของแสงต่อดวงตา</li>
+      <li><strong>สภาวะการทดสอบ:</strong> ปรับหน้าจอทุกเครื่องให้แสดงผลสีขาวเต็มหน้าจอ (Full-screen white, R=G=B=255) ที่ระดับความสว่างสูงสุด วัดสเปกตรัมแสงด้วยสเปกโตรเรดิโอมิเตอร์ Konica-Minolta CS-2000 ในห้องมืด</li>
+      <li><strong>กลุ่มควบคุม (Controls):</strong> ใช้แหล่งกำเนิดแสงสังเคราะห์ SpectralLED RS-7-3 เพื่อเปรียบเทียบ โดยแสงสีฟ้าก่อให้เกิด ROS อย่างรวดเร็ว (Positive Control) ขณะที่แสงสีแดงไม่พบการเกิด ROS (Negative Control)</li>
+    </ul>
+
+    <div class="table-container">
+      <div style="font-size: 10.5px; font-weight: 600; margin-bottom: 4px; color: #334155;">ตารางที่ 1: รายละเอียดอุปกรณ์แสดงผลที่นำมาทดสอบในงานวิจัย</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 14%;">รหัสตัวอย่าง</th>
+            <th style="width: 15%;">โหมดการทำงาน</th>
+            <th style="width: 18%;">โทนสีหน้าจอ</th>
+            <th style="width: 18%;">ความสว่าง (Luminance)</th>
+            <th style="width: 18%;">เทคโนโลยีหน้าจอ</th>
+            <th style="width: 17%;">รูปแบบแสงสว่าง</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Device 1D</strong></td>
+            <td>Day (กลางวัน)</td>
+            <td>Cold white</td>
+            <td class="alert-cell">423 cd/m²</td>
+            <td>Color LCD</td>
+            <td>Backlight (ส่องหลัง)</td>
+          </tr>
+          <tr>
+            <td><strong>Device 1N</strong></td>
+            <td>Night (กลางคืน)</td>
+            <td>Warm white</td>
+            <td>285 cd/m²</td>
+            <td>Color LCD</td>
+            <td>Backlight (ส่องหลัง)</td>
+          </tr>
+          <tr>
+            <td><strong>Device 2D</strong></td>
+            <td>Day (กลางวัน)</td>
+            <td>Cold white</td>
+            <td class="highlight-cell">116 cd/m²</td>
+            <td>B&W EPD (ePaper)</td>
+            <td>Frontlight (ส่องหน้า)</td>
+          </tr>
+          <tr>
+            <td><strong>Device 2N</strong></td>
+            <td>Night (กลางคืน)</td>
+            <td>Warm white</td>
+            <td class="highlight-cell">89 cd/m²</td>
+            <td>B&W EPD (ePaper)</td>
+            <td>Frontlight (ส่องหน้า)</td>
+          </tr>
+          <tr>
+            <td><strong>Device 3D / 3N</strong></td>
+            <td>Day / Night</td>
+            <td>Cold / Warm</td>
+            <td class="highlight-cell">91 / 89 cd/m²</td>
+            <td>Color EPD (ePaper)</td>
+            <td>Frontlight (Shift 460nm)</td>
+          </tr>
+          <tr>
+            <td><strong>Device 4D</strong></td>
+            <td>Day (กลางวัน)</td>
+            <td>Cold white</td>
+            <td class="highlight-cell">88 cd/m²</td>
+            <td>Color EPD (ePaper)</td>
+            <td>Frontlight (พาณิชย์)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="page-footer">
+      <div>เอกสารสรุปงานวิจัย: JSID 2023 (Wang et al.) | DOI: 10.1002/jsid.1191</div>
+      <div>หน้าที่ 1 จาก 2</div>
+    </div>
+  </div>
+
+  <!-- ==================== หน้าที่ 2 ==================== -->
+  <div class="page-container page-break">
+    <h2>3. ผลการทดลองสำคัญและการวิเคราะห์เชิงลึก (Results & Deep Analysis)</h2>
+    
+    <h3>3.1 อัตราการสะสมของสารอนุมูลอิสระ (ROS Accumulation Dynamics)</h3>
+    <ul>
+      <li><strong>ผลตามระยะเวลา (Time-dependent increase):</strong> ภายใต้การเปิดใช้งานอุปกรณ์ เซลล์ที่ได้รับแสงจะมีการสะสม ROS เพิ่มขึ้นตามระยะเวลาอย่างต่อเนื่องในทุกอุปกรณ์</li>
+      <li><strong>เปรียบเทียบ LCD กับ EPD:</strong> เมื่อทดสอบในโหมดการทำงานเดียวกัน (เปรียบเทียบ Day vs Day หรือ Night vs Night) เซลล์ที่สัมผัสแสงจาก <strong>จอ ePaper แบบส่องหน้า (Frontlit EPD) มีอัตราการสะสมของ ROS ช้ากว่าจอ LCD แบบส่องหลัง (Backlit LCD) ถึง 2 ถึง 3 เท่า</strong></li>
+      <li><strong>ความต่างของโหมดกลางวันและกลางคืน:</strong> การปรับเป็น Night Mode (Warm White) ช่วยลดอัตราการสร้าง ROS ได้อย่างชัดเจนในทุกอุปกรณ์ เนื่องจากมีการลดสัดส่วนของสเปกตรัมแสงสีฟ้าลง</li>
+      <li><strong>อิทธิพลของสเปกตรัมแสง (Spectral Hazard Shift):</strong> แม้จะตั้งค่าระดับความสว่างสัมพัทธ์ให้เทียบเท่ากัน แต่สเปกตรัมของแสงมีบทบาทสำคัญมาก โดยอุปกรณ์ Device 3 ที่ปรับการเปล่งแสงสีฟ้าขยับไปที่ 460 nm (ห่างจากจุดสูงสุดของฟังก์ชันอันตรายของแสงสีฟ้าที่ประมาณ 435–440 nm) สามารถลดการกระตุ้น ROS ได้ดีกว่า LED สีฟ้าแบบดั้งเดิม</li>
+    </ul>
+
+    <h3>3.2 ผลกระทบต่อโครงสร้างและสัณฐานวิทยาของไมโทคอนเดรีย (Mitochondrial Morphology)</h3>
+    <p>
+      ไมโทคอนเดรียเปรียบเสมือนโรงผลิตพลังงานของเซลล์ และเป็นเป้าหมายหลักที่ไวต่อความเสียหายจากปฏิกิริยาออกซิเดชัน โดยผลการส่องกล้องวิเคราะห์โครงสร้างเซลล์หลังได้รับแสงต่อเนื่องนาน 4 ชั่วโมง แสดงผลลัพธ์ดังนี้:
+    </p>
+    <ul>
+      <li><strong>เซลล์กลุ่มควบคุมในที่มืด (Dark Control):</strong> ไมโทคอนเดรียมีลักษณะเป็นร่างแหท่อยาวที่เชื่อมต่อกันอย่างสมบูรณ์ (Elongated, interconnected tubular networks) แสดงถึงภาวะเซลล์ปกติที่แข็งแรง</li>
+      <li><strong>เซลล์ที่สัมผัสแสงจากจอ LCD (Day Mode):</strong> เกิดการเปลี่ยนแปลงสัณฐานอย่างชัดเจน โดยเส้นร่างแหท่อยาวแตกหักออก กลายเป็นเม็ดรูปทรงกลมและแยกตัวออกจากกัน (Increased circularity & fragmentation) ซึ่งเป็นสัญลักษณ์ทางพยาธิสภาพของภาวะเซลล์เกิดความเครียดออกซิเดชันขั้นรุนแรง และเป็นจุดเริ่มต้นของกระบวนการสลายเซลล์ (Apoptosis)</li>
+      <li><strong>เซลล์ที่สัมผัสแสงจากจอ EPD (ePaper):</strong> ไมโทคอนเดรียสามารถรักษารูปทรงและโครงข่ายร่างแหที่เชื่อมต่อกันได้อย่างเหนียวแน่น ใกล้เคียงกับกลุ่มควบคุมในที่มืดอย่างมีนัยสำคัญ</li>
+    </ul>
+
+    <div class="table-container">
+      <div style="font-size: 10.5px; font-weight: 600; margin-bottom: 4px; color: #334155;">ตารางที่ 2: สรุปการเปรียบเทียบเชิงลึกระหว่างสองเทคโนโลยีจอภาพ</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 25%;">ประเด็นการประเมิน</th>
+            <th style="width: 37%;">จอภาพแบบเปล่งแสง (Color LCD)</th>
+            <th style="width: 38%;">จอภาพแบบสะท้อนแสง (ePaper / E Ink)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>ลักษณะการกระจายแสง</strong></td>
+            <td>ส่องตรงจากไฟ LED ด้านหลังผ่านฟิลเตอร์เข้าสู่ม่านตาโดยตรง</td>
+            <td class="highlight-cell">ใช้ไฟส่องสะท้อนผ่านพื้นผิวหน้าจอ (Reflected light) แสงนุ่มนวลกว่า</td>
+          </tr>
+          <tr>
+            <td><strong>ความสว่างที่ปล่อยออกมา</strong></td>
+            <td>สูงมาก (285 – 423 cd/m²) เพื่อสู้แสงสะท้อนในห้อง</td>
+            <td class="highlight-cell">ต่ำกว่าอย่างมาก (88 – 116 cd/m²) อาศัยการสะท้อนแสงธรรมชาติช่วย</td>
+          </tr>
+          <tr>
+            <td><strong>อัตราการสะสม ROS</strong></td>
+            <td class="alert-cell">สูงและรวดเร็ว (สะสมไวกว่า 2-3 เท่า)</td>
+            <td class="highlight-cell">ต่ำและสะสมช้ากว่าอย่างมีนัยสำคัญทางสถิติ</td>
+          </tr>
+          <tr>
+            <td><strong>ความสมบูรณ์ของไมโทคอนเดรีย</strong></td>
+            <td class="alert-cell">โครงสร้างแตกหัก กลายเป็นทรงกลมกระจัดกระจาย</td>
+            <td class="highlight-cell">โครงสร้างร่างแหท่อยาวคงสภาพสมบูรณ์ใกล้เคียงสภาวะปกติ</td>
+          </tr>
+          <tr>
+            <td><strong>ความเสี่ยงต่อสุขภาพตา</strong></td>
+            <td>มีความเสี่ยงสูงต่อความเครียดออกซิเดชันและภาวะตาล้า</td>
+            <td class="highlight-cell">อ่อนโยนต่อเซลล์จอประสาทตา เหมาะแก่การอ่านระยะยาว</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>4. ข้อสรุปและคำแนะนำเชิงปฏิบัติ (Conclusions & Practical Takeaways)</h2>
+    <div class="callout callout-info">
+      <strong>ข้อสรุปหลักของงานวิจัย:</strong> เทคโนโลยีจอภาพกระดาษอิเล็กทรอนิกส์ (ePaper) ที่ใช้ระบบสะท้อนแสงร่วมกับไฟส่องหน้า ก่อให้เกิดความเครียดออกซิเดชันต่อเซลล์จอประสาทตาน้อยกว่าจอภาพ LCD แบบส่องหลังอย่างชัดเจนในทุกมิติ โดยช่วยชะลอการสะสมของสารอนุมูลอิสระ และปกป้องไมโทคอนเดรียไม่ให้ถูกทำลาย
+    </div>
+
+    <ul>
+      <li><strong>การเลือกอุปกรณ์สำหรับการอ่านเป็นเวลานาน:</strong> สำหรับการอ่านหนังสือ บทความวิจัย หรือการศึกษาของเด็ก การใช้อุปกรณ์ที่ใช้เทคโนโลยีจอสะท้อนแสง (e-reader / E Ink) เป็นทางเลือกที่ปลอดภัยและลดความเสี่ยงต่อเซลล์จอประสาทตาได้มากกว่าแท็บเล็ต LCD</li>
+      <li><strong>ประโยชน์ของ Night Mode:</strong> ไม่ว่าจะใช้อุปกรณ์ประเภทใด การเปิดโหมดกลางคืน (Night Mode / Warm Light) ช่วยลดความเสี่ยงจากแสงสีฟ้าได้อย่างมีนัยสำคัญ</li>
+      <li><strong>นวัตกรรมแหล่งกำเนิดแสง:</strong> การปรับความยาวคลื่นของ LED สีฟ้าให้ขยับออกจากช่วงอันตราย (เช่น ขยับไปที่ 460 nm) เป็นแนวทางการออกแบบหน้าจอในอนาคตที่ช่วยเพิ่มความปลอดภัยต่อดวงตา</li>
+    </ul>
+
+    <div class="callout callout-warning">
+      <strong>ข้อพิจารณาทางวิชาการ (Academic Context):</strong> งานวิจัยนี้เป็นการทดลองในเซลล์เพาะเลี้ยงในหลอดทดลอง (In Vitro) ซึ่งมีข้อดีในการตัดตัวแปรแทรกซ้อนและยืนยันกลไกชีววิทยาของเซลล์ได้อย่างแม่นยำ ทั้งนี้ ในดวงตามนุษย์ที่มีชีวิตจริง (In Vivo) จะมีระบบปกป้องเสริม เช่น การหดตัวของรูม่านตา (Pupil reflex), การปรับโฟกัส, สารต้านอนุมูลอิสระในน้ำเลี้ยงตา และการกะพริบตา ซึ่งช่วยบรรเทาผลกระทบได้บางส่วน
+    </div>
+
+    <div class="page-footer">
+      <div>แหล่งอ้างอิง: Wang, X., Hertel, D., Garone, L. C., & Rogers, R. A. (2023). JSID, 31(3), 112-124. | DOI: 10.1002/jsid.1191</div>
+      <div>หน้าที่ 2 จาก 2</div>
+    </div>
+  </div>
+
+</body>
+</html>

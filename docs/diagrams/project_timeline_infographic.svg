@@ -1,0 +1,1402 @@
+<svg xmlns="http://www.w3.org/200svg" viewBox="0 0 1700 4270" width="100%" height="100%" style="background-color: #0B1120; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <linearGradient id="trunkGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="25%" stop-color="#10B981" />
+      <stop offset="30%" stop-color="#F59E0B" />
+      <stop offset="45%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#818CF8" />
+    </linearGradient>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06B6D4" />
+      <stop offset="50%" stop-color="#3B82F6" />
+      <stop offset="100%" stop-color="#8B5CF6" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- Background Grid Pattern -->
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1E293B" stroke-width="0.75" stroke-opacity="0.4"/>
+  </pattern>
+  <rect width="1700" height="4270" fill="url(#grid)" />
+
+  <!-- HEADER SECTION -->
+  <g transform="translate(0, 45)">
+    <text x="850" y="35" text-anchor="middle" font-size="14" font-weight="700" letter-spacing="3" fill="#38BDF8">ROBOSEN PHYSICAL MODULAR BLOCK SYSTEM</text>
+    <text x="850" y="75" text-anchor="middle" font-size="34" font-weight="900" letter-spacing="1" fill="url(#headerGrad)">14-WEEK PROJECT MASTER TIMELINE</text>
+    <text x="850" y="110" text-anchor="middle" font-size="16" fill="#94A3B8">แผนภาพสรุปความก้าวหน้าและเป้าหมายประจำสัปดาห์ (Focusing on Project Deliverables &amp; Milestones)</text>
+
+    <!-- Status Legend -->
+    <g transform="translate(530, 140)">
+      <circle cx="0" cy="0" r="7" fill="#10B981" />
+      <text x="14" y="4" font-size="13" font-weight="600" fill="#34D399">เสร็จสิ้น (DONE): W1-W3</text>
+      <circle cx="210" cy="0" r="7" fill="#F59E0B" />
+      <text x="224" y="4" font-size="13" font-weight="600" fill="#FCD34D">กำลังดำเนินการ (IN PROGRESS): W4</text>
+      <circle cx="470" cy="0" r="7" fill="#38BDF8" />
+      <text x="484" y="4" font-size="13" font-weight="600" fill="#7DD3FC">ตามแผนงาน (SCHEDULED): W5-W14</text>
+    </g>
+  </g>
+
+  <!-- CENTRAL TIMELINE SPINE (TRUNK) -->
+  <line x1="850" y1="240" x2="850" y2="4170" stroke="url(#trunkGrad)" stroke-width="6" stroke-linecap="round" />
+  <line x1="850" y1="240" x2="850" y2="4170" stroke="#FFFFFF" stroke-width="1.5" stroke-opacity="0.3" stroke-linecap="round" />
+
+  <!-- ===== WEEK 1 BRANCH ===== -->
+  <g id="week-1">
+    <path d="M 850 260 L 780 260" stroke="#10B981" stroke-width="3" stroke-dasharray="none" stroke-linecap="round" />
+    <circle cx="850" cy="260" r="16" fill="#10B981" opacity="0.3" filter="url(#glow)" />
+    <circle cx="850" cy="260" r="12" fill="#0F172A" stroke="#10B981" stroke-width="3" />
+    <circle cx="850" cy="260" r="5" fill="#10B981" />
+    <foreignObject x="90" y="133" width="690" height="255" filter="url(#cardShadow)">
+
+        <div xmlns="http://www.w3.org/1999/xhtml" style="
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+            border-radius: 14px;
+            border: 1px solid #10B98166;
+            padding: 14px 18px;
+            box-sizing: border-box;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #F8FAFC;
+        ">
+            <!-- Header bar of card -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(148, 163, 184, 0.2);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: #065F46; color: #34D399; font-weight: 800; font-size: 12px; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">
+                        WEEK 01
+                    </span>
+                    <span style="font-size: 12px; color: #94A3B8; font-family: monospace;">📅 16/08/2026 - 22/08/2026</span>
+                    
+                </div>
+                <div>
+                    <span style="background: #065F46; color: #34D399; border: 1px solid #10B981; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 12px;">
+                        DONE (เสร็จสิ้น)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Milestone Title -->
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 14px; font-weight: 700; color: #38BDF8; line-height: 1.3;">
+                    วางรากฐานระบบ, โครงสร้างบล็อกคำสั่ง & เชื่อมต่อบลูทูธเบื้องต้น
+                </div>
+                <div style="font-size: 11px; color: #64748B; font-style: italic;">
+                    System Foundation, Modular Architecture & Baseline BLE Protocol
+                </div>
+            </div>
+
+            <!-- Deliverables List -->
+            <div style="flex: 1; overflow: hidden;">
+                
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">⚡</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[ฮาร์ดแวร์ & วงจร]</strong>
+                    <span> ร่างโครงสร้างระบบจ่ายไฟ & กำหนดสัญญาณหน้าสัมผัสเชื่อมต่อระหว่างบล็อก</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🧊</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[โครงสร้าง & 3D]</strong>
+                    <span> กำหนดขนาดและสัดส่วนตัวบล็อกให้จับถือถนัดมือ & วางตำแหน่งจุดเชื่อมต่อ</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">💻</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[เฟิร์มแวร์ & โปรโตคอล]</strong>
+                    <span> ถอดรหัสคำสั่งบลูทูธเบื้องต้นของหุ่นยนต์ K1 (เดินหน้า ถอยหลัง หันเลี้ยว)</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🎨</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การออกแบบ & สรีรศาสตร์]</strong>
+                    <span> ศึกษาหลักสรีรศาสตร์ในการจับถือ: ความโค้งมนที่ปลอดภัย และการใช้สี/รูปทรง</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🛡️</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[ความปลอดภัย & มาตรฐาน]</strong>
+                    <span> กำหนดเกณฑ์ความปลอดภัย: แรงยึดแม่เหล็ก, ระบบกันไฟลัดวงจร & ความทนต่อการตก</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+    </foreignObject>
+  </g>
+
+  <!-- ===== WEEK 2 BRANCH ===== -->
+  <g id="week-2">
+    <path d="M 850 535 L 920 535" stroke="#10B981" stroke-width="3" stroke-dasharray="none" stroke-linecap="round" />
+    <circle cx="850" cy="535" r="16" fill="#10B981" opacity="0.3" filter="url(#glow)" />
+    <circle cx="850" cy="535" r="12" fill="#0F172A" stroke="#10B981" stroke-width="3" />
+    <circle cx="850" cy="535" r="5" fill="#10B981" />
+    <foreignObject x="920" y="408" width="690" height="255" filter="url(#cardShadow)">
+
+        <div xmlns="http://www.w3.org/1999/xhtml" style="
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+            border-radius: 14px;
+            border: 1px solid #10B98166;
+            padding: 14px 18px;
+            box-sizing: border-box;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #F8FAFC;
+        ">
+            <!-- Header bar of card -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(148, 163, 184, 0.2);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: #065F46; color: #34D399; font-weight: 800; font-size: 12px; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">
+                        WEEK 02
+                    </span>
+                    <span style="font-size: 12px; color: #94A3B8; font-family: monospace;">📅 23/08/2026 - 29/08/2026</span>
+                    
+                </div>
+                <div>
+                    <span style="background: #065F46; color: #34D399; border: 1px solid #10B981; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 12px;">
+                        DONE (เสร็จสิ้น)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Milestone Title -->
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 14px; font-weight: 700; color: #38BDF8; line-height: 1.3;">
+                    ถอดรหัสคำสั่งหุ่นยนต์ครบวงจร, สร้างโปรแกรมสื่อสาร & ระบบจำลองการทำงาน
+                </div>
+                <div style="font-size: 11px; color: #64748B; font-style: italic;">
+                    Advanced Protocol Decoding, Control Engine & Logic Simulation
+                </div>
+            </div>
+
+            <!-- Deliverables List -->
+            <div style="flex: 1; overflow: hidden;">
+                
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">⚡</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[ฮาร์ดแวร์ & วงจร]</strong>
+                    <span> วิเคราะห์ฮาร์ดแวร์หุ่นยนต์, วงจรชาร์จไฟ & จัดเตรียมชุดไฟล์เสียงสำหรับคำสั่ง</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🧊</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[โครงสร้าง & 3D]</strong>
+                    <span> สรุปรายการชิ้นส่วนต้นแบบ & วัดขนาดจริงของแผงวงจรเพื่อเตรียมออกแบบเคส</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">💻</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[เฟิร์มแวร์ & โปรโตคอล]</strong>
+                    <span> ถอดรหัสคำสั่งขั้นสูงกว่า 25 รูปแบบ, ระบบตอบกลับ (ACK) & โปรแกรมควบคุมการเคลื่อนไหว</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🎨</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การออกแบบ & สรีรศาสตร์]</strong>
+                    <span> วางลำดับขั้นตอนการใช้งาน: เสียบตั้งค่าแท่น -> ต่อเรียงบล็อกแม่เหล็ก -> ไฟบอกสถานะ</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🛡️</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การทดสอบ & QA]</strong>
+                    <span> พัฒนาระบบจำลองการสื่อสารเพื่อทดสอบการรับส่งข้อมูลและความถูกต้องของคำสั่ง</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+    </foreignObject>
+  </g>
+
+  <!-- ===== WEEK 3 BRANCH ===== -->
+  <g id="week-3">
+    <path d="M 850 810 L 780 810" stroke="#10B981" stroke-width="3" stroke-dasharray="none" stroke-linecap="round" />
+    <circle cx="850" cy="810" r="16" fill="#10B981" opacity="0.3" filter="url(#glow)" />
+    <circle cx="850" cy="810" r="12" fill="#0F172A" stroke="#10B981" stroke-width="3" />
+    <circle cx="850" cy="810" r="5" fill="#10B981" />
+    <foreignObject x="90" y="683" width="690" height="255" filter="url(#cardShadow)">
+
+        <div xmlns="http://www.w3.org/1999/xhtml" style="
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+            border-radius: 14px;
+            border: 1px solid #10B98166;
+            padding: 14px 18px;
+            box-sizing: border-box;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #F8FAFC;
+        ">
+            <!-- Header bar of card -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(148, 163, 184, 0.2);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: #065F46; color: #34D399; font-weight: 800; font-size: 12px; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">
+                        WEEK 03
+                    </span>
+                    <span style="font-size: 12px; color: #94A3B8; font-family: monospace;">📅 30/08/2026 - 05/09/2026</span>
+                    
+                </div>
+                <div>
+                    <span style="background: #065F46; color: #34D399; border: 1px solid #10B981; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 12px;">
+                        DONE (เสร็จสิ้น)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Milestone Title -->
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 14px; font-weight: 700; color: #38BDF8; line-height: 1.3;">
+                    พัฒนาโครงสร้างโปรแกรมควบคุมหลัก & สรุปรายการอุปกรณ์ฮาร์ดแวร์
+                </div>
+                <div style="font-size: 11px; color: #64748B; font-style: italic;">
+                    Master Controller Core Engine & Final Hardware BOM
+                </div>
+            </div>
+
+            <!-- Deliverables List -->
+            <div style="flex: 1; overflow: hidden;">
+                
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">⚡</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[ฮาร์ดแวร์ & วงจร]</strong>
+                    <span> สรุปรายการอุปกรณ์หลัก (BOM): ไมโครคอนโทรลเลอร์, ไฟสถานะ, จอภาพ, ปุ่มปรับค่า & แบตเตอรี่</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🧊</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[โครงสร้าง & 3D]</strong>
+                    <span> ร่างแบบโครงสร้างยึดอุปกรณ์สำหรับชุดทดลองต้นแบบ & วางตำแหน่งพอร์ตเชื่อมต่อ</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">💻</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[เฟิร์มแวร์ & โปรโตคอล]</strong>
+                    <span> พัฒนาโปรแกรมหลักบน Master Block: ค้นหาและเชื่อมต่อหุ่นยนต์อัตโนมัติ พร้อมระบบความปลอดภัย</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🎨</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การออกแบบ & สรีรศาสตร์]</strong>
+                    <span> จัดทำแผนภาพสรุปโฟลว์ขั้นตอนการทำงานและการส่งผ่านคำสั่งของระบบบล็อก</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🛡️</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การทดสอบ & QA]</strong>
+                    <span> ทดสอบความแม่นยำของปุ่มหมุนปรับค่า พร้อมระบบตัดสัญญาณรบกวนและจำกัดขอบเขตค่า</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+    </foreignObject>
+  </g>
+
+  <!-- ===== WEEK 4 BRANCH ===== -->
+  <g id="week-4">
+    <path d="M 850 1085 L 920 1085" stroke="#F59E0B" stroke-width="3" stroke-dasharray="none" stroke-linecap="round" />
+    <circle cx="850" cy="1085" r="16" fill="#F59E0B" opacity="0.3" filter="url(#glow)" />
+    <circle cx="850" cy="1085" r="12" fill="#0F172A" stroke="#F59E0B" stroke-width="3" />
+    <circle cx="850" cy="1085" r="5" fill="#F59E0B" />
+    <foreignObject x="920" y="958" width="690" height="255" filter="url(#cardShadow)">
+
+        <div xmlns="http://www.w3.org/1999/xhtml" style="
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+            border-radius: 14px;
+            border: 2px solid #F59E0B; box-shadow: 0 0 15px #F59E0B33;
+            padding: 14px 18px;
+            box-sizing: border-box;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #F8FAFC;
+        ">
+            <!-- Header bar of card -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(148, 163, 184, 0.2);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: #92400E; color: #FCD34D; font-weight: 800; font-size: 12px; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">
+                        WEEK 04
+                    </span>
+                    <span style="font-size: 12px; color: #94A3B8; font-family: monospace;">📅 06/09/2026 - 12/09/2026</span>
+                    
+                </div>
+                <div>
+                    <span style="background: #92400E; color: #FCD34D; border: 1px solid #F59E0B; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 12px;">
+                        IN PROGRESS (กำลังดำเนินการ)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Milestone Title -->
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 14px; font-weight: 700; color: #38BDF8; line-height: 1.3;">
+                    ออกแบบแผนผังวงจรไฟฟ้าครบชุด & ขึ้นโมเดลสามมิติตัวบล็อกคำสั่ง
+                </div>
+                <div style="font-size: 11px; color: #64748B; font-style: italic;">
+                    Complete Electrical Schematics & 3D Enclosure CAD Modeling
+                </div>
+            </div>
+
+            <!-- Deliverables List -->
+            <div style="flex: 1; overflow: hidden;">
+                
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">⚡</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[ฮาร์ดแวร์ & วงจร]</strong>
+                    <span> ออกแบบวงจรไฟฟ้าครบ 3 ส่วน: Master Block, Action Block และ End Block</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🧊</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[โครงสร้าง & 3D]</strong>
+                    <span> ออกแบบโมเดล 3D: แม่เหล็กป้องกันต่อกลับด้าน, ท่อนำแสงไฟแสดงผล & เคสบล็อกหลัก</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">💻</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[เฟิร์มแวร์ & โปรโตคอล]</strong>
+                    <span> ทดสอบเชื่อมต่อบล็อกจำลองเข้ากับหุ่นยนต์จริง เพื่อยืนยันการส่งคำสั่งไร้สายผ่าน BLE</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🎨</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การออกแบบ & สรีรศาสตร์]</strong>
+                    <span> ออกแบบกราฟิกบนตัวบล็อกและหน้าจอ: ไอคอนคำสั่งอ่านง่าย, แถบสีแบ่งหมวด & ลูกศรทิศทาง</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🛡️</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การทดสอบ & QA]</strong>
+                    <span> ตรวจสอบความปลอดภัยทางไฟฟ้าและวงจรควบคุมการชาร์จแบตเตอรี่บนชุดทดลอง</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+    </foreignObject>
+  </g>
+
+  <!-- ===== WEEK 5 BRANCH ===== -->
+  <g id="week-5">
+    <path d="M 850 1360 L 780 1360" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" stroke-linecap="round" />
+    <circle cx="850" cy="1360" r="16" fill="#38BDF8" opacity="0.3" filter="url(#glow)" />
+    <circle cx="850" cy="1360" r="12" fill="#0F172A" stroke="#38BDF8" stroke-width="3" />
+    <circle cx="850" cy="1360" r="5" fill="#38BDF8" />
+    <foreignObject x="90" y="1233" width="690" height="255" filter="url(#cardShadow)">
+
+        <div xmlns="http://www.w3.org/1999/xhtml" style="
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+            border-radius: 14px;
+            border: 1px solid #38BDF866;
+            padding: 14px 18px;
+            box-sizing: border-box;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #F8FAFC;
+        ">
+            <!-- Header bar of card -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(148, 163, 184, 0.2);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: #0F172A; color: #7DD3FC; font-weight: 800; font-size: 12px; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">
+                        WEEK 05
+                    </span>
+                    <span style="font-size: 12px; color: #94A3B8; font-family: monospace;">📅 13/09/2026 - 19/09/2026</span>
+                    
+                </div>
+                <div>
+                    <span style="background: #0F172A; color: #7DD3FC; border: 1px solid #38BDF8; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 12px;">
+                        SCHEDULED (ตามแผนงาน)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Milestone Title -->
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 14px; font-weight: 700; color: #38BDF8; line-height: 1.3;">
+                    ออกแบบแผ่นวงจรพิมพ์ (PCB), พัฒนาโปรแกรมประจำบล็อก & พิมพ์ชิ้นงานสามมิติทดสอบ
+                </div>
+                <div style="font-size: 11px; color: #64748B; font-style: italic;">
+                    PCB Routing, Action Block Firmware & 3D Test Print Fit Checks
+                </div>
+            </div>
+
+            <!-- Deliverables List -->
+            <div style="flex: 1; overflow: hidden;">
+                
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">⚡</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[ฮาร์ดแวร์ & วงจร]</strong>
+                    <span> ออกแบบลายวงจรแผ่น PCB ให้มีขนาดกะทัดรัดและลงตัวกับโครงสร้างบล็อกทั้ง 3 รูปแบบ</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🧊</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[โครงสร้าง & 3D]</strong>
+                    <span> พิมพ์ชิ้นงาน 3D ทดสอบ: ตรวจสอบความกระชับของชิ้นส่วน, แรงดูดแม่เหล็ก & การมองเห็นแสงไฟ</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">💻</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[เฟิร์มแวร์ & โปรโตคอล]</strong>
+                    <span> พัฒนาโปรแกรมประจำ Action Block: บันทึกค่าลงหน่วยความจำ, ควบคุมไฟสถานะ & ประมวลผล</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🎨</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การออกแบบ & สรีรศาสตร์]</strong>
+                    <span> ออกแบบสัญลักษณ์บนบล็อก: เครื่องหมายจุดต่อ, สเกลรอบปุ่มหมุน & สัญลักษณ์ปิดท้าย</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🛡️</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การทดสอบ & QA]</strong>
+                    <span> รันชุดทดสอบการสื่อสารอัตโนมัติ: รับมือกรณีต่อบล็อกไม่แน่น & ตรวจความถูกต้องข้อมูล</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+    </foreignObject>
+  </g>
+
+  <!-- ===== WEEK 6 BRANCH ===== -->
+  <g id="week-6">
+    <path d="M 850 1635 L 920 1635" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" stroke-linecap="round" />
+    <circle cx="850" cy="1635" r="16" fill="#38BDF8" opacity="0.3" filter="url(#glow)" />
+    <circle cx="850" cy="1635" r="12" fill="#0F172A" stroke="#38BDF8" stroke-width="3" />
+    <circle cx="850" cy="1635" r="5" fill="#38BDF8" />
+    <foreignObject x="920" y="1508" width="690" height="255" filter="url(#cardShadow)">
+
+        <div xmlns="http://www.w3.org/1999/xhtml" style="
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+            border-radius: 14px;
+            border: 1px solid #38BDF866;
+            padding: 14px 18px;
+            box-sizing: border-box;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #F8FAFC;
+        ">
+            <!-- Header bar of card -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(148, 163, 184, 0.2);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: #0F172A; color: #7DD3FC; font-weight: 800; font-size: 12px; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">
+                        WEEK 06
+                    </span>
+                    <span style="font-size: 12px; color: #94A3B8; font-family: monospace;">📅 20/09/2026 - 26/09/2026</span>
+                    
+                </div>
+                <div>
+                    <span style="background: #0F172A; color: #7DD3FC; border: 1px solid #38BDF8; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 12px;">
+                        SCHEDULED (ตามแผนงาน)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Milestone Title -->
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 14px; font-weight: 700; color: #38BDF8; line-height: 1.3;">
+                    สั่งผลิตแผ่นวงจรและจัดซื้ออุปกรณ์ & พัฒนากราฟิกหน้าจอแสดงผล
+                </div>
+                <div style="font-size: 11px; color: #64748B; font-style: italic;">
+                    PCB Manufacturing Dispatch, Parts Procurement & OLED UI Graphics
+                </div>
+            </div>
+
+            <!-- Deliverables List -->
+            <div style="flex: 1; overflow: hidden;">
+                
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">⚡</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[ฮาร์ดแวร์ & วงจร]</strong>
+                    <span> ตรวจสอบความถูกต้องของแบบวงจร & ส่งสั่งผลิตแผ่นวงจรพิมพ์ (PCB) และสั่งซื้อชิ้นส่วน</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🧊</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[โครงสร้าง & 3D]</strong>
+                    <span> จัดซื้อชิ้นส่วนโครงสร้าง: แม่เหล็กแรงสูง N52, ขั้วพินสปริง (Pogo), ปุ่มหมุน, สวิตช์ & แบตเตอรี่</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">💻</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[เฟิร์มแวร์ & โปรโตคอล]</strong>
+                    <span> พัฒนาระบบแสดงผล OLED: ไอคอนคำสั่งขนาดใหญ่ชัดเจน, ขีดแถบพารามิเตอร์ & สัญญาณบลูทูธ</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🎨</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การออกแบบ & สรีรศาสตร์]</strong>
+                    <span> ผลิตตัวอย่างสติกเกอร์สัญลักษณ์: ตรวจสอบความคมชัด ความทนทานต่อการขูดขีด & แสงไฟ</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🛡️</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การทดสอบ & QA]</strong>
+                    <span> ทดสอบความเสถียรของหน่วยประมวลผล: รันประมวลผลคำสั่งต่อเนื่องกว่า 100 รอบโดยไม่สะดุด</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+    </foreignObject>
+  </g>
+
+  <!-- ===== WEEK 7 BRANCH ===== -->
+  <g id="week-7">
+    <path d="M 850 1910 L 780 1910" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" stroke-linecap="round" />
+    <circle cx="850" cy="1910" r="19" fill="#38BDF8" opacity="0.3" filter="url(#glow)" />
+    <circle cx="850" cy="1910" r="15" fill="#0F172A" stroke="#38BDF8" stroke-width="3" />
+    <circle cx="850" cy="1910" r="5" fill="#38BDF8" />
+    <foreignObject x="90" y="1783" width="690" height="255" filter="url(#cardShadow)">
+
+        <div xmlns="http://www.w3.org/1999/xhtml" style="
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+            border-radius: 14px;
+            border: 2px solid #38BDF8; box-shadow: 0 0 15px #38BDF833;
+            padding: 14px 18px;
+            box-sizing: border-box;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #F8FAFC;
+        ">
+            <!-- Header bar of card -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(148, 163, 184, 0.2);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: #0F172A; color: #7DD3FC; font-weight: 800; font-size: 12px; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">
+                        WEEK 07
+                    </span>
+                    <span style="font-size: 12px; color: #94A3B8; font-family: monospace;">📅 27/09/2026 - 03/10/2026</span>
+                    <span style="background:#F59E0B; color:#000; font-size:11px; font-weight:800; padding:2px 6px; border-radius:4px; margin-left:6px;">KEY MILESTONE 🌟</span>
+                </div>
+                <div>
+                    <span style="background: #0F172A; color: #7DD3FC; border: 1px solid #38BDF8; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 12px;">
+                        SCHEDULED (ตามแผนงาน)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Milestone Title -->
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 14px; font-weight: 700; color: #38BDF8; line-height: 1.3;">
+                    🎯 ประเมินผลกลางภาค (Midterm), สั่งพิมพ์เคสบล็อกชุดจริง & เตรียมอุปกรณ์ประกอบ
+                </div>
+                <div style="font-size: 11px; color: #64748B; font-style: italic;">
+                    Midterm Progress Evaluation, Production 3D Cases & Assembly Preparation
+                </div>
+            </div>
+
+            <!-- Deliverables List -->
+            <div style="flex: 1; overflow: hidden;">
+                
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">⚡</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[ฮาร์ดแวร์ & วงจร]</strong>
+                    <span> จัดเตรียมเครื่องมือ อุปกรณ์บัดกรี และโต๊ะปฏิบัติการสำหรับประกอบบอร์ดอิเล็กทรอนิกส์</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🧊</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[โครงสร้าง & 3D]</strong>
+                    <span> พิมพ์ชิ้นงาน 3D เคสชุดจริงความแข็งแรงสูงครบเซต: บล็อกหลัก 1 + บล็อกคำสั่ง 3 + บล็อกปิดท้าย 1</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">💻</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[เฟิร์มแวร์ & โปรโตคอล]</strong>
+                    <span> เชื่อมโยงระบบแสดงผลกับระบบควบคุม: สลับหน้าจอเมนู, โหมดตั้งค่าบล็อก & โหมดเชื่อมต่อหุ่นยนต์</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🎨</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การออกแบบ & สรีรศาสตร์]</strong>
+                    <span> ประเมินความสะดวกในการใช้งาน: ขอบมุมโค้งมนไม่บาดมือ, ความหนืดของลูกบิด & ความชัดของจอ</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🎯</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[หมุดหมายสำคัญ]</strong>
+                    <span> 【ประเมินผลกลางภาค】: ส่งรายงานความก้าวหน้าโครงการ, นำเสนอผลงาน & สอบประเมินกลางภาค</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+    </foreignObject>
+  </g>
+
+  <!-- ===== WEEK 8 BRANCH ===== -->
+  <g id="week-8">
+    <path d="M 850 2185 L 920 2185" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" stroke-linecap="round" />
+    <circle cx="850" cy="2185" r="16" fill="#38BDF8" opacity="0.3" filter="url(#glow)" />
+    <circle cx="850" cy="2185" r="12" fill="#0F172A" stroke="#38BDF8" stroke-width="3" />
+    <circle cx="850" cy="2185" r="5" fill="#38BDF8" />
+    <foreignObject x="920" y="2058" width="690" height="255" filter="url(#cardShadow)">
+
+        <div xmlns="http://www.w3.org/1999/xhtml" style="
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+            border-radius: 14px;
+            border: 1px solid #38BDF866;
+            padding: 14px 18px;
+            box-sizing: border-box;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #F8FAFC;
+        ">
+            <!-- Header bar of card -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(148, 163, 184, 0.2);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: #0F172A; color: #7DD3FC; font-weight: 800; font-size: 12px; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">
+                        WEEK 08
+                    </span>
+                    <span style="font-size: 12px; color: #94A3B8; font-family: monospace;">📅 04/10/2026 - 10/10/2026</span>
+                    
+                </div>
+                <div>
+                    <span style="background: #0F172A; color: #7DD3FC; border: 1px solid #38BDF8; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 12px;">
+                        SCHEDULED (ตามแผนงาน)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Milestone Title -->
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 14px; font-weight: 700; color: #38BDF8; line-height: 1.3;">
+                    ประกอบและบัดกรีแผ่นวงจร & ทดสอบความปลอดภัยระบบจ่ายไฟ
+                </div>
+                <div style="font-size: 11px; color: #64748B; font-style: italic;">
+                    PCB Assembly & Soldering, Power Safety & Bring-up Verification
+                </div>
+            </div>
+
+            <!-- Deliverables List -->
+            <div style="flex: 1; overflow: hidden;">
+                
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">⚡</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[ฮาร์ดแวร์ & วงจร]</strong>
+                    <span> ประกอบบัดกรีชิ้นส่วนอิเล็กทรอนิกส์, ขั้วสัมผัสเชื่อมต่อ, ปุ่มปรับค่า & หน้าจอแสดงผล</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🧊</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[โครงสร้าง & 3D]</strong>
+                    <span> ขัดเก็บผิวสัมผัสเคส 3D ให้เรียบเนียน & ทดลองติดตั้งแผงวงจรจริงลงในตัวบล็อก (Dry Fit)</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">💻</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[เฟิร์มแวร์ & โปรโตคอล]</strong>
+                    <span> ติดตั้งโปรแกรมทดสอบลงบล็อกหลัก: ตรวจสอบการทำงานของจอแสดงผลและปุ่มหมุนปรับค่า</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🎨</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การออกแบบ & สรีรศาสตร์]</strong>
+                    <span> จัดทำสติกเกอร์สัญลักษณ์คำสั่งเคลือบผิวทนทานพิเศษ พร้อมติดตั้งลงบนเคสบล็อกจริง</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🛡️</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การทดสอบ & QA]</strong>
+                    <span> ทดสอบความปลอดภัยทางไฟฟ้า: วัดแรงดันไฟเลี้ยง, ระบบชาร์จตัดไฟ & กระแสไฟสแตนด์บาย</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+    </foreignObject>
+  </g>
+
+  <!-- ===== WEEK 9 BRANCH ===== -->
+  <g id="week-9">
+    <path d="M 850 2460 L 780 2460" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" stroke-linecap="round" />
+    <circle cx="850" cy="2460" r="16" fill="#38BDF8" opacity="0.3" filter="url(#glow)" />
+    <circle cx="850" cy="2460" r="12" fill="#0F172A" stroke="#38BDF8" stroke-width="3" />
+    <circle cx="850" cy="2460" r="5" fill="#38BDF8" />
+    <foreignObject x="90" y="2333" width="690" height="255" filter="url(#cardShadow)">
+
+        <div xmlns="http://www.w3.org/1999/xhtml" style="
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+            border-radius: 14px;
+            border: 1px solid #38BDF866;
+            padding: 14px 18px;
+            box-sizing: border-box;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #F8FAFC;
+        ">
+            <!-- Header bar of card -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(148, 163, 184, 0.2);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: #0F172A; color: #7DD3FC; font-weight: 800; font-size: 12px; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">
+                        WEEK 09
+                    </span>
+                    <span style="font-size: 12px; color: #94A3B8; font-family: monospace;">📅 11/10/2026 - 17/10/2026</span>
+                    
+                </div>
+                <div>
+                    <span style="background: #0F172A; color: #7DD3FC; border: 1px solid #38BDF8; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 12px;">
+                        SCHEDULED (ตามแผนงาน)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Milestone Title -->
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 14px; font-weight: 700; color: #38BDF8; line-height: 1.3;">
+                    ติดตั้งโปรแกรมลงบอร์ดจริง, ทดสอบแท่นตั้งค่าบล็อก & ตรวจสอบการสื่อสารข้อมูล
+                </div>
+                <div style="font-size: 11px; color: #64748B; font-style: italic;">
+                    Firmware Flashing, Configuration Dock Integration & Signal Integrity
+                </div>
+            </div>
+
+            <!-- Deliverables List -->
+            <div style="flex: 1; overflow: hidden;">
+                
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">⚡</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[ฮาร์ดแวร์ & วงจร]</strong>
+                    <span> ตรวจสอบความสมบูรณ์ของลายวงจร & วัดระดับความเรียบเสมอกันของขั้วพินสปริงหน้าสัมผัส</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🧊</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[โครงสร้าง & 3D]</strong>
+                    <span> ติดตั้งแม่เหล็กเข้ากับเคสบล็อกตามแนวขั้วที่กำหนด ดูดประกบแน่นหนาและต่อถูกด้านเสมอ</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">💻</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[เฟิร์มแวร์ & โปรโตคอล]</strong>
+                    <span> ติดตั้งโปรแกรมลง Action Block ทั้ง 4 ชิ้น & ทดสอบตั้งค่าพารามิเตอร์ผ่าน Dock พร้อมไฟตอบรับ</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🎨</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การออกแบบ & สรีรศาสตร์]</strong>
+                    <span> จัดทำแบบประเมินความสะดวกการใช้งาน: แรงดูดแม่เหล็ก, ความง่ายในการต่อ & การเข้าใจไฟสถานะ</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🛡️</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การทดสอบ & QA]</strong>
+                    <span> ตรวจวัดสัญญาณข้อมูลด้วย Oscilloscope พร้อมทดสอบการขยับ/โยกบล็อกขณะส่งข้อมูล</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+    </foreignObject>
+  </g>
+
+  <!-- ===== WEEK 10 BRANCH ===== -->
+  <g id="week-10">
+    <path d="M 850 2735 L 920 2735" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" stroke-linecap="round" />
+    <circle cx="850" cy="2735" r="19" fill="#38BDF8" opacity="0.3" filter="url(#glow)" />
+    <circle cx="850" cy="2735" r="15" fill="#0F172A" stroke="#38BDF8" stroke-width="3" />
+    <circle cx="850" cy="2735" r="5" fill="#38BDF8" />
+    <foreignObject x="920" y="2608" width="690" height="255" filter="url(#cardShadow)">
+
+        <div xmlns="http://www.w3.org/1999/xhtml" style="
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+            border-radius: 14px;
+            border: 2px solid #38BDF8; box-shadow: 0 0 15px #38BDF833;
+            padding: 14px 18px;
+            box-sizing: border-box;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #F8FAFC;
+        ">
+            <!-- Header bar of card -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(148, 163, 184, 0.2);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: #0F172A; color: #7DD3FC; font-weight: 800; font-size: 12px; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">
+                        WEEK 10
+                    </span>
+                    <span style="font-size: 12px; color: #94A3B8; font-family: monospace;">📅 18/10/2026 - 24/10/2026</span>
+                    <span style="background:#F59E0B; color:#000; font-size:11px; font-weight:800; padding:2px 6px; border-radius:4px; margin-left:6px;">KEY MILESTONE 🌟</span>
+                </div>
+                <div>
+                    <span style="background: #0F172A; color: #7DD3FC; border: 1px solid #38BDF8; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 12px;">
+                        SCHEDULED (ตามแผนงาน)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Milestone Title -->
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 14px; font-weight: 700; color: #38BDF8; line-height: 1.3;">
+                    🤖 ประกอบตัวบล็อกสมบูรณ์ครบชุด & ทดสอบการทำงานร่วมกับหุ่นยนต์ครบวงจร
+                </div>
+                <div style="font-size: 11px; color: #64748B; font-style: italic;">
+                    Full 5-Block Integration & End-to-End Execution with K1 Robot
+                </div>
+            </div>
+
+            <!-- Deliverables List -->
+            <div style="flex: 1; overflow: hidden;">
+                
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">⚡</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[ฮาร์ดแวร์ & วงจร]</strong>
+                    <span> ติดตั้งชุดแบตเตอรี่และสวิตช์เปิด-ปิดเข้ากับ Master Block พร้อมระบบป้องกันไฟ</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🧊</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[โครงสร้าง & 3D]</strong>
+                    <span> ประกอบวงจร, จอภาพ, ปุ่มหมุน, ปุ่มกด และช่องไฟเข้าเคสตัวบล็อกสมบูรณ์ครบทั้ง 5 บล็อก</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">💻</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[เฟิร์มแวร์ & โปรโตคอล]</strong>
+                    <span> ทดสอบครบวงจร: ตั้งค่าที่แท่น -> ต่อบล็อกเรียงคำสั่ง -> กด Run -> หุ่นยนต์เคลื่อนไหวสำเร็จ</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🎨</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การออกแบบ & สรีรศาสตร์]</strong>
+                    <span> จัดเซตกล่องบล็อกคำสั่งครบ 5 ชิ้น พร้อมจัดทำคู่มือแนะนำการใช้งานเบื้องต้นแบบเข้าใจง่าย</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🛡️</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การทดสอบ & QA]</strong>
+                    <span> ตรวจสอบไฟแสดงผลวิ่งตามจังหวะหุ่นยนต์ & ยืนยันความแม่นยำในการประมวลผลคำสั่ง 100%</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+    </foreignObject>
+  </g>
+
+  <!-- ===== WEEK 11 BRANCH ===== -->
+  <g id="week-11">
+    <path d="M 850 3010 L 780 3010" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" stroke-linecap="round" />
+    <circle cx="850" cy="3010" r="16" fill="#38BDF8" opacity="0.3" filter="url(#glow)" />
+    <circle cx="850" cy="3010" r="12" fill="#0F172A" stroke="#38BDF8" stroke-width="3" />
+    <circle cx="850" cy="3010" r="5" fill="#38BDF8" />
+    <foreignObject x="90" y="2883" width="690" height="255" filter="url(#cardShadow)">
+
+        <div xmlns="http://www.w3.org/1999/xhtml" style="
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+            border-radius: 14px;
+            border: 1px solid #38BDF866;
+            padding: 14px 18px;
+            box-sizing: border-box;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #F8FAFC;
+        ">
+            <!-- Header bar of card -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(148, 163, 184, 0.2);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: #0F172A; color: #7DD3FC; font-weight: 800; font-size: 12px; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">
+                        WEEK 11
+                    </span>
+                    <span style="font-size: 12px; color: #94A3B8; font-family: monospace;">📅 25/10/2026 - 31/10/2026</span>
+                    
+                </div>
+                <div>
+                    <span style="background: #0F172A; color: #7DD3FC; border: 1px solid #38BDF8; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 12px;">
+                        SCHEDULED (ตามแผนงาน)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Milestone Title -->
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 14px; font-weight: 700; color: #38BDF8; line-height: 1.3;">
+                    ทดสอบความแข็งแรงทนทาน, ระบบหยุดทำงานฉุกเฉิน & ซ้อมใหญ่การทำงาน
+                </div>
+                <div style="font-size: 11px; color: #64748B; font-style: italic;">
+                    Drop Durability Testing, Emergency Disconnect Failsafe & Rehearsal
+                </div>
+            </div>
+
+            <!-- Deliverables List -->
+            <div style="flex: 1; overflow: hidden;">
+                
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">⚡</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[ฮาร์ดแวร์ & วงจร]</strong>
+                    <span> ตรวจวัดอุณหภูมิความร้อนขณะใช้งานต่อเนื่อง & วัดแรงดันไฟเลี้ยงเมื่อต่อบล็อกยาวสูงสุด</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🧊</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[โครงสร้าง & 3D]</strong>
+                    <span> ทดสอบการตกกระแทก (Drop Test): ตรวจสอบว่าเคสและขั้วสัมผัสไม่แตกหักเสียหาย</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">💻</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[เฟิร์มแวร์ & โปรโตคอล]</strong>
+                    <span> ทดสอบความปลอดภัยเมื่อดึงบล็อกออกขณะทำงาน: หุ่นยนต์หยุดทำงานทันทีพร้อมสัญญาณเตือน</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🎨</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การออกแบบ & สรีรศาสตร์]</strong>
+                    <span> ตรวจมาตรฐานความปลอดภัย: ทุกเหลี่ยมมุมโค้งมน, วัสดุไร้สารพิษ & แม่เหล็กฝังแน่นไม่หลุด</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🛡️</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การทดสอบ & QA]</strong>
+                    <span> ซักซ้อมขั้นตอนทดสอบภาคสนามเสมือนจริง: เตรียมอุปกรณ์สำรอง, มุมกล้อง & เกณฑ์ประเมิน</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+    </foreignObject>
+  </g>
+
+  <!-- ===== WEEK 12 BRANCH ===== -->
+  <g id="week-12">
+    <path d="M 850 3285 L 920 3285" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" stroke-linecap="round" />
+    <circle cx="850" cy="3285" r="19" fill="#38BDF8" opacity="0.3" filter="url(#glow)" />
+    <circle cx="850" cy="3285" r="15" fill="#0F172A" stroke="#38BDF8" stroke-width="3" />
+    <circle cx="850" cy="3285" r="5" fill="#38BDF8" />
+    <foreignObject x="920" y="3158" width="690" height="255" filter="url(#cardShadow)">
+
+        <div xmlns="http://www.w3.org/1999/xhtml" style="
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+            border-radius: 14px;
+            border: 2px solid #38BDF8; box-shadow: 0 0 15px #38BDF833;
+            padding: 14px 18px;
+            box-sizing: border-box;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #F8FAFC;
+        ">
+            <!-- Header bar of card -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(148, 163, 184, 0.2);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: #0F172A; color: #7DD3FC; font-weight: 800; font-size: 12px; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">
+                        WEEK 12
+                    </span>
+                    <span style="font-size: 12px; color: #94A3B8; font-family: monospace;">📅 01/11/2026 - 07/11/2026</span>
+                    <span style="background:#F59E0B; color:#000; font-size:11px; font-weight:800; padding:2px 6px; border-radius:4px; margin-left:6px;">KEY MILESTONE 🌟</span>
+                </div>
+                <div>
+                    <span style="background: #0F172A; color: #7DD3FC; border: 1px solid #38BDF8; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 12px;">
+                        SCHEDULED (ตามแผนงาน)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Milestone Title -->
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 14px; font-weight: 700; color: #38BDF8; line-height: 1.3;">
+                    🌟 ทดสอบการใช้งานระบบบล็อกจริงกับผู้ใช้ในวันหยุดสุดสัปดาห์ (Usability Pilot)
+                </div>
+                <div style="font-size: 11px; color: #64748B; font-style: italic;">
+                    Weekend Field Pilot & Usability Testing with Real Users
+                </div>
+            </div>
+
+            <!-- Deliverables List -->
+            <div style="flex: 1; overflow: hidden;">
+                
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">⚡</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[ฮาร์ดแวร์ & วงจร]</strong>
+                    <span> ดูแลฮาร์ดแวร์ระหว่างการทดสอบ: ติดตามระดับแบตเตอรี่, ตรวจหน้าสัมผัสขั้วบล็อก & อุปกรณ์สำรอง</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🧊</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[โครงสร้าง & 3D]</strong>
+                    <span> ประเมินการใช้งานจริง: ความง่ายในการต่อ/ถอดบล็อกแม่เหล็ก, ความถนัดในการหมุนลูกบิด & ความทนทาน</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">💻</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[เฟิร์มแวร์ & โปรโตคอล]</strong>
+                    <span> ติดตามระบบควบคุมและการสื่อสาร: ตรวจสอบความเสถียรในการส่งคำสั่งบลูทูธ & จังหวะไฟสถานะ</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🎨</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การออกแบบ & สรีรศาสตร์]</strong>
+                    <span> จัดกิจกรรมทดสอบกับผู้ใช้จริง: ให้ต่อบล็อกสั่งงานหุ่นยนต์อย่างอิสระ & ประเมินความพึงพอใจ</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🛡️</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การทดสอบ & QA]</strong>
+                    <span> บันทึกข้อมูลเชิงประจักษ์: เวลาที่ใช้ประมวลผล, ความถูกต้องของไฟสถานะ & ปัญหาที่พบเพื่อปรับปรุง</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+    </foreignObject>
+  </g>
+
+  <!-- ===== WEEK 13 BRANCH ===== -->
+  <g id="week-13">
+    <path d="M 850 3560 L 780 3560" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" stroke-linecap="round" />
+    <circle cx="850" cy="3560" r="16" fill="#38BDF8" opacity="0.3" filter="url(#glow)" />
+    <circle cx="850" cy="3560" r="12" fill="#0F172A" stroke="#38BDF8" stroke-width="3" />
+    <circle cx="850" cy="3560" r="5" fill="#38BDF8" />
+    <foreignObject x="90" y="3433" width="690" height="255" filter="url(#cardShadow)">
+
+        <div xmlns="http://www.w3.org/1999/xhtml" style="
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+            border-radius: 14px;
+            border: 1px solid #38BDF866;
+            padding: 14px 18px;
+            box-sizing: border-box;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #F8FAFC;
+        ">
+            <!-- Header bar of card -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(148, 163, 184, 0.2);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: #0F172A; color: #7DD3FC; font-weight: 800; font-size: 12px; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">
+                        WEEK 13
+                    </span>
+                    <span style="font-size: 12px; color: #94A3B8; font-family: monospace;">📅 08/11/2026 - 14/11/2026</span>
+                    
+                </div>
+                <div>
+                    <span style="background: #0F172A; color: #7DD3FC; border: 1px solid #38BDF8; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 12px;">
+                        SCHEDULED (ตามแผนงาน)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Milestone Title -->
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 14px; font-weight: 700; color: #38BDF8; line-height: 1.3;">
+                    ปรับปรุงตามผลตอบรับของผู้ใช้, ปรับแต่งหน้าจอแสดงผลและระบบ & ทดสอบความเสถียร
+                </div>
+                <div style="font-size: 11px; color: #64748B; font-style: italic;">
+                    Post-Pilot Feedback Refinements, UI/Firmware Polish & Endurance Testing
+                </div>
+            </div>
+
+            <!-- Deliverables List -->
+            <div style="flex: 1; overflow: hidden;">
+                
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">⚡</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[ฮาร์ดแวร์ & วงจร]</strong>
+                    <span> ตรวจสอบสภาพจุดเชื่อมต่อและแบตเตอรี่หลังผ่านการทดสอบหนัก & ปรับปรุงโหมดประหยัดพลังงาน</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🧊</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[โครงสร้าง & 3D]</strong>
+                    <span> ปรับปรุงเคสตามฟีดแบ็ก: เพิ่มลายกันลื่นที่ลูกบิดหมุน & ปรับมุมลาดเอียงให้ต่อบล็อกได้ง่ายยิ่งขึ้น</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">💻</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[เฟิร์มแวร์ & โปรโตคอล]</strong>
+                    <span> ปรับแต่งโปรแกรม: ปรับความลื่นไหลของการหมุนค่า, เพิ่มความคมชัดของไอคอน & จังหวะไฟหายใจ</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🎨</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การออกแบบ & สรีรศาสตร์]</strong>
+                    <span> วิเคราะห์ผลตอบรับจากผู้ใช้: สรุปคะแนนความสะดวกในการจับถือ, ความเข้าใจคำสั่ง & กราฟสรุป</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🛡️</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การทดสอบ & QA]</strong>
+                    <span> ทดสอบการทำงานซ้ำแบบผสมผสานต่อเนื่องกว่า 50 รอบ ยืนยันระบบทำงานเสถียรสูงสุดโดยไม่สะดุด</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+    </foreignObject>
+  </g>
+
+  <!-- ===== WEEK 14 BRANCH ===== -->
+  <g id="week-14">
+    <path d="M 850 3835 L 920 3835" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" stroke-linecap="round" />
+    <circle cx="850" cy="3835" r="19" fill="#38BDF8" opacity="0.3" filter="url(#glow)" />
+    <circle cx="850" cy="3835" r="15" fill="#0F172A" stroke="#38BDF8" stroke-width="3" />
+    <circle cx="850" cy="3835" r="5" fill="#38BDF8" />
+    <foreignObject x="920" y="3708" width="690" height="255" filter="url(#cardShadow)">
+
+        <div xmlns="http://www.w3.org/1999/xhtml" style="
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+            border-radius: 14px;
+            border: 2px solid #38BDF8; box-shadow: 0 0 15px #38BDF833;
+            padding: 14px 18px;
+            box-sizing: border-box;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #F8FAFC;
+        ">
+            <!-- Header bar of card -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(148, 163, 184, 0.2);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="background: #0F172A; color: #7DD3FC; font-weight: 800; font-size: 12px; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">
+                        WEEK 14
+                    </span>
+                    <span style="font-size: 12px; color: #94A3B8; font-family: monospace;">📅 15/11/2026 - 21/11/2026</span>
+                    <span style="background:#F59E0B; color:#000; font-size:11px; font-weight:800; padding:2px 6px; border-radius:4px; margin-left:6px;">KEY MILESTONE 🌟</span>
+                </div>
+                <div>
+                    <span style="background: #0F172A; color: #7DD3FC; border: 1px solid #38BDF8; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 12px;">
+                        SCHEDULED (ตามแผนงาน)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Milestone Title -->
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 14px; font-weight: 700; color: #38BDF8; line-height: 1.3;">
+                    🏆 ประกอบชุดบล็อกฉบับสมบูรณ์, ถ่ายวิดีโอสาธิต, จัดทำรายงานวิชาการ & สอบป้องกันโครงงาน
+                </div>
+                <div style="font-size: 11px; color: #64748B; font-style: italic;">
+                    Final Assembly, Demonstration Video, Technical Report & Final Project Defense
+                </div>
+            </div>
+
+            <!-- Deliverables List -->
+            <div style="flex: 1; overflow: hidden;">
+                
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">⚡</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[ฮาร์ดแวร์ & วงจร]</strong>
+                    <span> รวบรวมเอกสารวิศวกรรมฮาร์ดแวร์ฉบับสมบูรณ์: ผังวงจร (Schematic), แบบ PCB, BOM & ผลการทดสอบ</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🧊</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[โครงสร้าง & 3D]</strong>
+                    <span> ตรวจสอบความเรียบร้อยขั้นสุดท้าย: ทำความสะอาดเคส, ติดสติกเกอร์สัญลักษณ์ & บรรจุลงกล่องจัดแสดง</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">💻</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[เฟิร์มแวร์ & โปรโตคอล]</strong>
+                    <span> จัดเก็บซอร์สโค้ดและโครงสร้างโปรเจกต์เวอร์ชันสมบูรณ์ (Release v1.0.0) พร้อมเอกสารกำกับ</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🎨</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การออกแบบ & สรีรศาสตร์]</strong>
+                    <span> จัดทำเล่มรายงานวิชาการฉบับสมบูรณ์: สรุปผลการออกแบบสรีรศาสตร์, รายงานผลการทดสอบ & สไลด์</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🏆</span>
+                <div>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[หมุดหมายสำคัญ]</strong>
+                    <span> 【สอบป้องกันโครงงาน】: ถ่ายทำวิดีโอสาธิตผลิตภัณฑ์ & สมาชิกทุกคนร่วมสาธิตสดในการสอบป้องกันโครงงาน</span>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+        
+    </foreignObject>
+  </g>
+
+  <!-- FOOTER BANNER -->
+  <g transform="translate(0, 4190)">
+    <rect x="400" y="0" width="900" height="50" rx="25" fill="#1E293B" stroke="#334155" stroke-width="1.5" />
+    <text x="850" y="30" text-anchor="middle" font-size="14" font-weight="600" fill="#94A3B8">
+      🎯 Senior Capstone Project 2026 | Physical Modular Tangible Programming Blocks for Robosen K1 Robot
+    </text>
+  </g>
+</svg>

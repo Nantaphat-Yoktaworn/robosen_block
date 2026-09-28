@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>รายงานสรุปงานวิจัย: การอ่านบนจอภาพแบบ LCD เทียบกับ e-Ink และผลกระทบต่อความล้าและความเครียดของสายตา (OPO 2012)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 11mm 15mm 11mm 15mm;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    body {
+      font-family: 'Sarabun', 'Leelawadee UI', 'Tahoma', sans-serif;
+      font-size: 10.8px;
+      line-height: 1.48;
+      color: #1e293b;
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+    }
+    h1, h2, h3, h4 {
+      font-family: 'Prompt', 'Leelawadee UI', 'Tahoma', sans-serif;
+      color: #0f172a;
+      margin-top: 0;
+    }
+    .page-container {
+      position: relative;
+    }
+    .page-break {
+      page-break-before: always;
+      padding-top: 2px;
+    }
+    
+    /* Header Styles */
+    .header {
+      border-bottom: 2px solid #0284c7;
+      padding-bottom: 8px;
+      margin-bottom: 11px;
+    }
+    .badge {
+      display: inline-block;
+      background-color: #e0f2fe;
+      color: #0369a1;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+    h1 {
+      font-size: 16.5px;
+      line-height: 1.35;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #0f172a;
+    }
+    .subtitle {
+      font-size: 11px;
+      color: #475569;
+      font-weight: 400;
+      margin-bottom: 0;
+    }
+
+    /* Metadata Card */
+    .meta-card {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin-bottom: 11px;
+      display: grid;
+      grid-template-columns: 1.12fr 0.88fr;
+      gap: 6px 14px;
+      font-size: 10.2px;
+    }
+    .meta-item strong {
+      color: #334155;
+      display: inline-block;
+    }
+    .meta-item a {
+      color: #0284c7;
+      text-decoration: none;
+    }
+
+    /* Stat Banner */
+    .stat-banner {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .stat-box {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      border: 1px solid #bae6fd;
+      border-radius: 6px;
+      padding: 7px 5px;
+      text-align: center;
+    }
+    .stat-number {
+      font-family: 'Prompt', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: #0284c7;
+      line-height: 1.15;
+    }
+    .stat-label {
+      font-size: 9.5px;
+      color: #0369a1;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .stat-desc {
+      font-size: 8.8px;
+      color: #475569;
+      margin-top: 2px;
+      line-height: 1.22;
+    }
+
+    /* Headings & Text */
+    h2 {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0369a1;
+      border-left: 3.5px solid #0284c7;
+      padding-left: 7px;
+      margin-top: 10px;
+      margin-bottom: 5px;
+    }
+    h3 {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-top: 7px;
+      margin-bottom: 3px;
+    }
+    p {
+      margin: 0 0 5px 0;
+      text-align: justify;
+    }
+    ul {
+      margin: 0 0 7px 0;
+      padding-left: 16px;
+    }
+    li {
+      margin-bottom: 2.5px;
+    }
+
+    /* Tables */
+    .table-container {
+      margin: 5px 0 9px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9.8px;
+    }
+    th {
+      background-color: #0f172a;
+      color: #ffffff;
+      font-family: 'Prompt', sans-serif;
+      font-weight: 500;
+      padding: 5px 7px;
+      text-align: left;
+      border: 1px solid #0f172a;
+    }
+    td {
+      padding: 4px 7px;
+      border: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+    tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+    .highlight-cell {
+      background-color: #f0fdf4 !important;
+      color: #166534;
+      font-weight: 500;
+    }
+    .neutral-cell {
+      background-color: #f0f9ff !important;
+      color: #0369a1;
+      font-weight: 500;
+    }
+    .alert-cell {
+      background-color: #fef2f2 !important;
+      color: #991b1b;
+    }
+
+    /* Callout Boxes */
+    .callout {
+      border-radius: 6px;
+      padding: 6px 10px;
+      margin: 5px 0;
+      font-size: 9.8px;
+      line-height: 1.45;
+    }
+    .callout-info {
+      background-color: #f0fdf4;
+      border-left: 3.5px solid #16a34a;
+      color: #14532d;
+    }
+    .callout-warning {
+      background-color: #fefce8;
+      border-left: 3.5px solid #ca8a04;
+      color: #713f12;
+    }
+
+    /* Footers */
+    .page-footer {
+      border-top: 1px solid #e2e8f0;
+      padding-top: 4px;
+      margin-top: 9px;
+      font-size: 8.8px;
+      color: #64748b;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== หน้าที่ 1 ==================== -->
+  <div class="page-container">
+    <div class="header">
+      <div class="badge">เอกสารวิชาการสรุปงานวิจัย (Executive Research Brief)</div>
+      <h1>การเปรียบเทียบผลกระทบของการอ่านบนจอภาพแบบ LCD และจอภาพแบบ e-Ink ต่อความล้าและความเครียดของสายตา</h1>
+      <div class="subtitle">สรุปสาระสำคัญเชิงลึกจากบทความวิจัยที่ตีพิมพ์ในวารสาร Ophthalmic & Physiological Optics (OPO 2012)</div>
+    </div>
+
+    <div class="meta-card">
+      <div>
+        <div class="meta-item"><strong>ชื่อบทความวิจัย:</strong> Reading on LCD vs e-Ink displays: effects on fatigue and visual strain</div>
+        <div class="meta-item" style="margin-top: 3px;"><strong>คณะผู้วิจัย:</strong> Eva Siegenthaler, Yves Bochud, Per Bergamin, Pascal Wurtz</div>
+        <div class="meta-item" style="margin-top: 2px;"><strong>หน่วยงานวิจัย:</strong> Institute for Research in Open-, Distance- and eLearning, Swiss Distance University of Applied Sciences (FFHS), Brig, Switzerland</div>
+      </div>
+      <div>
+        <div class="meta-item"><strong>วารสารที่ตีพิมพ์:</strong> Ophthalmic & Physiological Optics (The Journal of The College of Optometrists)</div>
+        <div class="meta-item" style="margin-top: 3px;"><strong>ฉบับเผยแพร่:</strong> Vol. 32, Issue 5, pp. 367–374 (กันยายน 2012)</div>
+        <div class="meta-item" style="margin-top: 3px;"><strong>เลข DOI:</strong> <a href="https://doi.org/10.1111/j.1475-1313.2012.00928.x">10.1111/j.1475-1313.2012.00928.x</a></div>
+      </div>
+    </div>
+
+    <div class="stat-banner">
+      <div class="stat-box">
+        <div class="stat-number">ไม่แตกต่าง</div>
+        <div class="stat-label">ความล้าสายตา (Fatigue)</div>
+        <div class="stat-desc">ทั้งผลประเมินเชิงอัตวิสัย (VFS) และเชิงภาวะวิสัยไม่พบความต่างอย่างมีนัยสำคัญระหว่าง LCD และ e-Ink</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">204 vs 205 ms</div>
+        <div class="stat-label">เวลาตรึงตา (Fixation)</div>
+        <div class="stat-desc">ระยะเวลาตรึงสายตาเฉลี่ยต่อคำใกล้เคียงกันมาก (LCD: 204 ms เทียบกับ e-Ink: 205 ms)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">คุณภาพของภาพ</div>
+        <div class="stat-label">ปัจจัยชี้ขาดหลัก (Key Driver)</div>
+        <div class="stat-desc">ความคมชัด ความละเอียด และคอนทราสต์ สำคัญต่อความสบายตามากกว่าประเภทเทคโนโลยีจอ</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">5 มิติชี้วัด</div>
+        <div class="stat-label">การวัดผลรอบด้าน</div>
+        <div class="stat-desc">ประเมินทั้งอาการเมื่อยล้า, ความเร็วการอ่าน, Letter Search, Oculomotor และ Pupillary Light Reflex</div>
+      </div>
+    </div>
+
+    <h2>1. ที่มา ความสำคัญ และบริบททางวิชาการ</h2>
+    <p>
+      ในช่วงต้นทศวรรษ 2010 การเข้ามาของอุปกรณ์อ่านหนังสือพกพาความละเอียดสูง ได้แก่ <strong>เครื่องอ่านหนังสืออิเล็กทรอนิกส์จอ e-Ink</strong> (เช่น Sony Reader, Amazon Kindle) และ <strong>แท็บเล็ตจอ LCD เปล่งแสงส่องหลัง</strong> (เช่น Apple iPad) ได้เปลี่ยนโฉมพฤติกรรมการอ่านในภาคการศึกษา ธุรกิจ และชีวิตประจำวัน อย่างไรก็ตาม มีความเชื่อและสมมติฐานดั้งเดิมที่ยึดถือกันมานานว่า <em>การอ่านบนจอแสดงผลอิเล็กทรอนิกส์แบบเปล่งแสง (Backlit LCD VDUs) ทำให้ผู้ใช้อ่านได้ช้าลง กะพริบตาลดลง และเกิดอาการล้าของสายตา (Visual Fatigue / Asthenopia) มากกว่าการอ่านบนกระดาษพิมพ์</em> ในขณะที่จอภาพแบบ e-Ink ได้รับการโฆษณาว่าให้ประสบการณ์เสมือนกระดาษจริงและเป็นมิตรต่อดวงตามากกว่า
+    </p>
+    <p>
+      เพื่อพิสูจน์ข้อถกเถียงดังกล่าวอย่างเป็นกลางทางวิทยาศาสตร์ คณะผู้วิจัยจึงได้ออกแบบการทดลองควบคุมเพื่อ <strong>เปรียบเทียบผลกระทบของการอ่านหนังสือต่อเนื่องเป็นเวลานานหลายชั่วโมง</strong> ระหว่างจอภาพทั้งสองประเภท โดยทำการตรวจวัดทั้งพฤติกรรมการอ่านและปฏิกิริยาความเครียดทางสรีรวิทยาของดวงตาด้วยเครื่องมือวัดทางจักษุวิทยาและจิตฟิสิกส์การมองเห็น (Psychophysics) อย่างละเอียด
+    </p>
+
+    <h2>2. อุปกรณ์ที่ใช้และระเบียบวิธีวิจัย (Materials & Methods)</h2>
+    <ul>
+      <li><strong>กลุ่มตัวอย่าง (Participants):</strong> ผู้เข้าร่วมการทดลองสุขภาพสายตาปกติหรือได้รับการแก้ไขสายตาเป็นปกติ (Normal or corrected-to-normal vision) อายุเฉลี่ยอยู่ในช่วงวัยผู้ใหญ่ตอนต้น (20–26 ปี) เพื่อควบคุมปัจจัยความเสื่อมถอยของสายตาตามวัย (Presbyopia)</li>
+      <li><strong>กระบวนการทดลอง (Procedure):</strong> กำหนดให้ผู้เข้าร่วมการทดลองอ่านบทความหรือเนื้อหาหนังสือต่อเนื่องเป็นเวลาหลายชั่วโมงในแต่ละเซสชัน (โดยเฉลี่ยกว่า 1 ชั่วโมงถึงหลายชั่วโมงต่อเนื่อง) ในระยะห่างสายตาคงที่มาตรฐาน (~60 เซนติเมตร) ภายใต้ห้องทดลองที่มีการควบคุมความสว่างของแสงแวดล้อม (Ambient Illuminance) ให้สม่ำเสมอ</li>
+      <li><strong>การบันทึกข้อมูลแบบอนุกรมเวลา (Periodic Tracking):</strong> มีการเก็บตัวชี้วัดความเครียดสายตาเป็นระยะๆ หลังการอ่านในแต่ละช่วงชั่วโมง เพื่อติดตามพัฒนาการของความล้าที่สะสมตามเวลา</li>
+    </ul>
+
+    <div class="table-container">
+      <div style="font-size: 10.2px; font-weight: 600; margin-bottom: 4px; color: #334155;">ตารางที่ 1: รายละเอียดคุณสมบัติทางเทคนิคของอุปกรณ์แสดงผลที่นำมาเปรียบเทียบในการทดลอง</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 20%;">พารามิเตอร์การประเมิน</th>
+            <th style="width: 40%;">จอภาพสะท้อนแสง: e-Ink Reader (Sony Reader PRS-600)</th>
+            <th style="width: 40%;">จอภาพเปล่งแสง: Backlit LCD Tablet (Apple iPad 1st Gen)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>เทคโนโลยีหน้าจอ</strong></td>
+            <td>Electrophoretic Display (E-Ink Vizplex) ชนิดสะท้อนแสงธรรมชาติ</td>
+            <td>In-Plane Switching (IPS) Color TFT-LCD ชนิดเปล่งแสงผ่านผลึกเหลว</td>
+          </tr>
+          <tr>
+            <td><strong>ระบบแสงสว่าง (Illumination)</strong></td>
+            <td class="highlight-cell">ไม่มีไฟส่องในตัว (Passive Reflective) พึ่งพาแสงสว่างโดยรอบ</td>
+            <td class="alert-cell">มีไฟส่องหลังแบบ LED (Active Backlight) ส่องตรงเข้าสู่ดวงตา</td>
+          </tr>
+          <tr>
+            <td><strong>ขนาดและความละเอียด</strong></td>
+            <td>ขนาดหน้าจอ 6.0 นิ้ว, ความละเอียด 800 &times; 600 พิกเซล (~166 ppi)</td>
+            <td>ขนาดหน้าจอ 9.7 นิ้ว, ความละเอียด 1024 &times; 768 พิกเซล (~132 ppi)</td>
+          </tr>
+          <tr>
+            <td><strong>ระบบสัมผัส (Touchscreen)</strong></td>
+            <td>Resistive / Optical Touch Overlay (มีชั้นเคลือบผิวหน้าจอ)</td>
+            <td>Capacitive Multi-touch Screen (ผิวกระจกเคลือบกันรอยนิ้วมือ)</td>
+          </tr>
+          <tr>
+            <td><strong>การควบคุมสภาพแวดล้อม</strong></td>
+            <td colspan="2" class="neutral-cell" style="text-align: center;">ติดตั้งบนแท่นยึดปรับองศาระยะคงที่ 60 ซม. ในห้องทดสอบที่มีแสงสว่างประดิษฐ์ควบคุมระดับความสว่างสม่ำเสมอ</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="page-footer">
+      <div>เอกสารสรุปงานวิจัย: OPO 2012 (Siegenthaler et al.) | DOI: 10.1111/j.1475-1313.2012.00928.x</div>
+      <div>หน้าที่ 1 จาก 2</div>
+    </div>
+  </div>
+
+  <!-- ==================== หน้าที่ 2 ==================== -->
+  <div class="page-container page-break">
+    <h2>3. ผลการทดลองสำคัญและการวิเคราะห์เชิงลึก (Results & Deep Analysis)</h2>
+    
+    <h3>3.1 การประเมินความล้าของสายตาเชิงอัตวิสัย (Subjective Visual Fatigue)</h3>
+    <ul>
+      <li><strong>การสะสมความล้าตามเวลา (Time-on-Task Effect):</strong> ผู้เข้าร่วมการทดลองรายงานระดับความล้าของสายตาเพิ่มขึ้นอย่างมีนัยสำคัญเมื่ออ่านหนังสือต่อเนื่องเป็นเวลานาน ซึ่งเป็นปรากฏการณ์ปกติทางสรีรวิทยาของการเพ่งสายตาระยะใกล้</li>
+      <li><strong>ความเท่าเทียมกันระหว่างสองจอ (No Technology Difference):</strong> คะแนนความล้าจากแบบสอบถาม Visual Fatigue Scale (VFS) หลังการอ่านเป็นเวลานานหลายชั่วโมง <strong>ไม่พบความแตกต่างอย่างมีนัยสำคัญทางสถิติ</strong> ระหว่างกลุ่มที่อ่านบนจอ e-Ink และกลุ่มที่อ่านบนจอ LCD แสดงว่าแสงส่องหลังจากจอ iPad ยุคนั้นไม่ได้กระตุ้นให้เกิดความเมื่อยล้าตาเชิงอัตวิสัยมากกว่าจอสะท้อนแสง Sony Reader ภายใต้แสงห้องปกติ</li>
+    </ul>
+
+    <h3>3.2 ตัวชี้วัดเชิงภาวะวิสัยและสรีรวิทยาการมองเห็น (Objective Measures & Physiology)</h3>
+    <ul>
+      <li><strong>พฤติกรรมการเคลื่อนไหวของดวงตา (Oculomotor Behavior):</strong> ผลการตรวจวัดด้วยระบบ Eye-Tracking พบว่า <strong>ระยะเวลาการตรึงสายตาเฉลี่ย (Mean Fixation Duration)</strong> ของทั้งสองจอใกล้เคียงกันอย่างยิ่ง โดยอยู่ที่ประมาณ <strong>204 มิลลิวินาที (LCD)</strong> เทียบกับ <strong>205 มิลลิวินาที (e-Ink)</strong> รวมถึงสัดส่วนของการกวาดสายตาย้อนกลับ (Regressive Saccades) เพื่อทวนความเข้าใจก็ไม่แตกต่างกัน</li>
+      <li><strong>ความเร็วในการอ่าน (Reading Speed):</strong> อัตราการอ่านข้อความ (คำต่อนาที / WPM) ของผู้เข้าร่วมการทดลองไม่มีความแตกต่างอย่างมีนัยสำคัญ บ่งชี้ว่าประสิทธิภาพการประมวลผลข้อความบนจอ LCD ยุคใหม่ทำได้ทัดเทียมกับจอ e-Ink</li>
+      <li><strong>ภารกิจค้นหาตัวอักษร (Letter Search Task):</strong> วัดประสิทธิภาพการแยกแยะสัญลักษณ์ทางสายตาและสมาธิ ผลการทดสอบแสดงระดับความแม่นยำและความเร็วที่สม่ำเสมอตลอดช่วงการทดสอบ ไม่พบการเสื่อมถอยของสมรรถภาพการมองเห็นที่ต่างกัน</li>
+      <li><strong>ปฏิกิริยารูม่านตาต่อแสง (Pupillary Light Reflex: PLR):</strong> การวัดการหดและขยายตัวของรูม่านตาด้วยระบบอินฟราเรดเพื่อประเมินความเครียดของระบบประสาทอัตโนมัติ ไม่พบการตอบสนองที่ผิดปกติหรือภาวะเครียดจำเพาะเจาะจงต่อจอประเภทใดประเภทหนึ่ง</li>
+    </ul>
+
+    <div class="table-container">
+      <div style="font-size: 10.2px; font-weight: 600; margin-bottom: 4px; color: #334155;">ตารางที่ 2: สรุปเปรียบเทียบผลการวัดตัวแปรสำคัญระหว่างจอ LCD และ e-Ink ในการอ่านระยะยาว</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 25%;">มิติการประเมิน</th>
+            <th style="width: 32%;">จอสะท้อนแสง (Sony PRS-600)</th>
+            <th style="width: 32%;">จอเปล่งแสง (Apple iPad LCD)</th>
+            <th style="width: 11%;">นัยสำคัญ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>ความรู้สึกล้าสายตา (VFS)</strong></td>
+            <td>เพิ่มขึ้นตามเวลาอ่านต่อเนื่อง</td>
+            <td>เพิ่มขึ้นตามเวลาอ่านต่อเนื่อง</td>
+            <td class="highlight-cell">ไม่ต่าง ($p > .05$)</td>
+          </tr>
+          <tr>
+            <td><strong>ระยะเวลาตรึงตา (Fixation)</strong></td>
+            <td>เฉลี่ย ~205 ms (อ่านราบรื่น)</td>
+            <td>เฉลี่ย ~204 ms (อ่านราบรื่น)</td>
+            <td class="highlight-cell">ไม่ต่าง ($p > .05$)</td>
+          </tr>
+          <tr>
+            <td><strong>ความเร็วในการอ่าน (Speed)</strong></td>
+            <td>เสถียร ไม่พบการชะลอตัวผิดปกติ</td>
+            <td>เสถียร ไม่พบการชะลอตัวผิดปกติ</td>
+            <td class="highlight-cell">ไม่ต่าง ($p > .05$)</td>
+          </tr>
+          <tr>
+            <td><strong>การค้นหาตัวอักษร (Search)</strong></td>
+            <td>ความแม่นยำและเวลาตอบสนองคงที่</td>
+            <td>ความแม่นยำและเวลาตอบสนองคงที่</td>
+            <td class="highlight-cell">ไม่ต่าง ($p > .05$)</td>
+          </tr>
+          <tr>
+            <td><strong>รีเฟล็กซ์รูม่านตา (PLR)</strong></td>
+            <td>การตอบสนองต่อแสงเป็นปกติ</td>
+            <td>การตอบสนองต่อแสงเป็นปกติ</td>
+            <td class="highlight-cell">ไม่ต่าง ($p > .05$)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>4. ข้อสรุปและการสังเคราะห์เชิงวิชาการ (Conclusions & Scientific Synthesis)</h2>
+    <div class="callout callout-info">
+      <strong>ข้อสรุปหลักของงานวิจัย:</strong> ปัจจัยสำคัญที่สุดที่มีผลต่อความสบายตาและสมรรถภาพในการอ่านหนังสืออิเล็กทรอนิกส์ <strong>ไม่ใช่ประเภทเทคโนโลยีการแสดงผล (Technology per se)</strong> แต่เป็น <strong>คุณภาพของภาพ (Image Quality)</strong> เช่น ความคมชัดของตัวอักษร การเกลี่ยฟอนต์ คอนทราสต์ และการตั้งค่าความสว่างที่เหมาะสม โดยจอแสดงผลยุคใหม่ทั้งสองแบบมีคุณสมบัติที่เพียงพอต่อการอ่านต่อเนื่องเป็นเวลานานได้อย่างสบายตา
+    </div>
+
+    <ul>
+      <li><strong>การเชื่อมโยงกับงานวิจัยยุคหลัง (Modern Comparative Context):</strong>
+        <ul>
+          <li><em>ด้านความล้าและสรีรวิทยาการอ่าน (Ergonomics):</em> งานวิจัยนี้สอดคล้องกับหลักทัศนศาสตร์ว่า หากควบคุมแสงสว่างภายนอกให้สมดุลและปรับความสว่างจอ LCD ไม่ให้จ้าเกินไป ดวงตามนุษย์สามารถปรับโฟกัสได้ดีเท่ากันทั้งสองระบบ</li>
+          <li><em>ด้านความเครียดออกซิเดชันของเซลล์จอประสาทตา (Retinal Cellular Stress):</em> แม้ในระดับพฤติกรรมสายตาภายนอกจะไม่พบความล้าต่างกัน แต่งานวิจัยชีววิทยาจอประสาทตารุ่นหลัง (เช่น Wang et al., JSID 2023) ชี้ว่า <strong>ในระดับเซลล์จอประสาทตา (ARPE-19) แสงสีฟ้าคลื่นสั้นจากหลอด LED ของ LCD ยังคงกระตุ้นสารอนุมูลอิสระ (ROS) และทำลายไมโทคอนเดรียได้มากกว่าจอ e-Ink ถึง 2–3 เท่า</strong> โดยเฉพาะเมื่อใช้งานในที่มืด</li>
+        </ul>
+      </li>
+      <li><strong>คำแนะนำเชิงปฏิบัติ (Practical Recommendations):</strong>
+        <ul>
+          <li>สำหรับการอ่านในห้องที่มีแสงสว่างเพียงพอ การใช้งานแท็บเล็ต LCD หรือ e-Ink ให้ความสบายตาไม่แตกต่างกันอย่างมีนัยสำคัญ แต่ผู้ใช้ต้องหลีกเลี่ยงแสงสะท้อน (Glare) และไม่ปรับแสงจ้าเกินไป</li>
+          <li>สำหรับการอ่านต่อเนื่องเวลานานในที่แสงน้อยหรือก่อนนอน จอ e-Ink ยังคงเป็นตัวเลือกที่ปลอดภัยกว่าต่อจังหวะชีวภาพ (Circadian Rhythm) และเซลล์จอประสาทตา</li>
+        </ul>
+      </li>
+    </ul>
+
+    <div class="callout callout-warning">
+      <strong>ข้อจำกัดของงานวิจัย (Study Limitations):</strong> การทดลองนี้ดำเนินการในห้องปฏิบัติการที่มีการควบคุมแสงสว่างและระยะสายตาอย่างเข้มงวด โดยใช้กลุ่มตัวอย่างวัยหนุ่มสาวสุขภาพตาดี ซึ่งผลลัพธ์อาจแตกต่างออกไปในกลุ่มผู้สูงอายุที่มีภาวะสายตายาวตามวัย (Presbyopia) หรือในสภาพการใช้งานจริงนอกห้องทดลองที่มีแสงสะท้อนรบกวนสูง
+    </div>
+
+    <div class="page-footer">
+      <div>แหล่งอ้างอิง: Siegenthaler, E., Bochud, Y., Bergamin, P., & Wurtz, P. (2012). Ophthalmic Physiol Opt, 32(5), 367–374. | DOI: 10.1111/j.1475-1313.2012.00928.x</div>
+      <div>หน้าที่ 2 จาก 2</div>
+    </div>
+  </div>
+
+</body>
+</html>
