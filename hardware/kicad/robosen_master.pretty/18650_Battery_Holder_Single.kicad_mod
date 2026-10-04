@@ -1,0 +1,70 @@
+(footprint "18650_Battery_Holder_Single"
+	(version 20240108)
+	(generator "antigravity-kicad-generator")
+	(layer "F.Cu")
+	(descr "Single 18650 Li-ion Battery Holder with solder pins (77mm x 21mm, e.g. Keystone 1042 / BK-18650-PC2)")
+	(tags "18650 Battery Holder Li-ion Keystone 1042")
+	(property "Reference" "REF**"
+		(at 0 -13.0 0)
+		(layer "F.SilkS")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "18650_Holder"
+		(at 0 13.0 0)
+		(layer "F.Fab")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr through_hole)
+	(fp_rect
+		(start -38.5 -10.5)
+		(end 38.5 10.5)
+		(stroke
+			(width 0.2)
+			(type solid)
+		)
+		(fill none)
+		(layer "F.SilkS")
+	)
+	(fp_text user "18650 Li-ion Cell"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(effects
+			(font
+				(size 1.2 1.2)
+				(thickness 0.15)
+			)
+		)
+	)
+	(fp_text user "[ + ]"
+		(at 30 0 0)
+		(layer "F.SilkS")
+		(effects
+			(font
+				(size 1.5 1.5)
+				(thickness 0.25)
+			)
+		)
+	)
+	(fp_text user "[ - ]"
+		(at -30 0 0)
+		(layer "F.SilkS")
+		(effects
+			(font
+				(size 1.5 1.5)
+				(thickness 0.25)
+			)
+		)
+	)
+	(pad "1" thru_hole rect (at 36.5 0) (size 3.0 3.0) (drill 1.6) (layers "*.Cu" "*.Mask"))
+	(pad "2" thru_hole circle (at -36.5 0) (size 3.0 3.0) (drill 1.6) (layers "*.Cu" "*.Mask"))
+)

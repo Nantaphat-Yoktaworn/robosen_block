@@ -84,6 +84,9 @@ Every active component in Prototype #01 runs natively on **+3.3V logic and power
 
 ## 5. Complete Breadboard Pinout & Wiring Specifications
 
+> 💡 **Interactive Web Guide:** An interactive, filterable wiring table and component BOM is available at [`docs/master_block_wiring.html`](docs/master_block_wiring.html).  
+> 📐 **Custom PCB Carrier Migration:** KiCad 10 project and verified footprints are available at [`hardware/kicad/`](hardware/kicad/).
+
 ### 5.1 Master Controller (ESP32-S3 Pin & Wire Color Allocations)
 
 | Peripheral | Signal / Pin Name | ESP32-S3 GPIO | Wire Color | Breadboard Connection & Role |

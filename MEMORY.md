@@ -39,6 +39,12 @@ robosen_block/
 │   │   └── README.md
 │   └── esp32_master/
 │       └── esp32_master.ino              # Master Block C++ firmware (ESP32-S3 BLE Central, NVS flash, Dual-Knob UI, Run Chain Engine)
+├── hardware/
+│   └── kicad/                            # KiCad 10 Motherboard Carrier PCB Project
+│       ├── robosen_master_block.kicad_pro# Master project file
+│       ├── fp-lib-table                  # Local footprint library registry table
+│       ├── README.md                     # Hardware wiring & footprint guide
+│       └── robosen_master.pretty/        # Custom verified footprint library (.kicad_mod)
 ├── recordings/
 │   └── K1/
 │       └── test.json                     # Recorded joint keyframe motion sequences
@@ -783,6 +789,29 @@ The `assignments/` folder stores academic project coursework, literature reviews
 | | `PIN_EPD_SDA` | Display `SDA` (SPI MOSI/DIN) | ESP32-S3 **GPIO 38** (⚪ White) |
 | | Power Rails | Display `VCC` & `GND` | Strictly 3.3V DC & GND |
 
+### 21.5 Planned Upgrade / TODO: Master Block Battery Telemetry (Voltage Divider)
+- **Status:** ⏳ **Deferred / In Backlog** (User to purchase $100\text{ k}\Omega$ resistors; current setup proceeds as-is without internal battery sensing).
+- **Target Hardware Addition:**
+  - $R_1$: $100\text{ k}\Omega$ (1% metal film)
+  - $R_2$: $100\text{ k}\Omega$ (1% metal film)
+  - Optional $C_1$: $100\text{ nF}$ ceramic decoupling cap across $R_2$ for ADC ripple suppression.
+- **Circuit Schematic:**
+  ```text
+  [TPS63020 VIN (Switched 3.0V - 4.2V)]
+                 │
+                 ▼
+             [ R1: 100 kΩ ]
+                 │
+                 ├──────────────────────► ESP32-S3 GPIO 1 (ADC1_CH0) [1.5V - 2.1V Safe]
+                 │
+             [ R2: 100 kΩ ]
+                 │
+                 ▼
+          [ Common GND Rail ]
+  ```
+- **Firmware Logic:** Connects to `GPIO 1` (`ADC1_CH0`), samples via `analogReadMilliVolts(1) * 2`, maps $3.30\text{V} (0\%)$ to $4.20\text{V} (100\%)$, and renders battery gauge icon on E-Ink top status bar.
+
+
 ---
 
 ## 22. Master Block 2.13" E-Ink Display (DEPG0213BN / SSD1680) Silicon Verification
@@ -806,3 +835,25 @@ The `assignments/` folder stores academic project coursework, literature reviews
      - Glass Particle Migration Waveform (`_Update_Part`): **727 ms** (`726998 µs`).
      - Total Frame Cycle Time: **746 ms** $\longrightarrow$ **1.34 updates/sec (1.34 Hz)** maximum physical panel capability.
      - Fully verified for responsive parameter tweaking via rotary encoders and live menu navigation without eye fatigue.
+
+---
+
+## 23. Master Block KiCad 10 Hardware Carrier PCB & Custom Footprint Library
+
+- **Documentation Date:** October 4, 2026
+- **Project Location:** [`hardware/kicad/`](hardware/kicad/)
+- **Target CAD System:** KiCad 10.0.6 (Fully compatible with KiCad 8.x / 9.x / 10.x).
+- **Architecture Strategy:** **Modular Daughterboard Carrier PCB (Motherboard)**. The custom PCB houses sockets and headers for the ESP32-S3 DevKit, TP4056 USB-C BMS module, TPS63020 buck-boost module, 18650 holder, KY-040 rotary encoders, and 2.13" E-Paper display, replacing all breadboards and loose jumper wires with reliable copper traces.
+- **Custom Footprint Library:** Registered locally in `hardware/kicad/fp-lib-table` pointing to `robosen_master.pretty/`.
+- **Verified Footprint Inventory (100% Validated via `kicad-cli 10.0.6`):**
+  1. `ESP32-S3-DevKitC-1-Socket.kicad_mod`: 2x22 pin dual row headers, 2.54mm pitch, 22.86mm (0.9") row span, with top USB-C orientation markers.
+  2. `TP4056_Type-C_Module.kicad_mod`: 28mm × 17.3mm outline, connector overhang, and 6 solder pads (`B+`, `B-`, `OUT+`, `OUT-`, `IN+`, `IN-`).
+  3. `TPS63020_BuckBoost_Module.kicad_mod`: 25mm × 15mm outline, 5-pin 2.54mm breakout header (`VOUT`, `GND`, `VIN`, `EN`, `PS`).
+  4. `18650_Battery_Holder_Single.kicad_mod`: Keystone 1042 / BK-18650-PC2 through-hole footprint (77mm × 21mm, 73mm pin span).
+  5. `Pogo_4Pin_Dock_2.54mm.kicad_mod`: Standard 4-pin 2.54mm polarized header socket for Config Dock & Run Chain Bus.
+  6. `KY-040_Rotary_Encoder_Module.kicad_mod`: 5-pin 2.54mm header with knob outline and rotation center.
+  7. `EPaper_2.13in_Header_1x08.kicad_mod`: 8-pin 2.54mm SPI interface header for DEPG0213BN / SSD1680 display.
+- **Manufacturing Checklist for JLCPCB:**
+  - Bare PCB fabrication requires only **Gerber files (`.gbr`)** and **Excellon Drill files (`.drl`)** packaged in a `.zip` file.
+  - 3D models (`.step`/`.wrl`) are **NOT required** by JLCPCB for PCB fabrication, but supported for enclosure design.
+

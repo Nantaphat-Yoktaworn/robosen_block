@@ -1,0 +1,58 @@
+(footprint "TPS63020_BuckBoost_Module"
+	(version 20240108)
+	(generator "antigravity-kicad-generator")
+	(layer "F.Cu")
+	(descr "TPS63020 High Efficiency Synchronous Buck-Boost DC-DC Converter Breakout Module")
+	(tags "TPS63020 Buck-Boost 3.3V Regulator Power DC-DC")
+	(property "Reference" "REF**"
+		(at 0 -10.5 0)
+		(layer "F.SilkS")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "TPS63020_Module"
+		(at 0 10.5 0)
+		(layer "F.Fab")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr through_hole)
+	(fp_rect
+		(start -12.5 -7.5)
+		(end 12.5 7.5)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill none)
+		(layer "F.SilkS")
+	)
+	(fp_text user "TPS63020 3.3V"
+		(at 0 -1.5 0)
+		(layer "F.Fab")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.12)
+			)
+		)
+	)
+	(pad "1" thru_hole rect (at -5.08 5.08) (size 1.8 1.8) (drill 1.0) (layers "*.Cu" "*.Mask"))
+	(fp_text user "VOUT" (at -5.08 2.54 90) (layer "F.SilkS") (effects (font (size 0.7 0.7) (thickness 0.1))))
+	(pad "2" thru_hole circle (at -2.54 5.08) (size 1.8 1.8) (drill 1.0) (layers "*.Cu" "*.Mask"))
+	(fp_text user "GND" (at -2.54 2.54 90) (layer "F.SilkS") (effects (font (size 0.7 0.7) (thickness 0.1))))
+	(pad "3" thru_hole circle (at 0 5.08) (size 1.8 1.8) (drill 1.0) (layers "*.Cu" "*.Mask"))
+	(fp_text user "VIN" (at 0 2.54 90) (layer "F.SilkS") (effects (font (size 0.7 0.7) (thickness 0.1))))
+	(pad "4" thru_hole circle (at 2.54 5.08) (size 1.8 1.8) (drill 1.0) (layers "*.Cu" "*.Mask"))
+	(fp_text user "EN" (at 2.54 2.54 90) (layer "F.SilkS") (effects (font (size 0.7 0.7) (thickness 0.1))))
+	(pad "5" thru_hole circle (at 5.08 5.08) (size 1.8 1.8) (drill 1.0) (layers "*.Cu" "*.Mask"))
+	(fp_text user "PS" (at 5.08 2.54 90) (layer "F.SilkS") (effects (font (size 0.7 0.7) (thickness 0.1))))
+)

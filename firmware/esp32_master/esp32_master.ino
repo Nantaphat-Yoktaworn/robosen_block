@@ -5,6 +5,10 @@
 #include <BLEClient.h>
 #include <BLEAdvertisedDevice.h>
 #include <Preferences.h>
+#include <SPI.h>
+#include <GxEPD2_BW.h>
+#include <Adafruit_GFX.h>
+#include <Fonts/FreeSansBold9pt7b.h>
 
 // ==============================================================================
 // 1. PIN DEFINITIONS (PROTOTYPE #01 SPEC - DUAL-KNOB SYSTEM)
@@ -30,6 +34,19 @@ const int PIN_CFG_RX    = 18;  // 🟣 Purple Wire (Master RX <- Action Block TX
 const int PIN_CHAIN_TX  = 15;  // Master Run Chain Output -> Block 1 RX (PD6)
 const int PIN_CHAIN_RX  = 16;  // Master Return Rail Input <- Smart End Block TX (PD5)
 HardwareSerial ChainSerial(2);
+
+// --- 2.13" E-INK DISPLAY PINS (DEPG0213BN / SSD1680, 122x250, SPI) ---
+const int PIN_EPD_BUSY  = 4;   // 🔘 Gray Wire (Active Status Flag)
+const int PIN_EPD_RES   = 5;   // 🟤 Brown Wire (Hardware Reset)
+const int PIN_EPD_DC    = 6;   // 🟣 Purple Wire (Data / Command)
+const int PIN_EPD_CS    = 7;   // 🟡 Yellow Wire (Chip Select)
+const int PIN_EPD_SCL   = 21;  // 🟢 Green Wire (SPI SCK / Clock)
+const int PIN_EPD_SDA   = 38;  // ⚪ White Wire (SPI MOSI / DIN)
+
+// Production verified driver for DEPG0213BN panel
+GxEPD2_BW<GxEPD2_213_BN, GxEPD2_213_BN::HEIGHT> display(
+  GxEPD2_213_BN(PIN_EPD_CS, PIN_EPD_DC, PIN_EPD_RES, PIN_EPD_BUSY)
+);
 
 // --- ONBOARD WS2812 RGB STATUS LED ---
 #ifndef RGB_BUILTIN
@@ -197,6 +214,12 @@ void updateStatusLED();
 void pollConfigDock();
 bool executeRunChain();
 RobosenAction getActionObjByToken(uint8_t token, int param);
+
+// E-Ink Display Functions (DEPG0213BN / SSD1680)
+void updateEInkActionMenu();
+void updateEInkPairingMenu();
+void updateEInkScanning();
+void updateEInkRunChain(int currentStep, int totalSteps, const char* actionName, int paramVal, const char* paramUnit);
 
 // BLE Client Callbacks for Connection Life-Cycle Management
 class RobosenClientCallback : public BLEClientCallbacks {
@@ -447,6 +470,14 @@ void setup() {
   // Initialize Run Chain UART (ChainSerial on Pins 16 RX, 15 TX @ 115200)
   pinMode(PIN_CHAIN_RX, INPUT_PULLUP);
   ChainSerial.begin(115200, SERIAL_8N1, PIN_CHAIN_RX, PIN_CHAIN_TX);
+
+  // Initialize 2.13" E-Ink Display (DEPG0213BN / SSD1680)
+  Serial.println("[SYSTEM] Initializing 2.13\" E-Ink display (SPI SCL=21, SDA=38)...");
+  SPI.begin(PIN_EPD_SCL, -1, PIN_EPD_SDA, -1);
+  display.epd2.selectSPI(SPI, SPISettings(4000000, MSBFIRST, SPI_MODE0));
+  // initial = false eliminates disruptive boot flashing and 10s busy timeouts
+  display.init(115200, false, 2, false);
+  display.setRotation(1); // 250 width x 122 height (Landscape)
 
   // Configure Internal Pull-Up Resistors for all inputs
   pinMode(PIN_K1_CLK, INPUT_PULLUP);
@@ -1235,6 +1266,9 @@ bool executeRunChain() {
     Serial.printf(">>> Executing: '%s' (%d %s) on Robot <<<\n", 
                   actionObj.name, actionObj.paramVal, actionObj.paramUnit);
 
+    // Update E-Ink Display with current active step
+    updateEInkRunChain(s, count, actionObj.name, actionObj.paramVal, actionObj.paramUnit);
+
     // Dispatch BLE motion command to physical robot
     sendRobosenPacket(actionObj);
 
@@ -1254,6 +1288,8 @@ bool executeRunChain() {
   Serial.println("║  Triggering Rainbow Victory Sparkle across all connected blocks!       ║");
   Serial.println("╚════════════════════════════════════════════════════════════════════════╝\n");
 
+  updateEInkRunChain(count, count, "ALL STEPS DONE! [OK]", 0, "");
+
   // Master RGB LED Rainbow Sparkle
   for (int k = 0; k < 3; k++) {
     setStatusLED(100, 0, 0);   delay(80);
@@ -1264,6 +1300,9 @@ bool executeRunChain() {
     setStatusLED(50, 0, 100);  delay(80);
   }
   updateStatusLED();
+
+  delay(1200);
+  renderActionMenu(); // Return display back to Action Menu
 
   return true;
 }
@@ -1283,6 +1322,7 @@ void runBleScan() {
 
   currentState = STATE_BLE_SCANNING;
   updateStatusLED(); // 🔵 Active Scanning
+  updateEInkScanning(); // Render Scanning status on E-Ink
 
   Serial.println("\n╔════════════════════════════════════════════════════════════════╗");
   Serial.println("║            [TEACHER PAIRING MODE: SCANNING BLE...]             ║");
@@ -1382,6 +1422,9 @@ void renderActionMenu() {
   }
   Serial.println("║ • Start Click: Run Chain Sequence     • Hold Start: BLE Pairing (3s)   ║");
   Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+
+  // Render to 2.13" E-Paper Display
+  updateEInkActionMenu();
 }
 
 void renderPairingMenu() {
@@ -1407,4 +1450,248 @@ void renderPairingMenu() {
   Serial.println("║ • Turn Knob: Scroll List       • Click Knob: Save to NVS Flash         ║");
   Serial.println("║ • Start Click: Cancel & Exit                                           ║");
   Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+
+  // Render to 2.13" E-Paper Display
+  updateEInkPairingMenu();
+}
+
+// ==============================================================================
+// 11. E-INK DISPLAY CONTROLLER IMPLEMENTATION (DEPG0213BN / SSD1680)
+// ==============================================================================
+
+/**
+ * Renders the main Master Block user interface onto the 2.13" E-Paper display.
+ * Uses Fast Partial Refresh with zero-flicker transitions.
+ */
+void updateEInkActionMenu() {
+  display.setPartialWindow(0, 0, display.width(), display.height());
+  display.firstPage();
+  do {
+    display.fillScreen(GxEPD_WHITE);
+
+    int16_t w = display.width();
+    int16_t h = display.height();
+
+    // 1. Frame border
+    display.drawRect(0, 0, w, h, GxEPD_BLACK);
+    display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
+
+    // 2. Top Title Bar (Inverted Header)
+    display.fillRect(2, 2, w - 4, 20, GxEPD_BLACK);
+    display.setTextColor(GxEPD_WHITE);
+    display.setFont(&FreeSansBold9pt7b);
+    display.setCursor(6, 17);
+    display.print("ROBOSEN K1");
+
+    // Top-Right Status Badge
+    display.setFont(); // Default 5x7 font
+    display.setTextSize(1);
+    display.setCursor(160, 8);
+    if (isConnected) {
+      display.print("[CONNECTED]");
+    } else if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
+      display.print("[UNPAIRED]");
+    } else if (connectAttemptCounter > 0) {
+      display.printf("[RETRY #%d]", connectAttemptCounter);
+    } else {
+      display.print("[SEARCHING]");
+    }
+
+    // 3. Center Action & Parameter Section
+    RobosenAction& act = ACTIONS[currentActionIndex];
+
+    // Action Name
+    display.setTextColor(GxEPD_BLACK);
+    display.setFont(&FreeSansBold9pt7b);
+    display.setCursor(8, 44);
+    display.print(act.name);
+
+    // Parameter Value & Unit
+    display.setCursor(10, 68);
+    display.printf("[%d]", act.paramVal);
+
+    display.setCursor(55, 68);
+    display.print(act.paramUnit);
+
+    // Visual Dots / Gauge for Parameter (1 to 5)
+    display.setFont();
+    for (int i = 0; i < 5; i++) {
+      int dotX = 180 + (i * 12);
+      int dotY = 62;
+      if (i < act.paramVal) {
+        display.fillCircle(dotX, dotY, 4, GxEPD_BLACK);
+      } else {
+        display.drawCircle(dotX, dotY, 4, GxEPD_BLACK);
+      }
+    }
+
+    // 4. Horizontal Divider Line
+    display.drawLine(2, 82, w - 3, 82, GxEPD_BLACK);
+
+    // 5. Bottom Config Dock Status Area
+    display.setFont();
+    display.setTextSize(1);
+    display.setCursor(8, 89);
+    if (isBlockDocked) {
+      display.printf("DOCK: [0x%02X] %s (%d %s)", 
+                     dockedActionId, getActionNameByToken(dockedActionId),
+                     dockedParamVal, getParamUnitByToken(dockedActionId));
+      display.setCursor(8, 103);
+      display.print("Knob 1 Click: Burn Config to Block");
+    } else {
+      display.print("DOCK: EMPTY (Insert Block to Config)");
+      display.setCursor(8, 103);
+      display.print("Start: Run Chain | Hold: Pair (3s)");
+    }
+
+  } while (display.nextPage());
+}
+
+/**
+ * Renders the Teacher BLE Pairing Menu on the E-Ink display.
+ */
+void updateEInkPairingMenu() {
+  display.setPartialWindow(0, 0, display.width(), display.height());
+  display.firstPage();
+  do {
+    display.fillScreen(GxEPD_WHITE);
+    int16_t w = display.width();
+    int16_t h = display.height();
+
+    // Frame
+    display.drawRect(0, 0, w, h, GxEPD_BLACK);
+    display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
+
+    // Header
+    display.fillRect(2, 2, w - 4, 20, GxEPD_BLACK);
+    display.setTextColor(GxEPD_WHITE);
+    display.setFont(&FreeSansBold9pt7b);
+    display.setCursor(6, 17);
+    display.print("PAIR ROBOT (BLE)");
+
+    display.setFont();
+    display.setTextSize(1);
+    display.setCursor(170, 8);
+    display.printf("%d FOUND", bleDeviceCount);
+
+    // Device List
+    display.setTextColor(GxEPD_BLACK);
+    if (bleDeviceCount == 0) {
+      display.setCursor(14, 46);
+      display.print("No K1 robots found in range.");
+      display.setCursor(14, 62);
+      display.print("Ensure robot is powered ON.");
+    } else {
+      int startIdx = (currentBleIndex / 3) * 3;
+      int yPos = 32;
+      for (int i = startIdx; i < bleDeviceCount && i < startIdx + 3; i++) {
+        if (i == currentBleIndex) {
+          display.fillRect(4, yPos - 2, w - 8, 15, GxEPD_BLACK);
+          display.setTextColor(GxEPD_WHITE);
+          display.setCursor(8, yPos);
+          display.printf("> %-16s %3ddBm", bleList[i].name.substring(0, 16).c_str(), bleList[i].rssi);
+        } else {
+          display.setTextColor(GxEPD_BLACK);
+          display.setCursor(8, yPos);
+          display.printf("  %-16s %3ddBm", bleList[i].name.substring(0, 16).c_str(), bleList[i].rssi);
+        }
+        yPos += 16;
+      }
+    }
+
+    // Divider & Footer
+    display.drawLine(2, 92, w - 3, 92, GxEPD_BLACK);
+    display.setTextColor(GxEPD_BLACK);
+    display.setFont();
+    display.setCursor(8, 98);
+    display.print("Knob: Select  |  Click: Connect & Save");
+    display.setCursor(8, 110);
+    display.print("Start: Cancel & Return");
+
+  } while (display.nextPage());
+}
+
+/**
+ * Displays Scanning screen while BLE scan is active (4 seconds).
+ */
+void updateEInkScanning() {
+  display.setPartialWindow(0, 0, display.width(), display.height());
+  display.firstPage();
+  do {
+    display.fillScreen(GxEPD_WHITE);
+    int16_t w = display.width();
+    int16_t h = display.height();
+
+    display.drawRect(0, 0, w, h, GxEPD_BLACK);
+    display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
+
+    display.fillRect(2, 2, w - 4, 20, GxEPD_BLACK);
+    display.setTextColor(GxEPD_WHITE);
+    display.setFont(&FreeSansBold9pt7b);
+    display.setCursor(6, 17);
+    display.print("BLE SCANNING...");
+
+    display.setFont();
+    display.setTextColor(GxEPD_BLACK);
+    display.setTextSize(1);
+    display.setCursor(16, 46);
+    display.print("Searching nearby Robosen K1 robots...");
+    display.setCursor(16, 62);
+    display.print("Sorting by RSSI signal strength.");
+
+    display.drawLine(2, 92, w - 3, 92, GxEPD_BLACK);
+    display.setCursor(8, 102);
+    display.print("Hold Start Button to cancel");
+  } while (display.nextPage());
+}
+
+/**
+ * Displays Run Chain real-time execution status on E-Ink screen.
+ */
+void updateEInkRunChain(int currentStep, int totalSteps, const char* actionName, int paramVal, const char* paramUnit) {
+  display.setPartialWindow(0, 0, display.width(), display.height());
+  display.firstPage();
+  do {
+    display.fillScreen(GxEPD_WHITE);
+    int16_t w = display.width();
+    int16_t h = display.height();
+
+    display.drawRect(0, 0, w, h, GxEPD_BLACK);
+    display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
+
+    display.fillRect(2, 2, w - 4, 20, GxEPD_BLACK);
+    display.setTextColor(GxEPD_WHITE);
+    display.setFont(&FreeSansBold9pt7b);
+    display.setCursor(6, 17);
+    display.print("RUNNING CHAIN");
+
+    display.setFont();
+    display.setTextSize(1);
+    display.setCursor(170, 8);
+    if (totalSteps > 0) {
+      display.printf("STEP %d/%d", currentStep, totalSteps);
+    } else {
+      display.print("PHASE 1");
+    }
+
+    // Action Name
+    display.setTextColor(GxEPD_BLACK);
+    display.setFont(&FreeSansBold9pt7b);
+    display.setCursor(10, 48);
+    display.print(actionName);
+
+    display.setFont();
+    display.setTextSize(2);
+    display.setCursor(10, 64);
+    if (paramVal > 0) {
+      display.printf("%d %s", paramVal, paramUnit);
+    } else {
+      display.print("Active");
+    }
+
+    display.drawLine(2, 92, w - 3, 92, GxEPD_BLACK);
+    display.setTextSize(1);
+    display.setCursor(8, 102);
+    display.print("Physical Chain Bus Active (Phase 2)");
+  } while (display.nextPage());
 }

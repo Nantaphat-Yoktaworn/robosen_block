@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robosen K1 Master Block — Component BOM & Wiring Guide</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --surface: #111827;
+      --surface-border: #1f2937;
+      --card-bg: #162032;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent: #10b981;
+      --accent-glow: rgba(16, 185, 129, 0.2);
+      --accent-blue: #3b82f6;
+      --accent-amber: #f59e0b;
+      --accent-purple: #8b5cf6;
+      --code-bg: #030712;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      padding: 2rem 1.5rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--surface-border);
+      padding-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      background: #34d399;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #34d399;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      background: linear-gradient(to right, #ffffff, #9ca3af);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    /* Key Specs Grid */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .spec-card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      padding: 1.25rem;
+      border-radius: 0.75rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .spec-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(59, 130, 246, 0.4);
+    }
+
+    .spec-card .label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+
+    .spec-card .val {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .spec-card .desc {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 0.25rem;
+    }
+
+    /* Search & Filter Bar */
+    .filter-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      padding: 0.85rem 1.25rem;
+      border-radius: 0.75rem;
+    }
+
+    .search-input-box {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--code-bg);
+      border: 1px solid var(--surface-border);
+      color: #fff;
+      padding: 0.5rem 0.85rem;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+
+    .filter-buttons {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: var(--card-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--surface-border);
+      padding: 0.4rem 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--accent);
+      color: #030712;
+      border-color: var(--accent);
+    }
+
+    /* Sections */
+    .section-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-title svg {
+      color: var(--accent);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      margin-bottom: 2.5rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Tables */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background: rgba(17, 24, 39, 0.95);
+      color: #cbd5e1;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--surface-border);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.6);
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Color Badges */
+    .wire-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 600;
+      font-size: 0.8rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.375rem;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .badge-yellow  { background: rgba(234, 179, 8, 0.15);  color: #facc15; border-color: rgba(234, 179, 8, 0.4); }
+    .dot-yellow    { background: #facc15; box-shadow: 0 0 6px #facc15; }
+
+    .badge-green   { background: rgba(34, 197, 94, 0.15);  color: #4ade80; border-color: rgba(34, 197, 94, 0.4); }
+    .dot-green     { background: #4ade80; box-shadow: 0 0 6px #4ade80; }
+
+    .badge-blue    { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border-color: rgba(59, 130, 246, 0.4); }
+    .dot-blue      { background: #60a5fa; box-shadow: 0 0 6px #60a5fa; }
+
+    .badge-white   { background: rgba(248, 250, 252, 0.15); color: #f8fafc; border-color: rgba(248, 250, 252, 0.4); }
+    .dot-white     { background: #f8fafc; box-shadow: 0 0 6px #f8fafc; }
+
+    .badge-brown   { background: rgba(180, 83, 9, 0.2);   color: #d97706; border-color: rgba(180, 83, 9, 0.4); }
+    .dot-brown     { background: #d97706; box-shadow: 0 0 6px #d97706; }
+
+    .badge-gray    { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border-color: rgba(148, 163, 184, 0.4); }
+    .dot-gray      { background: #94a3b8; box-shadow: 0 0 6px #94a3b8; }
+
+    .badge-orange  { background: rgba(249, 115, 22, 0.15); color: #fb923c; border-color: rgba(249, 115, 22, 0.4); }
+    .dot-orange    { background: #fb923c; box-shadow: 0 0 6px #fb923c; }
+
+    .badge-purple  { background: rgba(168, 85, 247, 0.15); color: #c084fc; border-color: rgba(168, 85, 247, 0.4); }
+    .dot-purple    { background: #c084fc; box-shadow: 0 0 6px #c084fc; }
+
+    .badge-red     { background: rgba(239, 68, 68, 0.15);  color: #f87171; border-color: rgba(239, 68, 68, 0.4); }
+    .dot-red       { background: #f87171; box-shadow: 0 0 6px #f87171; }
+
+    .badge-black   { background: rgba(30, 41, 59, 0.5);   color: #94a3b8; border-color: rgba(100, 116, 139, 0.4); }
+    .dot-black     { background: #0f172a; border: 1px solid #64748b; }
+
+    .pin-code {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: #38bdf8;
+      background: var(--code-bg);
+      padding: 0.15rem 0.45rem;
+      border-radius: 0.25rem;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.15rem 0.4rem;
+      border-radius: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .tag-gpio  { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .tag-power { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .tag-spi   { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+    .tag-uart  { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+    /* Architecture Grid */
+    .subsystem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .subsystem-card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .subsystem-card h3 {
+      font-size: 1.15rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .subsystem-card p {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .mini-table {
+      width: 100%;
+      font-size: 0.8rem;
+      border-collapse: collapse;
+      margin-top: auto;
+    }
+
+    .mini-table th, .mini-table td {
+      padding: 0.45rem 0.6rem;
+      border: 1px solid var(--surface-border);
+    }
+
+    .mini-table th {
+      background: var(--card-bg);
+      color: #94a3b8;
+    }
+
+    /* Schematics Block */
+    .schematic-box {
+      background: var(--code-bg);
+      border: 1px solid var(--surface-border);
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: #38bdf8;
+      overflow-x: auto;
+      line-height: 1.4;
+      white-space: pre;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Alert callout */
+    .callout {
+      background: rgba(245, 158, 11, 0.1);
+      border-left: 4px solid var(--accent-amber);
+      padding: 1rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: #fde68a;
+    }
+
+    .callout strong {
+      color: #f59e0b;
+    }
+
+    /* Print media optimization */
+    @media print {
+      body {
+        background: #fff;
+        color: #000;
+        padding: 0.5cm;
+      }
+      .card, .spec-card, .subsystem-card {
+        border: 1px solid #ccc;
+        background: #fff;
+        box-shadow: none;
+        color: #000;
+      }
+      .filter-wrapper {
+        display: none;
+      }
+      th {
+        background: #f1f5f9;
+        color: #000;
+      }
+      td {
+        border-bottom: 1px solid #e2e8f0;
+        color: #000;
+      }
+      .pin-code {
+        border: 1px solid #ccc;
+        background: #f8fafc;
+        color: #000;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header Section -->
+    <header>
+      <div class="badge-pill">
+        <span class="pulse-dot"></span>
+        Hardware Specification &bull; Prototype #01
+      </div>
+      <h1>Robosen K1 Master Block</h1>
+      <p class="subtitle">Complete Component Bill of Materials (BOM), Pin-to-Pin Breadboard Wiring Table & Subsystem Schematics</p>
+    </header>
+
+    <!-- Top Key Metrics Cards -->
+    <div class="specs-grid">
+      <div class="spec-card">
+        <div class="label">Main Controller</div>
+        <div class="val">ESP32-S3</div>
+        <div class="desc">16MB Flash &bull; 8MB PSRAM &bull; Dual USB-C</div>
+      </div>
+      <div class="spec-card">
+        <div class="label">Logic Voltage</div>
+        <div class="val">3.3V DC</div>
+        <div class="desc">Single Common Rail (Zero Level Shifter)</div>
+      </div>
+      <div class="spec-card">
+        <div class="label">Battery & Autonomy</div>
+        <div class="val">3500 mAh</div>
+        <div class="desc">18650 Li-ion &bull; ~25-45 Hours Continuous</div>
+      </div>
+      <div class="spec-card">
+        <div class="label">Primary Display</div>
+        <div class="val">2.13" E-Paper</div>
+        <div class="desc">DEPG0213BN / SSD1680 (122&times;250 SPI)</div>
+      </div>
+    </div>
+
+    <!-- Section 1: Component Bill of Materials (BOM) -->
+    <div class="section-title">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+      1. Master Block Bill of Materials (BOM)
+    </div>
+
+    <div class="card">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 50px;">#</th>
+              <th>Component Name</th>
+              <th>Exact Model / Specification</th>
+              <th style="width: 70px;">Qty</th>
+              <th>Functional Role in Master Block</th>
+              <th>Interface / Power</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>01</strong></td>
+              <td><strong>Microcontroller</strong></td>
+              <td><code>ESP32-S3-DevKitC-1-WROOM-1-N16R8</code></td>
+              <td>1</td>
+              <td>Central processor, BLE Central client, E-Ink SPI master, Dual-UART engine</td>
+              <td><span class="tag tag-power">3.3V DC</span></td>
+            </tr>
+            <tr>
+              <td><strong>02</strong></td>
+              <td><strong>E-Ink Display Module</strong></td>
+              <td><code>2.13" DEPG0213BN / SSD1680</code> (GoodDisplay)</td>
+              <td>1</td>
+              <td>Sunlight-readable UI: action selection, parameter gauge, pairing list, chain status</td>
+              <td><span class="tag tag-spi">4-Wire SPI</span></td>
+            </tr>
+            <tr>
+              <td><strong>03</strong></td>
+              <td><strong>Knob 1 (Action Selector)</strong></td>
+              <td><code>KY-040 / EC11 Rotary Encoder Module</code></td>
+              <td>1</td>
+              <td>Quadrature dial for cycling actions (Walk, Turn, Punch) & Teacher pairing menu</td>
+              <td><span class="tag tag-gpio">GPIO 8, 9, 10</span></td>
+            </tr>
+            <tr>
+              <td><strong>04</strong></td>
+              <td><strong>Knob 2 (Param Adjuster)</strong></td>
+              <td><code>KY-040 / EC11 Rotary Encoder Module</code></td>
+              <td>1</td>
+              <td>Quadrature dial for tweaking steps, degrees, and repetitions</td>
+              <td><span class="tag tag-gpio">GPIO 11, 12, 13</span></td>
+            </tr>
+            <tr>
+              <td><strong>05</strong></td>
+              <td><strong>Start / Run Button</strong></td>
+              <td><code>12x12x7.3mm Momentary Tactile Switch</code></td>
+              <td>1</td>
+              <td>Tap = Trigger Run Chain Bus; Hold 3s = Open BLE Pairing Scan menu</td>
+              <td><span class="tag tag-gpio">GPIO 14 (Active LOW)</span></td>
+            </tr>
+            <tr>
+              <td><strong>06</strong></td>
+              <td><strong>Rechargeable Battery</strong></td>
+              <td><code>LG Chem INR18650-MJ1 (3.7V 3500mAh)</code></td>
+              <td>1</td>
+              <td>High-capacity standalone power source for Master and full downstream block chain</td>
+              <td><span class="tag tag-power">3.0V - 4.2V</span></td>
+            </tr>
+            <tr>
+              <td><strong>07</strong></td>
+              <td><strong>Charger & BMS Protection</strong></td>
+              <td><code>TP4056 USB-C Module + DW01A + FS8205A</code></td>
+              <td>1</td>
+              <td>5V 1A USB-C battery charging, overcharge (4.28V) and over-discharge (2.4V) cutoff</td>
+              <td><span class="tag tag-power">USB-C In &bull; B+/B-</span></td>
+            </tr>
+            <tr>
+              <td><strong>08</strong></td>
+              <td><strong>Buck-Boost DC-DC Regulator</strong></td>
+              <td><code>TI TPS63020 Synchronous Regulator Module</code></td>
+              <td>1</td>
+              <td>Regulates 3.0V-4.2V battery swing to solid 3.3V DC (up to 2A, brownout proof)</td>
+              <td><span class="tag tag-power">VOUT = 3.3V</span></td>
+            </tr>
+            <tr>
+              <td><strong>09</strong></td>
+              <td><strong>Main Power Switch</strong></td>
+              <td><code>SPST Sub-Miniature Slide Switch (≥0.5A)</code></td>
+              <td>1</td>
+              <td>System Master power ON/OFF switch between TP4056 OUT+ and TPS63020 VIN</td>
+              <td><span class="tag tag-power">Inline Power</span></td>
+            </tr>
+            <tr>
+              <td><strong>10</strong></td>
+              <td><strong>Config Dock Port</strong></td>
+              <td><code>4-Pin Magnetic / Spring Pogo Dock</code></td>
+              <td>1</td>
+              <td>Physical slot to insert Action Block: writes tokens & parameters (0xCF @ 9600 baud)</td>
+              <td><span class="tag tag-uart">UART1 (IO17, IO18)</span></td>
+            </tr>
+            <tr>
+              <td><strong>11</strong></td>
+              <td><strong>Run Chain Bus Port</strong></td>
+              <td><code>4-Pin Magnetic / Spring Pogo Port</code></td>
+              <td>1</td>
+              <td>Rail socket to snap code sequence: sends Phase 1 seed (0xAA) & Phase 2 execution</td>
+              <td><span class="tag tag-uart">UART2 (IO15, IO16)</span></td>
+            </tr>
+            <tr>
+              <td><strong>12</strong></td>
+              <td><strong>Status RGB LED</strong></td>
+              <td><code>WS2812B NeoPixel (Onboard)</code></td>
+              <td>1</td>
+              <td>Visual status: Green = Connected/Ready, Blue = Scanning, Yellow = Bus Active</td>
+              <td><span class="tag tag-gpio">GPIO 48</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Section 2: Complete Pinout & Wiring Table -->
+    <div class="section-title">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+      2. Pin-to-Pin Master Breadboard Wiring Table
+    </div>
+
+    <!-- Filter & Search Controls -->
+    <div class="filter-wrapper">
+      <div class="search-input-box">
+        <svg width="18" height="18" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="wireSearch" class="search-input" placeholder="Type to filter pin, subsystem, color, or GPIO (e.g., 'E-Ink', 'Yellow', 'UART')...">
+      </div>
+      <div class="filter-buttons">
+        <button class="filter-btn active" onclick="filterCategory('all')">All Pins</button>
+        <button class="filter-btn" onclick="filterCategory('knob')">Knobs & Button</button>
+        <button class="filter-btn" onclick="filterCategory('eink')">E-Ink Display</button>
+        <button class="filter-btn" onclick="filterCategory('uart')">Dock & Bus</button>
+        <button class="filter-btn" onclick="filterCategory('power')">Power Rails</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="table-container">
+        <table id="wiringTable">
+          <thead>
+            <tr>
+              <th>Subsystem</th>
+              <th>Signal Name</th>
+              <th>ESP32-S3 Pin</th>
+              <th>Wire Color</th>
+              <th>Target Destination & Terminal</th>
+              <th>Electrical / Operating Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Knobs & Controls -->
+            <tr data-cat="knob">
+              <td><strong>Knob 1 (Action)</strong></td>
+              <td><code>PIN_K1_CLK</code></td>
+              <td><span class="pin-code">GPIO 8</span></td>
+              <td><span class="wire-badge badge-yellow"><span class="dot dot-yellow"></span>Yellow</span></td>
+              <td>KY-040 Knob 1 <code>CLK</code></td>
+              <td>Quadrature phase A input</td>
+            </tr>
+            <tr data-cat="knob">
+              <td><strong>Knob 1 (Action)</strong></td>
+              <td><code>PIN_K1_DT</code></td>
+              <td><span class="pin-code">GPIO 9</span></td>
+              <td><span class="wire-badge badge-green"><span class="dot dot-green"></span>Green</span></td>
+              <td>KY-040 Knob 1 <code>DT</code></td>
+              <td>Quadrature phase B input</td>
+            </tr>
+            <tr data-cat="knob">
+              <td><strong>Knob 1 (Action)</strong></td>
+              <td><code>PIN_K1_SW</code></td>
+              <td><span class="pin-code">GPIO 10</span></td>
+              <td><span class="wire-badge badge-blue"><span class="dot dot-blue"></span>Blue</span></td>
+              <td>KY-040 Knob 1 <code>SW</code></td>
+              <td>Click: Burn Action config to docked block</td>
+            </tr>
+            <tr data-cat="knob">
+              <td><strong>Knob 2 (Param)</strong></td>
+              <td><code>PIN_K2_CLK</code></td>
+              <td><span class="pin-code">GPIO 11</span></td>
+              <td><span class="wire-badge badge-white"><span class="dot dot-white"></span>White</span></td>
+              <td>KY-040 Knob 2 <code>CLK</code></td>
+              <td>Quadrature phase A (CW = Increase)</td>
+            </tr>
+            <tr data-cat="knob">
+              <td><strong>Knob 2 (Param)</strong></td>
+              <td><code>PIN_K2_DT</code></td>
+              <td><span class="pin-code">GPIO 12</span></td>
+              <td><span class="wire-badge badge-brown"><span class="dot dot-brown"></span>Brown</span></td>
+              <td>KY-040 Knob 2 <code>DT</code></td>
+              <td>Quadrature phase B</td>
+            </tr>
+            <tr data-cat="knob">
+              <td><strong>Knob 2 (Param)</strong></td>
+              <td><code>PIN_K2_SW</code></td>
+              <td><span class="pin-code">GPIO 13</span></td>
+              <td><span class="wire-badge badge-gray"><span class="dot dot-gray"></span>Gray</span></td>
+              <td>KY-040 Knob 2 <code>SW</code></td>
+              <td>Click: Param reset / Confirm BLE pairing</td>
+            </tr>
+            <tr data-cat="knob">
+              <td><strong>Start Button</strong></td>
+              <td><code>PIN_START_BTN</code></td>
+              <td><span class="pin-code">GPIO 14</span></td>
+              <td><span class="wire-badge badge-orange"><span class="dot dot-orange"></span>Orange</span></td>
+              <td>12mm Switch Top-Right Terminal</td>
+              <td>Active LOW (Internal pull-up enabled)</td>
+            </tr>
+            <tr data-cat="knob">
+              <td><strong>Start Button</strong></td>
+              <td><code>GND Return</code></td>
+              <td><span class="pin-code">GND Rail</span></td>
+              <td><span class="wire-badge badge-black"><span class="dot dot-black"></span>Black</span></td>
+              <td>12mm Switch Bottom-Left Terminal</td>
+              <td>Diagonal bridge to common GND rail</td>
+            </tr>
+
+            <!-- E-Ink Display -->
+            <tr data-cat="eink">
+              <td><strong>E-Ink Display</strong></td>
+              <td><code>PIN_EPD_BUSY</code></td>
+              <td><span class="pin-code">GPIO 4</span></td>
+              <td><span class="wire-badge badge-gray"><span class="dot dot-gray"></span>Gray</span></td>
+              <td>DEPG0213BN Pin <code>BUSY</code></td>
+              <td>Active High/Low refresh status line</td>
+            </tr>
+            <tr data-cat="eink">
+              <td><strong>E-Ink Display</strong></td>
+              <td><code>PIN_EPD_RES</code></td>
+              <td><span class="pin-code">GPIO 5</span></td>
+              <td><span class="wire-badge badge-brown"><span class="dot dot-brown"></span>Brown</span></td>
+              <td>DEPG0213BN Pin <code>RES / RST</code></td>
+              <td>Hardware reset line</td>
+            </tr>
+            <tr data-cat="eink">
+              <td><strong>E-Ink Display</strong></td>
+              <td><code>PIN_EPD_DC</code></td>
+              <td><span class="pin-code">GPIO 6</span></td>
+              <td><span class="wire-badge badge-purple"><span class="dot dot-purple"></span>Purple</span></td>
+              <td>DEPG0213BN Pin <code>DC</code></td>
+              <td>Data / Command register toggle</td>
+            </tr>
+            <tr data-cat="eink">
+              <td><strong>E-Ink Display</strong></td>
+              <td><code>PIN_EPD_CS</code></td>
+              <td><span class="pin-code">GPIO 7</span></td>
+              <td><span class="wire-badge badge-yellow"><span class="dot dot-yellow"></span>Yellow</span></td>
+              <td>DEPG0213BN Pin <code>CS</code></td>
+              <td>SPI Chip Select (Active LOW)</td>
+            </tr>
+            <tr data-cat="eink">
+              <td><strong>E-Ink Display</strong></td>
+              <td><code>PIN_EPD_SCL</code></td>
+              <td><span class="pin-code">GPIO 21</span></td>
+              <td><span class="wire-badge badge-green"><span class="dot dot-green"></span>Green</span></td>
+              <td>DEPG0213BN Pin <code>SCL / SCK</code></td>
+              <td>SPI Hardware Clock (4 MHz)</td>
+            </tr>
+            <tr data-cat="eink">
+              <td><strong>E-Ink Display</strong></td>
+              <td><code>PIN_EPD_SDA</code></td>
+              <td><span class="pin-code">GPIO 38</span></td>
+              <td><span class="wire-badge badge-white"><span class="dot dot-white"></span>White</span></td>
+              <td>DEPG0213BN Pin <code>SDA / DIN</code></td>
+              <td>SPI MOSI Serial Data In</td>
+            </tr>
+            <tr data-cat="eink">
+              <td><strong>E-Ink Display</strong></td>
+              <td><code>VCC / GND</code></td>
+              <td><span class="pin-code">3V3 / GND</span></td>
+              <td><span class="wire-badge badge-red"><span class="dot dot-red"></span>Red / Black</span></td>
+              <td>DEPG0213BN <code>VCC & GND</code></td>
+              <td>Strictly 3.3V DC (DO NOT connect to 5V)</td>
+            </tr>
+
+            <!-- Config Dock -->
+            <tr data-cat="uart">
+              <td><strong>Config Dock (UART1)</strong></td>
+              <td><code>PIN_CFG_TX</code></td>
+              <td><span class="pin-code">GPIO 17</span></td>
+              <td><span class="wire-badge badge-gray"><span class="dot dot-gray"></span>Gray</span></td>
+              <td>Dock Pin 4 &bull; Target Block <code>PD6 (RX)</code></td>
+              <td>Master TX &rarr; Writes config (0xCF) @ 9600 baud</td>
+            </tr>
+            <tr data-cat="uart">
+              <td><strong>Config Dock (UART1)</strong></td>
+              <td><code>PIN_CFG_RX</code></td>
+              <td><span class="pin-code">GPIO 18</span></td>
+              <td><span class="wire-badge badge-purple"><span class="dot dot-purple"></span>Purple</span></td>
+              <td>Dock Pin 3 &bull; Target Block <code>PD5 (TX)</code></td>
+              <td>Master RX &larr; Reads Query & ACK from block</td>
+            </tr>
+            <tr data-cat="uart">
+              <td><strong>Config Dock (Power)</strong></td>
+              <td><code>V+ / GND</code></td>
+              <td><span class="pin-code">3V3 / GND</span></td>
+              <td><span class="wire-badge badge-red"><span class="dot dot-red"></span>Red / Black</span></td>
+              <td>Dock Pin 1 (V+) & Pin 2 (GND)</td>
+              <td>Supplies 3.3V power to docked block</td>
+            </tr>
+
+            <!-- Run Chain Bus -->
+            <tr data-cat="uart">
+              <td><strong>Run Chain (UART2)</strong></td>
+              <td><code>PIN_CHAIN_TX</code></td>
+              <td><span class="pin-code">GPIO 15</span></td>
+              <td><span class="wire-badge badge-green"><span class="dot dot-green"></span>Green</span></td>
+              <td>Run Port Pin 3 &bull; Block 1 <code>PD6 (RX)</code></td>
+              <td>Emits Phase 1 seed (0xAA) & Phase 2 execution</td>
+            </tr>
+            <tr data-cat="uart">
+              <td><strong>Run Chain (UART2)</strong></td>
+              <td><code>PIN_CHAIN_RX</code></td>
+              <td><span class="pin-code">GPIO 16</span></td>
+              <td><span class="wire-badge badge-white"><span class="dot dot-white"></span>White</span></td>
+              <td>Run Port Pin 4 &bull; End Block <code>PD5 (TX)</code></td>
+              <td>Receives Phase 1 loopback return rail</td>
+            </tr>
+            <tr data-cat="uart">
+              <td><strong>Run Chain (Power)</strong></td>
+              <td><code>V+ / GND</code></td>
+              <td><span class="pin-code">3V3 / GND</span></td>
+              <td><span class="wire-badge badge-red"><span class="dot dot-red"></span>Red / Black</span></td>
+              <td>Run Port Pin 1 (V+) & Pin 2 (GND)</td>
+              <td>Carries 3.3V down the entire daisy-chain sequence</td>
+            </tr>
+
+            <!-- Power Subsystem -->
+            <tr data-cat="power">
+              <td><strong>Battery Input</strong></td>
+              <td><code>B+ / B-</code></td>
+              <td><span class="pin-code">TP4056 B+/B-</span></td>
+              <td><span class="wire-badge badge-red"><span class="dot dot-red"></span>Red / Black</span></td>
+              <td>18650 Battery Cell Holder Leads</td>
+              <td>Direct battery connection to protection IC</td>
+            </tr>
+            <tr data-cat="power">
+              <td><strong>Power Switch</strong></td>
+              <td><code>OUT+ Switch</code></td>
+              <td><span class="pin-code">TP4056 OUT+</span></td>
+              <td><span class="wire-badge badge-red"><span class="dot dot-red"></span>Red Wire</span></td>
+              <td>SPST Slide Switch Terminal 1</td>
+              <td>Protected positive battery output</td>
+            </tr>
+            <tr data-cat="power">
+              <td><strong>Regulator Input</strong></td>
+              <td><code>VIN & EN</code></td>
+              <td><span class="pin-code">TPS63020 VIN</span></td>
+              <td><span class="wire-badge badge-red"><span class="dot dot-red"></span>Red Wire</span></td>
+              <td>SPST Slide Switch Terminal 2</td>
+              <td>Tie EN to VIN to power on with switch</td>
+            </tr>
+            <tr data-cat="power">
+              <td><strong>Regulator Ground</strong></td>
+              <td><code>GND & PS</code></td>
+              <td><span class="pin-code">TPS63020 GND</span></td>
+              <td><span class="wire-badge badge-black"><span class="dot dot-black"></span>Black / Blue</span></td>
+              <td>TP4056 OUT- & GND Rail</td>
+              <td>Tie PS to GND for high-efficiency Power Save</td>
+            </tr>
+            <tr data-cat="power">
+              <td><strong>Regulated 3.3V Rail</strong></td>
+              <td><code>VOUT (+3.3V)</code></td>
+              <td><span class="pin-code">TPS63020 VOUT</span></td>
+              <td><span class="wire-badge badge-red"><span class="dot dot-red"></span>Red Wire</span></td>
+              <td>ESP32-S3 <code>3V3</code> & Breadboard (+) Rail</td>
+              <td>Steady, brownout-proof 3.3V DC (up to 2.0A)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Section 3: Subsystem Diagrams & Pogo Pin Layouts -->
+    <div class="section-title">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+      3. Port Pinouts & Electrical Subsystems
+    </div>
+
+    <div class="subsystem-grid">
+      <!-- Port Pinout Card -->
+      <div class="subsystem-card">
+        <div>
+          <h3>4-Pin Magnetic Pogo Connectors</h3>
+          <p>Standardized non-overlapping pin order shared between Config Dock, Run Port, and Inter-Block links.</p>
+          <div class="schematic-box">  TOP VIEW: 4-PIN POGO CONNECTOR
+  ┌─────────────────────────────────┐
+  │  Pin 1: V+ (+3.3V Common Rail)   │
+  │  Pin 2: GND (Common Ground)     │
+  │  Pin 3: UART Data (TX / RX)     │
+  │  Pin 4: Return Rail (Pass-thru) │
+  └─────────────────────────────────┘</div>
+        </div>
+        <table class="mini-table">
+          <thead>
+            <tr>
+              <th>Pin</th>
+              <th>Config Dock</th>
+              <th>Run Chain Port</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1</strong></td>
+              <td>+3.3V VCC</td>
+              <td>+3.3V Rail (Power to Chain)</td>
+            </tr>
+            <tr>
+              <td><strong>2</strong></td>
+              <td>GND</td>
+              <td>GND Rail</td>
+            </tr>
+            <tr>
+              <td><strong>3</strong></td>
+              <td>GPIO 18 (CFG_RX)</td>
+              <td>GPIO 15 (CHAIN_TX)</td>
+            </tr>
+            <tr>
+              <td><strong>4</strong></td>
+              <td>GPIO 17 (CFG_TX)</td>
+              <td>GPIO 16 (CHAIN_RX Loopback)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Power Subsystem Schematic Card -->
+      <div class="subsystem-card">
+        <div>
+          <h3>Battery & DC-DC Power Flow</h3>
+          <p>BMS-protected Li-ion flow stepped down/up to a rock-solid 3.3V rail to prevent RF dropouts.</p>
+          <div class="schematic-box">[18650 Cell: 3.7V]
+       │
+       ▼
+ [TP4056 Charger] ◄── [USB-C 5V Input]
+       │ (OUT+)
+ [Slide Switch]
+       │ (VIN & EN)
+ [TPS63020 Buck-Boost] (PS -> GND)
+       │ (VOUT = 3.3V)
+ ──────┴─────────────────────────────
+ +3.3V SYSTEM POWER BUS (To ESP32-S3)</div>
+        </div>
+        <div class="callout" style="margin-bottom:0;">
+          <strong>Design Note:</strong> Tying <code>EN &rarr; VIN</code> on the TPS63020 powers off both the regulator and ESP32 when switched off, with zero standby quiescent drain.
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Electrical Safety & Assembly Checklist -->
+    <div class="section-title">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      4. Assembly Checklist & Hardware Rules
+    </div>
+
+    <div class="card" style="padding: 1.5rem;">
+      <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.85rem; font-size: 0.9rem; color: #cbd5e1;">
+        <li style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <span style="color: #34d399; font-weight: bold;">&#10004;</span>
+          <div><strong>Strict 3.3V DC Domain:</strong> Verify with a digital multimeter that the VCC rail never exceeds 3.35V. Connecting 5V directly to the E-Ink display or CH32V003 pins will damage the silicon.</div>
+        </li>
+        <li style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <span style="color: #34d399; font-weight: bold;">&#10004;</span>
+          <div><strong>10 k&Omega; Bus Pull-Up Resistors:</strong> Place a 10 k&Omega; resistor between GPIO 15 / GPIO 16 and +3.3V rail. This prevents floating UART lines and spurious packet interrupts when blocks are disconnected.</div>
+        </li>
+        <li style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <span style="color: #34d399; font-weight: bold;">&#10004;</span>
+          <div><strong>0.1 &mu;F Decoupling Capacitors:</strong> Place 100 nF ceramic capacitors right across the V+ and GND pins of the Run Chain and Config Dock sockets to eliminate contact bounce when snapping blocks together.</div>
+        </li>
+        <li style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <span style="color: #34d399; font-weight: bold;">&#10004;</span>
+          <div><strong>Start Button Diagonal Wiring:</strong> Ensure the orange lead (GPIO 14) and black ground lead are placed diagonally across the 12&times;12mm switch terminals to avoid connecting two permanently bridged legs.</div>
+        </li>
+      </ul>
+    <!-- Section 5: Planned Upgrade / TODO -->
+    <div class="section-title">
+      <svg width="22" height="22" fill="none" stroke="#f59e0b" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      5. Planned Upgrade (TODO): Master Block Battery Level Telemetry
+    </div>
+
+    <div class="card" style="padding: 1.5rem; border-color: rgba(245, 158, 11, 0.3);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <span class="tag" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); font-size: 0.8rem; padding: 0.3rem 0.6rem;">
+          ⏳ BACKLOG TODO &bull; PROCEED WITH CURRENT SETUP FOR NOW
+        </span>
+        <span style="font-size: 0.8rem; color: #94a3b8;">Pending purchase of 2&times; 100 k&Omega; resistors</span>
+      </div>
+
+      <p style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 1rem;">
+        <strong>Current Operating State:</strong> The K1 Robot's battery percentage is actively read over BLE (Opcode <code>0x0F</code>) and rendered on the E-Paper screen. Internal monitoring of the Master Block's own 18650 cell is deferred until $100\text{ k}\Omega$ resistors are acquired.
+      </p>
+
+      <div class="schematic-box" style="margin-bottom: 1rem;">FUTURE UPGRADE CIRCUIT: 1:1 VOLTAGE DIVIDER INTO GPIO 1 (ADC1_CH0)
+
+  [TPS63020 VIN (Switched 3.0V - 4.2V)]
+                 │
+                 ▼
+          [ R1: 100 kΩ ]  (1% metal film)
+                 │
+                 ├──────────────────────► ESP32-S3 GPIO 1 (ADC1_CH0) [1.5V - 2.1V Safe]
+                 │
+          [ R2: 100 kΩ ]  (1% metal film)
+                 │
+                 ▼
+        [ Common GND Rail ]</div>
+
+      <div style="font-size: 0.85rem; color: #94a3b8;">
+        <strong>Quick Notes:</strong>
+        <ul style="margin-left: 1.25rem; margin-top: 0.35rem; display: flex; flex-direction: column; gap: 0.3rem;">
+          <li>Wire <code>R1</code> directly after the power switch (on TPS63020 <code>VIN</code>) so current draw drops to 0 &mu;A when switched OFF.</li>
+          <li>ESP32-S3 ADC reads <code>analogReadMilliVolts(1) &times; 2</code> to map 3.30V (0%) &rarr; 4.20V (100%).</li>
+        </ul>
+      </div>
+    </div>
+
+    <footer style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 2rem 0; border-top: 1px solid var(--surface-border);">
+      Robosen K1 Modular Tangible Coding Block System &bull; Prototype #01 Engineering Specification
+    </footer>
+
+  </div>
+
+  <!-- Interactive JavaScript Filter -->
+  <script>
+    const searchInput = document.getElementById('wireSearch');
+    const table = document.getElementById('wiringTable');
+    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    let currentCategory = 'all';
+
+    function updateFilter() {
+      const query = searchInput.value.toLowerCase().trim();
+
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const category = row.getAttribute('data-cat');
+        const text = row.textContent.toLowerCase();
+
+        const matchesCat = (currentCategory === 'all' || category === currentCategory);
+        const matchesQuery = query === '' || text.includes(query);
+
+        if (matchesCat && matchesQuery) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      }
+    }
+
+    searchInput.addEventListener('input', updateFilter);
+
+    function filterCategory(cat) {
+      currentCategory = cat;
+      filterBtns.forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      updateFilter();
+    }
+  </script>
+</body>
+</html>

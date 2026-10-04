@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "robosen_master")(type "KiCad")(uri "${KIPRJMOD}/robosen_master.pretty")(options "")(descr "Robosen K1 Master Block Custom Footprints"))
+)

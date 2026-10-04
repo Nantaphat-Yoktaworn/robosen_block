@@ -233,7 +233,10 @@ The project is currently in an **advanced software, protocol simulation, and liv
 
 ## 7. Recommended Next Steps
 
-1. **PCB Schematic & Layout:** Design the 4-pin magnetic PCB for the ESP32-S3 Master Block (with E-Ink & dual knobs) and solid CH32V003 Action Block.
+1. **PCB Schematic & Layout (Phase 1 Carrier PCB):** 🟢 **INITIALIZED & FOOTPRINTS VERIFIED (Oct 4, 2026):**
+   - Initialized KiCad 10 project ([`hardware/kicad/`](hardware/kicad/)).
+   - Engineered and validated 7 custom footprints in `robosen_master.pretty/` (`ESP32-S3-DevKitC-1-Socket`, `TP4056_Type-C_Module`, `TPS63020_BuckBoost_Module`, `18650_Battery_Holder_Single`, `KY-040_Rotary_Encoder_Module`, `EPaper_2.13in_Header_1x08`, `Pogo_4Pin_Dock_2.54mm`) with 0 errors via `kicad-cli 10.0.6`.
+   - Created interactive web wiring guide and BOM ([`docs/master_block_wiring.html`](docs/master_block_wiring.html)).
 2. **C++ Master Firmware:** ✅ **COMPLETED & VERIFIED ON PHYSICAL HARDWARE (Sept 7–8, 2026):**
    - Implemented dual-knob rotary encoders, persistent BLE auto-reconnect, Config Dock UART driver, and Run Chain Engine (`0xAA`/`0xBB`/`0xFF`) on ESP32-S3 (`firmware/esp32_master`).
    - Verified live detection and non-volatile flash burning into docked CH32V003 Action Blocks.
