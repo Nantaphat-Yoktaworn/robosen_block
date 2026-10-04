@@ -1,6 +1,6 @@
 import re,json
 from pathlib import Path
-text=Path('hardware/preorder_audit_evidence/action.net').read_text()
+text=Path('hardware/action_block/action_block.net').read_text()
 tokens=re.findall(r'"(?:\\.|[^"\\])*"|[()]|[^\s()]+',text);pos=0
 def parse():
  global pos

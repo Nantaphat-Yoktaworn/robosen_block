@@ -1,7 +1,9 @@
+from pathlib import Path
 import pcbnew
 import math
 
-board = pcbnew.LoadBoard(r"C:\Users\nnnn\Projects\robosen_block\hardware\kicad\robosen_master_block.kicad_pcb")
+ROOT = Path(__file__).resolve().parent.parent
+board = pcbnew.LoadBoard(str(ROOT / "hardware" / "master_block" / "robosen_master_block.kicad_pcb"))
 
 print("=== 1. TRACK & VIA COUNT ===")
 tracks = []

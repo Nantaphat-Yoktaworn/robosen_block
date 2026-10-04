@@ -307,6 +307,7 @@ Complete hardware specifications are detailed in [`PHYSICAL_BLOCK_SYSTEM_SPEC.md
 | [`IMPROVEMENT_PLAN.md`](IMPROVEMENT_PLAN.md) | 5-Pillar Master Improvement Plan and future production roadmap |
 | [`MEMORY.md`](MEMORY.md) | Master technical knowledge base, verified hardware diagnostics, and opcode catalog |
 | [`ROBOSEN_K1_DOCUMENTATION.md`](ROBOSEN_K1_DOCUMENTATION.md) | Official Robosen K1 reference manual, kinematics, voice commands, and safety guide |
+| [`docs/K1_HARDWARE_AUDIT_REPORT.md`](docs/K1_HARDWARE_AUDIT_REPORT.md) | Live physical robot hardware diagnostics, telemetry verification, and action catalog dump |
 
 ---
 

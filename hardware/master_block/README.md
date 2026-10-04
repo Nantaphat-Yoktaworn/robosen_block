@@ -40,6 +40,7 @@ hardware/master_block/
 ├── robosen_master.kicad_sym             # Native KiCad symbol library (11 custom symbols)
 ├── fp-lib-table                         # Project Footprint Library mapping table
 ├── build_schematic.py                   # Automated Python generator for schematic & symlib
+├── route_pcb.py                         # Automated Python router & DRC verification script
 ├── erc_report.txt                       # KiCad Electrical Rules Check report (0 violations)
 ├── TODO.md                              # Hardware & schematic design task checklist
 ├── README.md                            # Hardware documentation & pinout guide

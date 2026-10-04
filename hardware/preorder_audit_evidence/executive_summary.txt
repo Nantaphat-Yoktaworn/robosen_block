@@ -1,6 +1,0 @@
-FINAL PRE-ORDER AUDIT — NOT APPROVED FOR JOINT PRODUCTION RELEASE
-Action: 32 x 32 mm; centered pogo arrays and RGB pinout PASS. Zero unconnected items, zero copper errors; 39 silkscreen warnings. All seven power/ground pads connected. Bare-board fabrication passes with documented qualifications.
-Master: 115.5 x 62 mm; zero unconnected items; all power traces 0.80 mm; battery-ground isolation PASS. HOLD: 61 assembly/placement DRC errors and 58 warnings, including display/antenna overlap and malformed courtyard.
-Both Gerber ZIPs: 10/10 files, valid CRCs, match fresh exports except timestamps.
-Report: hardware/FINAL_PREORDER_AUDIT_ASTRA.md
-PCB and production ZIP hashes unchanged.

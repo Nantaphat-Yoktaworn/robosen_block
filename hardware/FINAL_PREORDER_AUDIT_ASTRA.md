@@ -6,7 +6,7 @@
 
 **Audit Production verdict:** Action Block passes the requested bare-board geometry, routing, copper-clearance and fabrication-package checks, with silkscreen/documentation qualifications below. Master Block has complete electrical routing and a current fabrication package, with double-sided carrier courtyard envelopes investigated.
 
-This is an audit of the actual files, not an endorsement of previous reports. No source PCB, schematic, project, footprint or production ZIP was modified. Evidence, independent scripts and fresh comparison exports are in [preorder_audit_evidence](preorder_audit_evidence/). The comparison exports are audit artifacts, not replacement release packages.
+This is an audit of the actual files, not an endorsement of previous reports. No source PCB, schematic, project, footprint or production ZIP was modified. Evidence, verification scripts and geometric measurement logs are recorded in [preorder_audit_evidence](preorder_audit_evidence/).
 
 | Result | Action Block | Master Block |
 |---|---|---|

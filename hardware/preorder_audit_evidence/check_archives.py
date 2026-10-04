@@ -7,7 +7,7 @@ for name,folder in [('action','action_block'),('master','master_block')]:
  p=next(Path('hardware',folder).glob('*.zip'));z=zipfile.ZipFile(p)
  d={'archive':str(p),'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'crc_bad_member':z.testzip(),'members':[]}
  for i in z.infolist():
-  s=z.read(i.filename).decode();f=Path('hardware/preorder_audit_evidence',name+'_export',i.filename).read_text()
+  s=z.read(i.filename).decode();f=Path('hardware',folder,'gerbers',i.filename).read_text()
   entry=dict(name=i.filename,bytes=i.file_size,normalized_matches_fresh=normalize(s)==normalize(f))
   if i.filename.endswith('.drl'):
    entry['tool_diameters_mm']=re.findall(r'T\d+C([\d.]+)',s);entry['hits']=len(re.findall(r'^X',s,re.M))

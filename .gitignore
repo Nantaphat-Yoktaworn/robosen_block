@@ -52,6 +52,15 @@ _autosave-*
 *.rpt
 drc_report.txt
 
+# Test packet dumps & diagnostic logs
+robot_dump_*.json
+k1_deep_filesystem_dump_*.json
+k1_full_audit_log_*.json
 
-
+# macOS
+.DS_Store
+**/.DS_Store
+.AppleDouble
+.LSOverride
+._*
 

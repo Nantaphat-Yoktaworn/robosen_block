@@ -15,6 +15,12 @@ robosen_block/
 │   └── RESEARCH_SUMMARY.md               # Presentation-ready markdown summary of AS01 research papers
 ├── bin/
 │   └── k1.js                             # Node.js CLI executable wrapper
+├── docs/
+│   ├── diagrams/                         # High-resolution architectural and protocol data-flow diagrams
+│   ├── reports/                          # Academic literature review reports & summaries
+│   ├── K1_HARDWARE_AUDIT_REPORT.md       # Complete live hardware verification & audit report
+│   ├── master_block_wiring.html          # Interactive Master Block BOM & color-coded wiring guide
+│   └── mounting_and_enclosure_spec.md    # Master Block mounting hole & 3D enclosure specification
 ├── firmware/
 │   ├── arduino_uno_ch32v003_programmer/
 │   │   ├── arduino_uno_ch32v003_programmer.ino # Arduino Uno R3 Ardulink SWIO flasher
@@ -53,6 +59,7 @@ robosen_block/
 │       ├── fp-lib-table & sym-lib-table  # Local footprint and symbol library registries
 │       └── action_block.pretty/          # Custom footprints (.kicad_mod)
 ├── recordings/
+│   ├── dumps/                            # Raw BLE packet captures & diagnostic logs
 │   └── K1/
 │       └── test.json                     # Recorded joint keyframe motion sequences
 ├── scripts/
@@ -100,7 +107,6 @@ robosen_block/
 ├── index.d.ts                            # Root TypeScript exports
 ├── index.js                              # Package entry point (exports K1 and Robot)
 ├── package.json                          # NPM dependencies and script definitions
-├── note.md                               # Quick project guidelines & architecture cheat sheet
 ├── README.md                             # Comprehensive project master README
 ├── PROJECT_SUMMARY.md                    # Executive project summary & scope
 ├── PHYSICAL_BLOCK_SYSTEM_SPEC.md         # Hardware & electrical spec for modular tangible coding blocks (v3.0)
