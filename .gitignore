@@ -42,6 +42,7 @@ plans/*.xlsx
 *-save.kicad_pcb
 _autosave-*
 *.bak
+*.lck
 
 
 
