@@ -17,7 +17,7 @@ Most modern coding curricula for children rely on tablets, smartphones, or compu
 - **Disconnected Output:** Controlling a virtual sprite on a screen does not provide the same visceral spatial awareness and excitement as watching a physical robot walk, punch, and balance in the real world.
 
 ### 1.2 The Project Solution: Tangible Modular Coding Blocks
-This project creates a **tangible, screenless, modular programming system**. Children configure solid coding blocks on the Master's **Config Dock**, then snap them together in a line at the **Run Port**. When they press the big **Green "Go" Button** on the Master Block, the sequence compiles instantly and commands the **Robosen K1 humanoid robot** via Bluetooth Low Energy (BLE).
+This project creates a **tangible, screenless, modular programming system**. Children configure solid coding blocks on the Master's **Config Dock**, then snap them together in a line at the **Run Port**. When they press the **Green "Go / Confirm" Button** on the Master Block, the sequence compiles instantly and commands the **Robosen K1 humanoid robot** via Bluetooth Low Energy (BLE). Pressing the **Red "Stop / Cancel" Button** halts execution immediately or cancels the current action.
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -27,7 +27,7 @@ This project creates a **tangible, screenless, modular programming system**. Chi
 │   (Brain, Battery,     (Param: 3 steps)   (Param: 90° Right) (Action: Left Hook) (Terminator)    │
 │    E-Ink Display,                                                                                │
 │    2 Config Knobs,                                                                               │
-│    Start Button)                                                                                 │
+│    Dual UI Buttons)                                                                              │
 │          │                                                                                       │
 │          ▼ (Bluetooth BLE 4.2 / 5.0 Stream)                                                      │
 │   [ ROBOSEN K1 HUMANOID ROBOT ] ─── Executes commands step-by-step with real-time feedback!      │
@@ -62,10 +62,10 @@ The system is composed of four primary hardware elements:
 │                                                                                                        │
 │  1. MASTER BLOCK (The Brain, Config Dock & BLE Gateway)                                                │
 │     • Microcontroller: ESP32-S3 with Native Bluetooth BLE 5.0, SPI for E-Ink, and Dual UARTs           │
-│     • Display: High-contrast 1.54"/2.13" E-Ink E-Paper screen showing action names, icons, & parameters│
-│     • Controls: Knob 1 (Action Selector), Knob 2 (Parameter Adjuster), Large tactile "Start / Go" btn │
+│     • Display: High-contrast 2.13" E-Ink E-Paper screen showing action names, icons, & parameters       │
+│     • Controls: Knob 1 (Action Selector), Knob 2 (Param Adjuster), Dual Buttons (Green Go & Red Stop)  │
 │     • Dual Interfaces: (1) Config Dock Port (to flash 1 block) + (2) Run Chain Port (execution track) │
-│     • Power Source: Rechargeable 3.7V LiPo battery with USB-C TP4056 BMS charging & 3.3V Buck-Boost    │
+│     • Power Source: Rechargeable 18650 Li-ion battery with USB-C TP4056 BMS, 3.3V Buck-Boost & ADC Sense│
 │     • Visual Feedback: Master RGB Status LED with expressive light choreography (No noisy buzzer!)    │
 │                                                                                                        │
 │  2. SOLID SMART ACTION BLOCKS (The Modular Code Blocks)                                                │

@@ -239,22 +239,33 @@ Complete hardware specifications are detailed in [`PHYSICAL_BLOCK_SYSTEM_SPEC.md
    • DT       ──► [ 🟤 BROWN ]  ──► ESP32 GPIO 12
    • SW       ──► [ 🔘 GRAY ]   ──► ESP32 GPIO 13
 
-  [ Tactile Start Button (4-Pin DIP) ]
+  [ Tactile Start / Confirm Button - Green (4-Pin DIP, SW3) ]
    • Top-Right Pin ──► [ 🟠 ORANGE ] ──► ESP32 GPIO 14 (Internal Pull-Up)
    • Bottom-Left   ──► [ ⚫ BLACK ]  ──► (-) Ground Rail (Diagonal GND Return)
+
+  [ Tactile Cancel / Stop Button - Red (4-Pin DIP, SW5) ]
+   • Top-Right Pin ──► [ 🔴 RED/ORANGE ] ──► ESP32 GPIO 2 (Internal Pull-Up)
+   • Bottom-Left   ──► [ ⚫ BLACK ]       ──► (-) Ground Rail (Diagonal GND Return)
+
+  [ Battery Voltage Monitoring Divider (ADC1_CH0) ]
+   • Divider Top   ──► VBAT_SW (Switched Battery Voltage Rail)
+   • Midpoint (Sense)──► ESP32 GPIO 1 (BATSENSE) with 100nF Ceramic Filter Cap to GND
+   • Divider Bottom──► (-) Ground Rail
 ```
 
 | Component / Function | ESP32-S3 GPIO | Wire Color | Role / Description | Status |
 | :--- | :---: | :---: | :--- | :---: |
 | **+3.3V Power Rail** | `3V3` | 🔴 **Red** | Unified 3.3V DC Power Bus | ✅ Verified |
 | **GND Common Rail** | `GND` | ⚫ **Black** | Common Ground Bus | ✅ Verified |
+| **Battery Sense (ADC)** | `GPIO 1` | — | ADC1_CH0 1:1 Divider (100k/100k + 100nF) | ✅ Hardware Implemented |
+| **Stop / Cancel Button**| `GPIO 2` | 🔴 **Red** | Red Tactile Button (`SW5`): Emergency Stop / Cancel / Back | ✅ Hardware Implemented |
+| **Start / Run Button** | `GPIO 14` | 🟢/🟠 **Green/Orange**| Green Tactile Button (`SW3`): Confirm / Start / Next | ✅ Verified |
 | **Knob 1 CLK** | `GPIO 8` | 🟡 **Yellow** | Action Selection Direction A | ✅ Verified |
 | **Knob 1 DT** | `GPIO 9` | 🟢 **Green** | Action Selection Direction B | ✅ Verified |
 | **Knob 1 SW** | `GPIO 10` | 🔵 **Blue** | Action Select Confirmation | ✅ Verified |
 | **Knob 2 CLK** | `GPIO 11` | ⚪ **White** | Parameter Adjust Clock (CW = +) | ✅ Verified |
 | **Knob 2 DT** | `GPIO 12` | 🟤 **Brown** | Parameter Adjust Data | ✅ Verified |
 | **Knob 2 SW** | `GPIO 13` | 🔘 **Gray** | Parameter Reset / BLE Save | ✅ Verified |
-| **Start / Run Button** | `GPIO 14` | 🟠 **Orange** | Tap: Run Stream \| 3s: BLE Scan | ✅ Verified |
 | **Onboard Status RGB** | `GPIO 48` | *Internal* | 🟢 Ready \| 🔵 Scan \| 🟡 TX | ✅ Verified |
 | **Config Dock UART** | `GPIO 17, 18` | 🔘 Gray / 🟣 Purple | Write Action (`0xCF`) & Read ACK | ✅ Verified |
 | **Run Chain Bus UART**| `GPIO 15, 16` | 🟢 Green / ⚪ White | Phase 1 Discovery (`0xAA`) & Run (`0xBB`)| ✅ Verified |
@@ -262,23 +273,23 @@ Complete hardware specifications are detailed in [`PHYSICAL_BLOCK_SYSTEM_SPEC.md
 
 ### 2. Block Hardware Specifications
 - **Master Block MCU:** ESP32-S3 (Dual-Core Xtensa LX7, Native Bluetooth BLE 5.0, SPI for E-Ink, and Dual UARTs for Config Dock & Run Chain).
-- **Master UI & Display:** 2.13" E-Ink E-Paper display (DEPG0213BN / SSD1680) + Dual Rotary Dials (Action & Parameter) + Tactile Start button.
+- **Master UI & Display:** 2.13" E-Ink E-Paper display (DEPG0213BN / SSD1680, $71 \times 30\text{ mm}$ outline) + Dual Rotary Dials (Action & Parameter) + Dual Tactile Buttons (Green Start/Confirm & Red Stop/Cancel) + Battery Sense Monitor.
 - **Visual Feedback (No Buzzer):** Master & Block WS2812B RGB LEDs with rich light choreography (emerald green flash ACK, data comet compilation wave, live step glowing green, rainbow victory sparkle).
 - **Solid Action Block MCUs:** Ultra-low-cost WCH CH32V003 (32-bit RISC-V, ~$0.15 in SOP-8 package) with internal non-volatile flash parameter storage. No potentiometers or buttons on individual blocks!
-- **Power & Charging:** Single 3.7V LiPo cell with onboard TP4056 USB-C charging and BMS protection.
+- **Power & Charging:** Single 18650 3.7V Li-ion cell with onboard TP4056 USB-C charging, BMS protection, and TPS63020 3.3V synchronous buck-boost regulator.
 - **Physical Connector:** Standardized 4-pin polarized magnetic pogo connector with reverse-polarity protection and RC debouncing filters.
 
 ### 3. Firmware Deliverables & Hardware Verification
 
 | Module | Hardware Target | Source Location | Description | Status |
 | :--- | :--- | :--- | :--- | :---: |
-| **Master Controller** | ESP32-S3 | [`firmware/esp32_master/esp32_master.ino`](firmware/esp32_master/esp32_master.ino) | BLE Central, NVS pairing, Dual-Knob UI, Run Chain Engine (`0xAA`/`0xBB`) | ✅ Verified |
+| **Master Controller** | ESP32-S3 | [`firmware/esp32_master/`](firmware/esp32_master/) | BLE Central, NVS pairing, Dual-Knob UI, Run Chain Engine (`0xAA`/`0xBB`) | ⚠️ **Update Pending** (Add Red Button `GPIO2` & Battery Sense `GPIO1`) |
 | **Standalone E-Ink Test** | ESP32-S3 | [`firmware/standalone_eink_test/`](firmware/standalone_eink_test/) | 2.13" E-Paper DEPG0213BN driver, zero-flicker boot, live partial benchmark (1.34 Hz) | ✅ Verified |
 | **Action Block Firmware** | WCH CH32V003 | [`firmware/ch32v003_action_block/`](firmware/ch32v003_action_block/) | Unified C RISC-V firmware (2-Phase Binary V2, Config Dock, WS2812B) | ✅ **Flashed on Silicon** |
 | **Smart End Block Firmware** | WCH CH32V003 | [`firmware/ch32v003_end_block/`](firmware/ch32v003_end_block/) | Active loopback line driver, CRC-8 validation, rainbow sparkle (`0xEE`) | ✅ **Flashed on Silicon** |
 | **ESP32 SWIO Programmer** | ESP32 / ESP32-S3 | [`firmware/esp32_ch32v003_programmer/`](firmware/esp32_ch32v003_programmer/) | High-speed 1-wire SWIO debugger & chunked Python flasher (`flash_tool.py`) | ✅ Verified |
 | **Arduino Uno Programmer** | Arduino Uno R3 | [`firmware/arduino_uno_ch32v003_programmer/`](firmware/arduino_uno_ch32v003_programmer/) | Ardulink 16MHz assembly bit-banging flasher for `minichlink` | ✅ Verified |
-| **Master Carrier PCB** | KiCad 10.0.6 | [`hardware/kicad/`](hardware/kicad/) | Custom motherboard PCB project & verified 10-footprint library (`robosen_master.pretty`) | ✅ Verified |
+| **Master Carrier PCB** | KiCad 10.0.6 | [`hardware/kicad/`](hardware/kicad/) | Custom carrier motherboard PCB project, 12 verified footprints (`robosen_master.pretty`), 0 ERC violations | ✅ Verified |
 
 ---
 

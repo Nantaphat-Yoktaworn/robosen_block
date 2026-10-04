@@ -32,11 +32,11 @@
   - [x] Position 1×08 $2.54\text{ mm}$ header centered on the left edge ($1.5\text{ mm}$ from left edge, $Y \in [-8.89, +8.89]$) with pin labels
   - [x] Add full courtyard boundary ($72.0\text{ mm} \times 31.0\text{ mm}$) on `F.CrtYd`
 
-- [ ] **4. KiCad Project & Repository Clean-Up**
-  - [ ] Organize generated footprint SVG files into a dedicated subdirectory (e.g., `hardware/kicad/footprint_svg/`) to keep `hardware/kicad/` clean
-  - [ ] Verify `.gitignore` rules for KiCad temporary files (`*.kicad_prl`, `*.lck`, `*.bak`, `*-save.kicad_*`, `_autosave-*`)
-  - [ ] Remove obsolete/legacy footprints or duplicate files no longer referenced by the project
-  - [ ] Audit repository root to ensure clean structure per project deliverables storage rules
+- [x] **4. KiCad Project & Repository Clean-Up**
+  - [x] Organize generated footprint SVG files into a dedicated subdirectory (`hardware/kicad/footprint_svg/`) to keep `hardware/kicad/` clean
+  - [x] Verify `.gitignore` rules for KiCad temporary files (`*.kicad_prl`, `*.lck`, `*.bak`, `*-save.kicad_*`, `_autosave-*`, `*.kicad_sch-bak`, `*.kicad_pcb-bak`, `*-backups/`, `~*.lck`)
+  - [x] Remove obsolete/legacy footprints or duplicate files no longer referenced by the project
+  - [x] Audit repository root to ensure clean structure per project deliverables storage rules
 
 - [x] **5. Add Second Push Button (Cancel / Stop / Back — Red Button) & Confirm Button (Green Button)**
   - [x] Add `SW5` (12×12 mm Push Button, `SW_PUSH_12x12mm`) to schematic `robosen_master_block.kicad_sch`

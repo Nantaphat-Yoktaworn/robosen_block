@@ -535,11 +535,11 @@
             </tr>
             <tr>
               <td><strong>05</strong></td>
-              <td><strong>Start / Run Button</strong></td>
-              <td><code>12x12x7.3mm Momentary Tactile Switch</code></td>
-              <td>1</td>
-              <td>Tap = Trigger Run Chain Bus; Hold 3s = Open BLE Pairing Scan menu</td>
-              <td><span class="tag tag-gpio">GPIO 14 (Active LOW)</span></td>
+              <td><strong>Dual Push Buttons (Green & Red)</strong></td>
+              <td><code>12x12x7.3mm Momentary Tactile Switches</code></td>
+              <td>2</td>
+              <td>SW3 (Green): Confirm / Start / Next (GPIO 14)<br>SW5 (Red): Cancel / Stop / Emergency Halt / Back (GPIO 2)</td>
+              <td><span class="tag tag-gpio">GPIO 14, GPIO 2 (Active LOW)</span></td>
             </tr>
             <tr>
               <td><strong>06</strong></td>
@@ -596,6 +596,14 @@
               <td>1</td>
               <td>Visual status: Green = Connected/Ready, Blue = Scanning, Yellow = Bus Active</td>
               <td><span class="tag tag-gpio">GPIO 48</span></td>
+            </tr>
+            <tr>
+              <td><strong>13</strong></td>
+              <td><strong>Battery Voltage Divider & Filter</strong></td>
+              <td><code>2x 100kΩ (1%) Resistors (R3, R4) + 1x 100nF Ceramic Cap (C1)</code></td>
+              <td>1 set</td>
+              <td>1:1 voltage divider connected to switched rail (VBAT_SW) into ADC1_CH0 with noise filter cap</td>
+              <td><span class="tag tag-gpio">GPIO 1 (ADC1_CH0)</span></td>
             </tr>
           </tbody>
         </table>
@@ -687,20 +695,44 @@
               <td>Click: Param reset / Confirm BLE pairing</td>
             </tr>
             <tr data-cat="knob">
-              <td><strong>Start Button</strong></td>
-              <td><code>PIN_START_BTN</code></td>
+              <td><strong>Start / Confirm Button</strong></td>
+              <td><code>PIN_START_BTN</code> (SW3)</td>
               <td><span class="pin-code">GPIO 14</span></td>
-              <td><span class="wire-badge badge-orange"><span class="dot dot-orange"></span>Orange</span></td>
-              <td>12mm Switch Top-Right Terminal</td>
-              <td>Active LOW (Internal pull-up enabled)</td>
+              <td><span class="wire-badge badge-green"><span class="dot dot-green"></span>Green/Orange</span></td>
+              <td>12mm Green Switch Top-Right Terminal</td>
+              <td>Active LOW (Confirm / Start Run / Next Step)</td>
             </tr>
             <tr data-cat="knob">
-              <td><strong>Start Button</strong></td>
+              <td><strong>Start Button GND</strong></td>
               <td><code>GND Return</code></td>
               <td><span class="pin-code">GND Rail</span></td>
               <td><span class="wire-badge badge-black"><span class="dot dot-black"></span>Black</span></td>
               <td>12mm Switch Bottom-Left Terminal</td>
               <td>Diagonal bridge to common GND rail</td>
+            </tr>
+            <tr data-cat="knob">
+              <td><strong>Stop / Cancel Button</strong></td>
+              <td><code>PIN_STOP_BTN</code> (SW5)</td>
+              <td><span class="pin-code">GPIO 2</span></td>
+              <td><span class="wire-badge badge-red"><span class="dot dot-red"></span>Red</span></td>
+              <td>12mm Red Switch Top-Right Terminal</td>
+              <td>Active LOW (Cancel / Emergency Stop / Back)</td>
+            </tr>
+            <tr data-cat="knob">
+              <td><strong>Stop Button GND</strong></td>
+              <td><code>GND Return</code></td>
+              <td><span class="pin-code">GND Rail</span></td>
+              <td><span class="wire-badge badge-black"><span class="dot dot-black"></span>Black</span></td>
+              <td>12mm Switch Bottom-Left Terminal</td>
+              <td>Diagonal bridge to common GND rail</td>
+            </tr>
+            <tr data-cat="power">
+              <td><strong>Battery Sense (ADC)</strong></td>
+              <td><code>PIN_BATSENSE</code></td>
+              <td><span class="pin-code">GPIO 1</span></td>
+              <td><span class="wire-badge badge-blue"><span class="dot dot-blue"></span>Blue/Trace</span></td>
+              <td>R3/R4 Midpoint + C1 Filter Cap</td>
+              <td>ADC1_CH0 1:1 Divider (0-4.2V mapped to 0-2.1V safe)</td>
             </tr>
 
             <!-- E-Ink Display -->
@@ -960,43 +992,44 @@
           <div><strong>Start Button Diagonal Wiring:</strong> Ensure the orange lead (GPIO 14) and black ground lead are placed diagonally across the 12&times;12mm switch terminals to avoid connecting two permanently bridged legs.</div>
         </li>
       </ul>
-    <!-- Section 5: Planned Upgrade / TODO -->
+    <!-- Section 5: Implemented Hardware / Firmware Backlog -->
     <div class="section-title">
-      <svg width="22" height="22" fill="none" stroke="#f59e0b" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-      5. Planned Upgrade (TODO): Master Block Battery Level Telemetry
+      <svg width="22" height="22" fill="none" stroke="#10b981" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      5. Master Block Battery Level Telemetry (Implemented in Hardware)
     </div>
 
-    <div class="card" style="padding: 1.5rem; border-color: rgba(245, 158, 11, 0.3);">
+    <div class="card" style="padding: 1.5rem; border-color: rgba(16, 185, 129, 0.3);">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-        <span class="tag" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); font-size: 0.8rem; padding: 0.3rem 0.6rem;">
-          ⏳ BACKLOG TODO &bull; PROCEED WITH CURRENT SETUP FOR NOW
+        <span class="tag" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); font-size: 0.8rem; padding: 0.3rem 0.6rem;">
+          &#10004; HARDWARE IMPLEMENTED (KiCad Carrier PCB) &bull; FIRMWARE UPDATE PENDING
         </span>
-        <span style="font-size: 0.8rem; color: #94a3b8;">Pending purchase of 2&times; 100 k&Omega; resistors</span>
+        <span style="font-size: 0.8rem; color: #94a3b8;">1:1 Divider (R3=100k, R4=100k) + 100nF Filter Cap (C1)</span>
       </div>
 
       <p style="font-size: 0.9rem; color: #cbd5e1; margin-bottom: 1rem;">
-        <strong>Current Operating State:</strong> The K1 Robot's battery percentage is actively read over BLE (Opcode <code>0x0F</code>) and rendered on the E-Paper screen. Internal monitoring of the Master Block's own 18650 cell is deferred until $100\text{ k}\Omega$ resistors are acquired.
+        <strong>Hardware Design:</strong> The carrier PCB routes switched battery power (<code>VBAT_SW</code>) through a precision 1:1 voltage divider (R3, R4) with a 100nF ceramic capacitor (C1) into <strong>GPIO 1 (ADC1_CH0)</strong>. Current draw drops to 0.00 &mu;A when the master power switch is off.
       </p>
 
-      <div class="schematic-box" style="margin-bottom: 1rem;">FUTURE UPGRADE CIRCUIT: 1:1 VOLTAGE DIVIDER INTO GPIO 1 (ADC1_CH0)
+      <div class="schematic-box" style="margin-bottom: 1rem;">IMPLEMENTED HARDWARE CIRCUIT: 1:1 VOLTAGE DIVIDER INTO GPIO 1 (ADC1_CH0)
 
-  [TPS63020 VIN (Switched 3.0V - 4.2V)]
+  [TPS63020 VIN / VBAT_SW (Switched 3.0V - 4.2V)]
                  │
                  ▼
-          [ R1: 100 kΩ ]  (1% metal film)
+          [ R3: 100 kΩ ]  (1% metal film)
                  │
                  ├──────────────────────► ESP32-S3 GPIO 1 (ADC1_CH0) [1.5V - 2.1V Safe]
                  │
-          [ R2: 100 kΩ ]  (1% metal film)
+          [ R4: 100 kΩ ]  (1% metal film)
                  │
                  ▼
         [ Common GND Rail ]</div>
 
       <div style="font-size: 0.85rem; color: #94a3b8;">
-        <strong>Quick Notes:</strong>
+        <strong>Firmware Integration Steps:</strong>
         <ul style="margin-left: 1.25rem; margin-top: 0.35rem; display: flex; flex-direction: column; gap: 0.3rem;">
-          <li>Wire <code>R1</code> directly after the power switch (on TPS63020 <code>VIN</code>) so current draw drops to 0 &mu;A when switched OFF.</li>
-          <li>ESP32-S3 ADC reads <code>analogReadMilliVolts(1) &times; 2</code> to map 3.30V (0%) &rarr; 4.20V (100%).</li>
+          <li>Configure ADC1_CH0 on GPIO 1 in <code>esp32_master.ino</code> using <code>analogReadMilliVolts(1)</code>.</li>
+          <li>Calculate $V_{BAT} = 2 \times V_{ADC}$ to map 3.20V - 4.20V into 0% - 100% battery gauge.</li>
+          <li>Render Master battery percentage and icon on the 2.13" E-Paper display header.</li>
         </ul>
       </div>
     </div>

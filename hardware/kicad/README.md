@@ -14,29 +14,45 @@
 hardware/kicad/
 ├── robosen_master_block.kicad_pro       # KiCad Master Project configuration
 ├── robosen_master_block.kicad_sch       # Complete pre-wired Starter Schematic (A3 format)
+├── robosen_master_block.kicad_pcb       # Carrier Board PCB Layout (17 components pre-placed)
 ├── robosen_master_block.kicad_prl       # KiCad Project local settings
 ├── robosen_master_block.net             # Exported netlist (kicadsexpr format)
 ├── robosen_master_block_schematic.pdf   # High-resolution vector PDF export of schematic
+├── footprint_svg/                       # Vector SVG renders of all 12 custom footprints
+│   ├── 18650_Battery_Holder_Single.svg
+│   ├── C_Disc_P2.54mm.svg
+│   ├── EPaper_2.13in_Header_1x08.svg
+│   ├── ESP32-S3-DevKitC-1-Socket.svg
+│   ├── KY-040_Rotary_Encoder_Module.svg
+│   ├── Pogo_4Pin_Dock_2.54mm.svg
+│   ├── R_Axial_P10.16mm.svg
+│   ├── SW_Power_2Wire_Pads.svg
+│   ├── SW_PUSH_12x12mm.svg
+│   ├── SW_Slide_SS12D00.svg
+│   ├── TP4056_Type-C_Module.svg
+│   └── TPS63020_BuckBoost_Module.svg
 ├── schematic_svg/
 │   └── robosen_master_block.svg         # Vector SVG render of schematic
 ├── sym-lib-table                        # Project Symbol Library mapping table
-├── robosen_master.kicad_sym             # Native KiCad symbol library (10 custom symbols)
+├── robosen_master.kicad_sym             # Native KiCad symbol library (11 custom symbols)
 ├── fp-lib-table                         # Project Footprint Library mapping table
 ├── build_schematic.py                   # Automated Python generator for schematic & symlib
 ├── erc_report.txt                       # KiCad Electrical Rules Check report (0 violations)
+├── TODO.md                              # Hardware & schematic design task checklist
 ├── README.md                            # Hardware documentation & pinout guide
-└── robosen_master.pretty/               # Custom Footprint Library (10 verified .kicad_mod)
-    ├── ESP32-S3-DevKitC-1-Socket.kicad_mod   # Dual 22-pin header socket (0.9" row span)
-    ├── TP4056_Type-C_Module.kicad_mod       # USB-C Lithium Charger + BMS Module
-    ├── TPS63020_BuckBoost_Module.kicad_mod  # 3.3V Synchronous Buck-Boost Regulator
+└── robosen_master.pretty/               # Custom Footprint Library (12 verified .kicad_mod)
     ├── 18650_Battery_Holder_Single.kicad_mod# Keystone 1042 / BK-18650-PC2 Single-Cell Holder
+    ├── C_Disc_P2.54mm.kicad_mod             # 100nF Ceramic Disc Capacitor for ADC filtering (2.54mm pitch)
+    ├── EPaper_2.13in_Header_1x08.kicad_mod  # 8-Pin SPI header & 71x30mm mechanical outline (4x M2 holes)
+    ├── ESP32-S3-DevKitC-1-Socket.kicad_mod   # Dual 22-pin header socket with 6x17.5mm antenna keepout
     ├── KY-040_Rotary_Encoder_Module.kicad_mod# 5-Pin Rotary Encoder Module breakout
-    ├── EPaper_2.13in_Header_1x08.kicad_mod  # 8-Pin SPI header for DEPG0213BN / SSD1680
     ├── Pogo_4Pin_Dock_2.54mm.kicad_mod      # Config Dock & Run Chain Bus Port
-    ├── SW_PUSH_12x12mm.kicad_mod            # 12x12mm Tactile Push Button (START_BUTTON)
+    ├── R_Axial_P10.16mm.kicad_mod           # 1/4W 10.16mm (0.4") Axial Resistors
     ├── SW_Power_2Wire_Pads.kicad_mod        # 2-Wire External Power Switch Solder Pads (1.2mm drill)
+    ├── SW_PUSH_12x12mm.kicad_mod            # 12x12mm Tactile Push Button (START & STOP buttons)
     ├── SW_Slide_SS12D00.kicad_mod           # SS12D00 1P2T SPST Power Switch
-    └── R_Axial_P10.16mm.kicad_mod           # 1/4W 10.16mm (0.4") Axial Resistors
+    ├── TP4056_Type-C_Module.kicad_mod       # USB-C Lithium Charger + BMS Module
+    └── TPS63020_BuckBoost_Module.kicad_mod  # 3.3V Synchronous Buck-Boost Regulator
 ```
 
 ---
@@ -52,9 +68,10 @@ The schematic is organized on an **A3 sheet** into 4 functional zones on a stric
 |  [ ZONE 1: USER INTERFACE ]               [ ZONE 2: CORE MCU ]                          |
 |  - Knob 1: KY-040 Action (SW1)            - ESP32-S3 DevKitC-1 (U1)                     |
 |  - Knob 2: KY-040 Param (SW2)               * SPI BUS -> EPD Display                    |
-|  - Start Button: 12mm Push (SW3)            * UART1   -> Config Dock (J1)               |
-|  - Display: 2.13" E-Paper Header (DISP1)    * UART2   -> Run Chain Bus (J2)             |
-|                                             * GPIO 8-14 -> Encoders & Button            |
+|  - Confirm / Start: 12mm Push [Green] (SW3) * UART1   -> Config Dock (J1)               |
+|  - Cancel / Stop: 12mm Push [Red] (SW5)     * UART2   -> Run Chain Bus (J2)             |
+|  - Display: 2.13" E-Paper Header (DISP1)    * GPIO 8-14, 2 -> Encoders & Dual Buttons   |
+|                                             * GPIO 1 (ADC1_CH0) -> Battery Sense Divider|
 |                                                                                         |
 |                                           [ ZONE 3: DOCKS & BUS PULL-UPS ]              |
 |                                           - Config Dock Port (J1)                       |
@@ -66,6 +83,7 @@ The schematic is organized on an **A3 sheet** into 4 functional zones on a stric
 |                                           - U2 (TP4056 USB-C Charger & Protection)      |
 |                                           - SW4 (SS12D00 SPST Power Switch)             |
 |                                           - U3 (TPS63020 3.3V Synchronous Buck-Boost)   |
+|                                           - R3/R4/C1 (100k Battery Sense Divider + ADC) |
 +-----------------------------------------------------------------------------------------+
 ```
 
@@ -81,7 +99,9 @@ The schematic is organized on an **A3 sheet** into 4 functional zones on a stric
 | **`K2_CLK`** | SW2 Pin 1 (`CLK`) | U1 Pin 17 (`GPIO11`) | Parameter Knob quadrature phase A |
 | **`K2_DT`** | SW2 Pin 2 (`DT`) | U1 Pin 18 (`GPIO12`) | Parameter Knob quadrature phase B |
 | **`K2_SW`** | SW2 Pin 3 (`SW`) | U1 Pin 19 (`GPIO13`) | Parameter Knob push button switch |
-| **`BTN_START`** | SW3 Pin 1 (`1`) | U1 Pin 20 (`GPIO14`) | 12mm tactile execute/start button |
+| **`BTN_START`**| SW3 Pin 1 (`1`) | U1 Pin 20 (`GPIO14`) | 12mm tactile Confirm / Start / Next button [Green] |
+| **`BTN_STOP`** | SW5 Pin 1 (`1`) | U1 Pin 27 (`GPIO2`) | 12mm tactile Cancel / Stop / Back button [Red] |
+| **`BATSENSE`** | R3:2, R4:1, C1:1 | U1 Pin 26 (`GPIO1`) | Battery voltage sense divider midpoint (1/2 Vbat) with 100nF filter |
 | **`EPD_BUSY`** | DISP1 Pin 1 (`BUSY`) | U1 Pin 4 (`GPIO4`) | E-Paper busy status output |
 | **`EPD_CS`** | DISP1 Pin 2 (`CS`) | U1 Pin 7 (`GPIO7`) | E-Paper SPI chip select |
 | **`EPD_DC`** | DISP1 Pin 3 (`DC`) | U1 Pin 6 (`GPIO6`) | E-Paper data/command select |
@@ -94,27 +114,31 @@ The schematic is organized on an **A3 sheet** into 4 functional zones on a stric
 | **`CHAIN_RX`** | U1 Pin 9 (`GPIO16`) | J2 Pin 4 (`PASS`), R2 Pin 2 | Status RX from last instruction block |
 | **`VBAT_RAW`** | BT1 Pin 1 (`+`) | U2 Pin 2 (`B+`) | Raw battery positive terminal |
 | **`VBAT_GND`** | BT1 Pin 2 (`-`) | U2 Pin 3 (`B-`) | Raw battery negative terminal |
-| **`VBAT_PROT`** | U2 Pin 1 (`OUT+`) | SW4 Pin 1 (`1`) | Protected battery voltage to switch |
-| **`VBAT_SW`** | SW4 Pin 2 (`2`) | U3 Pin 3, Pin 4 (`VIN`) | Switched battery power into regulator |
+| **`VBAT_PROT`**| U2 Pin 1 (`OUT+`) | SW4 Pin 1 (`1`) | Protected battery voltage to switch |
+| **`VBAT_SW`** | SW4 Pin 2 (`2`) | U3 Pin 3, Pin 4 (`VIN`), R3:1 | Switched battery power into regulator and sense divider |
 | **`+3V3`** | U3 Pin 7, Pin 8 (`OUT`) | U1:1, U1:2, SW1:4, SW2:4, DISP1:7, J1:1, J2:1, R1:1, R2:1 | Regulated system power rail |
-| **`GND`** | System Common Rail | U1:22,23,43,44, SW1:5, SW2:5, SW3:2, DISP1:8, J1:2, J2:2, U2:4, U3:1,2,5,6 | System ground rail |
+| **`GND`** | System Common Rail | U1:22,23,43,44, SW1:5, SW2:5, SW3:2, SW5:2, DISP1:8, J1:2, J2:2, U2:4, U3:1,2,5,6, R4:2, C1:2 | System ground rail |
 
 ---
 
 ## 4. Verified Custom Footprints & Physical Measurements
 
-All 10 custom footprints in `robosen_master.pretty/` have been created and verified against manufacturer mechanical drawings and physical caliper measurements:
+All 12 custom footprints in `robosen_master.pretty/` have been created and verified against manufacturer mechanical drawings and physical caliper measurements:
 
 ### 1. ESP32-S3-DevKitC-1-Socket (`U1`)
 - **Format:** Dual 22-pin female header sockets spaced **0.900" (22.86 mm)** row-to-row.
 - **Orientation:** Antenna at **TOP**, Dual USB-C ports at **BOTTOM**.
+- **Antenna Overhang & RF Keepout:** $17.5\text{ mm} \text{ wide} \times 6.0\text{ mm} \text{ stick-out}$ ($X \in [-8.75, +8.75]$, $Y \in [-35.0, -29.0]$) with a strict all-layer copper keepout zone (`keepout_copper`) under and around the RF antenna region.
 - **Pin Numbering:**
   - Left Row: Pads **1 to 22** (Pin 1 `3V3` at top, Pin 22 `GND` at bottom).
   - Right Row: Pads **23 to 44** (Pin 23 `GND` at top, Pin 44 `IO21` at bottom).
   - Strictly aligned with Espressif official DevKitC-1 pinout and physical board silkscreen.
 
-### 2. 2.13" E-Paper Header (`DISP1`)
-- **Format:** 1×08 2.54 mm vertical through-hole header for DEPG0213BN / SSD1680.
+### 2. 2.13" E-Paper Display Module (`DISP1`)
+- **Module Physical Boundary:** $71.0\text{ mm} \times 30.0\text{ mm}$ on `F.SilkS` and `F.Fab`.
+- **Active Display Area:** $48.55\text{ mm} \times 23.71\text{ mm}$ (2.13" diagonal, $250 \times 122$ pixels) and $59.2\text{ mm} \times 29.2\text{ mm}$ glass outline drawn on `F.Fab`.
+- **Mounting Holes:** 4× M2 NPTH holes (Ø $2.2\text{ mm}$) inset $2.5\text{ mm}$ from all four corners ($X = \pm 33.0\text{ mm}$, $Y = \pm 12.5\text{ mm}$).
+- **Pin Header:** 1×08 $2.54\text{ mm}$ pitch vertical through-hole header centered on the left edge ($1.5\text{ mm}$ from left edge, $X = -34.0\text{ mm}$, $Y \in [-8.89, +8.89]$).
 - **Pinout (Top to Bottom):** `1:BUSY`, `2:CS`, `3:DC`, `4:RES`, `5:SDA`, `6:SCL`, `7:VCC`, `8:GND`.
 
 ### 3. TPS63020 3.3V Synchronous Buck-Boost (`U3`)
@@ -153,7 +177,7 @@ All 10 custom footprints in `robosen_master.pretty/` have been created and verif
 - **Drill & Pad:** $1.2\text{ mm}$ drill with generous $2.4\text{ mm}$ annular ring (accommodates 20–26 AWG stranded hookup wire or standard headers).
 - **Pinout:**
   - Pad 1 (`IN`): Square pad at $(-2.54\text{ mm}, 0)$, connects to `VBAT_PROT` (protected battery positive from TP4056 `OUT+`).
-  - Pad 2 (`SW`): Round pad at $(+2.54\text{ mm}, 0)$, connects to `VBAT_SW` (switched power feeding TPS63020 `VIN`).
+  - Pad 2 (`SW`): Round pad at $(+2.54\text{ mm}, 0)$, connects to `VBAT_SW` (switched power feeding TPS63020 `VIN` and divider `R3`).
 
 ### 7. 18650 Single-Cell Battery Holder (`BT1`)
 - **Dimensions:** $77.5\text{ mm} \text{ Long} \times 20.5\text{ mm} \text{ Wide}$.
@@ -162,10 +186,12 @@ All 10 custom footprints in `robosen_master.pretty/` have been created and verif
   - Pad 1 (`+` / `BAT+`): Square pad at Left ($X = -41.5\text{ mm}, Y = 0$), $1.2\text{ mm}$ drill, connects to `VBAT_RAW` (feeds TP4056 `B+`).
   - Pad 2 (`-` / `BAT-`): Round pad at Right ($X = +41.5\text{ mm}, Y = 0$), $1.2\text{ mm}$ drill, connects to `VBAT_GND` (feeds TP4056 `B-`).
 
-### 8. 12×12mm Tactile Push Button (`SW3`)
+### 8. 12×12mm Tactile Push Buttons (`SW3`, `SW5`)
 - **Format:** Standard 4-pin DIP tactile momentary switch ($12.0\text{ mm} \times 12.0\text{ mm}$ body, $5.0\text{ mm}$ round actuator).
 - **Pin Spacing:** $12.5\text{ mm} \times 5.0\text{ mm}$ diagonal through-hole pins.
-- **Pinout:** Pin 1 connects to `BTN_START` (GPIO14), Pin 2 connects to `GND`.
+- **Roles:**
+  - `SW3`: Confirm / Next / Start button [Green cap] (`BTN_START`, `GPIO14`).
+  - `SW5`: Cancel / Stop / Back button [Red cap] (`BTN_STOP`, `GPIO2`).
 
 ### 9. Config Dock & Run Chain Bus Ports (`J1`, `J2`)
 - **Format:** 1×04 vertical through-hole header on standard $2.54\text{ mm}$ ($0.1''$) pitch.
@@ -176,9 +202,19 @@ All 10 custom footprints in `robosen_master.pretty/` have been created and verif
   - Pin 3: `DATA` (`CFG_RX` on J1, `CHAIN_TX` on J2)
   - Pin 4: `PASS` (`CFG_TX` on J1, `CHAIN_RX` on J2)
 
-### 10. Pull-up Resistors (`R1`, `R2`)
-- **Format:** Standard 1/4W axial through-hole resistor with $10.16\text{ mm}$ ($0.4''$) lead pitch.
-- **Value:** $10\text{ k}\Omega$ pull-up to `+3V3` for the open-drain bidirectional bus lines.
+### 10. Axial Resistors (`R1`, `R2`, `R3`, `R4`)
+- **Format:** Standard 1/4W axial through-hole resistor with $10.16\text{ mm}$ ($0.4''$) lead pitch (`R_Axial_P10.16mm`).
+- **Values & Usage:**
+  - `R1`, `R2`: $10\text{ k}\Omega$ pull-ups to `+3V3` for the open-drain bidirectional bus lines.
+  - `R3`, `R4`: $100\text{ k}\Omega$ (1% precision) voltage divider resistors for battery monitoring.
+
+### 11. Ceramic Disc Capacitor (`C1`)
+- **Format:** Standard radial ceramic disc capacitor with $2.54\text{ mm}$ ($0.1''$) lead pitch (`C_Disc_P2.54mm`).
+- **Value & Usage:** $100\text{ nF}$ (0.1 $\mu$F) noise filtering and ADC sample stabilization across `BATSENSE` to `GND`.
+
+### 12. SS12D00 Slide Switch (`SW4` Alternative)
+- **Format:** SS12D00 1P2T SPST slide switch footprint ($8.5\text{ mm} \times 4.3\text{ mm}$ body, $2.0\text{ mm}$ travel).
+- **Lead Pitch:** $3\times 1$ pins on $2.0\text{ mm}$ pitch.
 
 ---
 
@@ -192,6 +228,5 @@ All 10 custom footprints in `robosen_master.pretty/` have been created and verif
 3. Double-click **`robosen_master_block.kicad_sch`** to open the schematic.
 4. Run Electrical Rules Check (**Tools → Electrical Rules Check**):
    - Status: **0 errors, 0 warnings** (`Found 0 violations`).
-5. To update PCB from schematic:
-   - Click **Tools → Update PCB from Schematic** (`F8`).
-   - All 13 component footprints will appear ready for routing on your carrier PCB outline!
+5. Open PCB Editor (**`robosen_master_block.kicad_pcb`**):
+   - All 17 component footprints are pre-placed and fully connected via netlist ratsnest, ready for final trace routing on your carrier PCB outline!

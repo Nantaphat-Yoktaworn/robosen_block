@@ -723,7 +723,9 @@ The `assignments/` folder stores academic project coursework, literature reviews
  │   GPIO 12 (PIN_K2_DT)  ──► Knob 2 DT        ││
  │   GPIO 13 (PIN_K2_SW)  ──► Knob 2 Switch    ││
  │                                             ││
- │   GPIO 14 (PIN_START)  ──► Start Button (NO)││
+ │   GPIO 14 (PIN_START)  ──► Green Start Btn  ││
+ │   GPIO 2  (PIN_STOP)   ──► Red Stop/Cancel  ││
+ │   GPIO 1  (BATSENSE)   ──► Battery ADC Sense││
  │                                             ││
  │   GPIO 17 (CFG_TX) ────┐                    ││
  │   GPIO 18 (CFG_RX) ──┐ │                    ││
@@ -774,8 +776,9 @@ The `assignments/` folder stores academic project coursework, literature reviews
 | **Knob 2 (Param)** | `PIN_K2_CLK` | ESP32-S3 **GPIO 11** | ⚪ White |
 | | `PIN_K2_DT` | ESP32-S3 **GPIO 12** | 🟤 Brown |
 | | `PIN_K2_SW` | ESP32-S3 **GPIO 13** | 🔘 Gray |
-| **Start Button** | `PIN_START_BTN` | ESP32-S3 **GPIO 14** & `GND` | 🟠 Orange *(Active LOW)* |
-| **Config Dock** | `PIN_CFG_TX` | Dock Pin 4 (`CFG_TX`) | ESP32-S3 **GPIO 17** |
+| **Battery Sense** | `PIN_BATSENSE` | ESP32-S3 **GPIO 1** (ADC1_CH0) | $100\text{ k}\Omega : 100\text{ k}\Omega$ divider + $100\text{ nF}$ filter |
+| **Stop / Cancel Button** | `PIN_STOP_BTN` | ESP32-S3 **GPIO 2** & `GND` | 🔴 Red Button (`SW5`, Active LOW) |
+| **Start / Confirm Button** | `PIN_START_BTN` | ESP32-S3 **GPIO 14** & `GND` | 🟢/🟠 Green Button (`SW3`, Active LOW) |
 | | `PIN_CFG_RX` | Dock Pin 3 (`CFG_RX`) | ESP32-S3 **GPIO 18** |
 | | Power Rails | Dock Pin 1 (`V+`) & Pin 2 (`GND`) | Connected to 3.3V & GND |
 | **Run Port** | `PIN_CHAIN_TX` | Run Pin 3 (`DATA`) | ESP32-S3 **GPIO 15** |
@@ -844,30 +847,38 @@ The `assignments/` folder stores academic project coursework, literature reviews
 - **Project Location:** [`hardware/kicad/`](hardware/kicad/)
 - **Target CAD System:** KiCad 10.0.6 (Fully compatible with KiCad 8.x / 9.x / 10.x).
 - **Architecture Strategy:** **Modular Daughterboard Carrier PCB (Motherboard)**. The custom PCB houses sockets and headers for the ESP32-S3 DevKit, TP4056 USB-C BMS module, TPS63020 buck-boost module, 18650 holder, KY-040 rotary encoders, 12mm tactile button, power switch, and 2.13" E-Paper display, replacing all breadboards and loose jumper wires with reliable copper traces.
-- **Custom Footprint Library:** Registered locally in `hardware/kicad/fp-lib-table` pointing to `robosen_master.pretty/`.
+- **Custom Footprint Library:** Registered locally in `hardware/kicad/fp-lib-table` pointing to `robosen_master.pretty/` (12 verified `.kicad_mod` files) and vector SVGs in `hardware/kicad/footprint_svg/`.
 - **Verified Footprint Inventory (100% Validated via `kicad-cli 10.0.6`):**
-  1. `ESP32-S3-DevKitC-1-Socket.kicad_mod`: 2x22 pin dual row headers, 2.54mm pitch, 22.86mm (0.9") row span, with top USB-C orientation markers.
-  2. `TP4056_Type-C_Module.kicad_mod`: 28mm × 17.3mm outline, connector overhang, and 6 solder pads (`B+`, `B-`, `OUT+`, `OUT-`, `IN+`, `IN-`).
-  3. `TPS63020_BuckBoost_Module.kicad_mod`: 25mm × 15mm outline, 5-pin 2.54mm breakout header (`VOUT`, `GND`, `VIN`, `EN`, `PS`).
-  4. `18650_Battery_Holder_Single.kicad_mod`: Keystone 1042 / BK-18650-PC2 through-hole footprint (77mm × 21mm, 73mm pin span).
-  5. `Pogo_4Pin_Dock_2.54mm.kicad_mod`: Standard 4-pin 2.54mm polarized header socket for Config Dock & Run Chain Bus.
+  1. `ESP32-S3-DevKitC-1-Socket.kicad_mod`: Dual 22-pin header socket (0.9" row span) with 6.0mm x 17.5mm antenna overhang and RF all-layer copper keepout.
+  2. `EPaper_2.13in_Header_1x08.kicad_mod`: 8-pin 2.54mm SPI interface header with full 71.0mm x 30.0mm PCB outline, 4x M2 corner mounting holes, and 2.13" active display area.
+  3. `TP4056_Type-C_Module.kicad_mod`: 28mm × 17.3mm outline, connector overhang, and 6 solder pads (`B+`, `B-`, `OUT+`, `OUT-`, `IN+`, `IN-`).
+  4. `TPS63020_BuckBoost_Module.kicad_mod`: 25mm × 15mm outline, 5-pin 2.54mm breakout header (`VOUT`, `GND`, `VIN`, `EN`, `PS`).
+  5. `18650_Battery_Holder_Single.kicad_mod`: Keystone 1042 / BK-18650-PC2 through-hole footprint (77.5mm × 20.5mm, 55.5mm hole span).
   6. `KY-040_Rotary_Encoder_Module.kicad_mod`: 5-pin 2.54mm header with knob outline and rotation center.
-  7. `EPaper_2.13in_Header_1x08.kicad_mod`: 8-pin 2.54mm SPI interface header for DEPG0213BN / SSD1680 display.
-  8. `SW_PUSH_12x12mm.kicad_mod`: 12x12mm tactile button footprint with 12.5mm x 5.0mm pin spacing.
-  9. `SW_Slide_SS12D00.kicad_mod`: 1P2T SPST slide power switch footprint (2.54mm pin pitch).
-  10. `R_Axial_P10.16mm.kicad_mod`: Standard 0.25W axial resistor footprint (10.16mm / 0.4" pitch).
+  7. `SW_PUSH_12x12mm.kicad_mod`: 12x12mm tactile button footprint (used for both SW3 Green Confirm and SW5 Red Cancel buttons).
+  8. `Pogo_4Pin_Dock_2.54mm.kicad_mod`: Standard 4-pin 2.54mm polarized header socket for Config Dock & Run Chain Bus.
+  9. `R_Axial_P10.16mm.kicad_mod`: Standard 0.25W axial resistor footprint (10.16mm / 0.4" pitch) for bus pull-ups and battery sense divider.
+  10. `C_Disc_P2.54mm.kicad_mod`: 100nF ceramic disc capacitor (2.54mm pitch) for ADC battery sense noise filtering.
+  11. `SW_Power_2Wire_Pads.kicad_mod`: 2-wire solder pads with 1.2mm drill and 5.08mm gap for external power switch.
+  12. `SW_Slide_SS12D00.kicad_mod`: 1P2T SPST slide power switch footprint (2.54mm pin pitch).
 - **Custom Symbol Library & Project Mapping:**
   - `hardware/kicad/sym-lib-table`: Local symbol table mapping `robosen_master` to `${KIPRJMOD}/robosen_master.kicad_sym`.
-  - `hardware/kicad/robosen_master.kicad_sym`: Native KiCad symbol library bundling all 10 custom symbols.
+  - `hardware/kicad/robosen_master.kicad_sym`: Native KiCad symbol library bundling 11 custom symbols.
 - **Pre-Wired Starter Schematic (`robosen_master_block.kicad_sch`):**
-  - Standard A3 sheet organized into 4 functional zones on a strict 1.27mm (50 mil) grid.
-  - Pre-wired nets: `K1_CLK/DT/SW`, `K2_CLK/DT/SW`, `BTN_START`, `EPD_BUSY/RES/DC/CS/SCK/MOSI`, `CFG_TX/RX`, `CHAIN_TX/RX`, `VBAT_RAW/GND/PROT/SW`, `+3V3`, `GND`.
+  - Standard A3 sheet organized into 4 functional zones on a strict 1.27mm (50 mil) grid (17 total component instances).
+  - Pre-wired nets: `K1_CLK/DT/SW`, `K2_CLK/DT/SW`, `BTN_START` (GPIO14), `BTN_STOP` (GPIO2), `BATSENSE` (GPIO1), `EPD_BUSY/RES/DC/CS/SCK/MOSI`, `CFG_TX/RX`, `CHAIN_TX/RX`, `VBAT_RAW/GND/PROT/SW`, `+3V3`, `GND`.
   - Electrical Rules Check (ERC): **0 violations** (`erc_report.txt`).
   - Production Deliverables:
     - Netlist: `hardware/kicad/robosen_master_block.net`
     - Vector PDF: `hardware/kicad/robosen_master_block_schematic.pdf`
     - Vector SVG: `hardware/kicad/schematic_svg/robosen_master_block.svg`
     - Automated Generator: `hardware/kicad/build_schematic.py`
+    - Pre-routed PCB Layout: `hardware/kicad/robosen_master_block.kicad_pcb`
+- **Firmware Update Backlog (Hardware Revision Notice):**
+  - Master Block firmware ([`firmware/esp32_master/esp32_master.ino`](file:///C:/Users/nnnn/Projects/robosen_block/firmware/esp32_master/esp32_master.ino)) requires:
+    1. Red Button (`SW5`, `GPIO 2`, `BTN_STOP`) integration for Emergency Halt, Cancel, and Back navigation.
+    2. Battery Sense (`GPIO 1`, ADC1_CH0) reading with 1:1 divider math ($V_{BAT} = 2 \times V_{ADC}$) and battery percentage display on E-Paper.
+    3. Documentation provided in [`firmware/esp32_master/README.md`](file:///C:/Users/nnnn/Projects/robosen_block/firmware/esp32_master/README.md).
 - **Manufacturing Checklist for JLCPCB:**
   - Bare PCB fabrication requires only **Gerber files (`.gbr`)** and **Excellon Drill files (`.drl`)** packaged in a `.zip` file.
   - 3D models (`.step`/`.wrl`) are **NOT required** by JLCPCB for PCB fabrication, but supported for enclosure design.

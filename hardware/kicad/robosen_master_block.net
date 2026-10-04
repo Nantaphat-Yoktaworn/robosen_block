@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "C:\\Users\\nnnn\\Projects\\robosen_block\\hardware\\kicad\\robosen_master_block.kicad_sch")
-		(date "2026-10-04T16:20:29")
+		(date "2026-10-04T19:01:43")
 		(tool "Eeschema 10.0.6")
 		(sheet
 			(number "1")
@@ -85,7 +85,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "96518bfa-31f7-49e2-b7f9-90ebde307a4a")
+			(tstamps "fad659b7-1342-4370-a4a1-001bcca1f631")
 			(units
 				(unit
 					(name "A")
@@ -95,6 +95,52 @@
 						)
 						(pin
 							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C1")
+			(value "100nF (ADC Filter)")
+			(footprint "robosen_master:C_Disc_P2.54mm")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:C_Disc_P2.54mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "C")
+				(description "Unpolarized Ceramic Capacitor 2.54mm pitch")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "33f82832-e283-4d7e-b21c-97ed1df14bc6")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
 						)
 					)
 				)
@@ -131,7 +177,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "5bb6be9f-9e7d-4d87-b998-4f0b751200ea")
+			(tstamps "51f3cc39-516d-48aa-b202-0b8b979408d8")
 			(units
 				(unit
 					(name "A")
@@ -195,7 +241,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "44538fa3-0ad5-489a-9d84-cb44d6ccd104")
+			(tstamps "2418eb42-72b7-4f6e-a3ca-4670fc12ec22")
 			(units
 				(unit
 					(name "A")
@@ -247,7 +293,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a34ae3de-65b9-4fc2-908f-7b83290adbde")
+			(tstamps "b9ab1799-bc41-4e39-9b0a-d6bc25eb144d")
 			(units
 				(unit
 					(name "A")
@@ -299,7 +345,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1563236b-c8fe-4657-9599-6ed4772d2ee6")
+			(tstamps "d641538a-ac34-4b69-b215-6f645c3b03f6")
 			(units
 				(unit
 					(name "A")
@@ -345,7 +391,99 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "b3b90351-f4b1-4cf2-a4db-b78d976d3a0c")
+			(tstamps "c6319524-7da0-4464-91a0-033d563c4f19")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R3")
+			(value "100k (1% Batt Div)")
+			(footprint "robosen_master:R_Axial_P10.16mm")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:R_Axial_P10.16mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "R")
+				(description "Resistor 0.25W Axial Through-Hole")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1ae131c1-c210-4b25-80ff-8d64fed5add5")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R4")
+			(value "100k (1% Batt Div)")
+			(footprint "robosen_master:R_Axial_P10.16mm")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:R_Axial_P10.16mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "R")
+				(description "Resistor 0.25W Axial Through-Hole")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "9f0424d8-509e-4b50-84af-5faf0f54e723")
 			(units
 				(unit
 					(name "A")
@@ -391,7 +529,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "25fce269-e7f0-4310-b03e-71b0e60719c9")
+			(tstamps "35094beb-de0a-4b6e-988f-aaf77343a3bb")
 			(units
 				(unit
 					(name "A")
@@ -446,7 +584,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e73cad4b-9204-4ba6-894d-6b69096d7dfb")
+			(tstamps "e4e03502-b21d-4264-85cf-d3a41a493b55")
 			(units
 				(unit
 					(name "A")
@@ -472,7 +610,7 @@
 		)
 		(comp
 			(ref "SW3")
-			(value "START_BUTTON")
+			(value "CONFIRM_START (Green)")
 			(footprint "robosen_master:SW_PUSH_12x12mm")
 			(fields
 				(field
@@ -501,7 +639,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d91c5211-e4e4-478c-91c6-ba535a1c03b5")
+			(tstamps "4e8d8837-6ce5-4f52-8801-bfc18c53c50d")
 			(units
 				(unit
 					(name "A")
@@ -547,7 +685,53 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "32979798-17b6-4942-baf6-3ed7883650ff")
+			(tstamps "2bd867f7-8592-4955-b0f3-a9acdf324f7e")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "SW5")
+			(value "CANCEL_STOP (Red)")
+			(footprint "robosen_master:SW_PUSH_12x12mm")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:SW_PUSH_12x12mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "SW_Push")
+				(description "12x12mm Push Button Switch Tactile Momentary")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "754da7fc-cc9e-4e45-aebf-64a7812100f7")
 			(units
 				(unit
 					(name "A")
@@ -593,7 +777,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "5f65194f-cf0c-4385-a2c2-97b7b16680e9")
+			(tstamps "23972106-ba41-4092-a068-5d0cecfe5893")
 			(units
 				(unit
 					(name "A")
@@ -765,7 +949,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "7761377f-284f-437c-87de-1d7642ffd7a7")
+			(tstamps "a4b3919c-53f5-47d5-a918-1d6a1ee88045")
 			(units
 				(unit
 					(name "A")
@@ -823,7 +1007,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "08146e2a-0fa0-4bdc-858c-2c94ac8bfeab")
+			(tstamps "d4cad509-9588-4556-8334-3304d8ded373")
 			(units
 				(unit
 					(name "A")
@@ -886,6 +1070,36 @@
 				(pin
 					(num "2")
 					(name "-")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "robosen_master")
+			(part "C")
+			(description "Unpolarized Ceramic Capacitor 2.54mm pitch")
+			(fields
+				(field
+					(name "Reference") "C")
+				(field
+					(name "Value") "C")
+				(field
+					(name "Footprint") "robosen_master:C_Disc_P2.54mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized Ceramic Capacitor 2.54mm pitch")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "2")
 					(type "passive")
 				)
 			)
@@ -1556,6 +1770,35 @@
 		)
 		(net
 			(code "2")
+			(name "/BATSENSE")
+			(class "Default")
+			(node
+				(ref "C1")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R3")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R4")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "26")
+				(pinfunction "GPIO1_26")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "3")
 			(name "/BTN_START")
 			(class "Default")
 			(node
@@ -1572,7 +1815,24 @@
 			)
 		)
 		(net
-			(code "3")
+			(code "4")
+			(name "/BTN_STOP")
+			(class "Default")
+			(node
+				(ref "SW5")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "27")
+				(pinfunction "GPIO2_27")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "5")
 			(name "/CFG_RX")
 			(class "Default")
 			(node
@@ -1589,7 +1849,7 @@
 			)
 		)
 		(net
-			(code "4")
+			(code "6")
 			(name "/CFG_TX")
 			(class "Default")
 			(node
@@ -1606,7 +1866,7 @@
 			)
 		)
 		(net
-			(code "5")
+			(code "7")
 			(name "/CHAIN_RX")
 			(class "Default")
 			(node
@@ -1629,7 +1889,7 @@
 			)
 		)
 		(net
-			(code "6")
+			(code "8")
 			(name "/CHAIN_TX")
 			(class "Default")
 			(node
@@ -1652,7 +1912,7 @@
 			)
 		)
 		(net
-			(code "7")
+			(code "9")
 			(name "/EPD_BUSY")
 			(class "Default")
 			(node
@@ -1669,7 +1929,7 @@
 			)
 		)
 		(net
-			(code "8")
+			(code "10")
 			(name "/EPD_CS")
 			(class "Default")
 			(node
@@ -1686,7 +1946,7 @@
 			)
 		)
 		(net
-			(code "9")
+			(code "11")
 			(name "/EPD_DC")
 			(class "Default")
 			(node
@@ -1703,7 +1963,7 @@
 			)
 		)
 		(net
-			(code "10")
+			(code "12")
 			(name "/EPD_MOSI")
 			(class "Default")
 			(node
@@ -1720,7 +1980,7 @@
 			)
 		)
 		(net
-			(code "11")
+			(code "13")
 			(name "/EPD_RES")
 			(class "Default")
 			(node
@@ -1737,7 +1997,7 @@
 			)
 		)
 		(net
-			(code "12")
+			(code "14")
 			(name "/EPD_SCK")
 			(class "Default")
 			(node
@@ -1754,7 +2014,7 @@
 			)
 		)
 		(net
-			(code "13")
+			(code "15")
 			(name "/K1_CLK")
 			(class "Default")
 			(node
@@ -1771,7 +2031,7 @@
 			)
 		)
 		(net
-			(code "14")
+			(code "16")
 			(name "/K1_DT")
 			(class "Default")
 			(node
@@ -1788,7 +2048,7 @@
 			)
 		)
 		(net
-			(code "15")
+			(code "17")
 			(name "/K1_SW")
 			(class "Default")
 			(node
@@ -1805,7 +2065,7 @@
 			)
 		)
 		(net
-			(code "16")
+			(code "18")
 			(name "/K2_CLK")
 			(class "Default")
 			(node
@@ -1822,7 +2082,7 @@
 			)
 		)
 		(net
-			(code "17")
+			(code "19")
 			(name "/K2_DT")
 			(class "Default")
 			(node
@@ -1839,7 +2099,7 @@
 			)
 		)
 		(net
-			(code "18")
+			(code "20")
 			(name "/K2_SW")
 			(class "Default")
 			(node
@@ -1856,7 +2116,7 @@
 			)
 		)
 		(net
-			(code "19")
+			(code "21")
 			(name "/VBAT_GND")
 			(class "Default")
 			(node
@@ -1873,7 +2133,7 @@
 			)
 		)
 		(net
-			(code "20")
+			(code "22")
 			(name "/VBAT_PROT")
 			(class "Default")
 			(node
@@ -1890,7 +2150,7 @@
 			)
 		)
 		(net
-			(code "21")
+			(code "23")
 			(name "/VBAT_RAW")
 			(class "Default")
 			(node
@@ -1907,9 +2167,15 @@
 			)
 		)
 		(net
-			(code "22")
+			(code "24")
 			(name "/VBAT_SW")
 			(class "Default")
+			(node
+				(ref "R3")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
 			(node
 				(ref "SW4")
 				(pin "2")
@@ -1930,9 +2196,15 @@
 			)
 		)
 		(net
-			(code "23")
+			(code "25")
 			(name "GND")
 			(class "Default")
+			(node
+				(ref "C1")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
 			(node
 				(ref "DISP1")
 				(pin "8")
@@ -1952,6 +2224,12 @@
 				(pintype "passive")
 			)
 			(node
+				(ref "R4")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
 				(ref "SW1")
 				(pin "5")
 				(pinfunction "GND_5")
@@ -1965,6 +2243,12 @@
 			)
 			(node
 				(ref "SW3")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "SW5")
 				(pin "2")
 				(pinfunction "2_2")
 				(pintype "passive")
@@ -2025,7 +2309,7 @@
 			)
 		)
 		(net
-			(code "24")
+			(code "26")
 			(name "unconnected-(U1-5V-Pad21)")
 			(class "Default")
 			(node
@@ -2036,7 +2320,7 @@
 			)
 		)
 		(net
-			(code "25")
+			(code "27")
 			(name "unconnected-(U1-EN{slash}RST-Pad3)")
 			(class "Default")
 			(node
@@ -2047,35 +2331,13 @@
 			)
 		)
 		(net
-			(code "26")
+			(code "28")
 			(name "unconnected-(U1-GPIO0-Pad36)")
 			(class "Default")
 			(node
 				(ref "U1")
 				(pin "36")
 				(pinfunction "GPIO0_36")
-				(pintype "bidirectional+no_connect")
-			)
-		)
-		(net
-			(code "27")
-			(name "unconnected-(U1-GPIO1-Pad26)")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "26")
-				(pinfunction "GPIO1_26")
-				(pintype "bidirectional+no_connect")
-			)
-		)
-		(net
-			(code "28")
-			(name "unconnected-(U1-GPIO2-Pad27)")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "27")
-				(pinfunction "GPIO2_27")
 				(pintype "bidirectional+no_connect")
 			)
 		)

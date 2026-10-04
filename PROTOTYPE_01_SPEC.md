@@ -103,7 +103,9 @@ Every active component in Prototype #01 runs natively on **+3.3V logic and power
 | | `SW (Push Switch)` | **GPIO 13** | 🔘 **Gray** | Built-in shaft push-switch (Param reset / BLE save) |
 | | `VCC / +` | **3V3 Rail** | 🔴 **Red** | Encoder module power rail |
 | | `GND` | **GND Rail** | ⚫ **Black** | Encoder ground rail |
-| **Start / Run Button** | `TRIG_BTN` | **GPIO 14** | 🟠 **Orange** | Top-Right switch pin (Tap = Run, 3s Hold = BLE Scan) |
+| **Power Sense (ADC)** | `BATSENSE` | **GPIO 1** | — | ADC1_CH0 1:1 Divider (100k/100k + 100nF) for battery voltage monitoring |
+| **Stop / Cancel Button** | `BTN_STOP` | **GPIO 2** | 🔴 **Red** | Red Tactile Button (`SW5`): Emergency Stop / Cancel / Back (Active LOW) |
+| **Start / Confirm Button** | `BTN_START` | **GPIO 14** | 🟢 **Green** | Green Tactile Button (`SW3`): Confirm / Start Run / Next (Active LOW) |
 | | `GND Return` | **GND Rail** | ⚫ **Black** | Bottom-Left switch pin (Diagonal GND return bridge) |
 | **Status RGB LED (Onboard)**| `RGB_BUILTIN` | **GPIO 48** | *Internal* | WS2812 NeoPixel (🟢 Green = Ready, 🔵 Blue = Scan, 🟡 Yellow = TX) |
 | **Status RGB LED (Master)** | `WS2812_DATA` | **GPIO 48** | *Internal* | Onboard WS2812 status LED (🟢 Ready, 🔵 Scan, 🟡 TX) |
@@ -405,8 +407,10 @@ STEP 1: MASTER BREADBOARD WIRING
      BUSY -> GPIO 4, RST -> GPIO 5, DC -> GPIO 6, CS -> GPIO 7, SCL (SCK) -> GPIO 21, SDA (DIN) -> GPIO 38.
   4. Wire Knob 1 (KY-040): CLK -> GPIO 8, DT -> GPIO 9, SW -> GPIO 10, VCC -> 3.3V, GND -> GND.
   5. Wire Knob 2 (KY-040): CLK -> GPIO 11, DT -> GPIO 12, SW -> GPIO 13, VCC -> 3.3V, GND -> GND.
-  6. Wire Start Button: Pin 1 -> GPIO 14, Pin 2 -> GND.
-  7. Master Status RGB LED: Uses onboard WS2812 NeoPixel on GPIO 48.
+  6. Wire Start / Confirm Button (SW3 - Green): Pin 1 -> GPIO 14, Pin 2 -> GND.
+  7. Wire Stop / Cancel Button (SW5 - Red): Pin 1 -> GPIO 2, Pin 2 -> GND.
+  8. Wire Battery Voltage Divider: R3 (100k) from VBAT_SW to GPIO 1, R4 (100k) from GPIO 1 to GND, C1 (100nF ceramic cap) across GPIO 1 and GND.
+  9. Master Status RGB LED: Uses onboard WS2812 NeoPixel on GPIO 48.
 
 STEP 2: ACTION & END BLOCK WIRING
   1. Place 1x TENSTAR CH32V003 board on each of Breadboards #2, #3, #4, #5.
@@ -453,9 +457,12 @@ The complete dual-knob tactile interface and wireless gateway stage of the Maste
 * **Tactile User Interface (Dual-Knob Master Interface):**
   * **Knob 1 (Action Selector):** `KY-040` on `GPIO 8 (CLK)` (🟡 Yellow) & `GPIO 9 (DT)` (🟢 Green) with `GPIO 10 (SW)` (🔵 Blue) click confirmation.
   * **Knob 2 (Parameter Adjuster):** `KY-040` on `GPIO 11 (CLK)` (⚪ White) & `GPIO 12 (DT)` (🟤 Brown) with `GPIO 13 (SW)` (🔘 Gray) parameter reset.
-  * **Master Start / Run Button:** Tactile button on `GPIO 14` (🟠 Orange) wired diagonally to GND (⚫ Black).
+  * **Dual Tactile User Interface Buttons:**
+    * **Start / Confirm Button (SW3 - Green):** Tactile button on `GPIO 14` (🟠 Orange / 🟢 Green) wired diagonally to GND (⚫ Black).
+    * **Stop / Cancel Button (SW5 - Red):** Tactile button on `GPIO 2` (🔴 Red) wired diagonally to GND (⚫ Black).
+  * **Battery Sense Divider:** $100\text{ k}\Omega : 100\text{ k}\Omega$ divider from `VBAT_SW` to GND with $100\text{ nF}$ filter cap into `GPIO 1` (ADC1_CH0).
   * **Status LED:** Onboard WS2812 NeoPixel on `GPIO 48` driven via `rgbLedWrite()`.
-* **Firmware Location:** [`firmware/esp32_master/esp32_master.ino`](file:///C:/Users/poomz/nnnn/robosen_block/firmware/esp32_master/esp32_master.ino).
+* **Firmware Location:** [`firmware/esp32_master/esp32_master.ino`](file:///C:/Users/nnnn/Projects/robosen_block/firmware/esp32_master/esp32_master.ino).
 
 ### 13.2 Color-Coded Breadboard Wiring Reference
 ```text
@@ -476,8 +483,12 @@ The complete dual-knob tactile interface and wireless gateway stage of the Maste
    • DT       ──► [ 🟤 BROWN ]  ──► ESP32 GPIO 12
    • SW       ──► [ 🔘 GRAY ]   ──► ESP32 GPIO 13
 
-  [ Tactile Start Button (4-Pin DIP) ]
+  [ Tactile Start / Confirm Button - Green (4-Pin DIP, SW3) ]
    • Top-Right Pin ──► [ 🟠 ORANGE ] ──► ESP32 GPIO 14 (Internal Pull-Up)
+   • Bottom-Left   ──► [ ⚫ BLACK ]  ──► (-) Ground Rail (Diagonal Return)
+
+  [ Tactile Stop / Cancel Button - Red (4-Pin DIP, SW5) ]
+   • Top-Right Pin ──► [ 🔴 RED ]    ──► ESP32 GPIO 2 (Internal Pull-Up)
    • Bottom-Left   ──► [ ⚫ BLACK ]  ──► (-) Ground Rail (Diagonal Return)
 ```
 
