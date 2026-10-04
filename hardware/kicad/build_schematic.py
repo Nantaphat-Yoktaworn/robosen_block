@@ -593,19 +593,17 @@ def generate():
         '\t\t(pin_names (offset 0) (hide yes)) (in_bom yes) (on_board yes)',
         '\t\t(property "Reference" "SW" (at 0 -6.35 0) (effects (font (size 1.27 1.27))))',
         '\t\t(property "Value" "SW_SPST" (at 0 6.35 0) (effects (font (size 1.27 1.27))))',
-        '\t\t(property "Footprint" "robosen_master:SW_Slide_SS12D00" (at 0 8.89 0) (effects (font (size 1.27 1.27)) (hide yes)))',
+        '\t\t(property "Footprint" "robosen_master:SW_Power_2Wire_Pads" (at 0 8.89 0) (effects (font (size 1.27 1.27)) (hide yes)))',
         '\t\t(property "Datasheet" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))',
-        '\t\t(property "Description" "Single-Pole Single-Throw Slide Power Switch SS12D00" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))',
+        '\t\t(property "Description" "Single-Pole Single-Throw 2-Wire Power Switch" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))',
         '\t\t(symbol "SW_SPST_0_1"',
         '\t\t\t(circle (center -2.54 0) (radius 0.508) (stroke (width 0.254) (type solid)) (fill (type none)))',
         '\t\t\t(circle (center 2.54 0) (radius 0.508) (stroke (width 0.254) (type solid)) (fill (type none)))',
-        '\t\t\t(circle (center 2.54 -2.54) (radius 0.508) (stroke (width 0.254) (type solid)) (fill (type none)))',
         '\t\t\t(polyline (pts (xy -2.0 0.5) (xy 2.0 2.0)) (stroke (width 0.254) (type solid)))',
         '\t\t)',
         '\t\t(symbol "SW_SPST_1_1"',
         '\t\t\t(pin passive line (at -5.08 0 0) (length 2.54) (name "1" (effects (font (size 1.0 1.0)))) (number "1" (effects (font (size 0.8 0.8)))))',
         '\t\t\t(pin passive line (at 5.08 0 180) (length 2.54) (name "2" (effects (font (size 1.0 1.0)))) (number "2" (effects (font (size 0.8 0.8)))))',
-        '\t\t\t(pin passive line (at 5.08 -2.54 180) (length 2.54) (name "3" (effects (font (size 1.0 1.0)))) (number "3" (effects (font (size 0.8 0.8)))))',
         '\t\t)'
     ]
     symbols_def["SW_SPST"] = spst_lines
@@ -763,7 +761,7 @@ def generate():
     # Power Zone
     sch.append(place_sym("robosen_master:18650_Cell", "BT1", "18650 3.7V 3500mAh", "robosen_master:18650_Battery_Holder_Single", 254.00, 215.90, 2))
     sch.append(place_sym("robosen_master:TP4056_Module", "U2", "TP4056_USB-C_BMS", "robosen_master:TP4056_Type-C_Module", 304.80, 215.90, 6))
-    sch.append(place_sym("robosen_master:SW_SPST", "SW4", "POWER_SWITCH", "robosen_master:SW_Slide_SS12D00", 342.90, 213.36, 3))
+    sch.append(place_sym("robosen_master:SW_SPST", "SW4", "POWER_SWITCH", "robosen_master:SW_Power_2Wire_Pads", 342.90, 213.36, 2))
     sch.append(place_sym("robosen_master:TPS63020_Module", "U3", "TPS63020_3.3V_BuckBoost", "robosen_master:TPS63020_BuckBoost_Module", 355.60, 254.00, 8))
 
     # =========================================================================
@@ -1034,9 +1032,6 @@ def generate():
     sch.append(wire(347.98, 213.36, 355.60, 213.36))
     sch.append(label("VBAT_SW", 355.60, 213.36, 0))
     sch.append(place_pwr("PWR_FLAG", "#FLG02", 355.60, 213.36, 90))
-
-    # SW4 Pin 3 (Unconnected throw in SPDT) -> No Connect
-    sch.append(no_conn(347.98, 215.90))
 
     # U3 (TPS63020 Buck-Boost, X = 355.60, Y = 254.00)
     # Left Pins (IN side, X = 335.28):

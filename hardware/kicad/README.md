@@ -34,6 +34,7 @@ hardware/kicad/
     ├── EPaper_2.13in_Header_1x08.kicad_mod  # 8-Pin SPI header for DEPG0213BN / SSD1680
     ├── Pogo_4Pin_Dock_2.54mm.kicad_mod      # Config Dock & Run Chain Bus Port
     ├── SW_PUSH_12x12mm.kicad_mod            # 12x12mm Tactile Push Button (START_BUTTON)
+    ├── SW_Power_2Wire_Pads.kicad_mod        # 2-Wire External Power Switch Solder Pads (1.2mm drill)
     ├── SW_Slide_SS12D00.kicad_mod           # SS12D00 1P2T SPST Power Switch
     └── R_Axial_P10.16mm.kicad_mod           # 1/4W 10.16mm (0.4") Axial Resistors
 ```
@@ -134,6 +135,50 @@ All 10 custom footprints in `robosen_master.pretty/` have been created and verif
   - Pad 3: `B-` (7.40 mm below Pad 2)
   - Pad 4: `OUT-` (3.20 mm below Pad 3)
 - **Left Column:** Pad 6 = `IN+` (top-left), Pad 5 = `IN-` (bottom-left).
+
+### 5. KY-040 Rotary Encoder Breakout Module (`SW1`, `SW2`)
+- **Dimensions:** $25.0\text{ mm} \text{ Wide} \times 18.0\text{ mm} \text{ High}$.
+- **Mounting Holes:** Dual $3.2\text{ mm}$ NPTH holes spaced $16.0\text{ mm}$ center-to-center ($4.5\text{ mm}$ from left/right edges, $2.5\text{ mm}$ from bottom edge).
+- **Pin Header:** 1×05 straight vertical pins on standard $2.54\text{ mm}$ ($0.1''$) breadboard pitch ($2.5\text{ mm}$ from right edge).
+- **Pinout (Top to Bottom):**
+  - Pad 1: `CLK` (quadrature phase A, $2.0\text{ mm}$ from top edge, square pad)
+  - Pad 2: `DT` (quadrature phase B, $2.54\text{ mm}$ pitch)
+  - Pad 3: `SW` (tactile push button switch, $2.54\text{ mm}$ pitch)
+  - Pad 4: `+` (+3.3V power, $2.54\text{ mm}$ pitch)
+  - Pad 5: `GND` (ground return, $2.54\text{ mm}$ pitch)
+- **Knob Shaft:** Center at $10.0\text{ mm}$ from left edge ($X = -2.50\text{ mm}$, $Y = -1.92\text{ mm}$ from module center), $6.0\text{ mm}$ D-shaft outline.
+
+### 6. 2-Wire External Power Switch Solder Pads (`SW4`)
+- **Format:** 1×02 through-hole solder pads with a **1-hole gap ($5.08\text{ mm} / 0.2''$ pitch)** for easy wire soldering and heatshrink clearance without bridging.
+- **Drill & Pad:** $1.2\text{ mm}$ drill with generous $2.4\text{ mm}$ annular ring (accommodates 20–26 AWG stranded hookup wire or standard headers).
+- **Pinout:**
+  - Pad 1 (`IN`): Square pad at $(-2.54\text{ mm}, 0)$, connects to `VBAT_PROT` (protected battery positive from TP4056 `OUT+`).
+  - Pad 2 (`SW`): Round pad at $(+2.54\text{ mm}, 0)$, connects to `VBAT_SW` (switched power feeding TPS63020 `VIN`).
+
+### 7. 18650 Single-Cell Battery Holder (`BT1`)
+- **Dimensions:** $77.5\text{ mm} \text{ Long} \times 20.5\text{ mm} \text{ Wide}$.
+- **Mounting Holes:** Dual $3.2\text{ mm}$ NPTH holes spaced $55.5\text{ mm}$ center-to-center along horizontal centerline ($11.0\text{ mm}$ from left and right edges).
+- **Wire Solder Pads:** Placed outside the holder ends for direct wire soldering without pinching leads:
+  - Pad 1 (`+` / `BAT+`): Square pad at Left ($X = -41.5\text{ mm}, Y = 0$), $1.2\text{ mm}$ drill, connects to `VBAT_RAW` (feeds TP4056 `B+`).
+  - Pad 2 (`-` / `BAT-`): Round pad at Right ($X = +41.5\text{ mm}, Y = 0$), $1.2\text{ mm}$ drill, connects to `VBAT_GND` (feeds TP4056 `B-`).
+
+### 8. 12×12mm Tactile Push Button (`SW3`)
+- **Format:** Standard 4-pin DIP tactile momentary switch ($12.0\text{ mm} \times 12.0\text{ mm}$ body, $5.0\text{ mm}$ round actuator).
+- **Pin Spacing:** $12.5\text{ mm} \times 5.0\text{ mm}$ diagonal through-hole pins.
+- **Pinout:** Pin 1 connects to `BTN_START` (GPIO14), Pin 2 connects to `GND`.
+
+### 9. Config Dock & Run Chain Bus Ports (`J1`, `J2`)
+- **Format:** 1×04 vertical through-hole header on standard $2.54\text{ mm}$ ($0.1''$) pitch.
+- **Drill & Pad:** $1.1\text{ mm}$ drill with $2.0\text{ mm}$ annular ring.
+- **Pinout (1 to 4):**
+  - Pin 1: `+3V3`
+  - Pin 2: `GND`
+  - Pin 3: `DATA` (`CFG_RX` on J1, `CHAIN_TX` on J2)
+  - Pin 4: `PASS` (`CFG_TX` on J1, `CHAIN_RX` on J2)
+
+### 10. Pull-up Resistors (`R1`, `R2`)
+- **Format:** Standard 1/4W axial through-hole resistor with $10.16\text{ mm}$ ($0.4''$) lead pitch.
+- **Value:** $10\text{ k}\Omega$ pull-up to `+3V3` for the open-drain bidirectional bus lines.
 
 ---
 

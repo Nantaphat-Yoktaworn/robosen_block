@@ -2,10 +2,10 @@
 	(version 20240108)
 	(generator "antigravity-kicad-generator")
 	(layer "F.Cu")
-	(descr "Single 18650 Li-ion Battery Holder with solder pins (77mm x 21mm, e.g. Keystone 1042 / BK-18650-PC2)")
-	(tags "18650 Battery Holder Li-ion Keystone 1042")
+	(descr "Single 18650 Li-ion Battery Holder with external wire solder pads (77.5mm x 20.5mm, Left: + / Right: -, dual 3.2mm mounting holes 55.5mm span)")
+	(tags "18650 Battery Holder Li-ion Wire Pads")
 	(property "Reference" "REF**"
-		(at 0 -13.0 0)
+		(at 0 -12.5 0)
 		(layer "F.SilkS")
 		(effects
 			(font
@@ -15,7 +15,7 @@
 		)
 	)
 	(property "Value" "18650_Holder"
-		(at 0 13.0 0)
+		(at 0 12.5 0)
 		(layer "F.Fab")
 		(effects
 			(font
@@ -26,45 +26,55 @@
 	)
 	(attr through_hole)
 	(fp_rect
-		(start -38.5 -10.5)
-		(end 38.5 10.5)
+		(start -38.75 -10.25)
+		(end 38.75 10.25)
 		(stroke
-			(width 0.2)
+			(width 0.15)
 			(type solid)
 		)
 		(fill none)
 		(layer "F.SilkS")
 	)
-	(fp_text user "18650 Li-ion Cell"
-		(at 0 0 0)
-		(layer "F.Fab")
-		(effects
-			(font
-				(size 1.2 1.2)
-				(thickness 0.15)
-			)
+	(fp_rect
+		(start -43.5 -11.0)
+		(end 43.5 11.0)
+		(stroke
+			(width 0.05)
+			(type solid)
 		)
+		(fill none)
+		(layer "F.CrtYd")
 	)
-	(fp_text user "[ + ]"
-		(at 30 0 0)
+	(fp_circle
+		(center -27.75 0)
+		(end -25.75 0)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill none)
 		(layer "F.SilkS")
-		(effects
-			(font
-				(size 1.5 1.5)
-				(thickness 0.25)
-			)
-		)
 	)
-	(fp_text user "[ - ]"
-		(at -30 0 0)
+	(fp_circle
+		(center 27.75 0)
+		(end 29.75 0)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill none)
 		(layer "F.SilkS")
-		(effects
-			(font
-				(size 1.5 1.5)
-				(thickness 0.25)
-			)
-		)
 	)
-	(pad "1" thru_hole rect (at 36.5 0) (size 3.0 3.0) (drill 1.6) (layers "*.Cu" "*.Mask"))
-	(pad "2" thru_hole circle (at -36.5 0) (size 3.0 3.0) (drill 1.6) (layers "*.Cu" "*.Mask"))
+	(pad "" np_thru_hole circle (at -27.75 0) (size 3.2 3.2) (drill 3.2) (layers "*.Mask"))
+	(pad "" np_thru_hole circle (at 27.75 0) (size 3.2 3.2) (drill 3.2) (layers "*.Mask"))
+
+	(fp_text user "18650 Li-ion Cell" (at 0 0 0) (layer "F.Fab") (effects (font (size 1.2 1.2) (thickness 0.15))))
+	(fp_text user "[ + ]" (at -20.0 0 0) (layer "F.SilkS") (effects (font (size 1.5 1.5) (thickness 0.2))))
+	(fp_text user "[ - ]" (at 20.0 0 0) (layer "F.SilkS") (effects (font (size 1.5 1.5) (thickness 0.2))))
+
+	(fp_text user "BAT+" (at -41.5 -2.2 0) (layer "F.SilkS") (effects (font (size 0.8 0.8) (thickness 0.12))))
+	(pad "1" thru_hole rect (at -41.5 0) (size 2.4 2.4) (drill 1.2) (layers "*.Cu" "*.Mask"))
+
+	(fp_text user "BAT-" (at 41.5 -2.2 0) (layer "F.SilkS") (effects (font (size 0.8 0.8) (thickness 0.12))))
+	(pad "2" thru_hole circle (at 41.5 0) (size 2.4 2.4) (drill 1.2) (layers "*.Cu" "*.Mask"))
 )

@@ -196,19 +196,17 @@
 		(pin_names (offset 0) (hide yes)) (in_bom yes) (on_board yes)
 		(property "Reference" "SW" (at 0 -6.35 0) (effects (font (size 1.27 1.27))))
 		(property "Value" "SW_SPST" (at 0 6.35 0) (effects (font (size 1.27 1.27))))
-		(property "Footprint" "robosen_master:SW_Slide_SS12D00" (at 0 8.89 0) (effects (font (size 1.27 1.27)) (hide yes)))
+		(property "Footprint" "robosen_master:SW_Power_2Wire_Pads" (at 0 8.89 0) (effects (font (size 1.27 1.27)) (hide yes)))
 		(property "Datasheet" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
-		(property "Description" "Single-Pole Single-Throw Slide Power Switch SS12D00" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+		(property "Description" "Single-Pole Single-Throw 2-Wire Power Switch" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
 		(symbol "SW_SPST_0_1"
 			(circle (center -2.54 0) (radius 0.508) (stroke (width 0.254) (type solid)) (fill (type none)))
 			(circle (center 2.54 0) (radius 0.508) (stroke (width 0.254) (type solid)) (fill (type none)))
-			(circle (center 2.54 -2.54) (radius 0.508) (stroke (width 0.254) (type solid)) (fill (type none)))
 			(polyline (pts (xy -2.0 0.5) (xy 2.0 2.0)) (stroke (width 0.254) (type solid)))
 		)
 		(symbol "SW_SPST_1_1"
 			(pin passive line (at -5.08 0 0) (length 2.54) (name "1" (effects (font (size 1.0 1.0)))) (number "1" (effects (font (size 0.8 0.8)))))
 			(pin passive line (at 5.08 0 180) (length 2.54) (name "2" (effects (font (size 1.0 1.0)))) (number "2" (effects (font (size 0.8 0.8)))))
-			(pin passive line (at 5.08 -2.54 180) (length 2.54) (name "3" (effects (font (size 1.0 1.0)))) (number "3" (effects (font (size 0.8 0.8)))))
 		)
 	)
 	(symbol "R"

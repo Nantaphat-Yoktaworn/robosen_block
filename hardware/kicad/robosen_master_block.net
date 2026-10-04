@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "C:\\Users\\nnnn\\Projects\\robosen_block\\hardware\\kicad\\robosen_master_block.kicad_sch")
-		(date "2026-10-04T15:36:48")
+		(date "2026-10-04T16:20:29")
 		(tool "Eeschema 10.0.6")
 		(sheet
 			(number "1")
@@ -85,7 +85,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "4290de03-4a9e-444e-9aa9-823f0c6228d0")
+			(tstamps "96518bfa-31f7-49e2-b7f9-90ebde307a4a")
 			(units
 				(unit
 					(name "A")
@@ -131,7 +131,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "4e310e0f-4ffc-437f-886f-e3bde1cb135a")
+			(tstamps "5bb6be9f-9e7d-4d87-b998-4f0b751200ea")
 			(units
 				(unit
 					(name "A")
@@ -195,7 +195,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "feb9c6f9-aef3-42c3-a0c7-63736e85e619")
+			(tstamps "44538fa3-0ad5-489a-9d84-cb44d6ccd104")
 			(units
 				(unit
 					(name "A")
@@ -247,7 +247,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "4109bf1e-2802-45e3-9d4a-6fcf15eb6b7d")
+			(tstamps "a34ae3de-65b9-4fc2-908f-7b83290adbde")
 			(units
 				(unit
 					(name "A")
@@ -299,7 +299,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "0fc86c4d-b5fe-4a5b-aa2f-132d0f5207dd")
+			(tstamps "1563236b-c8fe-4657-9599-6ed4772d2ee6")
 			(units
 				(unit
 					(name "A")
@@ -345,7 +345,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e84ec616-228e-4b83-af0d-d58b959dcbea")
+			(tstamps "b3b90351-f4b1-4cf2-a4db-b78d976d3a0c")
 			(units
 				(unit
 					(name "A")
@@ -391,7 +391,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "b9dac359-c5eb-44a5-b98d-f87e4e3d7550")
+			(tstamps "25fce269-e7f0-4310-b03e-71b0e60719c9")
 			(units
 				(unit
 					(name "A")
@@ -446,7 +446,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "3f63ebff-be1c-47d9-a409-f9b911ebd1c6")
+			(tstamps "e73cad4b-9204-4ba6-894d-6b69096d7dfb")
 			(units
 				(unit
 					(name "A")
@@ -501,7 +501,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "bc8dcdd6-aae9-4bb3-99f4-d695d77974ac")
+			(tstamps "d91c5211-e4e4-478c-91c6-ba535a1c03b5")
 			(units
 				(unit
 					(name "A")
@@ -519,10 +519,10 @@
 		(comp
 			(ref "SW4")
 			(value "POWER_SWITCH")
-			(footprint "robosen_master:SW_Slide_SS12D00")
+			(footprint "robosen_master:SW_Power_2Wire_Pads")
 			(fields
 				(field
-					(name "Footprint") "robosen_master:SW_Slide_SS12D00")
+					(name "Footprint") "robosen_master:SW_Power_2Wire_Pads")
 				(field
 					(name "Datasheet")
 				)
@@ -533,7 +533,7 @@
 			(libsource
 				(lib "robosen_master")
 				(part "SW_SPST")
-				(description "Single-Pole Single-Throw Slide Power Switch SS12D00")
+				(description "Single-Pole Single-Throw 2-Wire Power Switch")
 			)
 			(property
 				(name "Sheetname")
@@ -547,7 +547,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6cfaf4ef-c89e-4b4c-a31e-77e67e0c6cc1")
+			(tstamps "32979798-17b6-4942-baf6-3ed7883650ff")
 			(units
 				(unit
 					(name "A")
@@ -557,9 +557,6 @@
 						)
 						(pin
 							(num "2")
-						)
-						(pin
-							(num "3")
 						)
 					)
 				)
@@ -596,7 +593,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "35af9cdd-683a-4b21-b1b4-8930c5d77a68")
+			(tstamps "5f65194f-cf0c-4385-a2c2-97b7b16680e9")
 			(units
 				(unit
 					(name "A")
@@ -768,7 +765,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "2c00aa1d-ceaa-4d52-b2c5-cf3da9a01321")
+			(tstamps "7761377f-284f-437c-87de-1d7642ffd7a7")
 			(units
 				(unit
 					(name "A")
@@ -826,7 +823,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "c78f1c34-c27c-4bab-a0e6-1d537b0cc0d9")
+			(tstamps "08146e2a-0fa0-4bdc-858c-2c94ac8bfeab")
 			(units
 				(unit
 					(name "A")
@@ -1341,19 +1338,19 @@
 		(libpart
 			(lib "robosen_master")
 			(part "SW_SPST")
-			(description "Single-Pole Single-Throw Slide Power Switch SS12D00")
+			(description "Single-Pole Single-Throw 2-Wire Power Switch")
 			(fields
 				(field
 					(name "Reference") "SW")
 				(field
 					(name "Value") "SW_SPST")
 				(field
-					(name "Footprint") "robosen_master:SW_Slide_SS12D00")
+					(name "Footprint") "robosen_master:SW_Power_2Wire_Pads")
 				(field
 					(name "Datasheet")
 				)
 				(field
-					(name "Description") "Single-Pole Single-Throw Slide Power Switch SS12D00")
+					(name "Description") "Single-Pole Single-Throw 2-Wire Power Switch")
 			)
 			(pins
 				(pin
@@ -1364,11 +1361,6 @@
 				(pin
 					(num "2")
 					(name "2")
-					(type "passive")
-				)
-				(pin
-					(num "3")
-					(name "3")
 					(type "passive")
 				)
 			)
@@ -2034,17 +2026,6 @@
 		)
 		(net
 			(code "24")
-			(name "unconnected-(SW4-Pad3)")
-			(class "Default")
-			(node
-				(ref "SW4")
-				(pin "3")
-				(pinfunction "3_3")
-				(pintype "passive+no_connect")
-			)
-		)
-		(net
-			(code "25")
 			(name "unconnected-(U1-5V-Pad21)")
 			(class "Default")
 			(node
@@ -2055,7 +2036,7 @@
 			)
 		)
 		(net
-			(code "26")
+			(code "25")
 			(name "unconnected-(U1-EN{slash}RST-Pad3)")
 			(class "Default")
 			(node
@@ -2066,7 +2047,7 @@
 			)
 		)
 		(net
-			(code "27")
+			(code "26")
 			(name "unconnected-(U1-GPIO0-Pad36)")
 			(class "Default")
 			(node
@@ -2077,7 +2058,7 @@
 			)
 		)
 		(net
-			(code "28")
+			(code "27")
 			(name "unconnected-(U1-GPIO1-Pad26)")
 			(class "Default")
 			(node
@@ -2088,7 +2069,7 @@
 			)
 		)
 		(net
-			(code "29")
+			(code "28")
 			(name "unconnected-(U1-GPIO2-Pad27)")
 			(class "Default")
 			(node
@@ -2099,7 +2080,7 @@
 			)
 		)
 		(net
-			(code "30")
+			(code "29")
 			(name "unconnected-(U1-GPIO3-Pad13)")
 			(class "Default")
 			(node
@@ -2110,7 +2091,7 @@
 			)
 		)
 		(net
-			(code "31")
+			(code "30")
 			(name "unconnected-(U1-GPIO19-Pad42)")
 			(class "Default")
 			(node
@@ -2121,7 +2102,7 @@
 			)
 		)
 		(net
-			(code "32")
+			(code "31")
 			(name "unconnected-(U1-GPIO20-Pad41)")
 			(class "Default")
 			(node
@@ -2132,7 +2113,7 @@
 			)
 		)
 		(net
-			(code "33")
+			(code "32")
 			(name "unconnected-(U1-GPIO35-Pad35)")
 			(class "Default")
 			(node
@@ -2143,7 +2124,7 @@
 			)
 		)
 		(net
-			(code "34")
+			(code "33")
 			(name "unconnected-(U1-GPIO36-Pad34)")
 			(class "Default")
 			(node
@@ -2154,7 +2135,7 @@
 			)
 		)
 		(net
-			(code "35")
+			(code "34")
 			(name "unconnected-(U1-GPIO37-Pad33)")
 			(class "Default")
 			(node
@@ -2165,7 +2146,7 @@
 			)
 		)
 		(net
-			(code "36")
+			(code "35")
 			(name "unconnected-(U1-GPIO39-Pad31)")
 			(class "Default")
 			(node
@@ -2176,7 +2157,7 @@
 			)
 		)
 		(net
-			(code "37")
+			(code "36")
 			(name "unconnected-(U1-GPIO40-Pad30)")
 			(class "Default")
 			(node
@@ -2187,7 +2168,7 @@
 			)
 		)
 		(net
-			(code "38")
+			(code "37")
 			(name "unconnected-(U1-GPIO41-Pad29)")
 			(class "Default")
 			(node
@@ -2198,7 +2179,7 @@
 			)
 		)
 		(net
-			(code "39")
+			(code "38")
 			(name "unconnected-(U1-GPIO42-Pad28)")
 			(class "Default")
 			(node
@@ -2209,7 +2190,7 @@
 			)
 		)
 		(net
-			(code "40")
+			(code "39")
 			(name "unconnected-(U1-GPIO45-Pad37)")
 			(class "Default")
 			(node
@@ -2220,7 +2201,7 @@
 			)
 		)
 		(net
-			(code "41")
+			(code "40")
 			(name "unconnected-(U1-GPIO46-Pad14)")
 			(class "Default")
 			(node
@@ -2231,7 +2212,7 @@
 			)
 		)
 		(net
-			(code "42")
+			(code "41")
 			(name "unconnected-(U1-GPIO47-Pad39)")
 			(class "Default")
 			(node
@@ -2242,7 +2223,7 @@
 			)
 		)
 		(net
-			(code "43")
+			(code "42")
 			(name "unconnected-(U1-GPIO48-Pad38)")
 			(class "Default")
 			(node
@@ -2253,7 +2234,7 @@
 			)
 		)
 		(net
-			(code "44")
+			(code "43")
 			(name "unconnected-(U1-RX{slash}IO44-Pad25)")
 			(class "Default")
 			(node
@@ -2264,7 +2245,7 @@
 			)
 		)
 		(net
-			(code "45")
+			(code "44")
 			(name "unconnected-(U1-TX{slash}IO43-Pad24)")
 			(class "Default")
 			(node
@@ -2275,7 +2256,7 @@
 			)
 		)
 		(net
-			(code "46")
+			(code "45")
 			(name "unconnected-(U2-IN+-Pad6)")
 			(class "Default")
 			(node
@@ -2286,7 +2267,7 @@
 			)
 		)
 		(net
-			(code "47")
+			(code "46")
 			(name "unconnected-(U2-IN--Pad5)")
 			(class "Default")
 			(node
