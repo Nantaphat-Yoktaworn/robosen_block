@@ -36,12 +36,45 @@ For standard M3 brass heat-set threaded inserts (e.g., Ruthex, Voron, or generic
 - **Insert Pilot Hole Diameter**: **Ø4.0 mm to 4.2 mm** (with 0.5 mm × 45° lead-in chamfer for alignment during iron insertion)
 - **Pilot Hole Depth**: **≥ 5.5 mm** (leaves clearance below insert for molten plastic capture and screw tip)
 - **Fasteners**: M3 Socket Head or Button Head Cap Screws ($L = 5\text{ mm}$ or $6\text{ mm}$, head diameter ≤ 5.7 mm)
+- **Fastener Insulation Recommendation**: Use non-conductive nylon washers or nylon screws/standoffs to ensure zero possibility of abrasion against the PCB surface solder mask.
 
 ---
 
-## 4. Visual Layout Previews
+## 4. Crucial Assembly & Mechanical Guidelines
+
+### 4.1. 18650 Battery Holder (`BT1`) Underside Clearance
+- **Pin Stacking**: There are **12 through-hole pin centers** directly beneath the plastic body of the 18650 holder (`U2` pads 1–4, `U3` pads 5–8, `SW3` pad 1 legs, `SW5` pad 2 legs).
+- **Assembly Requirement**:
+  1. Clip all through-hole leads on the back side completely flush using sharp flush cutters.
+  2. Apply a **$1.0\text{ mm} - 1.5\text{ mm}$ thick EVA foam tape** or double-sided mounting foam pad beneath the battery holder body. This absorbs the height of the rounded solder joints and prevents pressure against the battery cell or plastic holder.
+
+### 4.2. E-Paper Display (`DISP1`) vs. ESP32-S3 Antenna
+- The front e-paper display module physically overlaps approximately 65% of the ESP32 antenna area on the opposite side.
+- The PCB copper strictly avoids the antenna keepout area ($0.00\text{ mm}^2$ copper fill).
+- **Prototype Testing**: Ensure you test Bluetooth Low Energy (BLE) connection range through your assembled 3D casing to verify wireless performance meets your project requirements.
+
+---
+
+## 5. PCB Fabrication Specifications (For Manufacturer)
+
+- **Layers**: 2 Layers
+- **Dimensions**: $115.50\text{ mm} \times 62.00\text{ mm}$
+- **Material**: FR-4 Standard ($T_g \ge 130^\circ\text{C}$)
+- **Board Thickness**: $1.6\text{ mm}$
+- **Copper Weight**: $1\text{ oz}$ ($35\ \mu\text{m}$)
+- **Solder Mask**: Matte Green or Matte Black
+- **Silkscreen**: White
+- **Surface Finish**: Lead-Free HASL or ENIG (Electroless Nickel Immersion Gold)
+- **Minimum Trace / Clearance**: $0.25\text{ mm} / 0.22\text{ mm}$ (Power traces: $0.80\text{ mm}$)
+- **Minimum Drill / Via**: $0.3\text{ mm}$ drill / $0.6\text{ mm}$ diameter
+- **Production Package**: [hardware/kicad/robosen_master_block_gerbers.zip](file:///C:/Users/nnnn/Projects/robosen_block/hardware/kicad/robosen_master_block_gerbers.zip)
+
+---
+
+## 6. Visual Layout Previews
 - **Front Side (Modules, Buttons, Knobs, Display)**:
   ![PCB Top View](diagrams/pcb_3d_top.png)
 
 - **Back Side (ESP32-S3 Socket, 18650 Battery Holder)**:
   ![PCB Bottom View](diagrams/pcb_3d_bottom.png)
+

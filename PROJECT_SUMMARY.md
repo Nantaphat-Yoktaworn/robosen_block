@@ -233,14 +233,16 @@ The project is currently in an **advanced software, protocol simulation, and liv
 
 ## 7. Recommended Next Steps
 
-1. **PCB Schematic & Layout (Phase 1 Carrier PCB):** ✅ **SCHEMATIC COMPLETE & ERC VERIFIED (Oct 4, 2026):**
+1. **PCB Schematic, Layout & Manufacturing Deliverables (Phase 1 Carrier PCB):** ✅ **COMPLETE, ROUTED & DRC VERIFIED (Oct 4, 2026):**
    - Initialized KiCad 10 project ([`hardware/kicad/`](hardware/kicad/)).
-   - Engineered and validated 10 custom footprints in `robosen_master.pretty/` (`ESP32-S3-DevKitC-1-Socket`, `TP4056_Type-C_Module`, `TPS63020_BuckBoost_Module`, `18650_Battery_Holder_Single`, `KY-040_Rotary_Encoder_Module`, `EPaper_2.13in_Header_1x08`, `Pogo_4Pin_Dock_2.54mm`, `SW_PUSH_12x12mm`, `SW_Slide_SS12D00`, `R_Axial_P10.16mm`) with 0 errors via `kicad-cli 10.0.6`.
+   - Engineered and validated 12 custom footprints in `robosen_master.pretty/` with 0 errors via `kicad-cli 10.0.6`.
    - Created native KiCad 10 symbol library (`robosen_master.kicad_sym` & `sym-lib-table`).
-   - Generated complete pre-wired starter schematic (`robosen_master_block.kicad_sch`) with 4 functional zones on exact 1.27mm grid.
+   - Generated complete pre-wired schematic (`robosen_master_block.kicad_sch`) with 4 functional zones on exact 1.27mm grid.
    - Electrical Rules Check (ERC) verified: **0 violations** (`erc_report.txt`).
-   - Exported netlist (`robosen_master_block.net`), high-resolution vector PDF (`robosen_master_block_schematic.pdf`), and SVG (`schematic_svg/robosen_master_block.svg`).
-   - Created interactive web wiring guide and BOM ([`docs/master_block_wiring.html`](docs/master_block_wiring.html)).
+   - Board Outline: Defined $115.50\text{ mm} \times 62.00\text{ mm}$ outline with 4 locked M3 mounting holes (`H1`–`H4`).
+   - Trace Routing & Power Planes: 100% routed (**0 unconnected items**), filled `GND` copper planes on both layers, $0.80\text{ mm}$ power traces, isolated `/VBAT_GND`, and $\ge 3.68\text{ mm}$ screw head clearance.
+   - Exported manufacturing Gerbers & drill files packaged in [`hardware/kicad/robosen_master_block_gerbers.zip`](hardware/kicad/robosen_master_block_gerbers.zip).
+   - Created comprehensive mounting & enclosure spec ([`docs/mounting_and_enclosure_spec.md`](docs/mounting_and_enclosure_spec.md)) and web wiring guide ([`docs/master_block_wiring.html`](docs/master_block_wiring.html)).
 2. **C++ Master Firmware:** ✅ **COMPLETED & VERIFIED ON PHYSICAL HARDWARE (Sept 7–8, 2026):**
    - Implemented dual-knob rotary encoders, persistent BLE auto-reconnect, Config Dock UART driver, and Run Chain Engine (`0xAA`/`0xBB`/`0xFF`) on ESP32-S3 (`firmware/esp32_master`).
    - Verified live detection and non-volatile flash burning into docked CH32V003 Action Blocks.

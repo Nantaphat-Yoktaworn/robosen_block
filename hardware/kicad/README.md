@@ -4,6 +4,8 @@
 > **KiCad Version:** KiCad 10.0.6 (Fully compatible with KiCad 8.x / 9.x / 10.x)  
 > **Workspace Directory:** `hardware/kicad/`  
 > **Schematic Status:** Fully pre-wired, verified with KiCad ERC (**0 violations**)  
+> **PCB Routing Status:** 100% Routed, verified with KiCad DRC (**0 unconnected items**)  
+> **Fabrication Files:** Gerbers & Excellon drill files generated and packaged in `robosen_master_block_gerbers.zip`  
 > **Author:** Nantaphat Yoktaworn / Antigravity AI  
 
 ---
@@ -229,4 +231,58 @@ All 12 custom footprints in `robosen_master.pretty/` have been created and verif
 4. Run Electrical Rules Check (**Tools → Electrical Rules Check**):
    - Status: **0 errors, 0 warnings** (`Found 0 violations`).
 5. Open PCB Editor (**`robosen_master_block.kicad_pcb`**):
-   - All 17 component footprints are pre-placed and fully connected via netlist ratsnest, ready for final trace routing on your carrier PCB outline!
+   - All 21 footprints are placed, 100% routed, and verified with **0 unconnected items**.
+   - Press **`Alt + 3`** to inspect the complete 3D assembly.
+
+---
+
+## 6. PCB Routing Architecture & Power Planes
+
+- **Board Dimensions:** $115.50\text{ mm} \times 62.00\text{ mm}$ (2 Layers, $1.6\text{ mm}$ FR-4).
+- **Power Planes (`GND`):** Both `F.Cu` and `B.Cu` are flooded with continuous copper `GND` planes with standard thermal relief spokes (`0.4 mm` spoke, `0.3 mm` gap) and automatic isolated island removal.
+- **Power Rails:** `+3V3`, `/VBAT_SW`, `/VBAT_PROT`, `/VBAT_RAW`, and `/VBAT_GND` are routed with **$0.80\text{ mm}$ wide traces** (supporting $> 1.5\text{ A}$ continuous load) and $1.0\text{ mm} / 0.5\text{ mm}$ power vias.
+- **Battery Protection Isolation:** `/VBAT_GND` connects exclusively between `BT1` Pad 2 (`BAT-`) and `U2` Pad 3 (`B-`), maintaining strict $> 0.25\text{ mm}$ physical separation from system `GND` to preserve TP4056 under-voltage/over-current protection.
+- **Signals:** Display SPI, UART ports, encoders, and buttons are routed with $0.25\text{ mm}$ signal traces and $0.6\text{ mm} / 0.3\text{ mm}$ vias.
+- **Antenna Keepout:** Zero copper traces, vias, or ground flood enter the $17.5\text{ mm} \times 6.0\text{ mm}$ ESP32 antenna exclusion zone.
+- **Mounting Hole Clearance:** All copper traces and vias maintain $\ge 3.68\text{ mm}$ radial clearance from `H1`–`H4` centers, safely clearing standard M3 screw heads ($R \le 2.85\text{ mm}$) and 3D print standoff bosses ($R \le 3.50\text{ mm}$).
+
+---
+
+## 7. PCB Manufacturing & Fabrication Files
+
+The fabrication outputs have been exported using `kicad-cli` and packaged for direct 1-click upload to board manufacturers (JLCPCB, PCBWay, OSHPark):
+
+- **Production ZIP Archive:** [`robosen_master_block_gerbers.zip`](robosen_master_block_gerbers.zip)
+- **Directory:** [`hardware/kicad/gerbers/`](gerbers/)
+  - `robosen_master_block-F_Cu.gtl` (Top Copper Layer)
+  - `robosen_master_block-B_Cu.gbl` (Bottom Copper Layer)
+  - `robosen_master_block-F_Mask.gts` (Top Solder Mask)
+  - `robosen_master_block-B_Mask.gbs` (Bottom Solder Mask)
+  - `robosen_master_block-F_Silkscreen.gto` (Top Silkscreen)
+  - `robosen_master_block-B_Silkscreen.gbo` (Bottom Silkscreen)
+  - `robosen_master_block-Edge_Cuts.gm1` (Board Outline & Routing Profile)
+  - `robosen_master_block-PTH.drl` (Plated Through-Hole Drill Hits)
+  - `robosen_master_block-NPTH.drl` (Non-Plated Through-Hole Drill Hits: M3 holes & module holes)
+  - `robosen_master_block-drl.rpt` (Drill Hole Size & Count Report)
+
+### Manufacturer Order Parameters (JLCPCB / PCBWay)
+- **Base Material:** FR-4 Standard ($T_g \ge 130^\circ\text{C}$)
+- **Layer Count:** 2 Layers
+- **Dimensions:** $115.50\text{ mm} \times 62.00\text{ mm}$
+- **PCB Thickness:** $1.6\text{ mm}$
+- **Finished Copper:** $1\text{ oz}$ ($35\ \mu\text{m}$)
+- **Solder Mask:** Matte Green (or Matte Black)
+- **Silkscreen:** White
+- **Surface Finish:** Lead-Free HASL or ENIG
+
+---
+
+## 8. Assembly & Prototyping Notes
+
+1. **Through-Hole Leads Under Battery Holder (`BT1`):**  
+   12 through-hole pins sit directly under the plastic body of the 18650 holder (`U2` pads 1–4, `U3` pads 5–8, `SW3` pad 1, `SW5` pad 2).  
+   *Action:* Clip all leads completely flush on the bottom side after soldering, and place a **$1.0\text{ mm} - 1.5\text{ mm}$ piece of EVA foam tape** under `BT1` to absorb solder joint fillet height.
+2. **Mounting Fasteners (`H1`–`H4`):**  
+   Use non-conductive nylon washers or nylon screws/standoffs to eliminate any friction or abrasion against the solder mask.
+3. **Bluetooth Range:**  
+   The e-paper display sits physically above the ESP32 antenna on the opposite side. Test BLE wireless connectivity through your assembled 3D casing to ensure signal range meets your needs.

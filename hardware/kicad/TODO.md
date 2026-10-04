@@ -47,6 +47,22 @@
   - [x] Place `SW5` on schematic layout alongside `SW3` with clear role indicators (`START_CONFIRM [Green]` vs `STOP_CANCEL [Red]`)
   - [x] Run KiCad ERC check (`0 violations`)
 
+- [x] **6. Define Board Outline & Mechanical Mounting Holes**
+  - [x] Set 115.5 x 62.0 mm rectangular `Edge.Cuts` boundary
+  - [x] Position ESP32-S3 (`U1`) and 18650 Battery Holder (`BT1`) on bottom layer (`B.Cu`)
+  - [x] Place 4x locked M3 mounting holes (`H1`–`H4`) with hidden reference labels
+  - [x] Document 3D casing boss & heat-set insert dimensions in `docs/mounting_and_enclosure_spec.md`
+
+- [x] **7. Trace Routing, Power Planes & Fabrication Deliverables**
+  - [x] Fill continuous `GND` copper planes on `F.Cu` and `B.Cu` with thermal relief spokes
+  - [x] Route all power rails (`+3V3`, `/VBAT_*`) with 0.80 mm traces and power vias
+  - [x] Route all SPI, UART, encoder, and button signal lines with 0.25 mm traces
+  - [x] Isolate `/VBAT_GND` from system `GND` for TP4056 BMS protection
+  - [x] Enforce $\ge 3.68\text{ mm}$ clearance around M3 mounting holes for screw heads
+  - [x] Verify netlist connectivity with KiCad DRC (**0 unconnected items**)
+  - [x] Run independent dual-agent verification (Antigravity + GPT-6 Astra)
+  - [x] Export manufacturing Gerbers, drill files, and package `robosen_master_block_gerbers.zip`
+
 ---
 
 ## 📐 Detailed Engineering Notes for Implementation
