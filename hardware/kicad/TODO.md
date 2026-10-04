@@ -38,6 +38,15 @@
   - [ ] Remove obsolete/legacy footprints or duplicate files no longer referenced by the project
   - [ ] Audit repository root to ensure clean structure per project deliverables storage rules
 
+- [ ] **5. Add Second Push Button (Cancel / Stop / Back — Red Button) & Confirm Button (Green Button)**
+  - [ ] Add `SW5` (12×12 mm Push Button, `SW_PUSH_12x12mm`) to schematic `robosen_master_block.kicad_sch`
+  - [ ] Connect one pin of `SW5` to an available ESP32-S3 GPIO (e.g. `GPIO2` / Pin 27 or `GPIO21` / Pin 33) with net label `BTN_STOP` (or `BTN_CANCEL` / `BTN_BACK`)
+  - [ ] Connect the opposite pin of `SW5` to `GND` (leveraging internal ESP32 `INPUT_PULLUP`)
+  - [ ] Update existing button `SW3` in schematic to designate as Confirm / Next / Start (Green Button, `BTN_START`, `GPIO14`)
+  - [ ] Update `build_schematic.py` schematic generator script and regenerate schematic & symbols
+  - [ ] Place `SW5` on PCB layout alongside `SW3` with clear silkscreen indicators (`START/OK` [Green] vs `STOP/CANCEL` [Red])
+  - [ ] Run KiCad ERC check (`0 violations`)
+
 ---
 
 ## 📐 Detailed Engineering Notes for Implementation
@@ -61,3 +70,19 @@ With $R_3 = 100\text{ k}\Omega$ (1%) and $R_4 = 100\text{ k}\Omega$ (1%):
 - **Driver Module Outer Size:** $65.0\text{ mm} \times 30.2\text{ mm}$.
 - **Header Location:** 1×08 header ($2.54\text{ mm}$ pitch) located along the short edge or back connector.
 - **Mounting:** Can be mounted using double-sided foam tape directly onto the carrier board, or secured via 4 corner M2 screws into threaded standoffs.
+
+### Task 5: Dual Push Button UI Specification
+- **Primary Button (`SW3` - Green Button):**
+  - **Function:** Confirm / Next / Start / Select
+  - **Net:** `BTN_START`
+  - **Pin:** `GPIO14` (Pin 20 on DevKit left header)
+  - **Footprint:** `robosen_master:SW_PUSH_12x12mm` (Active LOW with internal pull-up)
+- **Secondary Button (`SW5` - Red Button):**
+  - **Function:** Cancel / Stop / Back / Exit
+  - **Net:** `BTN_STOP` (or `BTN_CANCEL`)
+  - **Recommended Pin:** `GPIO2` (Pin 27 on DevKit right header)
+  - **Footprint:** `robosen_master:SW_PUSH_12x12mm` (Active LOW with internal pull-up)
+- **Ergonomics & Placement:**
+  - Standard UI convention: Symmetrical placement for intuitive physical interaction.
+  - Can be placed side-by-side or stacked vertically near the rotary encoders / E-paper display.
+  - Clear silkscreen labels on PCB: `CONFIRM / START` and `CANCEL / BACK`.
