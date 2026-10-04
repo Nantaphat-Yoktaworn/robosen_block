@@ -25,12 +25,12 @@
   - [x] Add silkscreen label: `ANTENNA`
   - [x] Verify clearance to carrier board edge so the antenna can hang over the PCB edge for optimal 2.4 GHz RF / BLE performance
 
-- [ ] **3. Add Full E-Paper Display Mechanical Outline & Layout to Footprint**
-  - [ ] Upgrade `EPaper_2.13in_Header_1x08.kicad_mod` from a simple 1×08 pin header to include the complete physical display module outline
-  - [ ] Draw display module outer boundary ($65.0\text{ mm} \times 30.2\text{ mm}$ or $59.2\text{ mm} \times 29.2\text{ mm}$) on `F.SilkS` and `F.Fab`
-  - [ ] Draw active display window ($48.55\text{ mm} \times 23.71\text{ mm}$, $250 \times 122$ pixels) on `F.Fab`
-  - [ ] Add 4 corner mounting holes (Ø $2.2\text{ mm}$ for M2 standoffs) if matching standard breakout PCB modules (e.g. Waveshare / GoodDisplay)
-  - [ ] Show FPC ribbon cable fold area and clearance zone to prevent collisions with neighboring components
+- [x] **3. Add Full E-Paper Display Mechanical Outline & Layout to Footprint**
+  - [x] Upgrade `EPaper_2.13in_Header_1x08.kicad_mod` with complete physical module boundary ($71.0\text{ mm} \times 30.0\text{ mm}$) on `F.SilkS` and `F.Fab`
+  - [x] Draw active display window ($46.0\text{ mm} \times 24.0\text{ mm}$) on `F.Fab` and silkscreen label
+  - [x] Add 4 corner mounting holes (Ø $2.2\text{ mm}$ for M2 standoffs, $2.5\text{ mm}$ inset from both edges) with silkscreen screw head keepouts
+  - [x] Position 1×08 $2.54\text{ mm}$ header centered on the left edge ($1.5\text{ mm}$ from left edge, $Y \in [-8.89, +8.89]$) with pin labels
+  - [x] Add full courtyard boundary ($72.0\text{ mm} \times 31.0\text{ mm}$) on `F.CrtYd`
 
 - [ ] **4. KiCad Project & Repository Clean-Up**
   - [ ] Organize generated footprint SVG files into a dedicated subdirectory (e.g., `hardware/kicad/footprint_svg/`) to keep `hardware/kicad/` clean
