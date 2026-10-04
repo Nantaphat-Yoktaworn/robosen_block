@@ -49,6 +49,8 @@ _autosave-*
 *.bck
 *.lck
 ~*.lck
+*.rpt
+drc_report.txt
 
 
 
