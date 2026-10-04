@@ -1,6 +1,7 @@
 # IDEs
 .idea/
 .vscode/
+.history/
 .DS_Store
 *.iml
 **/.project
