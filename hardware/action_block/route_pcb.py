@@ -1,7 +1,8 @@
 """Route the fixed Action Block placement with KiCad 10's Python.
 
-Requires an unrouted input board. Use --return-detour to route RETURN_BUS
-below the MCU: a straight line shorts pads 4/15 and 0.4 mm copper cannot
+Replaces existing tracks and zones without moving components. Use
+--return-detour to route RETURN_BUS below the MCU: a straight line shorts
+pad 4 and 0.4 mm copper cannot
 fit between its 1.8 mm pads at the project's 0.2 mm clearance.
 """
 from pathlib import Path
@@ -17,17 +18,30 @@ def placement(board):
     return sorted((f.GetReference(), f.GetPosition().x, f.GetPosition().y,
                    f.GetOrientationDegrees(),
                    tuple(sorted((p.GetNumber(), p.GetPosition().x,
-                                 p.GetPosition().y, p.GetNetname()) for p in f.Pads())))
+                                 p.GetPosition().y) for p in f.Pads())))
                   for f in board.GetFootprints())
+
+def pad_nets(board):
+    return {(f.GetReference(), p.GetNumber()): p.GetNetname()
+            for f in board.GetFootprints() for p in f.Pads()}
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--return-detour', action='store_true')
     args = parser.parse_args()
     board = pcb.LoadBoard(str(BOARD))
-    if len(board.GetTracks()) or len(board.Zones()):
-        raise SystemExit('Input must be unrouted; refusing to replace existing copper.')
     original = placement(board)
+    expected_nets = pad_nets(board)
+    expected_nets[('MCU', '15')] = '/RETURN_BUS'
+    return_net = board.FindNet('/RETURN_BUS')
+    if return_net is None:
+        raise SystemExit('Missing /RETURN_BUS net.')
+    mcu = board.FindFootprintByReference('MCU')
+    mcu.FindPadByNumber('15').SetNet(return_net)
+    for track in list(board.GetTracks()):
+        board.Delete(track)
+    for zone in list(board.Zones()):
+        board.Delete(zone)
     nets = board.GetNetsByName()
 
     def route(net, layer, width, points):
@@ -48,6 +62,7 @@ def main():
     route('+3V3', pcb.F_Cu, .6, [(109.5,68.69),(111.4,70.59),(111.4,82.06),(109.5,83.96)])
     if args.return_detour:
         route('/RETURN_BUS', pcb.B_Cu, .4, [(83.5,76.31),(86,78.81),(86,85.25),(88,87.25),(104.9,87.25),(106.5,85.65),(106.5,79.31),(109.5,76.31)])
+    route('/RETURN_BUS', pcb.B_Cu, .4, [(104,77.78),(105.47,76.31),(109.5,76.31)])
 
     for layer in (pcb.F_Cu, pcb.B_Cu):
         z = pcb.ZONE(board)
@@ -64,10 +79,13 @@ def main():
             poly.Append(pcb.FromMM(x), pcb.FromMM(y))
         board.Add(z)
     assert placement(board) == original, 'Placement changed'
+    assert pad_nets(board) == expected_nets, 'Unexpected pad net change'
     board.BuildConnectivity()
     pcb.ZONE_FILLER(board).Fill(board.Zones())
     pcb.SaveBoard(str(BOARD), board)
-    assert placement(pcb.LoadBoard(str(BOARD))) == original
+    saved = pcb.LoadBoard(str(BOARD))
+    assert placement(saved) == original
+    assert pad_nets(saved) == expected_nets
     print('Saved routes and filled thermal GND planes; placement unchanged.')
 
 if __name__ == '__main__':

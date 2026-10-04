@@ -34,6 +34,11 @@ Every Action Block is a drop-proof, solid modular unit with **zero moving parts*
 > **Return Rail Detour:**  
 > The `/RETURN_BUS` rail is routed on `B.Cu` ($0.40\text{ mm}$) with a 45° detour below the MCU DIP socket at $Y = 87.25\text{ mm}$ to prevent shorting through-hole pins 4 & 15.
 
+### Configurable Dynamic Role: MCU Pin 15 (`PD0`)
+- **Trace Connection**: MCU Pin 15 (`PD0`, at $104.00, 77.78\text{ mm}$) is routed directly to Net `/RETURN_BUS` (Pin 4 of `IN` and `OUT`) on `B.Cu` ($0.40\text{ mm}$).
+- **Action Block Mode**: `PD0` is configured as High-Z floating input (`GPIO_CFGLR_IN_FLOAT`), preserving continuous transparent pass-through for downstream blocks.
+- **Smart End Block Mode (`0xEE`)**: When assigned Token `0xEE` by the Master Dock, firmware dynamically configures `PD0` as active TX output, looping the verified `0xAA` sequence back to the Master along `/RETURN_BUS`. This eliminates the need for a separate physical End Block PCB or manual solder jumper.
+
 ### WS2812 RGB LED Header (`RGB`, 1×03 Pin Header)
 
 | Pin # | Silk Label | Board Position ($X, Y$) | Net Assignment | Notes |

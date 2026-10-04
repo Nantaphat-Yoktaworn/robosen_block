@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/Users/nnnn/Projects/robosen_block/hardware/action_block/action_block.kicad_sch")
-		(date "2026-10-05T04:04:33")
+		(date "2026-10-05T05:32:46")
 		(tool "Eeschema 10.0.6")
 		(sheet
 			(number "1")
@@ -85,7 +85,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "73368672-057a-4d20-94c5-73ae52fbe3c4")
+			(tstamps "dd05e0ed-d01c-4a77-b5cd-d75f0b9bbadd")
 			(units
 				(unit
 					(name "A")
@@ -131,7 +131,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "b2b442a5-acd2-4648-8bca-428cc092052a")
+			(tstamps "1ce495a8-85fe-48ef-8ab4-f67b41e41091")
 			(units
 				(unit
 					(name "A")
@@ -183,7 +183,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "7a886e6b-0db8-455e-a815-a8d0c641933f")
+			(tstamps "bf2ad2cb-2762-4068-9aff-59e8b8cbdda9")
 			(units
 				(unit
 					(name "A")
@@ -289,7 +289,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "82eb5778-ac4f-4199-a256-d2ed088e78bb")
+			(tstamps "83bdea88-12b9-4bb4-9c99-fc9881efaece")
 			(units
 				(unit
 					(name "A")
@@ -341,7 +341,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "19d4f7b3-dcfb-4729-a83f-8e0fcc1d6d66")
+			(tstamps "b01a3e23-a7b2-42b7-9340-da624bbe30f5")
 			(units
 				(unit
 					(name "A")
@@ -390,7 +390,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "21071cf7-d959-406e-a25f-07d94dc39029")
+			(tstamps "ec940027-7f9b-49a0-aa81-312a783e0876")
 			(units
 				(unit
 					(name "A")
@@ -765,6 +765,12 @@
 				(pintype "bidirectional")
 			)
 			(node
+				(ref "MCU")
+				(pin "15")
+				(pinfunction "PD0_15")
+				(pintype "bidirectional")
+			)
+			(node
 				(ref "OUT")
 				(pin "4")
 				(pinfunction "PASS_4")
@@ -970,17 +976,6 @@
 		)
 		(net
 			(code "17")
-			(name "unconnected-(MCU-PD0-Pad15)")
-			(class "Default")
-			(node
-				(ref "MCU")
-				(pin "15")
-				(pinfunction "PD0_15")
-				(pintype "bidirectional+no_connect")
-			)
-		)
-		(net
-			(code "18")
 			(name "unconnected-(MCU-PD2-Pad17)")
 			(class "Default")
 			(node
@@ -991,7 +986,7 @@
 			)
 		)
 		(net
-			(code "19")
+			(code "18")
 			(name "unconnected-(MCU-PD3-Pad18)")
 			(class "Default")
 			(node
@@ -1002,7 +997,7 @@
 			)
 		)
 		(net
-			(code "20")
+			(code "19")
 			(name "unconnected-(MCU-PD4-Pad19)")
 			(class "Default")
 			(node
@@ -1013,7 +1008,7 @@
 			)
 		)
 		(net
-			(code "21")
+			(code "20")
 			(name "unconnected-(MCU-PD7-Pad20)")
 			(class "Default")
 			(node

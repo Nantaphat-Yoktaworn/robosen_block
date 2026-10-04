@@ -418,8 +418,9 @@ def generate():
     sch.append(no_conn(162.56, 91.44))
     # Pin 14: PC7 (Y = 93.98)
     sch.append(no_conn(162.56, 93.98))
-    # Pin 15: PD0 (Y = 96.52) -> Floating = Action Block
-    sch.append(no_conn(162.56, 96.52))
+    # Pin 15: PD0 (Y = 96.52) -> Configurable Loopback to RETURN_BUS
+    sch.append(wire(162.56, 96.52, 172.72, 96.52))
+    sch.append(label("RETURN_BUS", 172.72, 96.52, 0))
 
     # Pin 16: PD1/SWIO (Y = 99.06) -> SWIO label
     sch.append(wire(162.56, 99.06, 172.72, 99.06))

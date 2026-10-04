@@ -6,9 +6,9 @@
  *   PD6 (Pin 13) - USART1_RX: Upstream Chain RX / Config Dock In
  *   PD5 (Pin 9)  - USART1_TX: Downstream Chain TX / Config Dock ACK
  *   PA2 (Pin 3)  - WS2812B RGB LED Data Line (DIN)
- *   PD0 (Pin 12) - Role Detect (Internal Pull-Up):
- *                   High/Floating = Action Block
- *                   Grounded      = Smart End Block
+ *   PD0 (Pin 15 on DIP) - /RETURN_BUS / Dynamic Role:
+ *                          Action Block: High-Z Floating Input (passive pass-through)
+ *                          Smart End Block (0xEE): Active Return Rail Driver (loops 0xAA onto Pin 4)
  *   PD4 (Pin 8)  - Onboard Activity LED (toggles on packet receive)
  *   PD1 (Pin 4)  - SWIO 1-wire debug / factory programming line
  * 
@@ -190,6 +190,9 @@ void set_action_idle_color() {
         case 0x19: // Celebrate - Yellow
             ws2812_set(60, 50, 0);
             break;
+        case 0xEE: // Smart End Block - Soft Emerald Green
+            ws2812_set(0, 45, 10);
+            break;
         default:   // Soft White
             ws2812_set(25, 25, 25);
             break;
@@ -197,7 +200,7 @@ void set_action_idle_color() {
 }
 
 // ==============================================================================
-// 4. UART DRIVER (PD5 = TX, PD6 = RX @ 115200 Baud)
+// 4. UART DRIVER (PD5 = TX, PD6 = RX @ 115200 Baud; PD0 = Return Rail TX)
 // ==============================================================================
 void uart_init() {
     RCC->APB2PCENR |= RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOD | RCC_APB2Periph_USART1;
@@ -220,6 +223,38 @@ void uart_init() {
 static inline void uart_tx(uint8_t b) {
     while (!(USART1->STATR & USART_STATR_TXE));
     USART1->DATAR = b;
+}
+
+static inline void uart_bit_delay() {
+    // 208 clock cycles at 24MHz for 115200 baud bit period (8.68 us)
+    asm volatile (
+        "li t0, 50\n"
+        "1: addi t0, t0, -1\n"
+        "bnez t0, 1b\n"
+        ::: "t0"
+    );
+}
+
+void uart_tx_pd0(uint8_t b) {
+    __disable_irq();
+    // Start bit: LOW
+    GPIOD->BCR = (1 << 0);
+    uart_bit_delay();
+
+    // 8 Data bits (LSB first)
+    for (int i = 0; i < 8; i++) {
+        if (b & (1 << i)) {
+            GPIOD->BSHR = (1 << 0);
+        } else {
+            GPIOD->BCR = (1 << 0);
+        }
+        uart_bit_delay();
+    }
+
+    // Stop bit: HIGH
+    GPIOD->BSHR = (1 << 0);
+    uart_bit_delay();
+    __enable_irq();
 }
 
 static inline bool uart_rx_available() {
@@ -253,18 +288,18 @@ int main() {
     // Setup PA2 for WS2812B
     funPinMode(PA2, GPIO_CFGLR_OUT_10Mhz_PP);
 
-    // Setup PD0 for Role Detect (Input Pull-Up)
-    funPinMode(PD0, GPIO_CFGLR_IN_PUPD);
-    funDigitalWrite(PD0, FUN_HIGH);
-
-    // Setup PD4 & PC0 for Activity Indicator (Output PP)
-    funPinMode(PD4, GPIO_CFGLR_OUT_10Mhz_PP);
-    funPinMode(PC0, GPIO_CFGLR_OUT_10Mhz_PP);
-    funDigitalWrite(PD4, FUN_LOW);
-    funDigitalWrite(PC0, FUN_LOW);
-
     // Load saved configuration from flash
     load_config();
+
+    // Setup PD0 for /RETURN_BUS:
+    // If configured as Smart End Block (0xEE): active TX driver (idle HIGH)
+    // If configured as Action Block: high-impedance floating input (passive pass-through)
+    if (g_action_id == 0xEE) {
+        funPinMode(PD0, GPIO_CFGLR_OUT_10Mhz_PP);
+        funDigitalWrite(PD0, FUN_HIGH);
+    } else {
+        funPinMode(PD0, GPIO_CFGLR_IN_FLOAT);
+    }
 
     // Init UART at 115200
     uart_init();
@@ -341,6 +376,14 @@ int main() {
                     if (calc_crc == rx_crc && footer == 0x55) {
                         save_config(act, par);
 
+                        // Reconfigure PD0 according to updated role
+                        if (g_action_id == 0xEE) {
+                            funPinMode(PD0, GPIO_CFGLR_OUT_10Mhz_PP);
+                            funDigitalWrite(PD0, FUN_HIGH);
+                        } else {
+                            funPinMode(PD0, GPIO_CFGLR_IN_FLOAT);
+                        }
+
                         // Send ACK: [ 0xCF, 0x06, CRC8, 0x55 ]
                         uint8_t ack_payload[1] = { 0x06 };
                         uint8_t ack_crc = crc8(ack_payload, 1);
@@ -386,7 +429,7 @@ int main() {
                 uint8_t calc_crc = crc8(check_buf, 2 + len);
 
                 if (calc_crc == rx_crc) {
-                    bool is_end_block = (funDigitalRead(PD0) == FUN_LOW);
+                    bool is_end_block = (g_action_id == 0xEE) || (funDigitalRead(PD0) == FUN_LOW);
 
                     if (!is_end_block) {
                         // ACTION BLOCK BEHAVIOR:
@@ -419,18 +462,26 @@ int main() {
                         set_action_idle_color();
                     } else {
                         // SMART END BLOCK BEHAVIOR:
-                        // Loop packet back onto Pin 4 return rail
+                        // Loop packet back onto Pin 4 return rail (via PD0 active driver & PD5)
                         uart_tx(0xAA);
+                        uart_tx_pd0(0xAA);
                         uart_tx(len);
+                        uart_tx_pd0(len);
                         uart_tx(count);
-                        for (uint8_t i = 0; i < len; i++) uart_tx(rx_buf[i]);
+                        uart_tx_pd0(count);
+                        for (uint8_t i = 0; i < len; i++) {
+                            uart_tx(rx_buf[i]);
+                            uart_tx_pd0(rx_buf[i]);
+                        }
                         uart_tx(rx_crc);
+                        uart_tx_pd0(rx_crc);
                         uart_tx(0x55);
+                        uart_tx_pd0(0x55);
 
-                        // Glow green to signal valid termination
-                        ws2812_set(0, 150, 20);
-                        Delay_Ms(300);
-                        ws2812_set(0, 40, 10);
+                        // Glow emerald green to signal valid termination
+                        ws2812_set(0, 240, 30);
+                        Delay_Ms(350);
+                        set_action_idle_color();
                     }
                 }
             }
