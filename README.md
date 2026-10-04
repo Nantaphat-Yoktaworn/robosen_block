@@ -217,9 +217,9 @@ python scripts/k1_ble_tester.py
 
 ## 🛠️ Hardware & Electrical Specifications
 
-Complete hardware specifications are detailed in [`PHYSICAL_BLOCK_SYSTEM_SPEC.md`](PHYSICAL_BLOCK_SYSTEM_SPEC.md) and [`PROTOTYPE_01_SPEC.md`](PROTOTYPE_01_SPEC.md):
+Complete hardware specifications are detailed in [`PHYSICAL_BLOCK_SYSTEM_SPEC.md`](PHYSICAL_BLOCK_SYSTEM_SPEC.md), [`PROTOTYPE_00_SPEC.md`](PROTOTYPE_00_SPEC.md) (Breadboard Proof-of-Concept), and [`PROTOTYPE_01_SPEC.md`](PROTOTYPE_01_SPEC.md) (First Custom PCB Version):
 
-### 1. Master Controller Breadboard Wiring & Pinout (Prototype #01)
+### 1. Master Controller Breadboard Wiring & Pinout (Prototype #0)
 
 ```text
   (+) Red Rail  (+3.3V) ◄═════════[ 🔴 RED ]════════ ESP32 3V3 Pin
@@ -303,7 +303,8 @@ Complete hardware specifications are detailed in [`PHYSICAL_BLOCK_SYSTEM_SPEC.md
 | [`hardware/action_block/`](hardware/action_block/) | KiCad 10 Action Block PCB project, routing report, and production Gerbers |
 | [`PROJECT_SUMMARY.md`](PROJECT_SUMMARY.md) | Comprehensive executive project summary, mission, and comparison matrix |
 | [`PHYSICAL_BLOCK_SYSTEM_SPEC.md`](PHYSICAL_BLOCK_SYSTEM_SPEC.md) | Hardware, electrical, connector pinout, and 2-phase protocol specifications |
-| [`PROTOTYPE_01_SPEC.md`](PROTOTYPE_01_SPEC.md) | Prototype 01 hardware breadboard wiring, firmware, and test guides |
+| [`PROTOTYPE_00_SPEC.md`](PROTOTYPE_00_SPEC.md) | Prototype #0: Breadboard proof-of-concept engineering specification, wiring & test guides |
+| [`PROTOTYPE_01_SPEC.md`](PROTOTYPE_01_SPEC.md) | Prototype #1: First custom PCB release engineering specification, JLCPCB orders & assembly |
 | [`IMPROVEMENT_PLAN.md`](IMPROVEMENT_PLAN.md) | 5-Pillar Master Improvement Plan and future production roadmap |
 | [`MEMORY.md`](MEMORY.md) | Master technical knowledge base, verified hardware diagnostics, and opcode catalog |
 | [`ROBOSEN_K1_DOCUMENTATION.md`](ROBOSEN_K1_DOCUMENTATION.md) | Official Robosen K1 reference manual, kinematics, voice commands, and safety guide |

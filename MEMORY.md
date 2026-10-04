@@ -110,7 +110,8 @@ robosen_block/
 ├── README.md                             # Comprehensive project master README
 ├── PROJECT_SUMMARY.md                    # Executive project summary & scope
 ├── PHYSICAL_BLOCK_SYSTEM_SPEC.md         # Hardware & electrical spec for modular tangible coding blocks (v3.0)
-├── PROTOTYPE_01_SPEC.md                  # Comprehensive prototype #01 engineering specification & breadboard pinouts
+├── PROTOTYPE_00_SPEC.md                  # Prototype #0 engineering specification & breadboard pinouts
+├── PROTOTYPE_01_SPEC.md                  # Prototype #1 engineering specification & custom PCB production release
 ├── IMPROVEMENT_PLAN.md                   # 5-Pillar master improvement plan & roadmap
 ├── ROBOSEN_K1_DOCUMENTATION.md           # Complete official K1 documentation & user manual
 └── MEMORY.md                             # Master project memory & knowledge base (this file)

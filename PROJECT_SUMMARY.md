@@ -231,7 +231,16 @@ The project is currently in an **advanced software, protocol simulation, and liv
 
 ---
 
-## 7. Recommended Next Steps
+## 7. Prototype Hardware Evolution & Status
+
+### Prototype #0: Breadboard Proof-of-Concept (August–September 2026) ✅ COMPLETE
+- **Architecture**: 5-block solderless breadboard array (Master ESP32-S3 + 3 Action Blocks + 1 Smart End Block).
+- **Validation**: Verified persistent BLE pairing with Robosen K1, 2-phase binary daisy-chain protocol (`0xAA`/`0xBB`), WS2812 light choreography, and 18650 power delivery.
+- **Reference Document**: [`PROTOTYPE_00_SPEC.md`](PROTOTYPE_00_SPEC.md).
+
+### Prototype #1: First Custom PCB Fabrication (October 2026) 🚀 ORDERED AT JLCPCB
+- **Architecture**: Custom 2-layer FR-4 carrier PCBs, standardized 4-pin magnetic pogo docking, self-contained BMS + buck-boost regulator, and software-configurable End Block role via MCU Pin 15 (`PD0`).
+- **Reference Document**: [`PROTOTYPE_01_SPEC.md`](PROTOTYPE_01_SPEC.md).
 
 1. **Master Block PCB (Phase 1 Carrier):** ✅ **ORDERED & FABRICATION IN PROGRESS (Oct 2026):**
    - KiCad 10 project ([`hardware/master_block/`](hardware/master_block/)), $115.50 \times 62.00\text{ mm}$ outline with 4 M3 mounting holes.
