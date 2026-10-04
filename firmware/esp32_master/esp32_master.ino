@@ -11,20 +11,26 @@
 #include <Fonts/FreeSansBold9pt7b.h>
 
 // ==============================================================================
-// 1. PIN DEFINITIONS (PROTOTYPE #01 SPEC - DUAL-KNOB SYSTEM)
+// 1. PIN DEFINITIONS (PROTOTYPE #01 CARRIER PCB SPEC - 4 UI INPUTS)
 // ==============================================================================
-// --- KNOB 1: ACTION SELECTOR ---
-const int PIN_K1_CLK    = 8;   // 🟡 Yellow Wire
-const int PIN_K1_DT     = 9;   // 🟢 Green Wire
-const int PIN_K1_SW     = 10;  // 🔵 Blue Wire
+// --- INPUT 1: KNOB 1 (ACTION SELECTOR ROTARY ENCODER - SW1) ---
+const int PIN_K1_CLK    = 8;   // 🟡 Phase A (GPIO 8)
+const int PIN_K1_DT     = 9;   // 🟢 Phase B (GPIO 9)
+const int PIN_K1_SW     = 10;  // 🔵 Push Switch (GPIO 10)
 
-// --- KNOB 2: PARAMETER ADJUSTER ---
-const int PIN_K2_CLK    = 11;  // ⚪ White Wire
-const int PIN_K2_DT     = 12;  // 🟤 Brown Wire
-const int PIN_K2_SW     = 13;  // 🔘 Gray Wire
+// --- INPUT 2: KNOB 2 (PARAMETER ADJUSTER ROTARY ENCODER - SW2) ---
+const int PIN_K2_CLK    = 11;  // ⚪ Phase A (GPIO 11)
+const int PIN_K2_DT     = 12;  // 🟤 Phase B (GPIO 12)
+const int PIN_K2_SW     = 13;  // 🔘 Push Switch (GPIO 13)
 
-// --- MASTER START BUTTON ---
-const int PIN_START_BTN = 14;  // 🟠 Orange Wire (Diagonal GND Return)
+// --- INPUT 3: MASTER START / CONFIRM BUTTON (SW3 - GREEN 12mm TACTILE) ---
+const int PIN_START_BTN = 14;  // 🟢 Green Tactile Button (Confirm / Start / Run) - Active LOW (GPIO 14)
+
+// --- INPUT 4: MASTER STOP / CANCEL BUTTON (SW5 - RED 12mm TACTILE) ---
+const int PIN_STOP_BTN  = 2;   // 🔴 Red Tactile Button (Cancel / Emergency Stop / Back) - Active LOW (GPIO 2)
+
+// --- BATTERY SENSE (ADC1_CH0) ---
+const int PIN_BATSENSE  = 1;   // 🔋 Battery Voltage Divider Midpoint (100k / 100k + 100nF filter) (GPIO 1)
 
 // --- CONFIG DOCK (UART1) ---
 const int PIN_CFG_TX    = 17;  // 🔘 Gray Wire (Master TX -> Action Block RX / PD6)
@@ -168,7 +174,8 @@ void writeConfigToDockedBlock(uint8_t actionToken, uint8_t param) {
 enum SystemState { 
   STATE_ACTION_MENU, 
   STATE_BLE_SCANNING, 
-  STATE_BLE_PAIRING_MENU 
+  STATE_BLE_PAIRING_MENU,
+  STATE_RUNNING
 };
 SystemState currentState = STATE_ACTION_MENU;
 
@@ -196,11 +203,13 @@ const unsigned long RETRY_INTERVAL_MS = 2000;
 unsigned long lastConnectAttemptTime = 0;
 int connectAttemptCounter = 0;
 
-// Debounce, Activity & Timing States
+// Debounce, Activity & Timing States for 4 UI Inputs
 int lastK1Clk = HIGH;
 int lastK2Clk = HIGH;
 unsigned long startBtnPressTime = 0;
 bool startBtnHeld = false;
+unsigned long stopBtnPressTime = 0;
+bool stopBtnHeld = false;
 unsigned long lastUserActivity = 0;
 unsigned long lastHeartbeatTime = 0;
 
@@ -214,6 +223,11 @@ void updateStatusLED();
 void pollConfigDock();
 bool executeRunChain();
 RobosenAction getActionObjByToken(uint8_t token, int param);
+float readBatteryVoltage();
+int calculateBatteryPercent(float vbat);
+void sendLocomotionStop();
+bool abortableDelay(unsigned long ms);
+void triggerChainAbort(int count);
 
 // E-Ink Display Functions (DEPG0213BN / SSD1680)
 void updateEInkActionMenu();
@@ -239,7 +253,9 @@ class RobosenClientCallback : public BLEClientCallbacks {
 };
 
 void updateStatusLED() {
-  if (currentState == STATE_BLE_SCANNING) {
+  if (currentState == STATE_RUNNING) {
+    setStatusLED(0, 100, 20); // 🟢 Bright Green: Chain actively executing
+  } else if (currentState == STATE_BLE_SCANNING) {
     setStatusLED(0, 0, 40);  // 🔵 Vivid Blue: Active Scanning
   } else if (currentState == STATE_BLE_PAIRING_MENU) {
     setStatusLED(0, 0, 30);  // 🔵 Soft Blue: Pairing Menu Selection
@@ -250,6 +266,44 @@ void updateStatusLED() {
   } else {
     setStatusLED(0, 30, 0);  // 🟢 Emerald Green: Connected & Ready
   }
+}
+
+// ==============================================================================
+// 4.1 BATTERY SENSE & SAFETY HALT IMPLEMENTATIONS
+// ==============================================================================
+float readBatteryVoltage() {
+  uint32_t rawMv = analogReadMilliVolts(PIN_BATSENSE);
+  // 1:1 precision voltage divider (R3=100k, R4=100k) => Vbat = Vadc * 2
+  float vbat = (rawMv * 2.0f) / 1000.0f;
+  return vbat;
+}
+
+int calculateBatteryPercent(float vbat) {
+  if (vbat >= 4.20f) return 100;
+  if (vbat <= 3.20f) return 0;
+  int pct = (int)((vbat - 3.20f) / (4.20f - 3.20f) * 100.0f);
+  return constrain(pct, 0, 100);
+}
+
+void sendLocomotionStop() {
+  if (isConnected && pRemoteChar != nullptr && pRemoteChar->canWrite()) {
+    uint8_t stopPacket[] = {0xFF, 0xFF, 0x02, 0x0C, 0x0E};
+    pRemoteChar->writeValue(stopPacket, sizeof(stopPacket));
+    Serial.println("  ► [SAFETY] Locomotion Stop [0xFF, 0xFF, 0x02, 0x0C, 0x0E] dispatched.");
+  }
+}
+
+bool abortableDelay(unsigned long ms) {
+  unsigned long start = millis();
+  while (millis() - start < ms) {
+    if (digitalRead(PIN_STOP_BTN) == LOW) {
+      Serial.println("\n🛑 [EMERGENCY STOP] Red Stop Button pressed during delay! Halting immediately!");
+      sendLocomotionStop();
+      return false;
+    }
+    delay(10);
+  }
+  return true;
 }
 
 // ==============================================================================
@@ -479,7 +533,7 @@ void setup() {
   display.init(115200, false, 2, false);
   display.setRotation(1); // 250 width x 122 height (Landscape)
 
-  // Configure Internal Pull-Up Resistors for all inputs
+  // Configure Internal Pull-Up Resistors for all 4 UI inputs (2 Encoders + 2 Buttons)
   pinMode(PIN_K1_CLK, INPUT_PULLUP);
   pinMode(PIN_K1_DT,  INPUT_PULLUP);
   pinMode(PIN_K1_SW,  INPUT_PULLUP);
@@ -489,6 +543,10 @@ void setup() {
   pinMode(PIN_K2_SW,  INPUT_PULLUP);
 
   pinMode(PIN_START_BTN, INPUT_PULLUP);
+  pinMode(PIN_STOP_BTN,  INPUT_PULLUP);
+
+  // Configure Battery Voltage ADC Pin (ADC1_CH0)
+  pinMode(PIN_BATSENSE, INPUT);
 
   lastK1Clk = digitalRead(PIN_K1_CLK);
   lastK2Clk = digitalRead(PIN_K2_CLK);
@@ -560,7 +618,7 @@ void loop() {
   }
 
   // --------------------------------------------------------------------------
-  // --- 1. MASTER START BUTTON (CHECKED FIRST: INSTANT 3s HOLD DETECTION) ---
+  // --- 1. MASTER START / CONFIRM BUTTON (SW3 - GPIO 14: 3s HOLD FOR PAIRING) ---
   // --------------------------------------------------------------------------
   int btnState = digitalRead(PIN_START_BTN);
   if (btnState == LOW) {
@@ -576,7 +634,7 @@ void loop() {
       static unsigned long lastHoldPrint = 0;
       if (millis() - lastHoldPrint >= 700) {
         lastHoldPrint = millis();
-        Serial.printf("[BUTTON] Holding: %lu / 3000 ms...\n", heldDuration);
+        Serial.printf("[BUTTON] Start Holding: %lu / 3000 ms...\n", heldDuration);
       }
 
       if (heldDuration >= 3000) {
@@ -591,7 +649,7 @@ void loop() {
     delay(10);
     return;
   } else {
-    // Button was released
+    // Start button was released
     if (startBtnPressTime > 0) {
       lastUserActivity = now;
       unsigned long duration = millis() - startBtnPressTime;
@@ -608,6 +666,14 @@ void loop() {
             updateStatusLED();
           }
         } else if (currentState == STATE_BLE_PAIRING_MENU) {
+          if (bleDeviceCount > 0) {
+            // Confirm highlighted robot target
+            pairedMAC  = bleList[currentBleIndex].address;
+            pairedName = bleList[currentBleIndex].name;
+            preferences.putString("paired_mac", pairedMAC);
+            preferences.putString("paired_name", pairedName);
+            Serial.printf("\n[BLE STATUS] 🟢 Confirmed robot via Start Button: %s (%s)\n", pairedName.c_str(), pairedMAC.c_str());
+          }
           currentState = STATE_ACTION_MENU;
           renderActionMenu();
           if (pairedMAC != "None (Unpaired)" && !isConnected) {
@@ -618,6 +684,72 @@ void loop() {
         }
       }
       startBtnHeld = false;
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // --- 1.1 MASTER STOP / CANCEL BUTTON (SW5 - GPIO 2: 3s HOLD FOR DISCONNECT) ---
+  // --------------------------------------------------------------------------
+  int stopBtnState = digitalRead(PIN_STOP_BTN);
+  if (stopBtnState == LOW) {
+    lastUserActivity = now;
+    if (stopBtnPressTime == 0) {
+      stopBtnPressTime = millis();
+      stopBtnHeld = false;
+      Serial.println("\n[BUTTON] Red Stop/Cancel button pressed... (Hold 3s to disconnect BLE)");
+    } else if (!stopBtnHeld) {
+      unsigned long heldDuration = millis() - stopBtnPressTime;
+
+      static unsigned long lastStopHoldPrint = 0;
+      if (millis() - lastStopHoldPrint >= 700) {
+        lastStopHoldPrint = millis();
+        Serial.printf("[BUTTON] Stop Holding: %lu / 3000 ms...\n", heldDuration);
+      }
+
+      if (heldDuration >= 3000) {
+        stopBtnHeld = true;
+        Serial.println("\n[SYSTEM] 🎯 3-Second Stop Hold Confirmed! Disconnecting BLE session...");
+        if (pClient != nullptr && pClient->isConnected()) {
+          pClient->disconnect();
+        }
+        isConnected = false;
+        pRemoteChar = nullptr;
+        setStatusLED(60, 0, 0);
+        delay(300);
+        updateStatusLED();
+        stopBtnPressTime = 0;
+        return;
+      }
+    }
+    delay(10);
+    return;
+  } else {
+    // Stop button was released
+    if (stopBtnPressTime > 0) {
+      lastUserActivity = now;
+      unsigned long duration = millis() - stopBtnPressTime;
+      stopBtnPressTime = 0;
+      if (duration < 3000 && !stopBtnHeld) {
+        if (currentState == STATE_ACTION_MENU) {
+          if (isBlockDocked) {
+            Serial.println("\n[CANCEL] Dismissed docked block configuration.");
+            isBlockDocked = false;
+            renderActionMenu();
+          } else {
+            Serial.println("\n[EMERGENCY STOP] Red Stop button pressed: Sending locomotion stop to lock posture!");
+            sendLocomotionStop();
+            setStatusLED(80, 0, 0);
+            delay(200);
+            updateStatusLED();
+          }
+        } else if (currentState == STATE_BLE_PAIRING_MENU || currentState == STATE_BLE_SCANNING) {
+          Serial.println("\n[CANCEL] Cancelled pairing/scan, returning to Action Menu.");
+          currentState = STATE_ACTION_MENU;
+          renderActionMenu();
+          updateStatusLED();
+        }
+      }
+      stopBtnHeld = false;
     }
   }
 
@@ -872,12 +1004,12 @@ bool sendRobosenPacket(const RobosenAction& action) {
 
       // Start continuous turn
       pRemoteChar->writeValue(packet, totalPacketLen);
-      delay(turnDurationMs);
+      if (!abortableDelay(turnDurationMs)) return false;
 
       // IMMEDIATELY Send Locomotion Stop (0x0C) to lock robot at desired angle!
       Serial.print("  ► Locomotion Stop: [HEX] FF FF 02 0C 0E (Gait Stand & Lock)\n");
       pRemoteChar->writeValue(stopPacket, sizeof(stopPacket));
-      delay(1000); // Allow gait engine to stabilize feet into neutral stand posture
+      if (!abortableDelay(1000)) return false; // Allow gait engine to stabilize feet into neutral stand posture
       Serial.printf(">>> [SUCCESS] Turned %s %d Deg° and locked position! <<<\n", 
                     (action.opcode == 0x08 ? "Left" : "Right"), action.paramVal);
 
@@ -891,12 +1023,12 @@ bool sendRobosenPacket(const RobosenAction& action) {
 
       // Start continuous locomotion
       pRemoteChar->writeValue(packet, totalPacketLen);
-      delay(walkDurationMs);
+      if (!abortableDelay(walkDurationMs)) return false;
 
       // Send Locomotion Stop (0x0C) to end locomotion
       Serial.print("  ► Locomotion Stop: [HEX] FF FF 02 0C 0E (Gait Stand & Lock)\n");
       pRemoteChar->writeValue(stopPacket, sizeof(stopPacket));
-      delay(1200); // Allow gait engine to stabilize feet into neutral stand posture
+      if (!abortableDelay(1200)) return false; // Allow gait engine to stabilize feet into neutral stand posture
       Serial.printf(">>> [SUCCESS] Locomotion completed (%d Steps) and locked position! <<<\n", action.paramVal);
 
     } else if (isPredefined) {
@@ -920,16 +1052,16 @@ bool sendRobosenPacket(const RobosenAction& action) {
         Serial.printf("(Duration: %lu ms)\n", animDurationMs);
 
         pRemoteChar->writeValue(packet, totalPacketLen);
-        delay(animDurationMs);
+        if (!abortableDelay(animDurationMs)) return false;
         if (rep < action.paramVal - 1) {
-          delay(400); // Inter-repetition settling pause
+          if (!abortableDelay(400)) return false; // Inter-repetition settling pause
         }
       }
       Serial.println(">>> [SUCCESS] All action repetitions completed! <<<");
 
     } else {
       pRemoteChar->writeValue(packet, totalPacketLen);
-      delay(1000);
+      if (!abortableDelay(1000)) return false;
     }
   } else {
     // Simulated output for phone mock / debug
@@ -941,9 +1073,9 @@ bool sendRobosenPacket(const RobosenAction& action) {
       for (int i = 0; i < totalPacketLen; i++) Serial.printf("%02X ", packet[i]);
       Serial.printf("(Direction: %s, Target: %d Deg°, Duration: %lu ms)\n", 
                     (action.opcode == 0x08 ? "Left" : "Right"), action.paramVal, turnDurationMs);
-      delay(turnDurationMs);
+      if (!abortableDelay(turnDurationMs)) return false;
       Serial.print("  ► Locomotion Stop (Simulated): [HEX] FF FF 02 0C 0E (Gait Stand & Lock)\n");
-      delay(1000);
+      if (!abortableDelay(1000)) return false;
       Serial.printf(">>> [SUCCESS] Simulated %s %d Deg° Turn! <<<\n", 
                     (action.opcode == 0x08 ? "Left" : "Right"), action.paramVal);
     } else if (isWalk) {
@@ -951,9 +1083,9 @@ bool sendRobosenPacket(const RobosenAction& action) {
       Serial.printf("  ► Locomotion Command (Simulated): [HEX] ");
       for (int i = 0; i < totalPacketLen; i++) Serial.printf("%02X ", packet[i]);
       Serial.printf("(Target: %d Steps, Duration: %lu ms)\n", action.paramVal, walkDurationMs);
-      delay(walkDurationMs);
+      if (!abortableDelay(walkDurationMs)) return false;
       Serial.print("  ► Locomotion Stop (Simulated): [HEX] FF FF 02 0C 0E (Gait Stand & Lock)\n");
-      delay(1200);
+      if (!abortableDelay(1200)) return false;
       Serial.printf(">>> [SUCCESS] Simulated %d Steps Locomotion! <<<\n", action.paramVal);
     } else if (isPredefined) {
       unsigned long animDurationMs = 4000;
@@ -972,9 +1104,9 @@ bool sendRobosenPacket(const RobosenAction& action) {
         Serial.printf("  ► Action Rep %d of %d (Simulated): [HEX] ", rep + 1, action.paramVal);
         for (int i = 0; i < totalPacketLen; i++) Serial.printf("%02X ", packet[i]);
         Serial.printf("(Duration: %lu ms)\n", animDurationMs);
-        delay(animDurationMs);
+        if (!abortableDelay(animDurationMs)) return false;
         if (rep < action.paramVal - 1) {
-          delay(400);
+          if (!abortableDelay(400)) return false;
         }
       }
       Serial.println(">>> [SUCCESS] All action repetitions simulated! <<<");
@@ -983,7 +1115,9 @@ bool sendRobosenPacket(const RobosenAction& action) {
         Serial.printf("  ► Step/Rep %d of %d (Simulated): [HEX] ", rep + 1, action.paramVal);
         for (int i = 0; i < totalPacketLen; i++) Serial.printf("%02X ", packet[i]);
         Serial.println();
-        if (rep < action.paramVal - 1) delay(800);
+        if (rep < action.paramVal - 1) {
+          if (!abortableDelay(800)) return false;
+        }
       }
       Serial.println(">>> [SUCCESS] All motion commands simulated! <<<");
     }
@@ -1139,11 +1273,49 @@ RobosenAction getActionObjByToken(uint8_t token, int param) {
 // ==============================================================================
 // 8.2 RUN CHAIN ENGINE: PHASE 1 (DISCOVERY 0xAA) & PHASE 2 (EXECUTION 0xBB)
 // ==============================================================================
+void triggerChainAbort(int count) {
+  Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
+  Serial.println("║  🛑 [EMERGENCY HALT] Run chain aborted by Red Stop Button!             ║");
+  Serial.println("║  Turning off all block LEDs and locking robot standing posture...      ║");
+  Serial.println("╚════════════════════════════════════════════════════════════════════════╝\n");
+
+  // Broadcast Step 0 (Abort / Turn off all block LEDs)
+  uint8_t abortPayload[2] = { 0x00, (uint8_t)count };
+  uint8_t abortCrc = calcCrc8(abortPayload, 2);
+  uint8_t abortPkt[5] = { 0xBB, 0x00, (uint8_t)count, abortCrc, 0x55 };
+  ChainSerial.write(abortPkt, 5);
+  ChainSerial.flush();
+
+  // Send Locomotion Stop to robot
+  sendLocomotionStop();
+
+  // Flash Red on status LED
+  setStatusLED(120, 0, 0);
+
+  // Update E-Ink Display
+  updateEInkRunChain(0, count, "HALT / EMERGENCY STOP", 0, "");
+
+  delay(1500);
+  renderActionMenu();
+}
+
 bool executeRunChain() {
+  currentState = STATE_RUNNING;
+  updateStatusLED();
+
   Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
   Serial.println("║                 [RUN CHAIN ENGINE] PHASE 1: DISCOVERY                  ║");
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
   Serial.println("║ Emitting Discovery Seed [0xAA, 0, 0, 0, 0x55] on GPIO 15 (TX)...       ║");
+
+  // Check if Stop Button is already held
+  if (digitalRead(PIN_STOP_BTN) == LOW) {
+    Serial.println("║ 🛑 Execution aborted: Red Stop Button pressed.                         ║");
+    Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+    currentState = STATE_ACTION_MENU;
+    updateStatusLED();
+    return false;
+  }
 
   // 1. Flush any residual noise or old bytes on Chain Return Rail
   while (ChainSerial.available() > 0) {
@@ -1159,6 +1331,13 @@ bool executeRunChain() {
   unsigned long t0 = millis();
   bool headerFound = false;
   while (millis() - t0 < 350) {
+    if (digitalRead(PIN_STOP_BTN) == LOW) {
+      Serial.println("║ 🛑 Discovery aborted by Red Stop Button.                               ║");
+      Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+      currentState = STATE_ACTION_MENU;
+      updateStatusLED();
+      return false;
+    }
     if (ChainSerial.available() > 0) {
       uint8_t b = ChainSerial.read();
       if (b == 0xAA) {
@@ -1172,15 +1351,26 @@ bool executeRunChain() {
   if (!headerFound) {
     Serial.println("║ ❌ Return Rail: No response / open circuit. (No blocks or no End Block)║");
     Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+    currentState = STATE_ACTION_MENU;
+    updateStatusLED();
     return false;
   }
 
   // 4. Read Len and Count
   unsigned long t1 = millis();
-  while (ChainSerial.available() < 2 && (millis() - t1 < 100)) delay(1);
+  while (ChainSerial.available() < 2 && (millis() - t1 < 100)) {
+    if (digitalRead(PIN_STOP_BTN) == LOW) {
+      currentState = STATE_ACTION_MENU;
+      updateStatusLED();
+      return false;
+    }
+    delay(1);
+  }
   if (ChainSerial.available() < 2) {
     Serial.println("║ ❌ Incomplete response: Timeout waiting for length and count.          ║");
     Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+    currentState = STATE_ACTION_MENU;
+    updateStatusLED();
     return false;
   }
 
@@ -1190,6 +1380,8 @@ bool executeRunChain() {
   if (count == 0 || len != count * 2 || len > 60) {
     Serial.printf("║ ❌ Invalid chain frame dimensions: Len=%d, Count=%d                       ║\n", len, count);
     Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+    currentState = STATE_ACTION_MENU;
+    updateStatusLED();
     return false;
   }
 
@@ -1198,6 +1390,11 @@ bool executeRunChain() {
   unsigned long t2 = millis();
   int bytesRead = 0;
   while (bytesRead < (len + 2) && (millis() - t2 < 200)) {
+    if (digitalRead(PIN_STOP_BTN) == LOW) {
+      currentState = STATE_ACTION_MENU;
+      updateStatusLED();
+      return false;
+    }
     if (ChainSerial.available() > 0) {
       rxBuf[bytesRead++] = ChainSerial.read();
     } else {
@@ -1208,6 +1405,8 @@ bool executeRunChain() {
   if (bytesRead < (len + 2)) {
     Serial.printf("║ ❌ Frame truncated: Expected %d bytes, only received %d.                 ║\n", len + 2, bytesRead);
     Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+    currentState = STATE_ACTION_MENU;
+    updateStatusLED();
     return false;
   }
 
@@ -1227,6 +1426,8 @@ bool executeRunChain() {
     Serial.printf("║ ❌ CRC-8 Mismatch! Calc: 0x%02X, Recv: 0x%02X, Footer: 0x%02X                   ║\n",
                   calcCrc, rxCrc, footer);
     Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+    currentState = STATE_ACTION_MENU;
+    updateStatusLED();
     return false;
   }
 
@@ -1242,7 +1443,12 @@ bool executeRunChain() {
   Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
 
   // Brief pause before execution begins
-  delay(400);
+  if (!abortableDelay(400)) {
+    triggerChainAbort(count);
+    currentState = STATE_ACTION_MENU;
+    updateStatusLED();
+    return false;
+  }
 
   // 8. PHASE 2: REAL-TIME STEP EXECUTION & WS2812B STEP TRACKING (0xBB)
   Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
@@ -1250,6 +1456,14 @@ bool executeRunChain() {
   Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
 
   for (int s = 1; s <= count; s++) {
+    // Check if user hit Red Stop button before triggering step
+    if (digitalRead(PIN_STOP_BTN) == LOW) {
+      triggerChainAbort(count);
+      currentState = STATE_ACTION_MENU;
+      updateStatusLED();
+      return false;
+    }
+
     uint8_t actId  = rxBuf[(s - 1) * 2];
     uint8_t parVal = rxBuf[(s - 1) * 2 + 1];
     RobosenAction actionObj = getActionObjByToken(actId, parVal);
@@ -1270,10 +1484,21 @@ bool executeRunChain() {
     updateEInkRunChain(s, count, actionObj.name, actionObj.paramVal, actionObj.paramUnit);
 
     // Dispatch BLE motion command to physical robot
-    sendRobosenPacket(actionObj);
+    bool stepOk = sendRobosenPacket(actionObj);
+    if (!stepOk) {
+      triggerChainAbort(count);
+      currentState = STATE_ACTION_MENU;
+      updateStatusLED();
+      return false;
+    }
 
-    // Inter-step settling delay
-    delay(500);
+    // Inter-step settling delay (abortable via Red Stop button)
+    if (!abortableDelay(500)) {
+      triggerChainAbort(count);
+      currentState = STATE_ACTION_MENU;
+      updateStatusLED();
+      return false;
+    }
   }
 
   // 9. PHASE 3: PROGRAM COMPLETE & RAINBOW VICTORY CELEBRATION (ActiveStep = 0xFF)
@@ -1299,9 +1524,10 @@ bool executeRunChain() {
     setStatusLED(0, 0, 100);   delay(80);
     setStatusLED(50, 0, 100);  delay(80);
   }
-  updateStatusLED();
 
   delay(1200);
+  currentState = STATE_ACTION_MENU;
+  updateStatusLED();
   renderActionMenu(); // Return display back to Action Menu
 
   return true;
@@ -1483,10 +1709,25 @@ void updateEInkActionMenu() {
     display.setCursor(6, 17);
     display.print("ROBOSEN K1");
 
-    // Top-Right Status Badge
+    // Header Status & Battery Monitor
     display.setFont(); // Default 5x7 font
     display.setTextSize(1);
-    display.setCursor(160, 8);
+
+    float vbat = readBatteryVoltage();
+    int batPct = calculateBatteryPercent(vbat);
+
+    // Battery icon & percentage in header (top-right)
+    int batX = w - 38;
+    int batY = 6;
+    display.drawRect(batX, batY, 20, 10, GxEPD_WHITE);
+    display.fillRect(batX + 20, batY + 2, 2, 6, GxEPD_WHITE); // terminal tip
+    int fillW = map(batPct, 0, 100, 0, 16);
+    if (fillW > 0) {
+      display.fillRect(batX + 2, batY + 2, fillW, 6, GxEPD_WHITE);
+    }
+
+    // Top-Right Status Badge (left of battery icon)
+    display.setCursor(batX - 78, 8);
     if (isConnected) {
       display.print("[CONNECTED]");
     } else if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
@@ -1528,7 +1769,7 @@ void updateEInkActionMenu() {
     // 4. Horizontal Divider Line
     display.drawLine(2, 82, w - 3, 82, GxEPD_BLACK);
 
-    // 5. Bottom Config Dock Status Area
+    // 5. Bottom Config Dock Status Area (4 UI Input hints)
     display.setFont();
     display.setTextSize(1);
     display.setCursor(8, 89);
@@ -1537,11 +1778,11 @@ void updateEInkActionMenu() {
                      dockedActionId, getActionNameByToken(dockedActionId),
                      dockedParamVal, getParamUnitByToken(dockedActionId));
       display.setCursor(8, 103);
-      display.print("Knob 1 Click: Burn Config to Block");
+      display.print("K1 Click: Flash | Stop (Red): Cancel");
     } else {
-      display.print("DOCK: EMPTY (Insert Block to Config)");
+      display.printf("DOCK: EMPTY  |  Bat: %.2fV (%d%%)", vbat, batPct);
       display.setCursor(8, 103);
-      display.print("Start: Run Chain | Hold: Pair (3s)");
+      display.print("Start: Run | Stop: Halt | Hold St: Pair");
     }
 
   } while (display.nextPage());
@@ -1604,9 +1845,9 @@ void updateEInkPairingMenu() {
     display.setTextColor(GxEPD_BLACK);
     display.setFont();
     display.setCursor(8, 98);
-    display.print("Knob: Select  |  Click: Connect & Save");
+    display.print("Knob: Select  |  Start/Click: Confirm");
     display.setCursor(8, 110);
-    display.print("Start: Cancel & Return");
+    display.print("Stop (Red): Cancel & Return");
 
   } while (display.nextPage());
 }
@@ -1641,7 +1882,7 @@ void updateEInkScanning() {
 
     display.drawLine(2, 92, w - 3, 92, GxEPD_BLACK);
     display.setCursor(8, 102);
-    display.print("Hold Start Button to cancel");
+    display.print("Stop Button (Red): Cancel scan");
   } while (display.nextPage());
 }
 
@@ -1692,6 +1933,6 @@ void updateEInkRunChain(int currentStep, int totalSteps, const char* actionName,
     display.drawLine(2, 92, w - 3, 92, GxEPD_BLACK);
     display.setTextSize(1);
     display.setCursor(8, 102);
-    display.print("Physical Chain Bus Active (Phase 2)");
+    display.print("Run Chain Active | Stop (Red): Halt");
   } while (display.nextPage());
 }
