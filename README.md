@@ -289,7 +289,8 @@ Complete hardware specifications are detailed in [`PHYSICAL_BLOCK_SYSTEM_SPEC.md
 | **Smart End Block Firmware** | WCH CH32V003 | [`firmware/ch32v003_end_block/`](firmware/ch32v003_end_block/) | Active loopback line driver, CRC-8 validation, rainbow sparkle (`0xEE`) | ✅ **Flashed on Silicon** |
 | **ESP32 SWIO Programmer** | ESP32 / ESP32-S3 | [`firmware/esp32_ch32v003_programmer/`](firmware/esp32_ch32v003_programmer/) | High-speed 1-wire SWIO debugger & chunked Python flasher (`flash_tool.py`) | ✅ Verified |
 | **Arduino Uno Programmer** | Arduino Uno R3 | [`firmware/arduino_uno_ch32v003_programmer/`](firmware/arduino_uno_ch32v003_programmer/) | Ardulink 16MHz assembly bit-banging flasher for `minichlink` | ✅ Verified |
-| **Master Carrier PCB** | KiCad 10.0.6 | [`hardware/kicad/`](hardware/kicad/) | Custom carrier motherboard PCB project, 12 verified footprints (`robosen_master.pretty`), 0 ERC violations | ✅ Verified |
+| **Master Carrier PCB** | KiCad 10.0.6 | [`hardware/master_block/`](hardware/master_block/) | Custom carrier motherboard PCB project, 12 verified footprints (`robosen_master.pretty`), 0 ERC violations | ✅ **Ordered** |
+| **Action Block PCB** | KiCad 10.0.6 | [`hardware/action_block/`](hardware/action_block/) | 32×32mm modular action block carrier, centered pogo docks, 3-pin RGB header, 0 DRC violations | ✅ **Ordered** |
 
 ---
 
@@ -298,7 +299,8 @@ Complete hardware specifications are detailed in [`PHYSICAL_BLOCK_SYSTEM_SPEC.md
 | Document | Description |
 | :--- | :--- |
 | [`docs/master_block_wiring.html`](docs/master_block_wiring.html) | Interactive Master Block BOM, color-coded pinout wiring table, and battery circuit guide |
-| [`hardware/kicad/`](hardware/kicad/) | KiCad 10 Master Block PCB project, footprint library, and JLCPCB manufacturing checklist |
+| [`hardware/master_block/`](hardware/master_block/) | KiCad 10 Master Block PCB project, footprint library, and JLCPCB manufacturing checklist |
+| [`hardware/action_block/`](hardware/action_block/) | KiCad 10 Action Block PCB project, routing report, and production Gerbers |
 | [`PROJECT_SUMMARY.md`](PROJECT_SUMMARY.md) | Comprehensive executive project summary, mission, and comparison matrix |
 | [`PHYSICAL_BLOCK_SYSTEM_SPEC.md`](PHYSICAL_BLOCK_SYSTEM_SPEC.md) | Hardware, electrical, connector pinout, and 2-phase protocol specifications |
 | [`PROTOTYPE_01_SPEC.md`](PROTOTYPE_01_SPEC.md) | Prototype 01 hardware breadboard wiring, firmware, and test guides |

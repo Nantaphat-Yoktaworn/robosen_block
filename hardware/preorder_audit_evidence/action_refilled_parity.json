@@ -1,0 +1,913 @@
+{
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-10-05T04:47:58",
+    "ignored_checks": [
+        {
+            "description": "Footprint has no courtyard defined",
+            "key": "missing_courtyard"
+        },
+        {
+            "description": "Track endpoint not centered on via",
+            "key": "track_not_centered_on_via"
+        },
+        {
+            "description": "Tuning profile track geometries",
+            "key": "tuning_profile_track_geometries"
+        },
+        {
+            "description": "Footprint doesn't match symbol's footprint filters",
+            "key": "footprint_filters_mismatch"
+        },
+        {
+            "description": "Footprint component type doesn't match footprint pads",
+            "key": "footprint_type_mismatch"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning",
+        "exclusion"
+    ],
+    "kicad_version": "10.0.6",
+    "schematic_parity": [
+        {
+            "description": "Field 'Description' differs (PCB: '', Schematic: 'Unpolarized Ceramic Capacitor 2.54mm pitch')",
+            "items": [
+                {
+                    "description": "Footprint C104",
+                    "pos": {
+                        "x": 109.5,
+                        "y": 62.23
+                    },
+                    "uuid": "7d096d4b-e0a3-4b6a-80d7-a58da081622e"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "No corresponding pin found in schematic",
+            "items": [
+                {
+                    "description": "PTH pad 1 [unconnected-(MCU-PC4-Pad1)] of MCU",
+                    "pos": {
+                        "x": 88.76,
+                        "y": 85.4
+                    },
+                    "uuid": "3e53b963-1d21-4f7c-abe7-b38656f582bb"
+                }
+            ],
+            "severity": "warning",
+            "type": "net_conflict"
+        },
+        {
+            "description": "No corresponding pin found in schematic",
+            "items": [
+                {
+                    "description": "PTH pad 2 [unconnected-(MCU-PC3-Pad2)] of MCU",
+                    "pos": {
+                        "x": 88.76,
+                        "y": 82.86
+                    },
+                    "uuid": "c4c1ad75-2bf9-4999-8dc6-a88549ffb5b3"
+                }
+            ],
+            "severity": "warning",
+            "type": "net_conflict"
+        },
+        {
+            "description": "No corresponding pin found in schematic",
+            "items": [
+                {
+                    "description": "PTH pad 3 [unconnected-(MCU-PC2-Pad3)] of MCU",
+                    "pos": {
+                        "x": 88.76,
+                        "y": 80.32
+                    },
+                    "uuid": "3bbd6036-d3b1-407e-a516-0a6bf69bcec2"
+                }
+            ],
+            "severity": "warning",
+            "type": "net_conflict"
+        },
+        {
+            "description": "No corresponding pin found in schematic",
+            "items": [
+                {
+                    "description": "PTH pad 4 [unconnected-(MCU-PC1-Pad4)] of MCU",
+                    "pos": {
+                        "x": 88.76,
+                        "y": 77.78
+                    },
+                    "uuid": "33350410-8259-42c4-8dda-16887d846909"
+                }
+            ],
+            "severity": "warning",
+            "type": "net_conflict"
+        },
+        {
+            "description": "No corresponding pin found in schematic",
+            "items": [
+                {
+                    "description": "PTH pad 5 [unconnected-(MCU-PC0-Pad5)] of MCU",
+                    "pos": {
+                        "x": 88.76,
+                        "y": 75.24
+                    },
+                    "uuid": "e69b2d3c-2595-4468-b282-0fce2521d6d7"
+                }
+            ],
+            "severity": "warning",
+            "type": "net_conflict"
+        },
+        {
+            "description": "No corresponding pin found in schematic",
+            "items": [
+                {
+                    "description": "PTH pad 7 [unconnected-(MCU-PA1-Pad7)] of MCU",
+                    "pos": {
+                        "x": 88.76,
+                        "y": 70.16
+                    },
+                    "uuid": "2ca338b7-e7f3-4948-bb5b-6d551f636d71"
+                }
+            ],
+            "severity": "warning",
+            "type": "net_conflict"
+        },
+        {
+            "description": "No corresponding pin found in schematic",
+            "items": [
+                {
+                    "description": "PTH pad 12 [unconnected-(MCU-PC5-Pad12)] of MCU",
+                    "pos": {
+                        "x": 104.0,
+                        "y": 85.4
+                    },
+                    "uuid": "4c581099-2621-46e2-90a1-17de9d172fdb"
+                }
+            ],
+            "severity": "warning",
+            "type": "net_conflict"
+        },
+        {
+            "description": "No corresponding pin found in schematic",
+            "items": [
+                {
+                    "description": "PTH pad 13 [unconnected-(MCU-PC6-Pad13)] of MCU",
+                    "pos": {
+                        "x": 104.0,
+                        "y": 82.86
+                    },
+                    "uuid": "05491cb7-5c6a-40dc-a4da-3eb9153236be"
+                }
+            ],
+            "severity": "warning",
+            "type": "net_conflict"
+        },
+        {
+            "description": "No corresponding pin found in schematic",
+            "items": [
+                {
+                    "description": "PTH pad 14 [unconnected-(MCU-PC7-Pad14)] of MCU",
+                    "pos": {
+                        "x": 104.0,
+                        "y": 80.32
+                    },
+                    "uuid": "82559cff-9b97-4953-bcb7-0f6a488a638e"
+                }
+            ],
+            "severity": "warning",
+            "type": "net_conflict"
+        },
+        {
+            "description": "No corresponding pin found in schematic",
+            "items": [
+                {
+                    "description": "PTH pad 15 [unconnected-(MCU-PD0-Pad15)] of MCU",
+                    "pos": {
+                        "x": 104.0,
+                        "y": 77.78
+                    },
+                    "uuid": "795b1563-7601-47c5-ad42-d4b297532665"
+                }
+            ],
+            "severity": "warning",
+            "type": "net_conflict"
+        },
+        {
+            "description": "No corresponding pin found in schematic",
+            "items": [
+                {
+                    "description": "PTH pad 17 [unconnected-(MCU-PD2-Pad17)] of MCU",
+                    "pos": {
+                        "x": 104.0,
+                        "y": 72.7
+                    },
+                    "uuid": "bec619f4-cfd4-45f7-a81d-b69d7ea59fa7"
+                }
+            ],
+            "severity": "warning",
+            "type": "net_conflict"
+        },
+        {
+            "description": "No corresponding pin found in schematic",
+            "items": [
+                {
+                    "description": "PTH pad 18 [unconnected-(MCU-PD3-Pad18)] of MCU",
+                    "pos": {
+                        "x": 104.0,
+                        "y": 70.16
+                    },
+                    "uuid": "ac58730e-8120-4149-86e5-234a8f44403c"
+                }
+            ],
+            "severity": "warning",
+            "type": "net_conflict"
+        },
+        {
+            "description": "No corresponding pin found in schematic",
+            "items": [
+                {
+                    "description": "PTH pad 19 [unconnected-(MCU-PD4-Pad19)] of MCU",
+                    "pos": {
+                        "x": 104.0,
+                        "y": 67.62
+                    },
+                    "uuid": "72131ba6-87c5-4451-9325-8885f021b611"
+                }
+            ],
+            "severity": "warning",
+            "type": "net_conflict"
+        },
+        {
+            "description": "No corresponding pin found in schematic",
+            "items": [
+                {
+                    "description": "PTH pad 20 [unconnected-(MCU-PD7-Pad20)] of MCU",
+                    "pos": {
+                        "x": 104.0,
+                        "y": 65.08
+                    },
+                    "uuid": "b11b0270-8eb5-4ece-987a-238b33dd2876"
+                }
+            ],
+            "severity": "warning",
+            "type": "net_conflict"
+        }
+    ],
+    "source": "action_block.kicad_pcb",
+    "unconnected_items": [],
+    "violations": [
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Rectangle on Edge.Cuts",
+                    "pos": {
+                        "x": 80.5,
+                        "y": 56.5
+                    },
+                    "uuid": "0a91bd86-948c-4c02-a2dc-3a028b55716d"
+                },
+                {
+                    "description": "Circle of IN on F.Silkscreen",
+                    "pos": {
+                        "x": 80.5,
+                        "y": 68.69
+                    },
+                    "uuid": "6ea765d1-0b47-4482-8d66-77a8de29456c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Rectangle on Edge.Cuts",
+                    "pos": {
+                        "x": 80.5,
+                        "y": 56.5
+                    },
+                    "uuid": "0a91bd86-948c-4c02-a2dc-3a028b55716d"
+                },
+                {
+                    "description": "Rectangle of MCU on F.Silkscreen",
+                    "pos": {
+                        "x": 91.88,
+                        "y": 60.7
+                    },
+                    "uuid": "a7785b7e-b5c1-4837-bd8f-a1031e9e1b39"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of RGB (GND)",
+                    "pos": {
+                        "x": 86.0,
+                        "y": 59.96
+                    },
+                    "uuid": "d579cbc5-b7d8-4db3-9eb1-2f3e70427554"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of RGB (VCC)",
+                    "pos": {
+                        "x": 86.0,
+                        "y": 62.5
+                    },
+                    "uuid": "7c11d806-4640-4878-aa4b-429a94face71"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of RGB (IN)",
+                    "pos": {
+                        "x": 86.0,
+                        "y": 65.04
+                    },
+                    "uuid": "5e1e397b-efc8-4d32-b4e5-10f4d86fefe5"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of PROG (GND)",
+                    "pos": {
+                        "x": 111.5,
+                        "y": 81.42
+                    },
+                    "uuid": "f71e8921-98a4-4a2e-8fa9-9a2bb7142020"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of PROG (3V3)",
+                    "pos": {
+                        "x": 111.5,
+                        "y": 83.96
+                    },
+                    "uuid": "f71e8921-98a4-4a2e-8fa9-9a2bb7142022"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of PROG (SWIO)",
+                    "pos": {
+                        "x": 111.5,
+                        "y": 86.5
+                    },
+                    "uuid": "f71e8921-98a4-4a2e-8fa9-9a2bb7142024"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (GND)",
+                    "pos": {
+                        "x": 90.76,
+                        "y": 60.0
+                    },
+                    "uuid": "c7c88a6e-2d5c-4f5a-bd5d-897352b24fd8"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (3V3)",
+                    "pos": {
+                        "x": 90.76,
+                        "y": 62.54
+                    },
+                    "uuid": "3ec571e4-e0e8-4127-8b92-853c6e0629e5"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (TX)",
+                    "pos": {
+                        "x": 90.76,
+                        "y": 65.08
+                    },
+                    "uuid": "a27b1a1a-8d3f-40d9-b9c1-8ebc2fdec3d9"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (RX)",
+                    "pos": {
+                        "x": 90.76,
+                        "y": 67.62
+                    },
+                    "uuid": "23e715e7-e002-4cb9-a988-8b4971c6fc66"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (PA1)",
+                    "pos": {
+                        "x": 90.76,
+                        "y": 70.16
+                    },
+                    "uuid": "eba5ea6d-5599-498b-8cd4-6d7258c03a98"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (PA2)",
+                    "pos": {
+                        "x": 90.76,
+                        "y": 72.7
+                    },
+                    "uuid": "62655713-eaaf-4f89-8ab0-e7d75038cd53"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (PC0)",
+                    "pos": {
+                        "x": 90.76,
+                        "y": 75.24
+                    },
+                    "uuid": "53e29b56-d421-4bf2-a2f2-41da45bea03a"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (PC1)",
+                    "pos": {
+                        "x": 90.76,
+                        "y": 77.78
+                    },
+                    "uuid": "2d9711a9-c7d5-4884-b958-918226687b05"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (PC2)",
+                    "pos": {
+                        "x": 90.76,
+                        "y": 80.32
+                    },
+                    "uuid": "8a9f3708-b08f-4840-bac0-620c702f7654"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (PC3)",
+                    "pos": {
+                        "x": 90.76,
+                        "y": 82.86
+                    },
+                    "uuid": "08effc07-9aad-45ea-bedf-f28b79298b1b"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (PC4)",
+                    "pos": {
+                        "x": 90.76,
+                        "y": 85.4
+                    },
+                    "uuid": "c1269f7c-ec30-488f-8fd9-84d776625a35"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (USB-C)",
+                    "pos": {
+                        "x": 96.38,
+                        "y": 58.2
+                    },
+                    "uuid": "8220ff14-9234-4be5-80af-842a8474c7c9"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (CH32V003)",
+                    "pos": {
+                        "x": 96.38,
+                        "y": 72.7
+                    },
+                    "uuid": "1d540b61-9d4e-42c3-8c24-54abcfbd8814"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (RST)",
+                    "pos": {
+                        "x": 96.38,
+                        "y": 78.95
+                    },
+                    "uuid": "91b92877-3f25-4e3a-9221-b41e5e3fa7ed"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (GND)",
+                    "pos": {
+                        "x": 102.0,
+                        "y": 60.0
+                    },
+                    "uuid": "fb479e7b-1376-48ba-8978-37f15201ebf8"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (3V3)",
+                    "pos": {
+                        "x": 102.0,
+                        "y": 62.54
+                    },
+                    "uuid": "1707fec4-2d8d-4680-aedd-a2778500a423"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (PD7)",
+                    "pos": {
+                        "x": 102.0,
+                        "y": 65.08
+                    },
+                    "uuid": "c135d372-44f3-46f9-8935-e9c4845ea0ce"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (PD4)",
+                    "pos": {
+                        "x": 102.0,
+                        "y": 67.62
+                    },
+                    "uuid": "39baa13f-6e33-4abe-8c2f-f64d89a86557"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (PD3)",
+                    "pos": {
+                        "x": 102.0,
+                        "y": 70.16
+                    },
+                    "uuid": "c7e39bbe-8587-4c8f-be50-ac94ebf8f2f4"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (PD2)",
+                    "pos": {
+                        "x": 102.0,
+                        "y": 72.7
+                    },
+                    "uuid": "a33becff-bcca-4270-9a9c-57b9e875843b"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (SWIO)",
+                    "pos": {
+                        "x": 102.0,
+                        "y": 75.24
+                    },
+                    "uuid": "175258d2-d262-42e6-9e49-390c4598921f"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (PD0)",
+                    "pos": {
+                        "x": 102.0,
+                        "y": 77.78
+                    },
+                    "uuid": "ba9325f2-73de-4111-a6d0-2b81a1d973f2"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (PC7)",
+                    "pos": {
+                        "x": 102.0,
+                        "y": 80.32
+                    },
+                    "uuid": "7d1c917a-6e05-4057-8903-43c29b5ab181"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (PC6)",
+                    "pos": {
+                        "x": 102.0,
+                        "y": 82.86
+                    },
+                    "uuid": "12abdf96-3b08-4ef4-9082-4719dc89884a"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.6500 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of MCU (PC5)",
+                    "pos": {
+                        "x": 102.0,
+                        "y": 85.4
+                    },
+                    "uuid": "d41fe8f1-d423-45db-a933-d0484f4a5c4a"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Footprint text of RGB (VCC)",
+                    "pos": {
+                        "x": 86.0,
+                        "y": 62.5
+                    },
+                    "uuid": "7c11d806-4640-4878-aa4b-429a94face71"
+                },
+                {
+                    "description": "Rectangle of RGB on F.Silkscreen",
+                    "pos": {
+                        "x": 85.5,
+                        "y": 58.5
+                    },
+                    "uuid": "befde2df-5402-4c81-945f-8807134b70d3"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of RGB on F.Silkscreen",
+                    "pos": {
+                        "x": 85.5,
+                        "y": 58.5
+                    },
+                    "uuid": "befde2df-5402-4c81-945f-8807134b70d3"
+                },
+                {
+                    "description": "Footprint text of RGB (GND)",
+                    "pos": {
+                        "x": 86.0,
+                        "y": 59.96
+                    },
+                    "uuid": "d579cbc5-b7d8-4db3-9eb1-2f3e70427554"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Footprint text of RGB (IN)",
+                    "pos": {
+                        "x": 86.0,
+                        "y": 65.04
+                    },
+                    "uuid": "5e1e397b-efc8-4d32-b4e5-10f4d86fefe5"
+                },
+                {
+                    "description": "Rectangle of RGB on F.Silkscreen",
+                    "pos": {
+                        "x": 85.5,
+                        "y": 58.5
+                    },
+                    "uuid": "befde2df-5402-4c81-945f-8807134b70d3"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of PROG on F.Silkscreen",
+                    "pos": {
+                        "x": 111.0,
+                        "y": 79.96
+                    },
+                    "uuid": "f71e8921-98a4-4a2e-8fa9-9a2bb7142016"
+                },
+                {
+                    "description": "Footprint text of PROG (GND)",
+                    "pos": {
+                        "x": 111.5,
+                        "y": 81.42
+                    },
+                    "uuid": "f71e8921-98a4-4a2e-8fa9-9a2bb7142020"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of PROG on F.Silkscreen",
+                    "pos": {
+                        "x": 111.0,
+                        "y": 79.96
+                    },
+                    "uuid": "f71e8921-98a4-4a2e-8fa9-9a2bb7142016"
+                },
+                {
+                    "description": "Footprint text of PROG (SWIO)",
+                    "pos": {
+                        "x": 111.5,
+                        "y": 86.5
+                    },
+                    "uuid": "f71e8921-98a4-4a2e-8fa9-9a2bb7142024"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of PROG on F.Silkscreen",
+                    "pos": {
+                        "x": 111.0,
+                        "y": 79.96
+                    },
+                    "uuid": "f71e8921-98a4-4a2e-8fa9-9a2bb7142016"
+                },
+                {
+                    "description": "Footprint text of PROG (3V3)",
+                    "pos": {
+                        "x": 111.5,
+                        "y": 83.96
+                    },
+                    "uuid": "f71e8921-98a4-4a2e-8fa9-9a2bb7142022"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        }
+    ]
+}

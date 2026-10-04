@@ -1,10 +1,10 @@
 You are working on the KiCad PCB for the Robosen Master Block project located in this workspace.
 
 ### Objective
-Perform trace routing and power planes (filled copper zones) for `hardware/kicad/robosen_master_block.kicad_pcb`.
+Perform trace routing and power planes (filled copper zones) for `hardware/master_block/robosen_master_block.kicad_pcb`.
 
 ### Context & Current State
-1. Board File: `hardware/kicad/robosen_master_block.kicad_pcb`
+1. Board File: `hardware/master_block/robosen_master_block.kicad_pcb`
 2. Board Outline: `Edge.Cuts` rectangle from `(86.50, 62.00) mm` to `(202.00, 124.00) mm` (Dimensions: 115.5 mm x 62.0 mm).
 3. Mounting Holes: 4x locked M3 mounting holes are placed at:
    - H1: (96.25, 92.00) mm
@@ -29,6 +29,6 @@ Perform trace routing and power planes (filled copper zones) for `hardware/kicad
 2. Trace Routing:
    - Route the remaining signal and power nets. You can write a Python script using `pcbnew` to route tracks (`pcbnew.PCB_TRACK`) and vias (`pcbnew.PCB_VIA`), or implement an automated routing strategy.
 3. DRC Verification:
-   - Run DRC using `& "C:\Program Files\KiCad\10.0\bin\kicad-cli.exe" pcb drc hardware/kicad/robosen_master_block.kicad_pcb` to check the remaining unconnected pads and any DRC violations.
+   - Run DRC using `& "C:\Program Files\KiCad\10.0\bin\kicad-cli.exe" pcb drc hardware/master_block/robosen_master_block.kicad_pcb` to check the remaining unconnected pads and any DRC violations.
 4. Summary:
    - Report what was accomplished, remaining unrouted nets if any, and DRC status.

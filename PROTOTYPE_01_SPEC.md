@@ -85,7 +85,7 @@ Every active component in Prototype #01 runs natively on **+3.3V logic and power
 ## 5. Complete Breadboard Pinout & Wiring Specifications
 
 > 💡 **Interactive Web Guide:** An interactive, filterable wiring table and component BOM is available at [`docs/master_block_wiring.html`](docs/master_block_wiring.html).  
-> 📐 **Custom PCB Carrier Migration:** KiCad 10 project and verified footprints are available at [`hardware/kicad/`](hardware/kicad/).
+> 📐 **Custom PCB Carrier Migration:** KiCad 10 projects and verified production packages are available at [`hardware/master_block/`](hardware/master_block/) (Motherboard, $115.5 \times 62.0\text{ mm}$, ORDERED) and [`hardware/action_block/`](hardware/action_block/) (Action Block, $32.0 \times 32.0\text{ mm}$, ORDERED).
 
 ### 5.1 Master Controller (ESP32-S3 Pin & Wire Color Allocations)
 
@@ -435,16 +435,17 @@ STEP 4: RUN CHAIN EXECUTION
 
 ---
 
-## 12. Future Production Transition: From Breadboard to Custom PCB
+## 12. Production Transition: Custom Carrier PCBs Designed & Ordered (October 2026)
 
-When transitioning from this Prototype #01 to final injection-molded / 3D-printed blocks:
-1. **Raw IC Replacement:** Replace CH32V003 development boards with raw **`CH32V003J4M6` (SOP-8)** ICs (~$0.15 / 5 THB).
-2. **Compact PCB:** Design a tiny 18mm $\times$ 18mm custom PCB for each action block with only 3 components:
-   * 1x CH32V003 IC
-   * 1x 0.1 µF ceramic capacitor
-   * 1x WS2812B RGB LED
-3. **Magnetic Pogo Pins:** Replace jumper wires with 4-pin self-aligning polarized magnetic pogo connectors.
-4. **Drop-Proof Durability:** Enclose electronics in ultrasonic-welded ABS/PLA blocks with zero moving parts.
+Transitioning from solderless breadboard to modular production carrier PCBs has been achieved:
+1. **Master Block Carrier Motherboard (`hardware/master_block/`):**
+   - $115.50 \times 62.00\text{ mm}$ 2-layer PCB housing ESP32-S3 DevKitC-1 socket, TP4056 USB-C charger, TPS63020 buck-boost, 18650 holder, KY-040 rotary encoders, START/STOP buttons, battery voltage sensor, and 2.13" E-Paper display.
+   - Status: **Ordered at JLCPCB (October 5, 2026)** (`robosen_master_block_gerbers.zip`).
+2. **Action Block Modular Carrier PCB (`hardware/action_block/`):**
+   - $32.00 \times 32.00\text{ mm}$ 2-layer PCB housing TENSTAR CH32V003F4P6 breakout socket, 3-pin WS2812B RGB module (`GND`, `VCC`, `IN`), centered collinear pogo docks ($Y = 72.50\text{ mm}$), and SWIO programming header.
+   - Status: **Ordered at JLCPCB (October 5, 2026)** (`robosen_action_block_gerbers.zip`).
+3. **Future Production Enhancements (Phase 2):**
+   - Transition from breakout boards to surface-mount components (CH32V003J4M6 SOP-8 / QFN-20, SMD WS2812B-2020) and ultrasonic-welded plastic shells with magnetic polarity channels.
 
 ---
 

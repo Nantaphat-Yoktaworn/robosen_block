@@ -67,7 +67,7 @@ For standard M3 brass heat-set threaded inserts (e.g., Ruthex, Voron, or generic
 - **Surface Finish**: Lead-Free HASL or ENIG (Electroless Nickel Immersion Gold)
 - **Minimum Trace / Clearance**: $0.25\text{ mm} / 0.22\text{ mm}$ (Power traces: $0.80\text{ mm}$)
 - **Minimum Drill / Via**: $0.3\text{ mm}$ drill / $0.6\text{ mm}$ diameter
-- **Production Package**: [hardware/kicad/robosen_master_block_gerbers.zip](file:///C:/Users/nnnn/Projects/robosen_block/hardware/kicad/robosen_master_block_gerbers.zip)
+- **Production Package**: [`hardware/master_block/robosen_master_block_gerbers.zip`](../hardware/master_block/robosen_master_block_gerbers.zip) (**ORDERED AT JLCPCB**)
 
 ---
 

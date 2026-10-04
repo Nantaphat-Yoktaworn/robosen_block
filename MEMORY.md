@@ -1,7 +1,7 @@
 # RobosenJS & Tangible Coding Block System: Master Project Memory
 
 > **System Overview:** Programmatic Control (Node.js & Python SDK), Custom Node-RED Tangible Block Simulator Palette, and Bluetooth Low Energy (BLE) Reverse Engineering for the **Robosen K1 / Interstellar Scout K1 Series** Humanoid Robot.  
-> **Last Updated:** August 29, 2026  
+> **Last Updated:** October 5, 2026  
 > **FCC ID:** `2ATNWK1` | **Live Verified Robot ID:** `K1-00457` (`3C:A5:51:94:97:70`) | **Firmware:** `VER:3.03L` (Build: `SH2022-07-23`)
 
 ---
@@ -40,11 +40,18 @@ robosen_block/
 │   └── esp32_master/
 │       └── esp32_master.ino              # Master Block C++ firmware (ESP32-S3 BLE Central, NVS flash, Dual-Knob UI, Run Chain Engine)
 ├── hardware/
-│   └── kicad/                            # KiCad 10 Motherboard Carrier PCB Project
-│       ├── robosen_master_block.kicad_pro# Master project file
-│       ├── fp-lib-table                  # Local footprint library registry table
-│       ├── README.md                     # Hardware wiring & footprint guide
-│       └── robosen_master.pretty/        # Custom verified footprint library (.kicad_mod)
+│   ├── master_block/                     # KiCad 10 Master Block Motherboard Carrier PCB Project
+│   │   ├── robosen_master_block.kicad_pro# Master project file
+│   │   ├── robosen_master_block.kicad_pcb# Routed PCB layout (115.5 x 62.0 mm, dual-layer GND fill)
+│   │   ├── robosen_master_block_gerbers.zip # 10-file JLCPCB production package (ORDERED)
+│   │   ├── fp-lib-table & sym-lib-table  # Local footprint and symbol library registries
+│   │   └── robosen_master.pretty/        # 12 verified footprints (.kicad_mod)
+│   └── action_block/                     # KiCad 10 Action Block Modular Carrier PCB Project
+│       ├── action_block.kicad_pro        # Action Block project file
+│       ├── action_block.kicad_pcb        # Routed PCB layout (32.0 x 32.0 mm, centered pogo docks)
+│       ├── robosen_action_block_gerbers.zip # 10-file JLCPCB production package (ORDERED)
+│       ├── fp-lib-table & sym-lib-table  # Local footprint and symbol library registries
+│       └── action_block.pretty/          # Custom footprints (.kicad_mod)
 ├── recordings/
 │   └── K1/
 │       └── test.json                     # Recorded joint keyframe motion sequences
@@ -844,10 +851,10 @@ The `assignments/` folder stores academic project coursework, literature reviews
 ## 23. Master Block KiCad 10 Hardware Carrier PCB, Custom Libraries & Pre-Wired Schematic
 
 - **Documentation Date:** October 4, 2026
-- **Project Location:** [`hardware/kicad/`](hardware/kicad/)
+- **Project Location:** [`hardware/master_block/`](hardware/master_block/)
 - **Target CAD System:** KiCad 10.0.6 (Fully compatible with KiCad 8.x / 9.x / 10.x).
 - **Architecture Strategy:** **Modular Daughterboard Carrier PCB (Motherboard)**. The custom PCB houses sockets and headers for the ESP32-S3 DevKit, TP4056 USB-C BMS module, TPS63020 buck-boost module, 18650 holder, KY-040 rotary encoders, 12mm tactile button, power switch, and 2.13" E-Paper display, replacing all breadboards and loose jumper wires with reliable copper traces.
-- **Custom Footprint Library:** Registered locally in `hardware/kicad/fp-lib-table` pointing to `robosen_master.pretty/` (12 verified `.kicad_mod` files) and vector SVGs in `hardware/kicad/footprint_svg/`.
+- **Custom Footprint Library:** Registered locally in `hardware/master_block/fp-lib-table` pointing to `robosen_master.pretty/` (12 verified `.kicad_mod` files) and vector SVGs in `hardware/master_block/footprint_svg/`.
 - **Verified Footprint Inventory (100% Validated via `kicad-cli 10.0.6`):**
   1. `ESP32-S3-DevKitC-1-Socket.kicad_mod`: Dual 22-pin header socket (0.9" row span) with 6.0mm x 17.5mm antenna overhang and RF all-layer copper keepout.
   2. `EPaper_2.13in_Header_1x08.kicad_mod`: 8-pin 2.54mm SPI interface header with full 71.0mm x 30.0mm PCB outline, 4x M2 corner mounting holes, and 2.13" active display area.
@@ -862,24 +869,68 @@ The `assignments/` folder stores academic project coursework, literature reviews
   11. `SW_Power_2Wire_Pads.kicad_mod`: 2-wire solder pads with 1.2mm drill and 5.08mm gap for external power switch.
   12. `SW_Slide_SS12D00.kicad_mod`: 1P2T SPST slide power switch footprint (2.54mm pin pitch).
 - **Custom Symbol Library & Project Mapping:**
-  - `hardware/kicad/sym-lib-table`: Local symbol table mapping `robosen_master` to `${KIPRJMOD}/robosen_master.kicad_sym`.
-  - `hardware/kicad/robosen_master.kicad_sym`: Native KiCad symbol library bundling 11 custom symbols.
+  - `hardware/master_block/sym-lib-table`: Local symbol table mapping `robosen_master` to `${KIPRJMOD}/robosen_master.kicad_sym`.
+  - `hardware/master_block/robosen_master.kicad_sym`: Native KiCad symbol library bundling 11 custom symbols.
 - **Pre-Wired Starter Schematic (`robosen_master_block.kicad_sch`):**
   - Standard A3 sheet organized into 4 functional zones on a strict 1.27mm (50 mil) grid (17 total component instances).
   - Pre-wired nets: `K1_CLK/DT/SW`, `K2_CLK/DT/SW`, `BTN_START` (GPIO14), `BTN_STOP` (GPIO2), `BATSENSE` (GPIO1), `EPD_BUSY/RES/DC/CS/SCK/MOSI`, `CFG_TX/RX`, `CHAIN_TX/RX`, `VBAT_RAW/GND/PROT/SW`, `+3V3`, `GND`.
   - Electrical Rules Check (ERC): **0 violations** (`erc_report.txt`).
   - Production Deliverables:
-    - Netlist: `hardware/kicad/robosen_master_block.net`
-    - Vector PDF: `hardware/kicad/robosen_master_block_schematic.pdf`
-    - Vector SVG: `hardware/kicad/schematic_svg/robosen_master_block.svg`
-    - Automated Generator: `hardware/kicad/build_schematic.py`
-    - Pre-routed PCB Layout: `hardware/kicad/robosen_master_block.kicad_pcb`
+    - Netlist: `hardware/master_block/robosen_master_block.net`
+    - Vector PDF: `hardware/master_block/robosen_master_block_schematic.pdf`
+    - Vector SVG: `hardware/master_block/schematic_svg/robosen_master_block.svg`
+    - Automated Generator: `hardware/master_block/build_schematic.py`
+    - Pre-routed PCB Layout: `hardware/master_block/robosen_master_block.kicad_pcb`
 - **Firmware Update Backlog (Hardware Revision Notice):**
   - Master Block firmware ([`firmware/esp32_master/esp32_master.ino`](file:///C:/Users/nnnn/Projects/robosen_block/firmware/esp32_master/esp32_master.ino)) requires:
     1. Red Button (`SW5`, `GPIO 2`, `BTN_STOP`) integration for Emergency Halt, Cancel, and Back navigation.
     2. Battery Sense (`GPIO 1`, ADC1_CH0) reading with 1:1 divider math ($V_{BAT} = 2 \times V_{ADC}$) and battery percentage display on E-Paper.
     3. Documentation provided in [`firmware/esp32_master/README.md`](file:///C:/Users/nnnn/Projects/robosen_block/firmware/esp32_master/README.md).
-- **Manufacturing Checklist for JLCPCB:**
-  - Bare PCB fabrication requires only **Gerber files (`.gbr`)** and **Excellon Drill files (`.drl`)** packaged in a `.zip` file.
-  - 3D models (`.step`/`.wrl`) are **NOT required** by JLCPCB for PCB fabrication, but supported for enclosure design.
+- **Manufacturing & Order Status:**
+  - **Status:** **ORDERED AT JLCPCB (October 5, 2026)**
+  - **Gerber Package:** [`hardware/master_block/robosen_master_block_gerbers.zip`](hardware/master_block/robosen_master_block_gerbers.zip) (10 files)
+  - **Fabrication Parameters:** 2 Layers, $115.50\text{ mm} \times 62.00\text{ mm}$, $1.6\text{ mm}$ FR-4, $1\text{ oz}$ copper, Lead-Free HASL finish, Green solder mask, White silkscreen.
+  - **Verification:** KiCad ERC 0 violations, KiCad DRC 0 unconnected items, 0 clearance errors. Dual-agent audited.
+
+---
+
+## 24. Action Block KiCad 10 Modular Carrier PCB & Manufacturing Release
+
+- **Documentation Date:** October 5, 2026
+- **Project Location:** [`hardware/action_block/`](hardware/action_block/)
+- **Target CAD System:** KiCad 10.0.6 (Fully compatible with KiCad 8.x / 9.x / 10.x).
+- **Architecture Strategy:** **Compact Modular Carrier PCB ($32.00 \times 32.00\text{ mm}$)**. Houses a socketed TENSTAR CH32V003F4P6 core development board (TSSOP-20 breakout in DIP form-factor), 3-pin WS2812B RGB LED breakout module, 3-pin SWIO programming header, $0.1\,\mu\text{F}$ decoupling capacitor, and collinear magnetic pogo dock connectors.
+- **Centered Pogo Dock Connectors:**
+  - Upstream `IN` Dock (`J1`, 4-pin 2.54mm pitch): Centered vertically at $Y = 72.50\text{ mm}$ (origin $X = 83.50\text{ mm}$, $Y = 68.69\text{ mm}$, pads span $Y = 68.69$ to $76.31\text{ mm}$).
+    - Pad 1 ($Y = 68.69\text{ mm}$): `+3V3`
+    - Pad 2 ($Y = 71.23\text{ mm}$): `GND`
+    - Pad 3 ($Y = 73.77\text{ mm}$): `/RX_IN` (connects to CH32V003 `PD6`)
+    - Pad 4 ($Y = 76.31\text{ mm}$): `/RETURN_BUS` (continuous return bus)
+  - Downstream `OUT` Dock (`J2`, 4-pin 2.54mm pitch): Centered vertically at $Y = 72.50\text{ mm}$ (origin $X = 109.50\text{ mm}$, $Y = 68.69\text{ mm}$, pads span $Y = 68.69$ to $76.31\text{ mm}$).
+    - Pad 1 ($Y = 68.69\text{ mm}$): `+3V3`
+    - Pad 2 ($Y = 71.23\text{ mm}$): `GND`
+    - Pad 3 ($Y = 73.77\text{ mm}$): `/TX_OUT` (driven by CH32V003 `PD5`)
+    - Pad 4 ($Y = 76.31\text{ mm}$): `/RETURN_BUS` (continuous return bus)
+  - **Mechanical Alignment:** Both `IN` and `OUT` docks have identical vertical centers ($Y = 72.50\text{ mm}$), ensuring exact collinear mating when modular blocks snap together end-to-end.
+- **3-Pin WS2812B RGB LED Module Header (`D1`):**
+  - Footprint: `WS2812B_Module_1x03_P2.54mm` located at $(84.00, 62.50\text{ mm})$, orientation $-90^\circ$.
+  - Pinout (Top-to-Bottom):
+    - Pad 1 (Top, $Y = 59.96\text{ mm}$): `GND`
+    - Pad 2 (Middle, $Y = 62.50\text{ mm}$): `+3V3` (`VCC`)
+    - Pad 3 (Bottom, $Y = 65.04\text{ mm}$): `/LED_DIN` (driven by CH32V003 `PC4` through a dedicated single segment trace)
+- **Signal & Power Routing Architecture:**
+  - Board Outline: $80.50 \le X \le 112.50\text{ mm}$, $56.50 \le Y \le 88.50\text{ mm}$ ($32.00 \times 32.00\text{ mm}$).
+  - 37 copper tracks, 0 vias, dual-layer continuous GND polygon planes (`F.Cu` and `B.Cu`).
+  - Power traces (`+3V3`): $0.60\text{ mm}$ wide ($> 1\text{ A}$ capacity).
+  - Signal traces: $0.25\text{ mm}$ wide.
+  - `/RETURN_BUS` Routing: Clean single detour on `B.Cu` running across $Y = 87.25\text{ mm}$ below MCU pads 1 and 12 ($Y = 85.40\text{ mm}$), completely avoiding pad drill rings and leaving copper clearances $\ge 0.45\text{ mm}$.
+- **Comprehensive Dual-Agent Pre-Order Audit:**
+  - Audited independently by Antigravity and Codex Astra (`gpt-6-astra`).
+  - KiCad 10 DRC: **0 violations, 0 unconnected nets, 0 clearance errors**.
+  - Netlist connectivity verified: 100% matched schematic netlist.
+  - Drill hit parity & solder mask coverage verified.
+- **Fabrication & Order Status:** **ORDERED AT JLCPCB (October 5, 2026)**
+  - Gerber Package: [`hardware/action_block/robosen_action_block_gerbers.zip`](hardware/action_block/robosen_action_block_gerbers.zip) (10 files: 7 gerber layers, 2 Excellon drills PTH/NPTH, 1 job file).
+  - JLCPCB Settings: 2 Layers, $32.00 \times 32.00\text{ mm}$, $1.6\text{ mm}$ FR-4 thickness, $1\text{ oz}$ copper, Lead-Free HASL finish, Green solder mask, White silkscreen.
+
 

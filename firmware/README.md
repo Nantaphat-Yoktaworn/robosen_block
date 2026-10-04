@@ -20,7 +20,7 @@ This directory contains the complete source code, flashing scripts, and document
 
 ## 2. Firmware Backlog & Hardware Revision Notice
 
-Following the completion of the KiCad carrier board design (`hardware/kicad/`), the **ESP32 Master Block firmware** requires the following planned updates:
+Following the completion of the KiCad carrier board design (`hardware/master_block/`), the **ESP32 Master Block firmware** requires the following planned updates:
 
 1. **Dual Button UI Support**:
    - **`PIN_START_BTN` (GPIO 14)**: Green Tactile Button (`SW3`) — Confirm, Start Run, Next Step.

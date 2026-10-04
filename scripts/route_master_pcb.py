@@ -10,7 +10,7 @@ import pcbnew as pcb
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
-BOARD = ROOT / 'hardware/kicad/robosen_master_block.kicad_pcb'
+BOARD = ROOT / 'hardware/master_block/robosen_master_block.kicad_pcb'
 STEP = 0.125
 X0, Y0, X1, Y1 = 86.5, 62., 202., 124.
 NX, NY = round((X1-X0)/STEP)+1, round((Y1-Y0)/STEP)+1

@@ -233,27 +233,28 @@ The project is currently in an **advanced software, protocol simulation, and liv
 
 ## 7. Recommended Next Steps
 
-1. **PCB Schematic, Layout & Manufacturing Deliverables (Phase 1 Carrier PCB):** ✅ **COMPLETE, ROUTED & DRC VERIFIED (Oct 4, 2026):**
-   - Initialized KiCad 10 project ([`hardware/kicad/`](hardware/kicad/)).
-   - Engineered and validated 12 custom footprints in `robosen_master.pretty/` with 0 errors via `kicad-cli 10.0.6`.
-   - Created native KiCad 10 symbol library (`robosen_master.kicad_sym` & `sym-lib-table`).
-   - Generated complete pre-wired schematic (`robosen_master_block.kicad_sch`) with 4 functional zones on exact 1.27mm grid.
-   - Electrical Rules Check (ERC) verified: **0 violations** (`erc_report.txt`).
-   - Board Outline: Defined $115.50\text{ mm} \times 62.00\text{ mm}$ outline with 4 locked M3 mounting holes (`H1`–`H4`).
-   - Trace Routing & Power Planes: 100% routed (**0 unconnected items**), filled `GND` copper planes on both layers, $0.80\text{ mm}$ power traces, isolated `/VBAT_GND`, and $\ge 3.68\text{ mm}$ screw head clearance.
-   - Exported manufacturing Gerbers & drill files packaged in [`hardware/kicad/robosen_master_block_gerbers.zip`](hardware/kicad/robosen_master_block_gerbers.zip).
-   - Created comprehensive mounting & enclosure spec ([`docs/mounting_and_enclosure_spec.md`](docs/mounting_and_enclosure_spec.md)) and web wiring guide ([`docs/master_block_wiring.html`](docs/master_block_wiring.html)).
-2. **C++ Master Firmware:** ✅ **COMPLETED & VERIFIED ON PHYSICAL HARDWARE (Sept 7–8, 2026):**
+1. **Master Block PCB (Phase 1 Carrier):** ✅ **ORDERED & FABRICATION IN PROGRESS (Oct 2026):**
+   - KiCad 10 project ([`hardware/master_block/`](hardware/master_block/)), $115.50 \times 62.00\text{ mm}$ outline with 4 M3 mounting holes.
+   - Trace Routing & Power Planes: 100% routed (**0 unconnected items**), filled `GND` copper planes on both layers, $0.80\text{ mm}$ power traces, isolated `/VBAT_GND` BMS protection loop.
+   - Production Gerbers & drill files: [`hardware/master_block/robosen_master_block_gerbers.zip`](hardware/master_block/robosen_master_block_gerbers.zip).
+2. **Action Block PCB (Modular CH32V003 Carrier):** ✅ **ORDERED & FABRICATION IN PROGRESS (Oct 2026):**
+   - KiCad 10 project ([`hardware/action_block/`](hardware/action_block/)), $32.00 \times 32.00\text{ mm}$ compact square carrier PCB.
+   - Centered Pogo Ports: Both Upstream `IN` and Downstream `OUT` 4-pin pogo docks are mathematically centered at $Y = 72.50\text{ mm}$ for flush collinear docking.
+   - 3-Pin RGB LED Header: Top-to-Bottom order `GND`, `VCC` (+3V3), `IN` (`/LED_DIN`).
+   - Routing: 100% routed (**0 unconnected items, 0 copper clearance errors**), `/RETURN_BUS` detour below MCU ($Y = 87.25\text{ mm}$), $0.60\text{ mm}$ power traces, and continuous GND planes.
+   - Dual-Agent Verified: Audited and cross-verified by Antigravity and Codex Astra (`gpt-6-astra`).
+   - Production Gerbers & drill files: [`hardware/action_block/robosen_action_block_gerbers.zip`](hardware/action_block/robosen_action_block_gerbers.zip).
+3. **C++ Master Firmware:** ✅ **COMPLETED & VERIFIED ON PHYSICAL HARDWARE (Sept 7–8, 2026):**
    - Implemented dual-knob rotary encoders, persistent BLE auto-reconnect, Config Dock UART driver, and Run Chain Engine (`0xAA`/`0xBB`/`0xFF`) on ESP32-S3 (`firmware/esp32_master`).
    - Verified live detection and non-volatile flash burning into docked CH32V003 Action Blocks.
    - Verified full daisy-chain discovery, cumulative CRC-8 validation, real-time step tracking, and rainbow celebration sparkle.
-3. **CH32V003 Action Block & Smart End Block Firmware:** ✅ **COMPLETED & VERIFIED ON PHYSICAL HARDWARE (Sept 7–8, 2026):**
+4. **CH32V003 Action Block & Smart End Block Firmware:** ✅ **COMPLETED & VERIFIED ON PHYSICAL HARDWARE (Sept 7–8, 2026):**
    - Built with native `riscv32-esp-elf-gcc` (`action_block.bin`: 2,804 bytes; `end_block.bin`: 2,016 bytes).
    - Implemented Config Port flash writer (`0xCF`), Phase 1 discovery relay (`0xAA`), and Phase 2 step tracking (`0xBB`) with downstream forwarding in RISC-V C.
    - Implemented Smart End Block active digital line driver with loopback, CRC-8 validation, and rainbow sparkle.
    - Verified byte-for-byte readback on physical TENSTAR CH32V003F4P6 chips via ESP32-S3 programmer on `COM3`.
    - Verified live 2-block run chain executing locomotion on Robosen K1 robot.
-4. **3D Casing Prototypes:** 3D print initial snap-fit solid block shells with magnetic polarity channels and light pipes for the WS2812B LEDs.
-5. **Classroom User Testing:** Pilot test 5-block sets with 5–7 year old children to validate physical usability and E-Ink dock ergonomics.
+5. **3D Casing Prototypes:** 3D print initial snap-fit solid block shells with magnetic polarity channels and light pipes for the WS2812B LEDs.
+6. **Classroom User Testing:** Pilot test 5-block sets with 5–7 year old children to validate physical usability and E-Ink dock ergonomics.
 
 

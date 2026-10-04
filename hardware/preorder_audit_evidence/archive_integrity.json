@@ -1,0 +1,138 @@
+{
+  "action": {
+    "archive": "hardware/action_block/robosen_action_block_gerbers.zip",
+    "sha256": "a7797fa7b5b42915fe014b7d6b90f4adbe9b091aee8f23857b6d91a95dba3e2e",
+    "crc_bad_member": null,
+    "members": [
+      {
+        "name": "action_block-B_Cu.gbl",
+        "bytes": 58926,
+        "normalized_matches_fresh": true
+      },
+      {
+        "name": "action_block-B_Mask.gbs",
+        "bytes": 1714,
+        "normalized_matches_fresh": true
+      },
+      {
+        "name": "action_block-B_Silkscreen.gbo",
+        "bytes": 458,
+        "normalized_matches_fresh": true
+      },
+      {
+        "name": "action_block-Edge_Cuts.gm1",
+        "bytes": 609,
+        "normalized_matches_fresh": true
+      },
+      {
+        "name": "action_block-F_Cu.gtl",
+        "bytes": 56841,
+        "normalized_matches_fresh": true
+      },
+      {
+        "name": "action_block-F_Mask.gts",
+        "bytes": 1714,
+        "normalized_matches_fresh": true
+      },
+      {
+        "name": "action_block-F_Silkscreen.gto",
+        "bytes": 61921,
+        "normalized_matches_fresh": true
+      },
+      {
+        "name": "action_block-job.gbrjob",
+        "bytes": 2470,
+        "normalized_matches_fresh": true
+      },
+      {
+        "name": "action_block-NPTH.drl",
+        "bytes": 264,
+        "normalized_matches_fresh": true,
+        "tool_diameters_mm": [],
+        "hits": 0
+      },
+      {
+        "name": "action_block-PTH.drl",
+        "bytes": 956,
+        "normalized_matches_fresh": true,
+        "tool_diameters_mm": [
+          "0.850",
+          "1.000",
+          "1.100"
+        ],
+        "hits": 38
+      }
+    ]
+  },
+  "master": {
+    "archive": "hardware/master_block/robosen_master_block_gerbers.zip",
+    "sha256": "080c174462b0789689491e709395a5da4f25a29b3d2153bf8d12985a1836ee07",
+    "crc_bad_member": null,
+    "members": [
+      {
+        "name": "robosen_master_block-B_Cu.gbl",
+        "bytes": 202417,
+        "normalized_matches_fresh": true
+      },
+      {
+        "name": "robosen_master_block-B_Mask.gbs",
+        "bytes": 4364,
+        "normalized_matches_fresh": true
+      },
+      {
+        "name": "robosen_master_block-B_Silkscreen.gbo",
+        "bytes": 23931,
+        "normalized_matches_fresh": true
+      },
+      {
+        "name": "robosen_master_block-Edge_Cuts.gm1",
+        "bytes": 619,
+        "normalized_matches_fresh": true
+      },
+      {
+        "name": "robosen_master_block-F_Cu.gtl",
+        "bytes": 189132,
+        "normalized_matches_fresh": true
+      },
+      {
+        "name": "robosen_master_block-F_Mask.gts",
+        "bytes": 4364,
+        "normalized_matches_fresh": true
+      },
+      {
+        "name": "robosen_master_block-F_Silkscreen.gto",
+        "bytes": 107230,
+        "normalized_matches_fresh": true
+      },
+      {
+        "name": "robosen_master_block-job.gbrjob",
+        "bytes": 2536,
+        "normalized_matches_fresh": true
+      },
+      {
+        "name": "robosen_master_block-NPTH.drl",
+        "bytes": 580,
+        "normalized_matches_fresh": true,
+        "tool_diameters_mm": [
+          "2.200",
+          "3.200"
+        ],
+        "hits": 14
+      },
+      {
+        "name": "robosen_master_block-PTH.drl",
+        "bytes": 2440,
+        "normalized_matches_fresh": true,
+        "tool_diameters_mm": [
+          "0.300",
+          "0.850",
+          "1.000",
+          "1.100",
+          "1.200",
+          "1.300"
+        ],
+        "hits": 127
+      }
+    ]
+  }
+}

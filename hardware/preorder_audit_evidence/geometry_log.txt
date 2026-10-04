@@ -1,0 +1,530 @@
+04:50:00 AM: Debug: Adding duplicate image handler for 'PNG file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'JPEG file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'TIFF file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'GIF file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'PNM file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'PCX file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'IFF file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'Windows icon file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'Windows cursor file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'Windows animated cursor file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'TGA file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'XPM file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'PNG file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'JPEG file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'TIFF file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'GIF file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'PNM file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'PCX file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'IFF file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'Windows icon file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'Windows cursor file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'Windows animated cursor file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'TGA file'
+04:50:00 AM: Debug: Adding duplicate image handler for 'XPM file'
+action {
+  "sha256": "bf540996d46648c4fcbf37c8f79539da147fc131260e56a972ba8c4b9a1a320d",
+  "layers": 2,
+  "thickness": 1.6,
+  "tracks": 37,
+  "vias": 0,
+  "edges": [
+    {
+      "shape": "Rect",
+      "start": [
+        80.5,
+        56.5
+      ],
+      "end": [
+        112.5,
+        88.5
+      ],
+      "width": 0.1
+    }
+  ],
+  "zones_stored": [
+    {
+      "layer": "F.Cu",
+      "net": "GND",
+      "area_mm2": 728.539261767979,
+      "polygons": 2,
+      "clearance": 0.25,
+      "thermal_gap": 0.3,
+      "thermal_spoke": 0.4,
+      "pad_connection": 1,
+      "island_removal": 0
+    },
+    {
+      "layer": "B.Cu",
+      "net": "GND",
+      "area_mm2": 730.4711153444995,
+      "polygons": 1,
+      "clearance": 0.25,
+      "thermal_gap": 0.3,
+      "thermal_spoke": 0.4,
+      "pad_connection": 1,
+      "island_removal": 0
+    }
+  ],
+  "zones_refilled": [
+    {
+      "layer": "F.Cu",
+      "net": "GND",
+      "area_mm2": 728.539261767979,
+      "polygons": 2,
+      "clearance": 0.25,
+      "thermal_gap": 0.3,
+      "thermal_spoke": 0.4,
+      "pad_connection": 1,
+      "island_removal": 0
+    },
+    {
+      "layer": "B.Cu",
+      "net": "GND",
+      "area_mm2": 730.4711153444995,
+      "polygons": 1,
+      "clearance": 0.25,
+      "thermal_gap": 0.3,
+      "thermal_spoke": 0.4,
+      "pad_connection": 1,
+      "island_removal": 0
+    }
+  ],
+  "source_unchanged": true
+}
+NETS {
+  "+3V3": {
+    "pads": [
+      "OUT:1",
+      "RGB:2",
+      "IN:1",
+      "C104:2",
+      "PROG:2",
+      "MCU:10",
+      "MCU:21"
+    ],
+    "widths": {
+      "0.6": 14
+    },
+    "length": 60.174187272926666
+  },
+  "/LED_DIN": {
+    "pads": [
+      "RGB:3",
+      "MCU:6"
+    ],
+    "widths": {
+      "0.3": 3
+    },
+    "length": 9.631656556895933
+  },
+  "/RETURN_BUS": {
+    "pads": [
+      "OUT:4",
+      "IN:4"
+    ],
+    "widths": {
+      "0.4": 7
+    },
+    "length": 42.54934341759516
+  },
+  "/RX_IN": {
+    "pads": [
+      "IN:3",
+      "MCU:8"
+    ],
+    "widths": {
+      "0.3": 4
+    },
+    "length": 9.547199128346444
+  },
+  "/SWIO": {
+    "pads": [
+      "PROG:3",
+      "MCU:16"
+    ],
+    "widths": {
+      "0.3": 3
+    },
+    "length": 13.538174593052023
+  },
+  "/TX_OUT": {
+    "pads": [
+      "OUT:3",
+      "MCU:9"
+    ],
+    "widths": {
+      "0.3": 6
+    },
+    "length": 25.991433611130294
+  },
+  "GND": {
+    "pads": [
+      "OUT:2",
+      "RGB:1",
+      "IN:2",
+      "C104:1",
+      "PROG:1",
+      "MCU:11",
+      "MCU:22"
+    ],
+    "widths": {},
+    "length": 0
+  }
+}
+master {
+  "sha256": "44cd5299f6834351aad9d08645dcbc903c97fa4cf2c73a6ffe21a0e4d53c7928",
+  "layers": 2,
+  "thickness": 1.6,
+  "tracks": 476,
+  "vias": 21,
+  "edges": [
+    {
+      "shape": "Rect",
+      "start": [
+        86.5,
+        62.0
+      ],
+      "end": [
+        202.0,
+        124.0
+      ],
+      "width": 0.1
+    }
+  ],
+  "zones_stored": [
+    {
+      "layer": "F.Cu",
+      "net": "GND",
+      "area_mm2": 4978.37894913888,
+      "polygons": 5,
+      "clearance": 0.25,
+      "thermal_gap": 0.3,
+      "thermal_spoke": 0.4,
+      "pad_connection": 1,
+      "island_removal": 0
+    },
+    {
+      "layer": "B.Cu",
+      "net": "GND",
+      "area_mm2": 5610.026770321256,
+      "polygons": 7,
+      "clearance": 0.25,
+      "thermal_gap": 0.3,
+      "thermal_spoke": 0.4,
+      "pad_connection": 1,
+      "island_removal": 0
+    }
+  ],
+  "zones_refilled": [
+    {
+      "layer": "F.Cu",
+      "net": "GND",
+      "area_mm2": 4978.37894913888,
+      "polygons": 5,
+      "clearance": 0.25,
+      "thermal_gap": 0.3,
+      "thermal_spoke": 0.4,
+      "pad_connection": 1,
+      "island_removal": 0
+    },
+    {
+      "layer": "B.Cu",
+      "net": "GND",
+      "area_mm2": 5610.026770321256,
+      "polygons": 7,
+      "clearance": 0.25,
+      "thermal_gap": 0.3,
+      "thermal_spoke": 0.4,
+      "pad_connection": 1,
+      "island_removal": 0
+    }
+  ],
+  "source_unchanged": true
+}
+NETS {
+  "+3V3": {
+    "pads": [
+      "J1:1",
+      "J2:1",
+      "SW1:4",
+      "U3:7",
+      "U3:8",
+      "SW2:4",
+      "R2:1",
+      "DISP1:7",
+      "R1:1",
+      "U1:1",
+      "U1:2"
+    ],
+    "widths": {
+      "0.8": 83
+    },
+    "length": 157.85640414034202
+  },
+  "/BATSENSE": {
+    "pads": [
+      "C1:2",
+      "R3:2",
+      "R4:1",
+      "U1:26"
+    ],
+    "widths": {
+      "0.25": 32
+    },
+    "length": 77.11278684220942
+  },
+  "/BTN_START": {
+    "pads": [
+      "SW3:1",
+      "SW3:1",
+      "U1:20"
+    ],
+    "widths": {
+      "0.25": 24
+    },
+    "length": 67.69163056034263
+  },
+  "/BTN_STOP": {
+    "pads": [
+      "SW5:1",
+      "SW5:1",
+      "U1:27"
+    ],
+    "widths": {
+      "0.25": 14
+    },
+    "length": 86.9810280736516
+  },
+  "/CFG_RX": {
+    "pads": [
+      "J1:3",
+      "U1:11"
+    ],
+    "widths": {
+      "0.25": 29
+    },
+    "length": 60.731752934319246
+  },
+  "/CFG_TX": {
+    "pads": [
+      "J1:4",
+      "U1:10"
+    ],
+    "widths": {
+      "0.25": 24
+    },
+    "length": 64.25890961685366
+  },
+  "/CHAIN_RX": {
+    "pads": [
+      "J2:4",
+      "R2:2",
+      "U1:9"
+    ],
+    "widths": {
+      "0.25": 19
+    },
+    "length": 66.35597216597436
+  },
+  "/CHAIN_TX": {
+    "pads": [
+      "J2:3",
+      "R1:2",
+      "U1:8"
+    ],
+    "widths": {
+      "0.25": 27
+    },
+    "length": 55.26064030267289
+  },
+  "/EPD_BUSY": {
+    "pads": [
+      "DISP1:1",
+      "U1:4"
+    ],
+    "widths": {
+      "0.25": 7
+    },
+    "length": 65.21235011299122
+  },
+  "/EPD_CS": {
+    "pads": [
+      "DISP1:2",
+      "U1:7"
+    ],
+    "widths": {
+      "0.25": 10
+    },
+    "length": 56.566457360255754
+  },
+  "/EPD_DC": {
+    "pads": [
+      "DISP1:3",
+      "U1:6"
+    ],
+    "widths": {
+      "0.25": 16
+    },
+    "length": 59.313278287618246
+  },
+  "/EPD_MOSI": {
+    "pads": [
+      "DISP1:5",
+      "U1:32"
+    ],
+    "widths": {
+      "0.25": 14
+    },
+    "length": 47.07477631085023
+  },
+  "/EPD_RES": {
+    "pads": [
+      "DISP1:4",
+      "U1:5"
+    ],
+    "widths": {
+      "0.25": 26
+    },
+    "length": 61.670587699151085
+  },
+  "/EPD_SCK": {
+    "pads": [
+      "DISP1:6",
+      "U1:40"
+    ],
+    "widths": {
+      "0.25": 8
+    },
+    "length": 26.112543263816605
+  },
+  "/K1_CLK": {
+    "pads": [
+      "SW1:1",
+      "U1:12"
+    ],
+    "widths": {
+      "0.25": 9
+    },
+    "length": 43.43236998209816
+  },
+  "/K1_DT": {
+    "pads": [
+      "SW1:2",
+      "U1:15"
+    ],
+    "widths": {
+      "0.25": 10
+    },
+    "length": 39.68902621394389
+  },
+  "/K1_SW": {
+    "pads": [
+      "SW1:3",
+      "U1:16"
+    ],
+    "widths": {
+      "0.25": 10
+    },
+    "length": 39.65683379375653
+  },
+  "/K2_CLK": {
+    "pads": [
+      "SW2:1",
+      "U1:17"
+    ],
+    "widths": {
+      "0.25": 10
+    },
+    "length": 71.10096067174143
+  },
+  "/K2_DT": {
+    "pads": [
+      "SW2:2",
+      "U1:18"
+    ],
+    "widths": {
+      "0.25": 28
+    },
+    "length": 74.13674673494218
+  },
+  "/K2_SW": {
+    "pads": [
+      "SW2:3",
+      "U1:19"
+    ],
+    "widths": {
+      "0.25": 18
+    },
+    "length": 85.72391362735695
+  },
+  "/VBAT_GND": {
+    "pads": [
+      "U2:3",
+      "BT1:2"
+    ],
+    "widths": {
+      "0.8": 12
+    },
+    "length": 53.85599205235723
+  },
+  "/VBAT_PROT": {
+    "pads": [
+      "U2:1",
+      "SW4:1"
+    ],
+    "widths": {
+      "0.8": 15
+    },
+    "length": 25.905817074858803
+  },
+  "/VBAT_RAW": {
+    "pads": [
+      "U2:2",
+      "BT1:1"
+    ],
+    "widths": {
+      "0.8": 8
+    },
+    "length": 26.966183073676067
+  },
+  "/VBAT_SW": {
+    "pads": [
+      "U3:3",
+      "U3:4",
+      "SW4:2",
+      "R3:1"
+    ],
+    "widths": {
+      "0.8": 23
+    },
+    "length": 52.32094951231971
+  },
+  "GND": {
+    "pads": [
+      "J1:2",
+      "C1:1",
+      "J2:2",
+      "SW1:5",
+      "U3:1",
+      "U3:2",
+      "U3:5",
+      "U3:6",
+      "SW3:2",
+      "SW3:2",
+      "SW2:5",
+      "SW5:2",
+      "SW5:2",
+      "DISP1:8",
+      "U2:4",
+      "R4:2",
+      "U1:22",
+      "U1:23",
+      "U1:43",
+      "U1:44"
+    ],
+    "widths": {},
+    "length": 0
+  }
+}
+ISOLATION {'F.Cu': {'lower': 0.249023, 'upper': 0.25, 'overlap_mm2': 0.0}, 'B.Cu': {'lower': 0.249023, 'upper': 0.25, 'overlap_mm2': 0.0}} KEEPOUT [{'outline': [[181.11, 87.68], [181.11, 70.18], [175.11, 70.18], [175.11, 87.68]], 'copper_overlap': {'F.Cu': 0.0, 'B.Cu': 0.0}}]

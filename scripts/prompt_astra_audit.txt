@@ -1,10 +1,10 @@
-You are an expert PCB layout and hardware design engineer performing an independent audit of the current routed PCB: `hardware/kicad/robosen_master_block.kicad_pcb`.
+You are an expert PCB layout and hardware design engineer performing an independent audit of the current routed PCB: `hardware/master_block/robosen_master_block.kicad_pcb`.
 
 ### Your Task
 Perform an independent, thorough engineering check of the board's routing, power planes, and physical clearances, and produce a detailed audit report.
 
 ### Environment & Tools
-- Board file: `hardware/kicad/robosen_master_block.kicad_pcb`
+- Board file: `hardware/master_block/robosen_master_block.kicad_pcb`
 - KiCad Python: `"C:\Program Files\KiCad\10.0\bin\python.exe"` (has `pcbnew`)
 - KiCad CLI: `"C:\Program Files\KiCad\10.0\bin\kicad-cli.exe"` (Remember to set `$env:KICAD_DOCUMENTS_HOME = "$PWD\hardware\kicad"` before running kicad-cli)
 

@@ -1,0 +1,58 @@
+[
+  {
+    "pad": "OUT:2",
+    "local_connection": -1,
+    "fill_contact_area_mm2": {
+      "F.Cu": 0.545390014107,
+      "B.Cu": 0.545389870131
+    }
+  },
+  {
+    "pad": "RGB:1",
+    "local_connection": -1,
+    "fill_contact_area_mm2": {
+      "F.Cu": 0.49451725767,
+      "B.Cu": 0.49451725767
+    }
+  },
+  {
+    "pad": "IN:2",
+    "local_connection": -1,
+    "fill_contact_area_mm2": {
+      "F.Cu": 0.727186541499,
+      "B.Cu": 0.545389828947
+    }
+  },
+  {
+    "pad": "C104:1",
+    "local_connection": -1,
+    "fill_contact_area_mm2": {
+      "F.Cu": 0.623839573692,
+      "B.Cu": 0.623839573692
+    }
+  },
+  {
+    "pad": "PROG:1",
+    "local_connection": -1,
+    "fill_contact_area_mm2": {
+      "F.Cu": 0.32967817178,
+      "B.Cu": 0.49451725767
+    }
+  },
+  {
+    "pad": "MCU:11",
+    "local_connection": -1,
+    "fill_contact_area_mm2": {
+      "F.Cu": 0.647898123997,
+      "B.Cu": 0.647898123997
+    }
+  },
+  {
+    "pad": "MCU:22",
+    "local_connection": -1,
+    "fill_contact_area_mm2": {
+      "F.Cu": 0.4859232926665,
+      "B.Cu": 0.647898123997
+    }
+  }
+]

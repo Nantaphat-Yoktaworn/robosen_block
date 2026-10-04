@@ -7,8 +7,8 @@ from pathlib import Path
 import pcbnew as k
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / 'hardware/kicad/robosen_master_block.kicad_pcb'
-OUT = ROOT / 'hardware/kicad/reports'
+SOURCE = ROOT / 'hardware/master_block/robosen_master_block.kicad_pcb'
+OUT = ROOT / 'hardware/master_block/reports'
 b = k.LoadBoard(str(SOURCE))
 mm = lambda v: v / 1e6
 xy = lambda p: [mm(p.x), mm(p.y)]

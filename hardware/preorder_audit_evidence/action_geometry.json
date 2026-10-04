@@ -1,0 +1,1334 @@
+{
+  "source": "hardware/action_block/action_block.kicad_pcb",
+  "sha256": "bf540996d46648c4fcbf37c8f79539da147fc131260e56a972ba8c4b9a1a320d",
+  "thickness": 1.6,
+  "layers": 2,
+  "tracks": 37,
+  "vias": 0,
+  "footprints": [
+    {
+      "ref": "OUT",
+      "value": "DOWNSTREAM_OUT",
+      "footprint": "Pogo_4Pin_Dock_2.54mm",
+      "layer": "F.Cu",
+      "origin": [
+        109.5,
+        68.69
+      ],
+      "angle": 0.0,
+      "pads": [
+        {
+          "number": "1",
+          "net": "+3V3",
+          "pos": [
+            109.5,
+            68.69
+          ],
+          "size": [
+            2.0,
+            2.0
+          ],
+          "drill": [
+            1.1,
+            1.1
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "2",
+          "net": "GND",
+          "pos": [
+            109.5,
+            71.23
+          ],
+          "size": [
+            2.0,
+            2.0
+          ],
+          "drill": [
+            1.1,
+            1.1
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "3",
+          "net": "/TX_OUT",
+          "pos": [
+            109.5,
+            73.77
+          ],
+          "size": [
+            2.0,
+            2.0
+          ],
+          "drill": [
+            1.1,
+            1.1
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "4",
+          "net": "/RETURN_BUS",
+          "pos": [
+            109.5,
+            76.31
+          ],
+          "size": [
+            2.0,
+            2.0
+          ],
+          "drill": [
+            1.1,
+            1.1
+          ],
+          "zone_connection": -1
+        }
+      ]
+    },
+    {
+      "ref": "RGB",
+      "value": "WS2812_RGB",
+      "footprint": "WS2812B_Module_1x03_P2.54mm",
+      "layer": "F.Cu",
+      "origin": [
+        84.0,
+        62.5
+      ],
+      "angle": -90.0,
+      "pads": [
+        {
+          "number": "1",
+          "net": "GND",
+          "pos": [
+            84.0,
+            59.96
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "2",
+          "net": "+3V3",
+          "pos": [
+            84.0,
+            62.5
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "3",
+          "net": "/LED_DIN",
+          "pos": [
+            84.0,
+            65.04
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        }
+      ]
+    },
+    {
+      "ref": "IN",
+      "value": "UPSTREAM_IN",
+      "footprint": "Pogo_4Pin_Dock_2.54mm",
+      "layer": "F.Cu",
+      "origin": [
+        83.5,
+        68.69
+      ],
+      "angle": 0.0,
+      "pads": [
+        {
+          "number": "1",
+          "net": "+3V3",
+          "pos": [
+            83.5,
+            68.69
+          ],
+          "size": [
+            2.0,
+            2.0
+          ],
+          "drill": [
+            1.1,
+            1.1
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "2",
+          "net": "GND",
+          "pos": [
+            83.5,
+            71.23
+          ],
+          "size": [
+            2.0,
+            2.0
+          ],
+          "drill": [
+            1.1,
+            1.1
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "3",
+          "net": "/RX_IN",
+          "pos": [
+            83.5,
+            73.77
+          ],
+          "size": [
+            2.0,
+            2.0
+          ],
+          "drill": [
+            1.1,
+            1.1
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "4",
+          "net": "/RETURN_BUS",
+          "pos": [
+            83.5,
+            76.31
+          ],
+          "size": [
+            2.0,
+            2.0
+          ],
+          "drill": [
+            1.1,
+            1.1
+          ],
+          "zone_connection": -1
+        }
+      ]
+    },
+    {
+      "ref": "C104",
+      "value": "100nF (104)",
+      "footprint": "C_Disc_P2.54mm",
+      "layer": "F.Cu",
+      "origin": [
+        109.5,
+        62.23
+      ],
+      "angle": 90.0,
+      "pads": [
+        {
+          "number": "1",
+          "net": "GND",
+          "pos": [
+            109.5,
+            63.5
+          ],
+          "size": [
+            1.6,
+            1.6
+          ],
+          "drill": [
+            0.85,
+            0.85
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "2",
+          "net": "+3V3",
+          "pos": [
+            109.5,
+            60.96
+          ],
+          "size": [
+            1.6,
+            1.6
+          ],
+          "drill": [
+            0.85,
+            0.85
+          ],
+          "zone_connection": -1
+        }
+      ]
+    },
+    {
+      "ref": "PROG",
+      "value": "SWIO_DEBUG",
+      "footprint": "Prog_Header_1x03_P2.54mm",
+      "layer": "F.Cu",
+      "origin": [
+        109.5,
+        83.96
+      ],
+      "angle": -90.0,
+      "pads": [
+        {
+          "number": "1",
+          "net": "GND",
+          "pos": [
+            109.5,
+            81.42
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "2",
+          "net": "+3V3",
+          "pos": [
+            109.5,
+            83.96
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "3",
+          "net": "/SWIO",
+          "pos": [
+            109.5,
+            86.5
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        }
+      ]
+    },
+    {
+      "ref": "MCU",
+      "value": "CH32V003F4P6",
+      "footprint": "TENSTAR_CH32V003F4P6",
+      "layer": "F.Cu",
+      "origin": [
+        96.38,
+        72.7
+      ],
+      "angle": 90.0,
+      "pads": [
+        {
+          "number": "1",
+          "net": "unconnected-(MCU-PC4-Pad1)",
+          "pos": [
+            88.76,
+            85.4
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "2",
+          "net": "unconnected-(MCU-PC3-Pad2)",
+          "pos": [
+            88.76,
+            82.86
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "3",
+          "net": "unconnected-(MCU-PC2-Pad3)",
+          "pos": [
+            88.76,
+            80.32
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "4",
+          "net": "unconnected-(MCU-PC1-Pad4)",
+          "pos": [
+            88.76,
+            77.78
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "5",
+          "net": "unconnected-(MCU-PC0-Pad5)",
+          "pos": [
+            88.76,
+            75.24
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "6",
+          "net": "/LED_DIN",
+          "pos": [
+            88.76,
+            72.7
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "7",
+          "net": "unconnected-(MCU-PA1-Pad7)",
+          "pos": [
+            88.76,
+            70.16
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "8",
+          "net": "/RX_IN",
+          "pos": [
+            88.76,
+            67.62
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "9",
+          "net": "/TX_OUT",
+          "pos": [
+            88.76,
+            65.08
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "10",
+          "net": "+3V3",
+          "pos": [
+            88.76,
+            62.54
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "11",
+          "net": "GND",
+          "pos": [
+            88.76,
+            60.0
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "12",
+          "net": "unconnected-(MCU-PC5-Pad12)",
+          "pos": [
+            104.0,
+            85.4
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "13",
+          "net": "unconnected-(MCU-PC6-Pad13)",
+          "pos": [
+            104.0,
+            82.86
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "14",
+          "net": "unconnected-(MCU-PC7-Pad14)",
+          "pos": [
+            104.0,
+            80.32
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "15",
+          "net": "unconnected-(MCU-PD0-Pad15)",
+          "pos": [
+            104.0,
+            77.78
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "16",
+          "net": "/SWIO",
+          "pos": [
+            104.0,
+            75.24
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "17",
+          "net": "unconnected-(MCU-PD2-Pad17)",
+          "pos": [
+            104.0,
+            72.7
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "18",
+          "net": "unconnected-(MCU-PD3-Pad18)",
+          "pos": [
+            104.0,
+            70.16
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "19",
+          "net": "unconnected-(MCU-PD4-Pad19)",
+          "pos": [
+            104.0,
+            67.62
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "20",
+          "net": "unconnected-(MCU-PD7-Pad20)",
+          "pos": [
+            104.0,
+            65.08
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "21",
+          "net": "+3V3",
+          "pos": [
+            104.0,
+            62.54
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        },
+        {
+          "number": "22",
+          "net": "GND",
+          "pos": [
+            104.0,
+            60.0
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "zone_connection": -1
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "shape": "Rect",
+      "start": [
+        80.5,
+        56.5
+      ],
+      "end": [
+        112.5,
+        88.5
+      ],
+      "width": 0.1
+    }
+  ],
+  "nets": {
+    "+3V3": {
+      "pads": [
+        "OUT:1",
+        "RGB:2",
+        "IN:1",
+        "C104:2",
+        "PROG:2",
+        "MCU:10",
+        "MCU:21"
+      ],
+      "widths": {
+        "0.6": 14
+      },
+      "length": 60.174187272926666,
+      "segments": [
+        {
+          "start": [
+            105.58,
+            60.96
+          ],
+          "end": [
+            109.5,
+            60.96
+          ],
+          "layer": "F.Cu",
+          "width": 0.6
+        },
+        {
+          "start": [
+            111.4,
+            70.59
+          ],
+          "end": [
+            111.4,
+            82.06
+          ],
+          "layer": "F.Cu",
+          "width": 0.6
+        },
+        {
+          "start": [
+            111.4,
+            82.06
+          ],
+          "end": [
+            109.5,
+            83.96
+          ],
+          "layer": "F.Cu",
+          "width": 0.6
+        },
+        {
+          "start": [
+            81.8,
+            64.7
+          ],
+          "end": [
+            81.8,
+            66.989999
+          ],
+          "layer": "F.Cu",
+          "width": 0.6
+        },
+        {
+          "start": [
+            81.8,
+            66.989999
+          ],
+          "end": [
+            83.5,
+            68.69
+          ],
+          "layer": "F.Cu",
+          "width": 0.6
+        },
+        {
+          "start": [
+            109.5,
+            68.69
+          ],
+          "end": [
+            111.4,
+            70.59
+          ],
+          "layer": "F.Cu",
+          "width": 0.6
+        },
+        {
+          "start": [
+            88.76,
+            62.54
+          ],
+          "end": [
+            104.0,
+            62.54
+          ],
+          "layer": "F.Cu",
+          "width": 0.6
+        },
+        {
+          "start": [
+            106.5,
+            65.69
+          ],
+          "end": [
+            109.5,
+            68.69
+          ],
+          "layer": "F.Cu",
+          "width": 0.6
+        },
+        {
+          "start": [
+            105.58,
+            60.96
+          ],
+          "end": [
+            106.5,
+            61.88
+          ],
+          "layer": "F.Cu",
+          "width": 0.6
+        },
+        {
+          "start": [
+            84.0,
+            62.5
+          ],
+          "end": [
+            81.8,
+            64.7
+          ],
+          "layer": "F.Cu",
+          "width": 0.6
+        },
+        {
+          "start": [
+            106.5,
+            61.88
+          ],
+          "end": [
+            106.5,
+            65.69
+          ],
+          "layer": "F.Cu",
+          "width": 0.6
+        },
+        {
+          "start": [
+            104.0,
+            62.54
+          ],
+          "end": [
+            105.58,
+            60.96
+          ],
+          "layer": "F.Cu",
+          "width": 0.6
+        },
+        {
+          "start": [
+            88.72,
+            62.5
+          ],
+          "end": [
+            88.76,
+            62.54
+          ],
+          "layer": "B.Cu",
+          "width": 0.6
+        },
+        {
+          "start": [
+            84.0,
+            62.5
+          ],
+          "end": [
+            88.72,
+            62.5
+          ],
+          "layer": "B.Cu",
+          "width": 0.6
+        }
+      ]
+    },
+    "/LED_DIN": {
+      "pads": [
+        "RGB:3",
+        "MCU:6"
+      ],
+      "widths": {
+        "0.3": 3
+      },
+      "length": 9.631656556895933,
+      "segments": [
+        {
+          "start": [
+            86.5,
+            67.54
+          ],
+          "end": [
+            86.5,
+            70.44
+          ],
+          "layer": "F.Cu",
+          "width": 0.3
+        },
+        {
+          "start": [
+            86.5,
+            70.44
+          ],
+          "end": [
+            88.76,
+            72.7
+          ],
+          "layer": "F.Cu",
+          "width": 0.3
+        },
+        {
+          "start": [
+            84.0,
+            65.04
+          ],
+          "end": [
+            86.5,
+            67.54
+          ],
+          "layer": "F.Cu",
+          "width": 0.3
+        }
+      ]
+    },
+    "/RETURN_BUS": {
+      "pads": [
+        "OUT:4",
+        "IN:4"
+      ],
+      "widths": {
+        "0.4": 7
+      },
+      "length": 42.54934341759516,
+      "segments": [
+        {
+          "start": [
+            86.0,
+            85.25
+          ],
+          "end": [
+            88.0,
+            87.25
+          ],
+          "layer": "B.Cu",
+          "width": 0.4
+        },
+        {
+          "start": [
+            106.5,
+            85.65
+          ],
+          "end": [
+            106.5,
+            79.31
+          ],
+          "layer": "B.Cu",
+          "width": 0.4
+        },
+        {
+          "start": [
+            88.0,
+            87.25
+          ],
+          "end": [
+            104.9,
+            87.25
+          ],
+          "layer": "B.Cu",
+          "width": 0.4
+        },
+        {
+          "start": [
+            83.5,
+            76.31
+          ],
+          "end": [
+            86.0,
+            78.81
+          ],
+          "layer": "B.Cu",
+          "width": 0.4
+        },
+        {
+          "start": [
+            104.9,
+            87.25
+          ],
+          "end": [
+            106.5,
+            85.65
+          ],
+          "layer": "B.Cu",
+          "width": 0.4
+        },
+        {
+          "start": [
+            106.5,
+            79.31
+          ],
+          "end": [
+            109.5,
+            76.31
+          ],
+          "layer": "B.Cu",
+          "width": 0.4
+        },
+        {
+          "start": [
+            86.0,
+            78.81
+          ],
+          "end": [
+            86.0,
+            85.25
+          ],
+          "layer": "B.Cu",
+          "width": 0.4
+        }
+      ]
+    },
+    "/RX_IN": {
+      "pads": [
+        "IN:3",
+        "MCU:8"
+      ],
+      "widths": {
+        "0.3": 4
+      },
+      "length": 9.547199128346444,
+      "segments": [
+        {
+          "start": [
+            85.4,
+            68.9
+          ],
+          "end": [
+            86.68,
+            67.62
+          ],
+          "layer": "B.Cu",
+          "width": 0.3
+        },
+        {
+          "start": [
+            86.68,
+            67.62
+          ],
+          "end": [
+            88.76,
+            67.62
+          ],
+          "layer": "B.Cu",
+          "width": 0.3
+        },
+        {
+          "start": [
+            83.5,
+            73.77
+          ],
+          "end": [
+            85.4,
+            71.87
+          ],
+          "layer": "B.Cu",
+          "width": 0.3
+        },
+        {
+          "start": [
+            85.4,
+            71.87
+          ],
+          "end": [
+            85.4,
+            68.9
+          ],
+          "layer": "B.Cu",
+          "width": 0.3
+        }
+      ]
+    },
+    "/SWIO": {
+      "pads": [
+        "PROG:3",
+        "MCU:16"
+      ],
+      "widths": {
+        "0.3": 3
+      },
+      "length": 13.538174593052023,
+      "segments": [
+        {
+          "start": [
+            106.0,
+            83.0
+          ],
+          "end": [
+            109.5,
+            86.5
+          ],
+          "layer": "F.Cu",
+          "width": 0.3
+        },
+        {
+          "start": [
+            104.0,
+            75.24
+          ],
+          "end": [
+            106.0,
+            77.24
+          ],
+          "layer": "F.Cu",
+          "width": 0.3
+        },
+        {
+          "start": [
+            106.0,
+            77.24
+          ],
+          "end": [
+            106.0,
+            83.0
+          ],
+          "layer": "F.Cu",
+          "width": 0.3
+        }
+      ]
+    },
+    "/TX_OUT": {
+      "pads": [
+        "OUT:3",
+        "MCU:9"
+      ],
+      "widths": {
+        "0.3": 6
+      },
+      "length": 25.991433611130294,
+      "segments": [
+        {
+          "start": [
+            107.0,
+            71.27
+          ],
+          "end": [
+            109.5,
+            73.77
+          ],
+          "layer": "B.Cu",
+          "width": 0.3
+        },
+        {
+          "start": [
+            88.76,
+            65.08
+          ],
+          "end": [
+            91.0,
+            65.08
+          ],
+          "layer": "B.Cu",
+          "width": 0.3
+        },
+        {
+          "start": [
+            92.27,
+            66.349999
+          ],
+          "end": [
+            104.9,
+            66.349999
+          ],
+          "layer": "B.Cu",
+          "width": 0.3
+        },
+        {
+          "start": [
+            104.9,
+            66.349999
+          ],
+          "end": [
+            107.0,
+            68.45
+          ],
+          "layer": "B.Cu",
+          "width": 0.3
+        },
+        {
+          "start": [
+            107.0,
+            68.45
+          ],
+          "end": [
+            107.0,
+            71.27
+          ],
+          "layer": "B.Cu",
+          "width": 0.3
+        },
+        {
+          "start": [
+            91.0,
+            65.08
+          ],
+          "end": [
+            92.27,
+            66.349999
+          ],
+          "layer": "B.Cu",
+          "width": 0.3
+        }
+      ]
+    },
+    "GND": {
+      "pads": [
+        "OUT:2",
+        "RGB:1",
+        "IN:2",
+        "C104:1",
+        "PROG:1",
+        "MCU:11",
+        "MCU:22"
+      ],
+      "widths": {},
+      "length": 0,
+      "segments": []
+    }
+  },
+  "zones_stored": [
+    {
+      "layer": "F.Cu",
+      "net": "GND",
+      "area_mm2": 728.539261767979,
+      "polygons": 2,
+      "clearance": 0.25,
+      "thermal_gap": 0.3,
+      "thermal_spoke": 0.4,
+      "pad_connection": 1,
+      "island_removal": 0
+    },
+    {
+      "layer": "B.Cu",
+      "net": "GND",
+      "area_mm2": 730.4711153444995,
+      "polygons": 1,
+      "clearance": 0.25,
+      "thermal_gap": 0.3,
+      "thermal_spoke": 0.4,
+      "pad_connection": 1,
+      "island_removal": 0
+    }
+  ],
+  "zones_refilled": [
+    {
+      "layer": "F.Cu",
+      "net": "GND",
+      "area_mm2": 728.539261767979,
+      "polygons": 2,
+      "clearance": 0.25,
+      "thermal_gap": 0.3,
+      "thermal_spoke": 0.4,
+      "pad_connection": 1,
+      "island_removal": 0
+    },
+    {
+      "layer": "B.Cu",
+      "net": "GND",
+      "area_mm2": 730.4711153444995,
+      "polygons": 1,
+      "clearance": 0.25,
+      "thermal_gap": 0.3,
+      "thermal_spoke": 0.4,
+      "pad_connection": 1,
+      "island_removal": 0
+    }
+  ],
+  "source_unchanged": true
+}

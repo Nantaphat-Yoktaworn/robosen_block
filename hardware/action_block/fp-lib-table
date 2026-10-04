@@ -1,0 +1,5 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "robosen_action")(type "KiCad")(uri "${KIPRJMOD}/action_block.pretty")(options "")(descr "Robosen Action Block Custom Footprints"))
+  (lib (name "robosen_master")(type "KiCad")(uri "${KIPRJMOD}/../master_block/robosen_master.pretty")(options "")(descr "Robosen Master Block Footprints"))
+)
