@@ -488,14 +488,14 @@ def generate():
         '\t\t\t(rectangle (start -12.7 -13.97) (end 12.7 13.97) (stroke (width 0.254) (type solid)) (fill (type background)))',
         '\t\t)',
         '\t\t(symbol "EPaper_8Pin_1_1"',
-        '\t\t\t(pin power_in line (at -17.78 8.89 0) (length 5.08) (name "VCC" (effects (font (size 1.0 1.0)))) (number "1" (effects (font (size 0.8 0.8)))))',
-        '\t\t\t(pin power_in line (at -17.78 6.35 0) (length 5.08) (name "GND" (effects (font (size 1.0 1.0)))) (number "2" (effects (font (size 0.8 0.8)))))',
-        '\t\t\t(pin input line (at -17.78 3.81 0) (length 5.08) (name "SDI/MOSI" (effects (font (size 1.0 1.0)))) (number "3" (effects (font (size 0.8 0.8)))))',
-        '\t\t\t(pin input line (at -17.78 1.27 0) (length 5.08) (name "SCLK" (effects (font (size 1.0 1.0)))) (number "4" (effects (font (size 0.8 0.8)))))',
-        '\t\t\t(pin input line (at -17.78 -1.27 0) (length 5.08) (name "CS" (effects (font (size 1.0 1.0)))) (number "5" (effects (font (size 0.8 0.8)))))',
-        '\t\t\t(pin input line (at -17.78 -3.81 0) (length 5.08) (name "D/C" (effects (font (size 1.0 1.0)))) (number "6" (effects (font (size 0.8 0.8)))))',
-        '\t\t\t(pin input line (at -17.78 -6.35 0) (length 5.08) (name "RES" (effects (font (size 1.0 1.0)))) (number "7" (effects (font (size 0.8 0.8)))))',
-        '\t\t\t(pin output line (at -17.78 -8.89 0) (length 5.08) (name "BUSY" (effects (font (size 1.0 1.0)))) (number "8" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin output line (at -17.78 8.89 0) (length 5.08) (name "BUSY" (effects (font (size 1.0 1.0)))) (number "1" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin input line (at -17.78 6.35 0) (length 5.08) (name "CS" (effects (font (size 1.0 1.0)))) (number "2" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin input line (at -17.78 3.81 0) (length 5.08) (name "DC" (effects (font (size 1.0 1.0)))) (number "3" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin input line (at -17.78 1.27 0) (length 5.08) (name "RES" (effects (font (size 1.0 1.0)))) (number "4" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin input line (at -17.78 -1.27 0) (length 5.08) (name "SDA" (effects (font (size 1.0 1.0)))) (number "5" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin input line (at -17.78 -3.81 0) (length 5.08) (name "SCL" (effects (font (size 1.0 1.0)))) (number "6" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin power_in line (at -17.78 -6.35 0) (length 5.08) (name "VCC" (effects (font (size 1.0 1.0)))) (number "7" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin power_in line (at -17.78 -8.89 0) (length 5.08) (name "GND" (effects (font (size 1.0 1.0)))) (number "8" (effects (font (size 0.8 0.8)))))',
         '\t\t)'
     ]
     symbols_def["EPaper_8Pin"] = epd_lines
@@ -512,12 +512,12 @@ def generate():
         '\t\t\t(rectangle (start -12.7 -10.16) (end 12.7 10.16) (stroke (width 0.254) (type solid)) (fill (type background)))',
         '\t\t)',
         '\t\t(symbol "TP4056_Module_1_1"',
-        '\t\t\t(pin passive line (at 17.78 5.08 180) (length 5.08) (name "B+" (effects (font (size 1.0 1.0)))) (number "1" (effects (font (size 0.8 0.8)))))',
-        '\t\t\t(pin passive line (at 17.78 -5.08 180) (length 5.08) (name "B-" (effects (font (size 1.0 1.0)))) (number "2" (effects (font (size 0.8 0.8)))))',
-        '\t\t\t(pin power_out line (at 17.78 2.54 180) (length 5.08) (name "OUT+" (effects (font (size 1.0 1.0)))) (number "3" (effects (font (size 0.8 0.8)))))',
-        '\t\t\t(pin power_in line (at 17.78 -2.54 180) (length 5.08) (name "OUT-" (effects (font (size 1.0 1.0)))) (number "4" (effects (font (size 0.8 0.8)))))',
-        '\t\t\t(pin passive line (at -17.78 -2.54 0) (length 5.08) (name "IN-" (effects (font (size 1.0 1.0)))) (number "5" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin passive line (at -17.78 5.08 0) (length 5.08) (name "B+" (effects (font (size 1.0 1.0)))) (number "2" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin passive line (at -17.78 -5.08 0) (length 5.08) (name "B-" (effects (font (size 1.0 1.0)))) (number "3" (effects (font (size 0.8 0.8)))))',
         '\t\t\t(pin passive line (at -17.78 2.54 0) (length 5.08) (name "IN+" (effects (font (size 1.0 1.0)))) (number "6" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin passive line (at -17.78 -2.54 0) (length 5.08) (name "IN-" (effects (font (size 1.0 1.0)))) (number "5" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin power_out line (at 17.78 2.54 180) (length 5.08) (name "OUT+" (effects (font (size 1.0 1.0)))) (number "1" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin power_in line (at 17.78 -2.54 180) (length 5.08) (name "OUT-" (effects (font (size 1.0 1.0)))) (number "4" (effects (font (size 0.8 0.8)))))',
         '\t\t)'
     ]
     symbols_def["TP4056_Module"] = tp_lines
@@ -525,20 +525,23 @@ def generate():
     # --- TPS63020_Module ---
     tps_lines = [
         '\t\t(pin_names (offset 1.016)) (in_bom yes) (on_board yes)',
-        '\t\t(property "Reference" "U" (at 0 -11.43 0) (effects (font (size 1.27 1.27))))',
-        '\t\t(property "Value" "TPS63020_BuckBoost" (at 0 11.43 0) (effects (font (size 1.27 1.27))))',
-        '\t\t(property "Footprint" "robosen_master:TPS63020_BuckBoost_Module" (at 0 13.97 0) (effects (font (size 1.27 1.27)) (hide yes)))',
+        '\t\t(property "Reference" "U" (at 0 -12.7 0) (effects (font (size 1.27 1.27))))',
+        '\t\t(property "Value" "TPS63020_BuckBoost" (at 0 12.7 0) (effects (font (size 1.27 1.27))))',
+        '\t\t(property "Footprint" "robosen_master:TPS63020_BuckBoost_Module" (at 0 15.24 0) (effects (font (size 1.27 1.27)) (hide yes)))',
         '\t\t(property "Datasheet" "Texas Instruments TPS63020" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))',
-        '\t\t(property "Description" "High Efficiency Single Inductor Buck-Boost Converter 3.3V Module" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))',
+        '\t\t(property "Description" "High Efficiency Single Inductor Buck-Boost Converter 3.3V Module (Horizontal)" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))',
         '\t\t(symbol "TPS63020_Module_0_1"',
-        '\t\t\t(rectangle (start -12.7 -8.89) (end 12.7 8.89) (stroke (width 0.254) (type solid)) (fill (type background)))',
+        '\t\t\t(rectangle (start -15.24 -10.16) (end 15.24 10.16) (stroke (width 0.254) (type solid)) (fill (type background)))',
         '\t\t)',
         '\t\t(symbol "TPS63020_Module_1_1"',
-        '\t\t\t(pin power_out line (at 17.78 2.54 180) (length 5.08) (name "VOUT" (effects (font (size 1.0 1.0)))) (number "1" (effects (font (size 0.8 0.8)))))',
-        '\t\t\t(pin power_in line (at 17.78 -2.54 180) (length 5.08) (name "GND" (effects (font (size 1.0 1.0)))) (number "2" (effects (font (size 0.8 0.8)))))',
-        '\t\t\t(pin power_in line (at -17.78 2.54 0) (length 5.08) (name "VIN" (effects (font (size 1.0 1.0)))) (number "3" (effects (font (size 0.8 0.8)))))',
-        '\t\t\t(pin input line (at -17.78 0 0) (length 5.08) (name "EN" (effects (font (size 1.0 1.0)))) (number "4" (effects (font (size 0.8 0.8)))))',
-        '\t\t\t(pin input line (at -17.78 -2.54 0) (length 5.08) (name "PS" (effects (font (size 1.0 1.0)))) (number "5" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin power_in line (at -20.32 6.35 0) (length 5.08) (name "GND" (effects (font (size 1.0 1.0)))) (number "1" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin power_in line (at -20.32 3.81 0) (length 5.08) (name "GND" (effects (font (size 1.0 1.0)))) (number "2" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin power_in line (at -20.32 -3.81 0) (length 5.08) (name "VIN" (effects (font (size 1.0 1.0)))) (number "3" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin power_in line (at -20.32 -6.35 0) (length 5.08) (name "VIN" (effects (font (size 1.0 1.0)))) (number "4" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin power_in line (at 20.32 6.35 180) (length 5.08) (name "GND" (effects (font (size 1.0 1.0)))) (number "5" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin power_in line (at 20.32 3.81 180) (length 5.08) (name "GND" (effects (font (size 1.0 1.0)))) (number "6" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin power_out line (at 20.32 -3.81 180) (length 5.08) (name "OUT" (effects (font (size 1.0 1.0)))) (number "7" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin passive line (at 20.32 -6.35 180) (length 5.08) (name "OUT" (effects (font (size 1.0 1.0)))) (number "8" (effects (font (size 0.8 0.8)))))',
         '\t\t)'
     ]
     symbols_def["TPS63020_Module"] = tps_lines
@@ -596,11 +599,13 @@ def generate():
         '\t\t(symbol "SW_SPST_0_1"',
         '\t\t\t(circle (center -2.54 0) (radius 0.508) (stroke (width 0.254) (type solid)) (fill (type none)))',
         '\t\t\t(circle (center 2.54 0) (radius 0.508) (stroke (width 0.254) (type solid)) (fill (type none)))',
-        '\t\t\t(polyline (pts (xy -2.0 0.5) (xy 2.0 3.0)) (stroke (width 0.254) (type solid)))',
+        '\t\t\t(circle (center 2.54 -2.54) (radius 0.508) (stroke (width 0.254) (type solid)) (fill (type none)))',
+        '\t\t\t(polyline (pts (xy -2.0 0.5) (xy 2.0 2.0)) (stroke (width 0.254) (type solid)))',
         '\t\t)',
         '\t\t(symbol "SW_SPST_1_1"',
-        '\t\t\t(pin passive line (at -5.08 0 0) (length 2.032) (name "1" (effects (font (size 1.0 1.0)))) (number "1" (effects (font (size 0.8 0.8)))))',
-        '\t\t\t(pin passive line (at 5.08 0 180) (length 2.032) (name "2" (effects (font (size 1.0 1.0)))) (number "2" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin passive line (at -5.08 0 0) (length 2.54) (name "1" (effects (font (size 1.0 1.0)))) (number "1" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin passive line (at 5.08 0 180) (length 2.54) (name "2" (effects (font (size 1.0 1.0)))) (number "2" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin passive line (at 5.08 -2.54 180) (length 2.54) (name "3" (effects (font (size 1.0 1.0)))) (number "3" (effects (font (size 0.8 0.8)))))',
         '\t\t)'
     ]
     symbols_def["SW_SPST"] = spst_lines
@@ -758,8 +763,8 @@ def generate():
     # Power Zone
     sch.append(place_sym("robosen_master:18650_Cell", "BT1", "18650 3.7V 3500mAh", "robosen_master:18650_Battery_Holder_Single", 254.00, 215.90, 2))
     sch.append(place_sym("robosen_master:TP4056_Module", "U2", "TP4056_USB-C_BMS", "robosen_master:TP4056_Type-C_Module", 304.80, 215.90, 6))
-    sch.append(place_sym("robosen_master:SW_SPST", "SW4", "POWER_SWITCH", "robosen_master:SW_Slide_SS12D00", 342.90, 213.36, 2))
-    sch.append(place_sym("robosen_master:TPS63020_Module", "U3", "TPS63020_3.3V_BuckBoost", "robosen_master:TPS63020_BuckBoost_Module", 355.60, 254.00, 5))
+    sch.append(place_sym("robosen_master:SW_SPST", "SW4", "POWER_SWITCH", "robosen_master:SW_Slide_SS12D00", 342.90, 213.36, 3))
+    sch.append(place_sym("robosen_master:TPS63020_Module", "U3", "TPS63020_3.3V_BuckBoost", "robosen_master:TPS63020_BuckBoost_Module", 355.60, 254.00, 8))
 
     # =========================================================================
     # 6. NET CONNECTIONS, WIRES & LABELS
@@ -939,22 +944,37 @@ def generate():
     sch.append(place_pwr("GND", "#PWR11", 78.74, 139.70, 270))
 
     # --- DISP1 (E-Paper Header, X = 45.72) ---
+    # Pin 1: BUSY (Y = 194.31)
     sch.append(wire(45.72, 194.31, 35.56, 194.31))
-    sch.append(place_pwr("+3V3", "#PWR12", 35.56, 194.31, 90))
+    sch.append(label("EPD_BUSY", 35.56, 194.31, 180))
+
+    # Pin 2: CS (Y = 196.85)
     sch.append(wire(45.72, 196.85, 35.56, 196.85))
-    sch.append(place_pwr("GND", "#PWR13", 35.56, 196.85, 270))
+    sch.append(label("EPD_CS", 35.56, 196.85, 180))
+
+    # Pin 3: DC (Y = 199.39)
     sch.append(wire(45.72, 199.39, 35.56, 199.39))
-    sch.append(label("EPD_MOSI", 35.56, 199.39, 180))
+    sch.append(label("EPD_DC", 35.56, 199.39, 180))
+
+    # Pin 4: RES (Y = 201.93)
     sch.append(wire(45.72, 201.93, 35.56, 201.93))
-    sch.append(label("EPD_SCK", 35.56, 201.93, 180))
+    sch.append(label("EPD_RES", 35.56, 201.93, 180))
+
+    # Pin 5: SDA / MOSI (Y = 204.47)
     sch.append(wire(45.72, 204.47, 35.56, 204.47))
-    sch.append(label("EPD_CS", 35.56, 204.47, 180))
+    sch.append(label("EPD_MOSI", 35.56, 204.47, 180))
+
+    # Pin 6: SCL / SCK (Y = 207.01)
     sch.append(wire(45.72, 207.01, 35.56, 207.01))
-    sch.append(label("EPD_DC", 35.56, 207.01, 180))
+    sch.append(label("EPD_SCK", 35.56, 207.01, 180))
+
+    # Pin 7: VCC / +3V3 (Y = 209.55)
     sch.append(wire(45.72, 209.55, 35.56, 209.55))
-    sch.append(label("EPD_RES", 35.56, 209.55, 180))
+    sch.append(place_pwr("+3V3", "#PWR12", 35.56, 209.55, 90))
+
+    # Pin 8: GND (Y = 212.09)
     sch.append(wire(45.72, 212.09, 35.56, 212.09))
-    sch.append(label("EPD_BUSY", 35.56, 212.09, 180))
+    sch.append(place_pwr("GND", "#PWR13", 35.56, 212.09, 270))
 
     # --- J1 (Config Dock, X = 327.66) ---
     sch.append(wire(327.66, 59.69, 317.50, 59.69))
@@ -990,19 +1010,19 @@ def generate():
 
     # --- Power Architecture: BT1 -> U2 -> SW4 -> U3 ---
     # BT1 (18650 Cell, X = 254.00)
-    # Direct physical wire from BT1 Pin 1 (254.00, 210.82) to U2 Pin 1 (322.58, 210.82)
-    sch.append(wire(254.00, 210.82, 322.58, 210.82))
-    sch.append(label("VBAT_RAW", 280.00, 210.82, 0))
+    # Direct physical wire from BT1 Pin 1 (254.00, 210.82) to U2 Pin 2 B+ (287.02, 210.82)
+    sch.append(wire(254.00, 210.82, 287.02, 210.82))
+    sch.append(label("VBAT_RAW", 270.00, 210.82, 0))
 
-    # Direct physical wire from BT1 Pin 2 (254.00, 220.98) to U2 Pin 2 (322.58, 220.98)
-    sch.append(wire(254.00, 220.98, 322.58, 220.98))
-    sch.append(label("VBAT_GND", 280.00, 220.98, 0))
+    # Direct physical wire from BT1 Pin 2 (254.00, 220.98) to U2 Pin 3 B- (287.02, 220.98)
+    sch.append(wire(254.00, 220.98, 287.02, 220.98))
+    sch.append(label("VBAT_GND", 270.00, 220.98, 0))
 
     # U2 TP4056 External 5V Pads (X = 287.02) -> Unused
-    sch.append(no_conn(287.02, 213.36)) # IN+
-    sch.append(no_conn(287.02, 218.44)) # IN-
+    sch.append(no_conn(287.02, 213.36)) # IN+ (Pin 6)
+    sch.append(no_conn(287.02, 218.44)) # IN- (Pin 5)
 
-    # Direct physical wire from U2 Pin 3 OUT+ (322.58, 213.36) to SW4 Pin 1 (337.82, 213.36)
+    # Direct physical wire from U2 Pin 1 OUT+ (322.58, 213.36) to SW4 Pin 1 (337.82, 213.36)
     sch.append(wire(322.58, 213.36, 337.82, 213.36))
     sch.append(label("VBAT_PROT", 330.20, 213.36, 0))
 
@@ -1015,27 +1035,36 @@ def generate():
     sch.append(label("VBAT_SW", 355.60, 213.36, 0))
     sch.append(place_pwr("PWR_FLAG", "#FLG02", 355.60, 213.36, 90))
 
+    # SW4 Pin 3 (Unconnected throw in SPDT) -> No Connect
+    sch.append(no_conn(347.98, 215.90))
+
     # U3 (TPS63020 Buck-Boost, X = 355.60, Y = 254.00)
-    # Pin 3 (VIN, Y = 251.46)
-    sch.append(wire(337.82, 251.46, 327.66, 251.46))
-    sch.append(label("VBAT_SW", 327.66, 251.46, 180))
+    # Left Pins (IN side, X = 335.28):
+    # Pin 1 & Pin 2: GND (Y = 247.65, 250.19)
+    sch.append(wire(335.28, 247.65, 325.12, 247.65))
+    sch.append(wire(335.28, 250.19, 325.12, 250.19))
+    sch.append(wire(325.12, 247.65, 325.12, 250.19))
+    sch.append(place_pwr("GND", "#PWR21", 325.12, 250.19, 270))
 
-    # Pin 4 (EN, Y = 254.00)
-    sch.append(wire(337.82, 254.00, 327.66, 254.00))
-    sch.append(label("VBAT_SW", 327.66, 254.00, 180))
+    # Pin 3 & Pin 4: VIN (Y = 257.81, 260.35)
+    sch.append(wire(335.28, 257.81, 325.12, 257.81))
+    sch.append(wire(335.28, 260.35, 325.12, 260.35))
+    sch.append(wire(325.12, 257.81, 325.12, 260.35))
+    sch.append(label("VBAT_SW", 325.12, 257.81, 180))
 
-    # Pin 5 (PS, Y = 256.54) -> Tied to GND for Power Save Mode
-    sch.append(wire(337.82, 256.54, 327.66, 256.54))
-    sch.append(place_pwr("GND", "#PWR21", 327.66, 256.54, 270))
+    # Right Pins (OUT side, X = 375.92):
+    # Pin 5 & Pin 6: GND (Y = 247.65, 250.19)
+    sch.append(wire(375.92, 247.65, 386.08, 247.65))
+    sch.append(wire(375.92, 250.19, 386.08, 250.19))
+    sch.append(wire(386.08, 247.65, 386.08, 250.19))
+    sch.append(place_pwr("GND", "#PWR23", 386.08, 250.19, 270))
+    sch.append(place_pwr("PWR_FLAG", "#FLG01", 386.08, 250.19, 270))
 
-    # Pin 1 (VOUT, Y = 251.46) -> Supplies system +3V3 rail
-    sch.append(wire(373.38, 251.46, 383.54, 251.46))
-    sch.append(place_pwr("+3V3", "#PWR22", 383.54, 251.46, 90))
-
-    # Pin 2 (GND, Y = 256.54) -> Tied to GND with PWR_FLAG
-    sch.append(wire(373.38, 256.54, 383.54, 256.54))
-    sch.append(place_pwr("GND", "#PWR23", 383.54, 256.54, 270))
-    sch.append(place_pwr("PWR_FLAG", "#FLG01", 383.54, 256.54, 270))
+    # Pin 7 & Pin 8: OUT (Y = 257.81, 260.35)
+    sch.append(wire(375.92, 257.81, 386.08, 257.81))
+    sch.append(wire(375.92, 260.35, 386.08, 260.35))
+    sch.append(wire(386.08, 257.81, 386.08, 260.35))
+    sch.append(place_pwr("+3V3", "#PWR22", 386.08, 257.81, 90))
 
     # Sheet instances & footer
     sch.append('\t(sheet_instances')

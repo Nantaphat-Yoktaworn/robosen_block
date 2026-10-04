@@ -278,7 +278,7 @@ Complete hardware specifications are detailed in [`PHYSICAL_BLOCK_SYSTEM_SPEC.md
 | **Smart End Block Firmware** | WCH CH32V003 | [`firmware/ch32v003_end_block/`](firmware/ch32v003_end_block/) | Active loopback line driver, CRC-8 validation, rainbow sparkle (`0xEE`) | ✅ **Flashed on Silicon** |
 | **ESP32 SWIO Programmer** | ESP32 / ESP32-S3 | [`firmware/esp32_ch32v003_programmer/`](firmware/esp32_ch32v003_programmer/) | High-speed 1-wire SWIO debugger & chunked Python flasher (`flash_tool.py`) | ✅ Verified |
 | **Arduino Uno Programmer** | Arduino Uno R3 | [`firmware/arduino_uno_ch32v003_programmer/`](firmware/arduino_uno_ch32v003_programmer/) | Ardulink 16MHz assembly bit-banging flasher for `minichlink` | ✅ Verified |
-| **Master Carrier PCB** | KiCad 10.0.6 | [`hardware/kicad/`](hardware/kicad/) | Custom motherboard PCB project & verified 7-footprint library (`robosen_master.pretty`) | ✅ Verified |
+| **Master Carrier PCB** | KiCad 10.0.6 | [`hardware/kicad/`](hardware/kicad/) | Custom motherboard PCB project & verified 10-footprint library (`robosen_master.pretty`) | ✅ Verified |
 
 ---
 

@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "C:\\Users\\nnnn\\Projects\\robosen_block\\hardware\\kicad\\robosen_master_block.kicad_sch")
-		(date "2026-10-04T13:30:18")
+		(date "2026-10-04T15:36:48")
 		(tool "Eeschema 10.0.6")
 		(sheet
 			(number "1")
@@ -85,7 +85,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "73f34b30-8557-4298-8416-5c60f0ff5e40")
+			(tstamps "4290de03-4a9e-444e-9aa9-823f0c6228d0")
 			(units
 				(unit
 					(name "A")
@@ -131,7 +131,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "8d365d74-1f60-4cc2-bda7-eca7526ed788")
+			(tstamps "4e310e0f-4ffc-437f-886f-e3bde1cb135a")
 			(units
 				(unit
 					(name "A")
@@ -195,7 +195,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a1491e70-6dd0-49b1-ac8e-154df87b1f19")
+			(tstamps "feb9c6f9-aef3-42c3-a0c7-63736e85e619")
 			(units
 				(unit
 					(name "A")
@@ -247,7 +247,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e4a0f86e-6948-4158-aaa0-d72e8847c375")
+			(tstamps "4109bf1e-2802-45e3-9d4a-6fcf15eb6b7d")
 			(units
 				(unit
 					(name "A")
@@ -299,7 +299,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d47671cc-0535-4f2e-b34f-a07e762f6a0b")
+			(tstamps "0fc86c4d-b5fe-4a5b-aa2f-132d0f5207dd")
 			(units
 				(unit
 					(name "A")
@@ -345,7 +345,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "c02ba646-e2b6-47e8-b9e2-b11c0e8edb62")
+			(tstamps "e84ec616-228e-4b83-af0d-d58b959dcbea")
 			(units
 				(unit
 					(name "A")
@@ -391,7 +391,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "b8c8622e-9fab-41a1-91e9-77bd37efca9b")
+			(tstamps "b9dac359-c5eb-44a5-b98d-f87e4e3d7550")
 			(units
 				(unit
 					(name "A")
@@ -446,7 +446,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "951feeb2-61a4-4de2-ac65-6507132784b3")
+			(tstamps "3f63ebff-be1c-47d9-a409-f9b911ebd1c6")
 			(units
 				(unit
 					(name "A")
@@ -501,7 +501,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "dac11dd9-dd7e-456f-b540-375bfff48252")
+			(tstamps "bc8dcdd6-aae9-4bb3-99f4-d695d77974ac")
 			(units
 				(unit
 					(name "A")
@@ -547,7 +547,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "96a259e4-d3a0-4651-b209-8b4dc0ee9caf")
+			(tstamps "6cfaf4ef-c89e-4b4c-a31e-77e67e0c6cc1")
 			(units
 				(unit
 					(name "A")
@@ -557,6 +557,9 @@
 						)
 						(pin
 							(num "2")
+						)
+						(pin
+							(num "3")
 						)
 					)
 				)
@@ -593,7 +596,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a7c94f5a-c7a4-412c-8d61-f22a44fc2608")
+			(tstamps "35af9cdd-683a-4b21-b1b4-8930c5d77a68")
 			(units
 				(unit
 					(name "A")
@@ -765,11 +768,14 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "433ecf56-e3f0-4956-84bc-9ccf5d22777f")
+			(tstamps "2c00aa1d-ceaa-4d52-b2c5-cf3da9a01321")
 			(units
 				(unit
 					(name "A")
 					(pins
+						(pin
+							(num "2")
+						)
 						(pin
 							(num "6")
 						)
@@ -777,16 +783,13 @@
 							(num "5")
 						)
 						(pin
-							(num "1")
-						)
-						(pin
 							(num "3")
 						)
 						(pin
-							(num "4")
+							(num "1")
 						)
 						(pin
-							(num "2")
+							(num "4")
 						)
 					)
 				)
@@ -809,7 +812,7 @@
 			(libsource
 				(lib "robosen_master")
 				(part "TPS63020_Module")
-				(description "High Efficiency Single Inductor Buck-Boost Converter 3.3V Module")
+				(description "High Efficiency Single Inductor Buck-Boost Converter 3.3V Module (Horizontal)")
 			)
 			(property
 				(name "Sheetname")
@@ -823,11 +826,17 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "4569db04-d51e-43e9-8030-89aa584e93a1")
+			(tstamps "c78f1c34-c27c-4bab-a0e6-1d537b0cc0d9")
 			(units
 				(unit
 					(name "A")
 					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
 						(pin
 							(num "3")
 						)
@@ -838,10 +847,13 @@
 							(num "5")
 						)
 						(pin
-							(num "1")
+							(num "6")
 						)
 						(pin
-							(num "2")
+							(num "7")
+						)
+						(pin
+							(num "8")
 						)
 					)
 				)
@@ -901,43 +913,43 @@
 			(pins
 				(pin
 					(num "1")
-					(name "VCC")
-					(type "power_in")
+					(name "BUSY")
+					(type "output")
 				)
 				(pin
 					(num "2")
-					(name "GND")
-					(type "power_in")
-				)
-				(pin
-					(num "3")
-					(name "SDI/MOSI")
-					(type "input")
-				)
-				(pin
-					(num "4")
-					(name "SCLK")
-					(type "input")
-				)
-				(pin
-					(num "5")
 					(name "CS")
 					(type "input")
 				)
 				(pin
-					(num "6")
-					(name "D/C")
+					(num "3")
+					(name "DC")
 					(type "input")
 				)
 				(pin
-					(num "7")
+					(num "4")
 					(name "RES")
 					(type "input")
 				)
 				(pin
+					(num "5")
+					(name "SDA")
+					(type "input")
+				)
+				(pin
+					(num "6")
+					(name "SCL")
+					(type "input")
+				)
+				(pin
+					(num "7")
+					(name "VCC")
+					(type "power_in")
+				)
+				(pin
 					(num "8")
-					(name "BUSY")
-					(type "output")
+					(name "GND")
+					(type "power_in")
 				)
 			)
 		)
@@ -1354,6 +1366,11 @@
 					(name "2")
 					(type "passive")
 				)
+				(pin
+					(num "3")
+					(name "3")
+					(type "passive")
+				)
 			)
 		)
 		(libpart
@@ -1376,18 +1393,18 @@
 			(pins
 				(pin
 					(num "1")
+					(name "OUT+")
+					(type "power_out")
+				)
+				(pin
+					(num "2")
 					(name "B+")
 					(type "passive")
 				)
 				(pin
-					(num "2")
+					(num "3")
 					(name "B-")
 					(type "passive")
-				)
-				(pin
-					(num "3")
-					(name "OUT+")
-					(type "power_out")
 				)
 				(pin
 					(num "4")
@@ -1409,7 +1426,7 @@
 		(libpart
 			(lib "robosen_master")
 			(part "TPS63020_Module")
-			(description "High Efficiency Single Inductor Buck-Boost Converter 3.3V Module")
+			(description "High Efficiency Single Inductor Buck-Boost Converter 3.3V Module (Horizontal)")
 			(docs "Texas Instruments TPS63020")
 			(fields
 				(field
@@ -1421,13 +1438,13 @@
 				(field
 					(name "Datasheet") "Texas Instruments TPS63020")
 				(field
-					(name "Description") "High Efficiency Single Inductor Buck-Boost Converter 3.3V Module")
+					(name "Description") "High Efficiency Single Inductor Buck-Boost Converter 3.3V Module (Horizontal)")
 			)
 			(pins
 				(pin
 					(num "1")
-					(name "VOUT")
-					(type "power_out")
+					(name "GND")
+					(type "power_in")
 				)
 				(pin
 					(num "2")
@@ -1441,13 +1458,28 @@
 				)
 				(pin
 					(num "4")
-					(name "EN")
-					(type "input")
+					(name "VIN")
+					(type "power_in")
 				)
 				(pin
 					(num "5")
-					(name "PS")
-					(type "input")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "6")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "7")
+					(name "OUT")
+					(type "power_out")
+				)
+				(pin
+					(num "8")
+					(name "OUT")
+					(type "passive")
 				)
 			)
 		)
@@ -1465,8 +1497,8 @@
 			(class "Default")
 			(node
 				(ref "DISP1")
-				(pin "1")
-				(pinfunction "VCC_1")
+				(pin "7")
+				(pinfunction "VCC_7")
 				(pintype "power_in")
 			)
 			(node
@@ -1519,9 +1551,15 @@
 			)
 			(node
 				(ref "U3")
-				(pin "1")
-				(pinfunction "VOUT_1")
+				(pin "7")
+				(pinfunction "OUT_7")
 				(pintype "power_out")
+			)
+			(node
+				(ref "U3")
+				(pin "8")
+				(pinfunction "OUT_8")
+				(pintype "passive")
 			)
 		)
 		(net
@@ -1627,8 +1665,8 @@
 			(class "Default")
 			(node
 				(ref "DISP1")
-				(pin "8")
-				(pinfunction "BUSY_8")
+				(pin "1")
+				(pinfunction "BUSY_1")
 				(pintype "output")
 			)
 			(node
@@ -1644,8 +1682,8 @@
 			(class "Default")
 			(node
 				(ref "DISP1")
-				(pin "5")
-				(pinfunction "CS_5")
+				(pin "2")
+				(pinfunction "CS_2")
 				(pintype "input")
 			)
 			(node
@@ -1661,8 +1699,8 @@
 			(class "Default")
 			(node
 				(ref "DISP1")
-				(pin "6")
-				(pinfunction "D/C_6")
+				(pin "3")
+				(pinfunction "DC_3")
 				(pintype "input")
 			)
 			(node
@@ -1678,8 +1716,8 @@
 			(class "Default")
 			(node
 				(ref "DISP1")
-				(pin "3")
-				(pinfunction "SDI/MOSI_3")
+				(pin "5")
+				(pinfunction "SDA_5")
 				(pintype "input")
 			)
 			(node
@@ -1695,8 +1733,8 @@
 			(class "Default")
 			(node
 				(ref "DISP1")
-				(pin "7")
-				(pinfunction "RES_7")
+				(pin "4")
+				(pinfunction "RES_4")
 				(pintype "input")
 			)
 			(node
@@ -1712,8 +1750,8 @@
 			(class "Default")
 			(node
 				(ref "DISP1")
-				(pin "4")
-				(pinfunction "SCLK_4")
+				(pin "6")
+				(pinfunction "SCL_6")
 				(pintype "input")
 			)
 			(node
@@ -1837,8 +1875,8 @@
 			)
 			(node
 				(ref "U2")
-				(pin "2")
-				(pinfunction "B-_2")
+				(pin "3")
+				(pinfunction "B-_3")
 				(pintype "passive")
 			)
 		)
@@ -1854,8 +1892,8 @@
 			)
 			(node
 				(ref "U2")
-				(pin "3")
-				(pinfunction "OUT+_3")
+				(pin "1")
+				(pinfunction "OUT+_1")
 				(pintype "power_out")
 			)
 		)
@@ -1871,8 +1909,8 @@
 			)
 			(node
 				(ref "U2")
-				(pin "1")
-				(pinfunction "B+_1")
+				(pin "2")
+				(pinfunction "B+_2")
 				(pintype "passive")
 			)
 		)
@@ -1895,8 +1933,8 @@
 			(node
 				(ref "U3")
 				(pin "4")
-				(pinfunction "EN_4")
-				(pintype "input")
+				(pinfunction "VIN_4")
+				(pintype "power_in")
 			)
 		)
 		(net
@@ -1905,8 +1943,8 @@
 			(class "Default")
 			(node
 				(ref "DISP1")
-				(pin "2")
-				(pinfunction "GND_2")
+				(pin "8")
+				(pinfunction "GND_8")
 				(pintype "power_in")
 			)
 			(node
@@ -1971,6 +2009,12 @@
 			)
 			(node
 				(ref "U3")
+				(pin "1")
+				(pinfunction "GND_1")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U3")
 				(pin "2")
 				(pinfunction "GND_2")
 				(pintype "power_in")
@@ -1978,12 +2022,29 @@
 			(node
 				(ref "U3")
 				(pin "5")
-				(pinfunction "PS_5")
-				(pintype "input")
+				(pinfunction "GND_5")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U3")
+				(pin "6")
+				(pinfunction "GND_6")
+				(pintype "power_in")
 			)
 		)
 		(net
 			(code "24")
+			(name "unconnected-(SW4-Pad3)")
+			(class "Default")
+			(node
+				(ref "SW4")
+				(pin "3")
+				(pinfunction "3_3")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "25")
 			(name "unconnected-(U1-5V-Pad21)")
 			(class "Default")
 			(node
@@ -1994,7 +2055,7 @@
 			)
 		)
 		(net
-			(code "25")
+			(code "26")
 			(name "unconnected-(U1-EN{slash}RST-Pad3)")
 			(class "Default")
 			(node
@@ -2005,7 +2066,7 @@
 			)
 		)
 		(net
-			(code "26")
+			(code "27")
 			(name "unconnected-(U1-GPIO0-Pad36)")
 			(class "Default")
 			(node
@@ -2016,7 +2077,7 @@
 			)
 		)
 		(net
-			(code "27")
+			(code "28")
 			(name "unconnected-(U1-GPIO1-Pad26)")
 			(class "Default")
 			(node
@@ -2027,7 +2088,7 @@
 			)
 		)
 		(net
-			(code "28")
+			(code "29")
 			(name "unconnected-(U1-GPIO2-Pad27)")
 			(class "Default")
 			(node
@@ -2038,7 +2099,7 @@
 			)
 		)
 		(net
-			(code "29")
+			(code "30")
 			(name "unconnected-(U1-GPIO3-Pad13)")
 			(class "Default")
 			(node
@@ -2049,7 +2110,7 @@
 			)
 		)
 		(net
-			(code "30")
+			(code "31")
 			(name "unconnected-(U1-GPIO19-Pad42)")
 			(class "Default")
 			(node
@@ -2060,7 +2121,7 @@
 			)
 		)
 		(net
-			(code "31")
+			(code "32")
 			(name "unconnected-(U1-GPIO20-Pad41)")
 			(class "Default")
 			(node
@@ -2071,7 +2132,7 @@
 			)
 		)
 		(net
-			(code "32")
+			(code "33")
 			(name "unconnected-(U1-GPIO35-Pad35)")
 			(class "Default")
 			(node
@@ -2082,7 +2143,7 @@
 			)
 		)
 		(net
-			(code "33")
+			(code "34")
 			(name "unconnected-(U1-GPIO36-Pad34)")
 			(class "Default")
 			(node
@@ -2093,7 +2154,7 @@
 			)
 		)
 		(net
-			(code "34")
+			(code "35")
 			(name "unconnected-(U1-GPIO37-Pad33)")
 			(class "Default")
 			(node
@@ -2104,7 +2165,7 @@
 			)
 		)
 		(net
-			(code "35")
+			(code "36")
 			(name "unconnected-(U1-GPIO39-Pad31)")
 			(class "Default")
 			(node
@@ -2115,7 +2176,7 @@
 			)
 		)
 		(net
-			(code "36")
+			(code "37")
 			(name "unconnected-(U1-GPIO40-Pad30)")
 			(class "Default")
 			(node
@@ -2126,7 +2187,7 @@
 			)
 		)
 		(net
-			(code "37")
+			(code "38")
 			(name "unconnected-(U1-GPIO41-Pad29)")
 			(class "Default")
 			(node
@@ -2137,7 +2198,7 @@
 			)
 		)
 		(net
-			(code "38")
+			(code "39")
 			(name "unconnected-(U1-GPIO42-Pad28)")
 			(class "Default")
 			(node
@@ -2148,7 +2209,7 @@
 			)
 		)
 		(net
-			(code "39")
+			(code "40")
 			(name "unconnected-(U1-GPIO45-Pad37)")
 			(class "Default")
 			(node
@@ -2159,7 +2220,7 @@
 			)
 		)
 		(net
-			(code "40")
+			(code "41")
 			(name "unconnected-(U1-GPIO46-Pad14)")
 			(class "Default")
 			(node
@@ -2170,7 +2231,7 @@
 			)
 		)
 		(net
-			(code "41")
+			(code "42")
 			(name "unconnected-(U1-GPIO47-Pad39)")
 			(class "Default")
 			(node
@@ -2181,7 +2242,7 @@
 			)
 		)
 		(net
-			(code "42")
+			(code "43")
 			(name "unconnected-(U1-GPIO48-Pad38)")
 			(class "Default")
 			(node
@@ -2192,7 +2253,7 @@
 			)
 		)
 		(net
-			(code "43")
+			(code "44")
 			(name "unconnected-(U1-RX{slash}IO44-Pad25)")
 			(class "Default")
 			(node
@@ -2203,7 +2264,7 @@
 			)
 		)
 		(net
-			(code "44")
+			(code "45")
 			(name "unconnected-(U1-TX{slash}IO43-Pad24)")
 			(class "Default")
 			(node
@@ -2214,7 +2275,7 @@
 			)
 		)
 		(net
-			(code "45")
+			(code "46")
 			(name "unconnected-(U2-IN+-Pad6)")
 			(class "Default")
 			(node
@@ -2225,7 +2286,7 @@
 			)
 		)
 		(net
-			(code "46")
+			(code "47")
 			(name "unconnected-(U2-IN--Pad5)")
 			(class "Default")
 			(node
