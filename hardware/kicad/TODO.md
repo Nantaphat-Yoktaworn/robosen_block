@@ -9,14 +9,14 @@
 
 ## 📋 Task Checklist
 
-- [ ] **1. Add Battery Percentage Monitoring Divider (ADC Voltage Sensor)**
-  - [ ] Add voltage divider resistors (`R3`, `R4`) to schematic `robosen_master_block.kicad_sch`
-  - [ ] Choose high-value resistors ($100\text{ k}\Omega / 100\text{ k}\Omega$ or $200\text{ k}\Omega / 200\text{ k}\Omega$, 1% precision) to minimize parasitic battery drain
-  - [ ] Connect divider top to `VBAT_SW` (switched power) so current drain is 0.00 $\mu$A when power switch `SW4` is turned off
-  - [ ] Route divider midpoint (`BATSENSE`) to an unused ADC1 pin on ESP32-S3 (e.g. `GPIO1` / Pin 26 or `GPIO3` / Pin 13)
-  - [ ] Add optional $100\text{ nF}$ ceramic capacitor (`C1`) across `BATSENSE` to `GND` for noise filtering and ADC sample stabilization
-  - [ ] Update `build_schematic.py` generator script and regenerate schematic & symbols
-  - [ ] Run KiCad ERC check (`0 violations`)
+- [x] **1. Add Battery Percentage Monitoring Divider (ADC Voltage Sensor)**
+  - [x] Add voltage divider resistors (`R3`, `R4`) to schematic `robosen_master_block.kicad_sch`
+  - [x] Choose high-value resistors ($100\text{ k}\Omega / 100\text{ k}\Omega$, 1% precision) to minimize parasitic battery drain
+  - [x] Connect divider top to `VBAT_SW` (switched power) so current drain is 0.00 $\mu$A when power switch `SW4` is turned off
+  - [x] Route divider midpoint (`BATSENSE`) to ESP32-S3 `GPIO1` (Pin 26, ADC1_CH0)
+  - [x] Add 100nF ceramic capacitor (`C1`, `C_Disc_P2.54mm`) across `BATSENSE` to `GND` for noise filtering and ADC sample stabilization
+  - [x] Update `build_schematic.py` generator script and regenerate schematic & symbols
+  - [x] Run KiCad ERC check (`0 violations`)
 
 - [ ] **2. Fix Footprint of ESP32-S3 Socket (Antenna Keepout & Clearance)**
   - [ ] Update `ESP32-S3-DevKitC-1-Socket.kicad_mod` with antenna overhang boundary

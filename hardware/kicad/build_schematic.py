@@ -626,6 +626,25 @@ def generate():
     ]
     symbols_def["R"] = r_lines
 
+    # --- C ---
+    c_lines = [
+        '\t\t(pin_names (offset 0) (hide yes)) (in_bom yes) (on_board yes)',
+        '\t\t(property "Reference" "C" (at 0 -5.08 0) (effects (font (size 1.27 1.27))))',
+        '\t\t(property "Value" "C" (at 0 5.08 0) (effects (font (size 1.27 1.27))))',
+        '\t\t(property "Footprint" "robosen_master:C_Disc_P2.54mm" (at 0 7.62 0) (effects (font (size 1.27 1.27)) (hide yes)))',
+        '\t\t(property "Datasheet" "" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))',
+        '\t\t(property "Description" "Unpolarized Ceramic Capacitor 2.54mm pitch" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))',
+        '\t\t(symbol "C_0_1"',
+        '\t\t\t(polyline (pts (xy -1.524 -0.635) (xy 1.524 -0.635)) (stroke (width 0.381) (type solid)) (fill (type none)))',
+        '\t\t\t(polyline (pts (xy -1.524 0.635) (xy 1.524 0.635)) (stroke (width 0.381) (type solid)) (fill (type none)))',
+        '\t\t)',
+        '\t\t(symbol "C_1_1"',
+        '\t\t\t(pin passive line (at 0 -5.08 90) (length 4.445) (name "1" (effects (font (size 1.0 1.0)))) (number "1" (effects (font (size 0.8 0.8)))))',
+        '\t\t\t(pin passive line (at 0 5.08 270) (length 4.445) (name "2" (effects (font (size 1.0 1.0)))) (number "2" (effects (font (size 0.8 0.8)))))',
+        '\t\t)'
+    ]
+    symbols_def["C"] = c_lines
+
     # =========================================================================
     # 3. WRITE .kicad_sym STANDALONE SYMBOL LIBRARY
     # =========================================================================
@@ -684,14 +703,18 @@ def generate():
     sch.append('\t)') # end lib_symbols
 
     # Helpers
-    def place_sym(lib_id, ref, val, footprint, x, y, pin_count, unit=1, dnp=False):
+    def place_sym(lib_id, ref, val, footprint, x, y, pin_count, unit=1, dnp=False, prop_side=None):
         s_id = uid()
         res = []
         res.append(f'\t(symbol (lib_id "{lib_id}") (at {x:.2f} {y:.2f} 0) (unit {unit})')
         res.append('\t\t(exclude_from_sim no) (in_bom yes) (on_board yes)')
         res.append(f'\t\t(dnp {"yes" if dnp else "no"}) (uuid "{s_id}")')
-        res.append(f'\t\t(property "Reference" "{ref}" (at {x:.2f} {y-11.43:.2f} 0) (effects (font (size 1.27 1.27))))')
-        res.append(f'\t\t(property "Value" "{val}" (at {x:.2f} {y+11.43:.2f} 0) (effects (font (size 1.27 1.27))))')
+        if prop_side == "right":
+            res.append(f'\t\t(property "Reference" "{ref}" (at {x+2.54:.2f} {y-2.54:.2f} 0) (effects (font (size 1.27 1.27)) (justify left)))')
+            res.append(f'\t\t(property "Value" "{val}" (at {x+2.54:.2f} {y+2.54:.2f} 0) (effects (font (size 1.27 1.27)) (justify left)))')
+        else:
+            res.append(f'\t\t(property "Reference" "{ref}" (at {x:.2f} {y-11.43:.2f} 0) (effects (font (size 1.27 1.27))))')
+            res.append(f'\t\t(property "Value" "{val}" (at {x:.2f} {y+11.43:.2f} 0) (effects (font (size 1.27 1.27))))')
         res.append(f'\t\t(property "Footprint" "{footprint}" (at {x:.2f} {y:.2f} 0) (effects (font (size 1.27 1.27)) (hide yes)))')
         res.append(f'\t\t(property "Datasheet" "" (at {x:.2f} {y:.2f} 0) (effects (font (size 1.27 1.27)) (hide yes)))')
         res.append(f'\t\t(property "Description" "" (at {x:.2f} {y:.2f} 0) (effects (font (size 1.27 1.27)) (hide yes)))')
@@ -758,11 +781,15 @@ def generate():
     sch.append(place_sym("robosen_master:R", "R1", "10k (Pull-up)", "robosen_master:R_Axial_P10.16mm", 317.50, 139.70, 2))
     sch.append(place_sym("robosen_master:R", "R2", "10k (Pull-up)", "robosen_master:R_Axial_P10.16mm", 342.90, 139.70, 2))
 
-    # Power Zone
-    sch.append(place_sym("robosen_master:18650_Cell", "BT1", "18650 3.7V 3500mAh", "robosen_master:18650_Battery_Holder_Single", 254.00, 215.90, 2))
-    sch.append(place_sym("robosen_master:TP4056_Module", "U2", "TP4056_USB-C_BMS", "robosen_master:TP4056_Type-C_Module", 304.80, 215.90, 6))
-    sch.append(place_sym("robosen_master:SW_SPST", "SW4", "POWER_SWITCH", "robosen_master:SW_Power_2Wire_Pads", 342.90, 213.36, 2))
-    sch.append(place_sym("robosen_master:TPS63020_Module", "U3", "TPS63020_3.3V_BuckBoost", "robosen_master:TPS63020_BuckBoost_Module", 355.60, 254.00, 8))
+    # Power Zone (Positioned with clear vertical margin above A3 title block)
+    sch.append(place_sym("robosen_master:18650_Cell", "BT1", "18650 3.7V 3500mAh", "robosen_master:18650_Battery_Holder_Single", 254.00, 185.42, 2))
+    sch.append(place_sym("robosen_master:TP4056_Module", "U2", "TP4056_USB-C_BMS", "robosen_master:TP4056_Type-C_Module", 304.80, 185.42, 6))
+    sch.append(place_sym("robosen_master:SW_SPST", "SW4", "POWER_SWITCH", "robosen_master:SW_Power_2Wire_Pads", 342.90, 182.88, 2))
+    sch.append(place_sym("robosen_master:TPS63020_Module", "U3", "TPS63020_3.3V_BuckBoost", "robosen_master:TPS63020_BuckBoost_Module", 355.60, 223.52, 8))
+    # Battery Voltage Divider & Filter (BATSENSE -> ADC1 GPIO1)
+    sch.append(place_sym("robosen_master:R", "R3", "100k (1% Batt Div)", "robosen_master:R_Axial_P10.16mm", 279.40, 210.82, 2, prop_side="right"))
+    sch.append(place_sym("robosen_master:R", "R4", "100k (1% Batt Div)", "robosen_master:R_Axial_P10.16mm", 279.40, 226.06, 2, prop_side="right"))
+    sch.append(place_sym("robosen_master:C", "C1", "100nF (ADC Filter)", "robosen_master:C_Disc_P2.54mm", 299.72, 226.06, 2, prop_side="right"))
 
     # =========================================================================
     # 6. NET CONNECTIONS, WIRES & LABELS
@@ -862,8 +889,9 @@ def generate():
     sch.append(no_conn(218.44, 110.49))
     # Pin 25 (RX/IO44, Y = 113.03) -> No Connect
     sch.append(no_conn(218.44, 113.03))
-    # Pin 26 (GPIO1, Y = 115.57) -> No Connect (Future battery divider)
-    sch.append(no_conn(218.44, 115.57))
+    # Pin 26 (GPIO1 / ADC1_CH0, Y = 115.57) -> BATSENSE
+    sch.append(wire(218.44, 115.57, 228.60, 115.57))
+    sch.append(label("BATSENSE", 228.60, 115.57, 0))
     # Pin 27 (GPIO2, Y = 118.11) -> No Connect
     sch.append(no_conn(218.44, 118.11))
     # Pin 28 (GPIO42, Y = 120.65) -> No Connect
@@ -1007,59 +1035,81 @@ def generate():
     sch.append(label("CHAIN_RX", 342.90, 152.40, 270))
 
     # --- Power Architecture: BT1 -> U2 -> SW4 -> U3 ---
-    # BT1 (18650 Cell, X = 254.00)
-    # Direct physical wire from BT1 Pin 1 (254.00, 210.82) to U2 Pin 2 B+ (287.02, 210.82)
-    sch.append(wire(254.00, 210.82, 287.02, 210.82))
-    sch.append(label("VBAT_RAW", 270.00, 210.82, 0))
+    # BT1 (18650 Cell, X = 254.00, Y = 185.42)
+    # Direct physical wire from BT1 Pin 1 (254.00, 180.34) to U2 Pin 2 B+ (287.02, 180.34)
+    sch.append(wire(254.00, 180.34, 287.02, 180.34))
+    sch.append(label("VBAT_RAW", 270.00, 180.34, 0))
 
-    # Direct physical wire from BT1 Pin 2 (254.00, 220.98) to U2 Pin 3 B- (287.02, 220.98)
-    sch.append(wire(254.00, 220.98, 287.02, 220.98))
-    sch.append(label("VBAT_GND", 270.00, 220.98, 0))
+    # Direct physical wire from BT1 Pin 2 (254.00, 190.50) to U2 Pin 3 B- (287.02, 190.50)
+    sch.append(wire(254.00, 190.50, 287.02, 190.50))
+    sch.append(label("VBAT_GND", 270.00, 190.50, 0))
 
     # U2 TP4056 External 5V Pads (X = 287.02) -> Unused
-    sch.append(no_conn(287.02, 213.36)) # IN+ (Pin 6)
-    sch.append(no_conn(287.02, 218.44)) # IN- (Pin 5)
+    sch.append(no_conn(287.02, 182.88)) # IN+ (Pin 6)
+    sch.append(no_conn(287.02, 187.96)) # IN- (Pin 5)
 
-    # Direct physical wire from U2 Pin 1 OUT+ (322.58, 213.36) to SW4 Pin 1 (337.82, 213.36)
-    sch.append(wire(322.58, 213.36, 337.82, 213.36))
-    sch.append(label("VBAT_PROT", 330.20, 213.36, 0))
+    # Direct physical wire from U2 Pin 1 OUT+ (322.58, 182.88) to SW4 Pin 1 (337.82, 182.88)
+    sch.append(wire(322.58, 182.88, 337.82, 182.88))
+    sch.append(label("VBAT_PROT", 330.20, 182.88, 0))
 
-    # U2 Pin 4 OUT- (322.58, 218.44) -> Tied to common GND
-    sch.append(wire(322.58, 218.44, 330.20, 218.44))
-    sch.append(place_pwr("GND", "#PWR20", 330.20, 218.44, 270))
+    # U2 Pin 4 OUT- (322.58, 187.96) -> Tied to common GND
+    sch.append(wire(322.58, 187.96, 330.20, 187.96))
+    sch.append(place_pwr("GND", "#PWR20", 330.20, 187.96, 270))
 
-    # SW4 Pin 2 Switched Power (347.98, 213.36) -> VBAT_SW
-    sch.append(wire(347.98, 213.36, 355.60, 213.36))
-    sch.append(label("VBAT_SW", 355.60, 213.36, 0))
-    sch.append(place_pwr("PWR_FLAG", "#FLG02", 355.60, 213.36, 90))
+    # SW4 Pin 2 Switched Power (347.98, 182.88) -> VBAT_SW
+    sch.append(wire(347.98, 182.88, 355.60, 182.88))
+    sch.append(label("VBAT_SW", 355.60, 182.88, 0))
+    sch.append(place_pwr("PWR_FLAG", "#FLG02", 355.60, 182.88, 90))
 
-    # U3 (TPS63020 Buck-Boost, X = 355.60, Y = 254.00)
+    # U3 (TPS63020 Buck-Boost, X = 355.60, Y = 223.52)
     # Left Pins (IN side, X = 335.28):
-    # Pin 1 & Pin 2: GND (Y = 247.65, 250.19)
-    sch.append(wire(335.28, 247.65, 325.12, 247.65))
-    sch.append(wire(335.28, 250.19, 325.12, 250.19))
-    sch.append(wire(325.12, 247.65, 325.12, 250.19))
-    sch.append(place_pwr("GND", "#PWR21", 325.12, 250.19, 270))
+    # Pin 1 & Pin 2: GND (Y = 217.17, 219.71)
+    sch.append(wire(335.28, 217.17, 325.12, 217.17))
+    sch.append(wire(335.28, 219.71, 325.12, 219.71))
+    sch.append(wire(325.12, 217.17, 325.12, 219.71))
+    sch.append(place_pwr("GND", "#PWR21", 325.12, 219.71, 270))
 
-    # Pin 3 & Pin 4: VIN (Y = 257.81, 260.35)
-    sch.append(wire(335.28, 257.81, 325.12, 257.81))
-    sch.append(wire(335.28, 260.35, 325.12, 260.35))
-    sch.append(wire(325.12, 257.81, 325.12, 260.35))
-    sch.append(label("VBAT_SW", 325.12, 257.81, 180))
+    # Pin 3 & Pin 4: VIN (Y = 227.33, 229.87)
+    sch.append(wire(335.28, 227.33, 325.12, 227.33))
+    sch.append(wire(335.28, 229.87, 325.12, 229.87))
+    sch.append(wire(325.12, 227.33, 325.12, 229.87))
+    sch.append(label("VBAT_SW", 325.12, 227.33, 180))
 
     # Right Pins (OUT side, X = 375.92):
-    # Pin 5 & Pin 6: GND (Y = 247.65, 250.19)
-    sch.append(wire(375.92, 247.65, 386.08, 247.65))
-    sch.append(wire(375.92, 250.19, 386.08, 250.19))
-    sch.append(wire(386.08, 247.65, 386.08, 250.19))
-    sch.append(place_pwr("GND", "#PWR23", 386.08, 250.19, 270))
-    sch.append(place_pwr("PWR_FLAG", "#FLG01", 386.08, 250.19, 270))
+    # Pin 5 & Pin 6: GND (Y = 217.17, 219.71)
+    sch.append(wire(375.92, 217.17, 386.08, 217.17))
+    sch.append(wire(375.92, 219.71, 386.08, 219.71))
+    sch.append(wire(386.08, 217.17, 386.08, 219.71))
+    sch.append(place_pwr("GND", "#PWR23", 386.08, 219.71, 270))
+    sch.append(place_pwr("PWR_FLAG", "#FLG01", 386.08, 219.71, 270))
 
-    # Pin 7 & Pin 8: OUT (Y = 257.81, 260.35)
-    sch.append(wire(375.92, 257.81, 386.08, 257.81))
-    sch.append(wire(375.92, 260.35, 386.08, 260.35))
-    sch.append(wire(386.08, 257.81, 386.08, 260.35))
-    sch.append(place_pwr("+3V3", "#PWR22", 386.08, 257.81, 90))
+    # Pin 7 & Pin 8: OUT (Y = 227.33, 229.87)
+    sch.append(wire(375.92, 227.33, 386.08, 227.33))
+    sch.append(wire(375.92, 229.87, 386.08, 229.87))
+    sch.append(wire(386.08, 227.33, 386.08, 229.87))
+    sch.append(place_pwr("+3V3", "#PWR22", 386.08, 227.33, 90))
+
+    # --- Battery Voltage Divider & Filter (R3, R4, C1) ---
+    # R3 Pin 2 (top: 279.40, 205.74) -> VBAT_SW
+    sch.append(wire(279.40, 205.74, 266.70, 205.74))
+    sch.append(label("VBAT_SW", 266.70, 205.74, 180))
+
+    # R3 Pin 1 (bottom: 279.40, 215.90) -> Midpoint junction at (279.40, 220.98)
+    sch.append(wire(279.40, 215.90, 279.40, 220.98))
+
+    # Midpoint connections at (279.40, 220.98):
+    # - Horizontal wire connecting to C1 Pin 1 (top: 299.72, 220.98)
+    sch.append(wire(279.40, 220.98, 299.72, 220.98))
+    # - Horizontal wire to BATSENSE label at (266.70, 220.98)
+    sch.append(wire(279.40, 220.98, 266.70, 220.98))
+    sch.append(label("BATSENSE", 266.70, 220.98, 180))
+
+    # Ground return connections:
+    # - Horizontal wire from R4 Pin 1 (bottom: 279.40, 231.14) to C1 Pin 2 (bottom: 299.72, 231.14)
+    sch.append(wire(279.40, 231.14, 299.72, 231.14))
+    # - Vertical wire from (279.40, 231.14) down to GND symbol
+    sch.append(wire(279.40, 231.14, 279.40, 238.76))
+    sch.append(place_pwr("GND", "#PWR24", 279.40, 238.76, 270))
 
     # Sheet instances & footer
     sch.append('\t(sheet_instances')
