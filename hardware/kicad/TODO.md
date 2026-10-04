@@ -38,14 +38,14 @@
   - [ ] Remove obsolete/legacy footprints or duplicate files no longer referenced by the project
   - [ ] Audit repository root to ensure clean structure per project deliverables storage rules
 
-- [ ] **5. Add Second Push Button (Cancel / Stop / Back — Red Button) & Confirm Button (Green Button)**
-  - [ ] Add `SW5` (12×12 mm Push Button, `SW_PUSH_12x12mm`) to schematic `robosen_master_block.kicad_sch`
-  - [ ] Connect one pin of `SW5` to an available ESP32-S3 GPIO (e.g. `GPIO2` / Pin 27 or `GPIO21` / Pin 33) with net label `BTN_STOP` (or `BTN_CANCEL` / `BTN_BACK`)
-  - [ ] Connect the opposite pin of `SW5` to `GND` (leveraging internal ESP32 `INPUT_PULLUP`)
-  - [ ] Update existing button `SW3` in schematic to designate as Confirm / Next / Start (Green Button, `BTN_START`, `GPIO14`)
-  - [ ] Update `build_schematic.py` schematic generator script and regenerate schematic & symbols
-  - [ ] Place `SW5` on PCB layout alongside `SW3` with clear silkscreen indicators (`START/OK` [Green] vs `STOP/CANCEL` [Red])
-  - [ ] Run KiCad ERC check (`0 violations`)
+- [x] **5. Add Second Push Button (Cancel / Stop / Back — Red Button) & Confirm Button (Green Button)**
+  - [x] Add `SW5` (12×12 mm Push Button, `SW_PUSH_12x12mm`) to schematic `robosen_master_block.kicad_sch`
+  - [x] Connect one pin of `SW5` to ESP32-S3 `GPIO2` (Pin 27) with net label `BTN_STOP`
+  - [x] Connect the opposite pin of `SW5` to `GND` (leveraging internal ESP32 `INPUT_PULLUP`)
+  - [x] Update existing button `SW3` in schematic to designate as Confirm / Next / Start (Green Button, `BTN_START`, `GPIO14`)
+  - [x] Update `build_schematic.py` schematic generator script and regenerate schematic & symbols
+  - [x] Place `SW5` on schematic layout alongside `SW3` with clear role indicators (`START_CONFIRM [Green]` vs `STOP_CANCEL [Red]`)
+  - [x] Run KiCad ERC check (`0 violations`)
 
 ---
 

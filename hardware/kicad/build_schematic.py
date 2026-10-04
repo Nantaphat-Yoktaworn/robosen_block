@@ -703,7 +703,7 @@ def generate():
     sch.append('\t)') # end lib_symbols
 
     # Helpers
-    def place_sym(lib_id, ref, val, footprint, x, y, pin_count, unit=1, dnp=False, prop_side=None):
+    def place_sym(lib_id, ref, val, footprint, x, y, pin_count, unit=1, dnp=False, prop_side=None, prop_y_offset=None):
         s_id = uid()
         res = []
         res.append(f'\t(symbol (lib_id "{lib_id}") (at {x:.2f} {y:.2f} 0) (unit {unit})')
@@ -713,8 +713,9 @@ def generate():
             res.append(f'\t\t(property "Reference" "{ref}" (at {x+2.54:.2f} {y-2.54:.2f} 0) (effects (font (size 1.27 1.27)) (justify left)))')
             res.append(f'\t\t(property "Value" "{val}" (at {x+2.54:.2f} {y+2.54:.2f} 0) (effects (font (size 1.27 1.27)) (justify left)))')
         else:
-            res.append(f'\t\t(property "Reference" "{ref}" (at {x:.2f} {y-11.43:.2f} 0) (effects (font (size 1.27 1.27))))')
-            res.append(f'\t\t(property "Value" "{val}" (at {x:.2f} {y+11.43:.2f} 0) (effects (font (size 1.27 1.27))))')
+            dy = prop_y_offset if prop_y_offset is not None else 11.43
+            res.append(f'\t\t(property "Reference" "{ref}" (at {x:.2f} {y-dy:.2f} 0) (effects (font (size 1.27 1.27))))')
+            res.append(f'\t\t(property "Value" "{val}" (at {x:.2f} {y+dy:.2f} 0) (effects (font (size 1.27 1.27))))')
         res.append(f'\t\t(property "Footprint" "{footprint}" (at {x:.2f} {y:.2f} 0) (effects (font (size 1.27 1.27)) (hide yes)))')
         res.append(f'\t\t(property "Datasheet" "" (at {x:.2f} {y:.2f} 0) (effects (font (size 1.27 1.27)) (hide yes)))')
         res.append(f'\t\t(property "Description" "" (at {x:.2f} {y:.2f} 0) (effects (font (size 1.27 1.27)) (hide yes)))')
@@ -772,7 +773,8 @@ def generate():
     # Left Zone: UI Elements
     sch.append(place_sym("robosen_master:KY-040", "SW1", "Knob 1 (Action)", "robosen_master:KY-040_Rotary_Encoder_Module", 63.50, 63.50, 5))
     sch.append(place_sym("robosen_master:KY-040", "SW2", "Knob 2 (Param)", "robosen_master:KY-040_Rotary_Encoder_Module", 63.50, 101.60, 5))
-    sch.append(place_sym("robosen_master:SW_Push", "SW3", "START_BUTTON", "robosen_master:SW_PUSH_12x12mm", 63.50, 139.70, 2))
+    sch.append(place_sym("robosen_master:SW_Push", "SW3", "CONFIRM_START (Green)", "robosen_master:SW_PUSH_12x12mm", 63.50, 139.70, 2, prop_y_offset=6.35))
+    sch.append(place_sym("robosen_master:SW_Push", "SW5", "CANCEL_STOP (Red)", "robosen_master:SW_PUSH_12x12mm", 63.50, 162.56, 2, prop_y_offset=6.35))
     sch.append(place_sym("robosen_master:EPaper_8Pin", "DISP1", "2.13in_EPaper_SSD1680", "robosen_master:EPaper_2.13in_Header_1x08", 63.50, 203.20, 8))
 
     # Right Zone: Pogo Ports & Pull-ups
@@ -892,8 +894,9 @@ def generate():
     # Pin 26 (GPIO1 / ADC1_CH0, Y = 115.57) -> BATSENSE
     sch.append(wire(218.44, 115.57, 228.60, 115.57))
     sch.append(label("BATSENSE", 228.60, 115.57, 0))
-    # Pin 27 (GPIO2, Y = 118.11) -> No Connect
-    sch.append(no_conn(218.44, 118.11))
+    # Pin 27 (GPIO2 / RTC_GPIO0, Y = 118.11) -> BTN_STOP
+    sch.append(wire(218.44, 118.11, 228.60, 118.11))
+    sch.append(label("BTN_STOP", 228.60, 118.11, 0))
     # Pin 28 (GPIO42, Y = 120.65) -> No Connect
     sch.append(no_conn(218.44, 120.65))
     # Pin 29 (GPIO41, Y = 123.19) -> No Connect
@@ -963,11 +966,17 @@ def generate():
     sch.append(wire(48.26, 106.68, 38.10, 106.68))
     sch.append(place_pwr("GND", "#PWR10", 38.10, 106.68, 270))
 
-    # --- SW3 (Start Button, Y = 139.70) ---
+    # --- SW3 (Confirm / Next / Start Button [Green], Y = 139.70) ---
     sch.append(wire(58.42, 139.70, 48.26, 139.70))
     sch.append(label("BTN_START", 48.26, 139.70, 180))
     sch.append(wire(68.58, 139.70, 78.74, 139.70))
     sch.append(place_pwr("GND", "#PWR11", 78.74, 139.70, 270))
+
+    # --- SW5 (Cancel / Stop / Back Button [Red], Y = 162.56) ---
+    sch.append(wire(58.42, 162.56, 48.26, 162.56))
+    sch.append(label("BTN_STOP", 48.26, 162.56, 180))
+    sch.append(wire(68.58, 162.56, 78.74, 162.56))
+    sch.append(place_pwr("GND", "#PWR25", 78.74, 162.56, 270))
 
     # --- DISP1 (E-Paper Header, X = 45.72) ---
     # Pin 1: BUSY (Y = 194.31)
