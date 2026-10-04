@@ -18,12 +18,12 @@
   - [x] Update `build_schematic.py` generator script and regenerate schematic & symbols
   - [x] Run KiCad ERC check (`0 violations`)
 
-- [ ] **2. Fix Footprint of ESP32-S3 Socket (Antenna Keepout & Clearance)**
-  - [ ] Update `ESP32-S3-DevKitC-1-Socket.kicad_mod` with antenna overhang boundary
-  - [ ] Draw meander antenna physical zone on `F.Fab` and `F.SilkS` ($X \in [-9.0, +9.0]$, $Y \in [-24.0, -31.5]$)
-  - [ ] Add copper keepout zone (`zone_type keepout`, no copper on all layers) under and around the RF antenna region
-  - [ ] Add silkscreen warning label: `ANTENNA OVERHANG / NO COPPER ZONE`
-  - [ ] Verify clearance to carrier board edge so the antenna can hang over the PCB edge for optimal 2.4 GHz RF / BLE performance
+- [x] **2. Fix Footprint of ESP32-S3 Socket (Antenna Keepout & Clearance)**
+  - [x] Update `ESP32-S3-DevKitC-1-Socket.kicad_mod` with antenna overhang boundary ($17.5\text{ mm} \text{ wide} \times 6.0\text{ mm} \text{ stick-out}$)
+  - [x] Draw meander antenna physical zone on `F.Fab` and `F.SilkS` ($X \in [-8.75, +8.75]$, $Y \in [-35.0, -29.0]$)
+  - [x] Add copper keepout zone (`keepout`, no copper on all layers) under and around the RF antenna region
+  - [x] Add silkscreen label: `ANTENNA`
+  - [x] Verify clearance to carrier board edge so the antenna can hang over the PCB edge for optimal 2.4 GHz RF / BLE performance
 
 - [ ] **3. Add Full E-Paper Display Mechanical Outline & Layout to Footprint**
   - [ ] Upgrade `EPaper_2.13in_Header_1x08.kicad_mod` from a simple 1×08 pin header to include the complete physical display module outline

@@ -2,10 +2,10 @@
 	(version 20240108)
 	(generator "antigravity-kicad-generator")
 	(layer "F.Cu")
-	(descr "ESP32-S3-DevKitC-1 socket footprint, 2x22 pins, 2.54mm pitch, 22.86mm (0.9 in) row spacing, USB-C TOP, Left 1-22, Right 23-44")
-	(tags "ESP32-S3 DevKitC-1 DevKit socket DIP-44 2.54mm")
+	(descr "ESP32-S3-DevKitC-1 socket footprint, 2x22 pins, 2.54mm pitch, 22.86mm (0.9 in) row spacing, with 17.5mm x 6mm antenna overhang (TOP) and copper keepout zone")
+	(tags "ESP32-S3 DevKitC-1 DevKit socket DIP-44 2.54mm antenna keepout")
 	(property "Reference" "REF**"
-		(at 0 -31.5 0)
+		(at 0 -36.5 0)
 		(layer "F.SilkS")
 		(effects
 			(font
@@ -44,6 +44,70 @@
 		)
 		(fill none)
 		(layer "F.CrtYd")
+	)
+	(fp_rect
+		(start -8.75 -35.0)
+		(end 8.75 -29.0)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill none)
+		(layer "F.SilkS")
+	)
+	(fp_rect
+		(start -8.75 -35.0)
+		(end 8.75 -29.0)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill none)
+		(layer "F.Fab")
+	)
+	(fp_rect
+		(start -9.25 -35.5)
+		(end 9.25 -29.0)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill none)
+		(layer "F.CrtYd")
+	)
+	(fp_text user "ANTENNA"
+		(at 0 -32.0 0)
+		(layer "F.SilkS")
+		(effects
+			(font
+				(size 0.9 0.9)
+				(thickness 0.12)
+			)
+		)
+	)
+	(zone
+		(layers "F.Cu" "B.Cu")
+		(uuid "e532a87c-1750-4600-b8e1-a0a1a2a3b4c5")
+		(hatch full 0.508)
+		(connect_pads
+			(clearance 0)
+		)
+		(min_thickness 0.254)
+		(keepout
+			(tracks not_allowed)
+			(vias not_allowed)
+			(pads not_allowed)
+			(copperpour not_allowed)
+			(footprints not_allowed)
+		)
+		(polygon
+			(pts
+				(xy -8.75 -35.0)
+				(xy 8.75 -35.0)
+				(xy 8.75 -29.0)
+				(xy -8.75 -29.0)
+			)
+		)
 	)
 	(fp_text user "ESP32-S3-DevKitC-1"
 		(at 0 0 90)
