@@ -838,12 +838,12 @@ The `assignments/` folder stores academic project coursework, literature reviews
 
 ---
 
-## 23. Master Block KiCad 10 Hardware Carrier PCB & Custom Footprint Library
+## 23. Master Block KiCad 10 Hardware Carrier PCB, Custom Libraries & Pre-Wired Schematic
 
 - **Documentation Date:** October 4, 2026
 - **Project Location:** [`hardware/kicad/`](hardware/kicad/)
 - **Target CAD System:** KiCad 10.0.6 (Fully compatible with KiCad 8.x / 9.x / 10.x).
-- **Architecture Strategy:** **Modular Daughterboard Carrier PCB (Motherboard)**. The custom PCB houses sockets and headers for the ESP32-S3 DevKit, TP4056 USB-C BMS module, TPS63020 buck-boost module, 18650 holder, KY-040 rotary encoders, and 2.13" E-Paper display, replacing all breadboards and loose jumper wires with reliable copper traces.
+- **Architecture Strategy:** **Modular Daughterboard Carrier PCB (Motherboard)**. The custom PCB houses sockets and headers for the ESP32-S3 DevKit, TP4056 USB-C BMS module, TPS63020 buck-boost module, 18650 holder, KY-040 rotary encoders, 12mm tactile button, power switch, and 2.13" E-Paper display, replacing all breadboards and loose jumper wires with reliable copper traces.
 - **Custom Footprint Library:** Registered locally in `hardware/kicad/fp-lib-table` pointing to `robosen_master.pretty/`.
 - **Verified Footprint Inventory (100% Validated via `kicad-cli 10.0.6`):**
   1. `ESP32-S3-DevKitC-1-Socket.kicad_mod`: 2x22 pin dual row headers, 2.54mm pitch, 22.86mm (0.9") row span, with top USB-C orientation markers.
@@ -853,6 +853,21 @@ The `assignments/` folder stores academic project coursework, literature reviews
   5. `Pogo_4Pin_Dock_2.54mm.kicad_mod`: Standard 4-pin 2.54mm polarized header socket for Config Dock & Run Chain Bus.
   6. `KY-040_Rotary_Encoder_Module.kicad_mod`: 5-pin 2.54mm header with knob outline and rotation center.
   7. `EPaper_2.13in_Header_1x08.kicad_mod`: 8-pin 2.54mm SPI interface header for DEPG0213BN / SSD1680 display.
+  8. `SW_PUSH_12x12mm.kicad_mod`: 12x12mm tactile button footprint with 12.5mm x 5.0mm pin spacing.
+  9. `SW_Slide_SS12D00.kicad_mod`: 1P2T SPST slide power switch footprint (2.54mm pin pitch).
+  10. `R_Axial_P10.16mm.kicad_mod`: Standard 0.25W axial resistor footprint (10.16mm / 0.4" pitch).
+- **Custom Symbol Library & Project Mapping:**
+  - `hardware/kicad/sym-lib-table`: Local symbol table mapping `robosen_master` to `${KIPRJMOD}/robosen_master.kicad_sym`.
+  - `hardware/kicad/robosen_master.kicad_sym`: Native KiCad symbol library bundling all 10 custom symbols.
+- **Pre-Wired Starter Schematic (`robosen_master_block.kicad_sch`):**
+  - Standard A3 sheet organized into 4 functional zones on a strict 1.27mm (50 mil) grid.
+  - Pre-wired nets: `K1_CLK/DT/SW`, `K2_CLK/DT/SW`, `BTN_START`, `EPD_BUSY/RES/DC/CS/SCK/MOSI`, `CFG_TX/RX`, `CHAIN_TX/RX`, `VBAT_RAW/GND/PROT/SW`, `+3V3`, `GND`.
+  - Electrical Rules Check (ERC): **0 violations** (`erc_report.txt`).
+  - Production Deliverables:
+    - Netlist: `hardware/kicad/robosen_master_block.net`
+    - Vector PDF: `hardware/kicad/robosen_master_block_schematic.pdf`
+    - Vector SVG: `hardware/kicad/schematic_svg/robosen_master_block.svg`
+    - Automated Generator: `hardware/kicad/build_schematic.py`
 - **Manufacturing Checklist for JLCPCB:**
   - Bare PCB fabrication requires only **Gerber files (`.gbr`)** and **Excellon Drill files (`.drl`)** packaged in a `.zip` file.
   - 3D models (`.step`/`.wrl`) are **NOT required** by JLCPCB for PCB fabrication, but supported for enclosure design.

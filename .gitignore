@@ -36,5 +36,13 @@ plans/*.xlsx
 *.elf
 *.o
 
+# KiCad Temporary & Local Preferences
+*.kicad_prl
+*-save.kicad_sch
+*-save.kicad_pcb
+_autosave-*
+*.bak
+
+
 
 
