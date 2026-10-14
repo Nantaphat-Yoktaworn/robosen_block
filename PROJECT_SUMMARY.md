@@ -238,14 +238,17 @@ The project is currently in an **advanced software, protocol simulation, and liv
 - **Validation**: Verified persistent BLE pairing with Robosen K1, 2-phase binary daisy-chain protocol (`0xAA`/`0xBB`), WS2812 light choreography, and 18650 power delivery.
 - **Reference Document**: [`PROTOTYPE_00_SPEC.md`](PROTOTYPE_00_SPEC.md).
 
-### Prototype #1: First Custom PCB Fabrication (October 2026) 🚀 ORDERED AT JLCPCB
+### Prototype #1: First Custom PCB Fabrication (October 2026) ⚠️ RETIRED (DEFECT FOUND)
 - **Architecture**: Custom 2-layer FR-4 carrier PCBs, standardized 4-pin magnetic pogo docking, self-contained BMS + buck-boost regulator, and software-configurable End Block role via MCU Pin 15 (`PD0`).
+- **Arrival Finding (Oct 14, 2026)**: Action Block carrier PCBs arrived and verified 100% functional. Master Block had an ESP32-S3 socket row spacing defect ($22.86\text{ mm}$ vs required $25.40\text{ mm}$), preventing module socket insertion.
 - **Reference Document**: [`PROTOTYPE_01_SPEC.md`](PROTOTYPE_01_SPEC.md).
 
-1. **Master Block PCB (Phase 1 Carrier):** ✅ **ORDERED & FABRICATION IN PROGRESS (Oct 2026):**
-   - KiCad 10 project ([`hardware/master_block/`](hardware/master_block/)), $115.50 \times 62.00\text{ mm}$ outline with 4 M3 mounting holes.
-   - Trace Routing & Power Planes: 100% routed (**0 unconnected items**), filled `GND` copper planes on both layers, $0.80\text{ mm}$ power traces, isolated `/VBAT_GND` BMS protection loop.
-   - Production Gerbers & drill files: [`hardware/master_block/robosen_master_block_gerbers.zip`](hardware/master_block/robosen_master_block_gerbers.zip).
+### Prototype #1-1: Master Block PCB Respin (October 2026) 🚀 READY FOR JLCPCB RE-ORDER
+- **Architecture**: Engineering change order (ECO) respin of Master Block carrier PCB in [`hardware/prototype_1_1/master_block/`](hardware/prototype_1_1/master_block/).
+- **ESP32-S3 Footprint Correction**: `ESP32-S3-DevKitC-1-Socket` pin row separation widened by 1 pitch unit (+100 mil) to exact **$25.40\text{ mm}$ ($1.000\text{ in}$)** standard.
+- **Routing & DRC**: 100% rerouted (**0 unconnected items, 0 copper clearance errors**), 469 tracks, 20 vias, solid GND planes, full M3 mounting hole standoff clearance ($\ge 3.68\text{ mm}$).
+- **Production Package**: Gerbers verified and zipped at [`hardware/prototype_1_1/master_block/robosen_master_block_gerbers.zip`](hardware/prototype_1_1/master_block/robosen_master_block_gerbers.zip).
+- **Reference Document**: [`PROTOTYPE_01_1_SPEC.md`](PROTOTYPE_01_1_SPEC.md).
 2. **Action Block PCB (Modular CH32V003 Carrier):** ✅ **ORDERED & FABRICATION IN PROGRESS (Oct 2026):**
    - KiCad 10 project ([`hardware/action_block/`](hardware/action_block/)), $32.00 \times 32.00\text{ mm}$ compact square carrier PCB.
    - Centered Pogo Ports: Both Upstream `IN` and Downstream `OUT` 4-pin pogo docks are mathematically centered at $Y = 72.50\text{ mm}$ for flush collinear docking.

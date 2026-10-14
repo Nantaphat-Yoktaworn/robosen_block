@@ -1,0 +1,115 @@
+(footprint "KY-040_Rotary_Encoder_Module"
+	(version 20240108)
+	(generator "antigravity-kicad-generator")
+	(layer "F.Cu")
+	(descr "KY-040 Rotary Encoder Module (25x18mm, 5-pin 2.54mm vertical header, dual 3mm mounting holes)")
+	(tags "Rotary Encoder KY-040 EC11 Module")
+	(property "Reference" "REF**"
+		(at 0 -10.5 0)
+		(layer "F.SilkS")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "KY-040"
+		(at 0 10.5 0)
+		(layer "F.Fab")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr through_hole)
+	(fp_rect
+		(start -12.5 -9.0)
+		(end 12.5 9.0)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill none)
+		(layer "F.SilkS")
+	)
+	(fp_rect
+		(start -13.0 -9.5)
+		(end 13.0 9.5)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill none)
+		(layer "F.CrtYd")
+	)
+	(fp_rect
+		(start -8.5 -7.92)
+		(end 3.5 4.08)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(fill none)
+		(layer "F.Fab")
+	)
+	(fp_circle
+		(center -2.5 -1.92)
+		(end 0.5 -1.92)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill none)
+		(layer "F.SilkS")
+	)
+	(fp_circle
+		(center -2.5 -1.92)
+		(end 2.0 -1.92)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill none)
+		(layer "F.Fab")
+	)
+	(fp_text user "SHAFT" (at -2.5 -1.92 0) (layer "F.Fab") (effects (font (size 0.7 0.7) (thickness 0.1))))
+	(fp_circle
+		(center -8.0 6.5)
+		(end -6.0 6.5)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill none)
+		(layer "F.SilkS")
+	)
+	(fp_circle
+		(center 8.0 6.5)
+		(end 10.0 6.5)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill none)
+		(layer "F.SilkS")
+	)
+	(pad "" np_thru_hole circle (at -8.0 6.5) (size 3.2 3.2) (drill 3.2) (layers "*.Mask"))
+	(pad "" np_thru_hole circle (at 8.0 6.5) (size 3.2 3.2) (drill 3.2) (layers "*.Mask"))
+	(pad "1" thru_hole rect (at 10.0 -7.00) (size 1.8 1.8) (drill 1.0) (layers "*.Cu" "*.Mask"))
+	(fp_text user "CLK" (at 7.2 -7.00 0) (layer "F.SilkS") (effects (font (size 0.7 0.7) (thickness 0.1))))
+
+	(pad "2" thru_hole circle (at 10.0 -4.46) (size 1.8 1.8) (drill 1.0) (layers "*.Cu" "*.Mask"))
+	(fp_text user "DT" (at 7.2 -4.46 0) (layer "F.SilkS") (effects (font (size 0.7 0.7) (thickness 0.1))))
+
+	(pad "3" thru_hole circle (at 10.0 -1.92) (size 1.8 1.8) (drill 1.0) (layers "*.Cu" "*.Mask"))
+	(fp_text user "SW" (at 7.2 -1.92 0) (layer "F.SilkS") (effects (font (size 0.7 0.7) (thickness 0.1))))
+
+	(pad "4" thru_hole circle (at 10.0 0.62) (size 1.8 1.8) (drill 1.0) (layers "*.Cu" "*.Mask"))
+	(fp_text user "+" (at 7.2 0.62 0) (layer "F.SilkS") (effects (font (size 0.8 0.8) (thickness 0.12))))
+
+	(pad "5" thru_hole circle (at 10.0 3.16) (size 1.8 1.8) (drill 1.0) (layers "*.Cu" "*.Mask"))
+	(fp_text user "GND" (at 7.2 3.16 0) (layer "F.SilkS") (effects (font (size 0.7 0.7) (thickness 0.1))))
+)

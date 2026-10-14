@@ -299,12 +299,14 @@ Complete hardware specifications are detailed in [`PHYSICAL_BLOCK_SYSTEM_SPEC.md
 | Document | Description |
 | :--- | :--- |
 | [`docs/master_block_wiring.html`](docs/master_block_wiring.html) | Interactive Master Block BOM, color-coded pinout wiring table, and battery circuit guide |
-| [`hardware/master_block/`](hardware/master_block/) | KiCad 10 Master Block PCB project, footprint library, and JLCPCB manufacturing checklist |
+| [`hardware/master_block/`](hardware/master_block/) | KiCad 10 Master Block PCB project (Prototype #1 baseline) |
 | [`hardware/action_block/`](hardware/action_block/) | KiCad 10 Action Block PCB project, routing report, and production Gerbers |
+| [`hardware/prototype_1_1/`](hardware/prototype_1_1/) | Prototype #1-1 Respin: Master Block PCB with corrected ESP32-S3 25.40mm row spacing |
 | [`PROJECT_SUMMARY.md`](PROJECT_SUMMARY.md) | Comprehensive executive project summary, mission, and comparison matrix |
 | [`PHYSICAL_BLOCK_SYSTEM_SPEC.md`](PHYSICAL_BLOCK_SYSTEM_SPEC.md) | Hardware, electrical, connector pinout, and 2-phase protocol specifications |
 | [`PROTOTYPE_00_SPEC.md`](PROTOTYPE_00_SPEC.md) | Prototype #0: Breadboard proof-of-concept engineering specification, wiring & test guides |
 | [`PROTOTYPE_01_SPEC.md`](PROTOTYPE_01_SPEC.md) | Prototype #1: First custom PCB release engineering specification, JLCPCB orders & assembly |
+| [`PROTOTYPE_01_1_SPEC.md`](PROTOTYPE_01_1_SPEC.md) | Prototype #1-1: Master Block PCB respin specification (ESP32-S3 footprint correction) |
 | [`IMPROVEMENT_PLAN.md`](IMPROVEMENT_PLAN.md) | 5-Pillar Master Improvement Plan and future production roadmap |
 | [`MEMORY.md`](MEMORY.md) | Master technical knowledge base, verified hardware diagnostics, and opcode catalog |
 | [`ROBOSEN_K1_DOCUMENTATION.md`](ROBOSEN_K1_DOCUMENTATION.md) | Official Robosen K1 reference manual, kinematics, voice commands, and safety guide |

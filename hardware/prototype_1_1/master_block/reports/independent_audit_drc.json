@@ -1,0 +1,2548 @@
+{
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-10-04T21:10:11",
+    "ignored_checks": [
+        {
+            "description": "Footprint has no courtyard defined",
+            "key": "missing_courtyard"
+        },
+        {
+            "description": "Track endpoint not centered on via",
+            "key": "track_not_centered_on_via"
+        },
+        {
+            "description": "Tuning profile track geometries",
+            "key": "tuning_profile_track_geometries"
+        },
+        {
+            "description": "Footprint doesn't match symbol's footprint filters",
+            "key": "footprint_filters_mismatch"
+        },
+        {
+            "description": "Footprint component type doesn't match footprint pads",
+            "key": "footprint_type_mismatch"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning",
+        "exclusion"
+    ],
+    "kicad_version": "10.0.6",
+    "schematic_parity": [
+        {
+            "description": "Extra footprint",
+            "items": [
+                {
+                    "description": "Footprint H3",
+                    "pos": {
+                        "x": 91.5,
+                        "y": 120.5
+                    },
+                    "uuid": "15751a44-4154-4594-bcef-33b07548ebc2"
+                }
+            ],
+            "severity": "warning",
+            "type": "extra_footprint"
+        },
+        {
+            "description": "Extra footprint",
+            "items": [
+                {
+                    "description": "Footprint H2",
+                    "pos": {
+                        "x": 192.25,
+                        "y": 92.0
+                    },
+                    "uuid": "2c21a0c3-9f6c-440f-9ffb-3997453ade66"
+                }
+            ],
+            "severity": "warning",
+            "type": "extra_footprint"
+        },
+        {
+            "description": "Extra footprint",
+            "items": [
+                {
+                    "description": "Footprint H1",
+                    "pos": {
+                        "x": 96.25,
+                        "y": 92.0
+                    },
+                    "uuid": "6bb2c568-71cd-4735-84cc-cecb7a6fbfe7"
+                }
+            ],
+            "severity": "warning",
+            "type": "extra_footprint"
+        },
+        {
+            "description": "Extra footprint",
+            "items": [
+                {
+                    "description": "Footprint H4",
+                    "pos": {
+                        "x": 197.0,
+                        "y": 120.5
+                    },
+                    "uuid": "ce63bd8c-fc30-4ad9-825e-3818ba034dd1"
+                }
+            ],
+            "severity": "warning",
+            "type": "extra_footprint"
+        }
+    ],
+    "source": "robosen_master_block.kicad_pcb",
+    "unconnected_items": [],
+    "violations": [
+        {
+            "description": "Items not allowed (keepout area of U1)",
+            "items": [
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "items_not_allowed"
+        },
+        {
+            "description": "Footprint has malformed courtyard (self-intersecting)",
+            "items": [
+                {
+                    "description": "Footprint U1",
+                    "pos": {
+                        "x": 146.11,
+                        "y": 78.93
+                    },
+                    "uuid": "ea337d08-1308-450d-9b30-d079a109e041"
+                }
+            ],
+            "severity": "error",
+            "type": "malformed_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 1 [GND] of C1",
+                    "pos": {
+                        "x": 186.96,
+                        "y": 97.5
+                    },
+                    "uuid": "bcefb307-02f9-409f-b580-01198c27f802"
+                },
+                {
+                    "description": "Footprint BT1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 105.8
+                    },
+                    "uuid": "9b529c97-76f2-4d7e-a77d-5b0397407692"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 5 [GND] of U3",
+                    "pos": {
+                        "x": 145.06,
+                        "y": 97.52
+                    },
+                    "uuid": "2bd43798-f844-448f-90c0-9d82a6551c5c"
+                },
+                {
+                    "description": "Footprint BT1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 105.8
+                    },
+                    "uuid": "9b529c97-76f2-4d7e-a77d-5b0397407692"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 6 [GND] of U3",
+                    "pos": {
+                        "x": 147.6,
+                        "y": 97.52
+                    },
+                    "uuid": "c73d4a52-0f70-47dd-8ff3-ae4d97cb57b1"
+                },
+                {
+                    "description": "Footprint BT1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 105.8
+                    },
+                    "uuid": "9b529c97-76f2-4d7e-a77d-5b0397407692"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 7 [+3V3] of U3",
+                    "pos": {
+                        "x": 157.5,
+                        "y": 97.52
+                    },
+                    "uuid": "b1cf1ee9-4258-4daf-88f1-d62c4cad80a1"
+                },
+                {
+                    "description": "Footprint BT1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 105.8
+                    },
+                    "uuid": "9b529c97-76f2-4d7e-a77d-5b0397407692"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 8 [+3V3] of U3",
+                    "pos": {
+                        "x": 160.04,
+                        "y": 97.52
+                    },
+                    "uuid": "270bd6b1-c7cb-4868-b206-eaa969f2d0db"
+                },
+                {
+                    "description": "Footprint BT1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 105.8
+                    },
+                    "uuid": "9b529c97-76f2-4d7e-a77d-5b0397407692"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 1 [/BTN_START] of SW3",
+                    "pos": {
+                        "x": 178.0,
+                        "y": 103.5
+                    },
+                    "uuid": "bc3cf1f0-78e7-44e5-bc7b-ba6c34971579"
+                },
+                {
+                    "description": "Footprint BT1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 105.8
+                    },
+                    "uuid": "9b529c97-76f2-4d7e-a77d-5b0397407692"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 1 [/BTN_START] of SW3",
+                    "pos": {
+                        "x": 178.0,
+                        "y": 108.5
+                    },
+                    "uuid": "d89b818c-cd19-4c2e-9c7d-f44212e03908"
+                },
+                {
+                    "description": "Footprint BT1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 105.8
+                    },
+                    "uuid": "9b529c97-76f2-4d7e-a77d-5b0397407692"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 2 [GND] of SW5",
+                    "pos": {
+                        "x": 108.5,
+                        "y": 103.5
+                    },
+                    "uuid": "5bafecb2-22ee-4243-a2ac-6d34bbbdae10"
+                },
+                {
+                    "description": "Footprint BT1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 105.8
+                    },
+                    "uuid": "9b529c97-76f2-4d7e-a77d-5b0397407692"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 2 [GND] of SW5",
+                    "pos": {
+                        "x": 108.5,
+                        "y": 108.5
+                    },
+                    "uuid": "91c03bb9-a994-42c4-a04d-c61b25359632"
+                },
+                {
+                    "description": "Footprint BT1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 105.8
+                    },
+                    "uuid": "9b529c97-76f2-4d7e-a77d-5b0397407692"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 1 [+3V3] of U1",
+                    "pos": {
+                        "x": 172.78,
+                        "y": 90.36
+                    },
+                    "uuid": "3175965b-c075-467f-9e94-076eb5468c62"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 2 [+3V3] of U1",
+                    "pos": {
+                        "x": 170.24,
+                        "y": 90.36
+                    },
+                    "uuid": "78c35415-2bb1-4859-9166-c4091211174b"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 3 [unconnected-(U1-EN/RST-Pad3)] of U1",
+                    "pos": {
+                        "x": 167.7,
+                        "y": 90.36
+                    },
+                    "uuid": "4179ae0c-333f-4014-8118-91b4766c26b6"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 4 [/EPD_BUSY] of U1",
+                    "pos": {
+                        "x": 165.16,
+                        "y": 90.36
+                    },
+                    "uuid": "c57e8e5f-1722-4cc2-89b8-48e788302bb8"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 5 [/EPD_RES] of U1",
+                    "pos": {
+                        "x": 162.62,
+                        "y": 90.36
+                    },
+                    "uuid": "ebcf9ec8-d8a1-42e0-8351-2aa50da06a7b"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 6 [/EPD_DC] of U1",
+                    "pos": {
+                        "x": 160.08,
+                        "y": 90.36
+                    },
+                    "uuid": "d4e341a8-8e55-4e85-a0f9-5e3081dbaae9"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 7 [/EPD_CS] of U1",
+                    "pos": {
+                        "x": 157.54,
+                        "y": 90.36
+                    },
+                    "uuid": "54005303-c013-4a4b-9944-85399a067af1"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 8 [/CHAIN_TX] of U1",
+                    "pos": {
+                        "x": 155.0,
+                        "y": 90.36
+                    },
+                    "uuid": "381c2e2f-7e7f-412f-abdf-623cda4ce677"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 9 [/CHAIN_RX] of U1",
+                    "pos": {
+                        "x": 152.46,
+                        "y": 90.36
+                    },
+                    "uuid": "7114640c-80e6-44e0-aba0-a4b67f0a718c"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 10 [/CFG_TX] of U1",
+                    "pos": {
+                        "x": 149.92,
+                        "y": 90.36
+                    },
+                    "uuid": "89fb3a41-968c-40e3-a32a-38ea299b8afb"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 11 [/CFG_RX] of U1",
+                    "pos": {
+                        "x": 147.38,
+                        "y": 90.36
+                    },
+                    "uuid": "80afea39-fe54-4c52-863d-52cb8d41aad4"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 12 [/K1_CLK] of U1",
+                    "pos": {
+                        "x": 144.84,
+                        "y": 90.36
+                    },
+                    "uuid": "35630085-bd17-4060-87dc-7635a57f9626"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 13 [unconnected-(U1-GPIO3-Pad13)] of U1",
+                    "pos": {
+                        "x": 142.3,
+                        "y": 90.36
+                    },
+                    "uuid": "bf4639a9-42cc-4f42-8a70-7dfc53de0d07"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 14 [unconnected-(U1-GPIO46-Pad14)] of U1",
+                    "pos": {
+                        "x": 139.76,
+                        "y": 90.36
+                    },
+                    "uuid": "baa47c8e-51e7-4472-a79a-a575d79f7e9d"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 15 [/K1_DT] of U1",
+                    "pos": {
+                        "x": 137.22,
+                        "y": 90.36
+                    },
+                    "uuid": "6f7ee2c6-8cad-4d2f-ac49-3cdf2cb8ba09"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 16 [/K1_SW] of U1",
+                    "pos": {
+                        "x": 134.68,
+                        "y": 90.36
+                    },
+                    "uuid": "112245a6-00da-4a3d-8a1d-cb2ca9cc3ee0"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 17 [/K2_CLK] of U1",
+                    "pos": {
+                        "x": 132.14,
+                        "y": 90.36
+                    },
+                    "uuid": "c119b7d5-8874-4212-87fa-6b367cf1edf7"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 18 [/K2_DT] of U1",
+                    "pos": {
+                        "x": 129.6,
+                        "y": 90.36
+                    },
+                    "uuid": "76c80c69-cb2e-4f2a-be98-7f6f32fc07c4"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 19 [/K2_SW] of U1",
+                    "pos": {
+                        "x": 127.06,
+                        "y": 90.36
+                    },
+                    "uuid": "f2837a95-fb7a-4806-8d3e-91b96b2e591a"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 20 [/BTN_START] of U1",
+                    "pos": {
+                        "x": 124.52,
+                        "y": 90.36
+                    },
+                    "uuid": "d69937b0-7da8-41f9-aef7-4cafcb15c77d"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 21 [unconnected-(U1-5V-Pad21)] of U1",
+                    "pos": {
+                        "x": 121.98,
+                        "y": 90.36
+                    },
+                    "uuid": "76210a7f-1a77-43fb-8a64-c153dc809ed5"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 22 [GND] of U1",
+                    "pos": {
+                        "x": 119.44,
+                        "y": 90.36
+                    },
+                    "uuid": "92633918-6a76-4680-8b94-85b5fb40edbe"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 23 [GND] of U1",
+                    "pos": {
+                        "x": 172.78,
+                        "y": 67.5
+                    },
+                    "uuid": "4886ff52-51bc-4126-97a4-850f1200fe0e"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 24 [unconnected-(U1-TX/IO43-Pad24)] of U1",
+                    "pos": {
+                        "x": 170.24,
+                        "y": 67.5
+                    },
+                    "uuid": "716aa056-9580-4682-a976-2dc536509d40"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 25 [unconnected-(U1-RX/IO44-Pad25)] of U1",
+                    "pos": {
+                        "x": 167.7,
+                        "y": 67.5
+                    },
+                    "uuid": "2edc5a2e-f6e5-4ee8-8abd-75700ccd9a96"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 26 [/BATSENSE] of U1",
+                    "pos": {
+                        "x": 165.16,
+                        "y": 67.5
+                    },
+                    "uuid": "b8a4988d-b2f4-403a-b0d5-e0a58b9250d2"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 27 [/BTN_STOP] of U1",
+                    "pos": {
+                        "x": 162.62,
+                        "y": 67.5
+                    },
+                    "uuid": "5b8ae26f-5ea6-40b6-bdda-f115ee23418a"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 28 [unconnected-(U1-GPIO42-Pad28)] of U1",
+                    "pos": {
+                        "x": 160.08,
+                        "y": 67.5
+                    },
+                    "uuid": "6f074150-320d-43c9-a9db-be2197660a70"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 29 [unconnected-(U1-GPIO41-Pad29)] of U1",
+                    "pos": {
+                        "x": 157.54,
+                        "y": 67.5
+                    },
+                    "uuid": "efa608af-b7b6-4155-b562-5a1ecf8c1282"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 30 [unconnected-(U1-GPIO40-Pad30)] of U1",
+                    "pos": {
+                        "x": 155.0,
+                        "y": 67.5
+                    },
+                    "uuid": "f8eac08d-4ec8-499c-a4b8-53c327234ce4"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 31 [unconnected-(U1-GPIO39-Pad31)] of U1",
+                    "pos": {
+                        "x": 152.46,
+                        "y": 67.5
+                    },
+                    "uuid": "715b4aa4-eeca-4b49-aa15-68a85f45bd1e"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 32 [/EPD_MOSI] of U1",
+                    "pos": {
+                        "x": 149.92,
+                        "y": 67.5
+                    },
+                    "uuid": "03ccd267-7b6f-45a9-9434-51d3e8540577"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 33 [unconnected-(U1-GPIO37-Pad33)] of U1",
+                    "pos": {
+                        "x": 147.38,
+                        "y": 67.5
+                    },
+                    "uuid": "759cda8e-4c1d-422d-a6b0-b17c82d10e5a"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 34 [unconnected-(U1-GPIO36-Pad34)] of U1",
+                    "pos": {
+                        "x": 144.84,
+                        "y": 67.5
+                    },
+                    "uuid": "e530d8a8-a1db-443e-a00c-c5755554bda9"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 35 [unconnected-(U1-GPIO35-Pad35)] of U1",
+                    "pos": {
+                        "x": 142.3,
+                        "y": 67.5
+                    },
+                    "uuid": "f9135a38-b291-4087-9417-4c3482f14147"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 36 [unconnected-(U1-GPIO0-Pad36)] of U1",
+                    "pos": {
+                        "x": 139.76,
+                        "y": 67.5
+                    },
+                    "uuid": "b115a77f-6b9f-4449-bc10-7c71cfd69d88"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 37 [unconnected-(U1-GPIO45-Pad37)] of U1",
+                    "pos": {
+                        "x": 137.22,
+                        "y": 67.5
+                    },
+                    "uuid": "74d52901-3075-49f1-99c2-eeaf4da7fcda"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 38 [unconnected-(U1-GPIO48-Pad38)] of U1",
+                    "pos": {
+                        "x": 134.68,
+                        "y": 67.5
+                    },
+                    "uuid": "1d2e4ac9-1f84-44bf-b1cb-708710058f9d"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 39 [unconnected-(U1-GPIO47-Pad39)] of U1",
+                    "pos": {
+                        "x": 132.14,
+                        "y": 67.5
+                    },
+                    "uuid": "7b34cb27-1185-4659-bffd-9f595b3476fb"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 40 [/EPD_SCK] of U1",
+                    "pos": {
+                        "x": 129.6,
+                        "y": 67.5
+                    },
+                    "uuid": "456b7b6a-57fd-4d6b-b707-8812a3a1fa8c"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 41 [unconnected-(U1-GPIO20-Pad41)] of U1",
+                    "pos": {
+                        "x": 127.06,
+                        "y": 67.5
+                    },
+                    "uuid": "3cccafef-e308-43fa-bafb-a4daf2371abc"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 42 [unconnected-(U1-GPIO19-Pad42)] of U1",
+                    "pos": {
+                        "x": 124.52,
+                        "y": 67.5
+                    },
+                    "uuid": "64527b4c-9bed-4f82-b1ef-1a375a3a3e37"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 43 [GND] of U1",
+                    "pos": {
+                        "x": 121.98,
+                        "y": 67.5
+                    },
+                    "uuid": "b88cf192-9059-4f36-a805-f6962859a2f7"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 44 [GND] of U1",
+                    "pos": {
+                        "x": 119.44,
+                        "y": 67.5
+                    },
+                    "uuid": "0cf45e26-f899-42da-9c11-dfcaa4a9735a"
+                },
+                {
+                    "description": "Footprint DISP1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 78.0
+                    },
+                    "uuid": "685a5c90-20d9-422c-914e-2ebc71d78ef2"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "NPTH inside courtyard",
+            "items": [
+                {
+                    "description": "NPTH pad of DISP1",
+                    "pos": {
+                        "x": 176.5,
+                        "y": 65.5
+                    },
+                    "uuid": "dafb5f39-19c6-419e-8148-b372fbdf5ee2"
+                },
+                {
+                    "description": "Footprint U1",
+                    "pos": {
+                        "x": 146.11,
+                        "y": 78.93
+                    },
+                    "uuid": "ea337d08-1308-450d-9b30-d079a109e041"
+                }
+            ],
+            "severity": "error",
+            "type": "npth_inside_courtyard"
+        },
+        {
+            "description": "NPTH inside courtyard",
+            "items": [
+                {
+                    "description": "NPTH pad of DISP1",
+                    "pos": {
+                        "x": 176.5,
+                        "y": 90.5
+                    },
+                    "uuid": "010a52a7-8ec6-4aba-bbfd-82c1c03c5349"
+                },
+                {
+                    "description": "Footprint U1",
+                    "pos": {
+                        "x": 146.11,
+                        "y": 78.93
+                    },
+                    "uuid": "ea337d08-1308-450d-9b30-d079a109e041"
+                }
+            ],
+            "severity": "error",
+            "type": "npth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 1 [/VBAT_PROT] of U2",
+                    "pos": {
+                        "x": 123.2,
+                        "y": 99.8
+                    },
+                    "uuid": "dad8d8b2-5cb2-4f17-bc2d-29b3c4d823ee"
+                },
+                {
+                    "description": "Footprint BT1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 105.8
+                    },
+                    "uuid": "9b529c97-76f2-4d7e-a77d-5b0397407692"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 2 [/VBAT_RAW] of U2",
+                    "pos": {
+                        "x": 126.4,
+                        "y": 99.8
+                    },
+                    "uuid": "b9a0f57d-566f-4b95-99f9-7ed9ed00176c"
+                },
+                {
+                    "description": "Footprint BT1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 105.8
+                    },
+                    "uuid": "9b529c97-76f2-4d7e-a77d-5b0397407692"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 3 [/VBAT_GND] of U2",
+                    "pos": {
+                        "x": 133.8,
+                        "y": 99.8
+                    },
+                    "uuid": "feb6d177-ea0e-452c-9524-5d85ae6e159a"
+                },
+                {
+                    "description": "Footprint BT1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 105.8
+                    },
+                    "uuid": "9b529c97-76f2-4d7e-a77d-5b0397407692"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "PTH inside courtyard",
+            "items": [
+                {
+                    "description": "PTH pad 4 [GND] of U2",
+                    "pos": {
+                        "x": 137.0,
+                        "y": 99.8
+                    },
+                    "uuid": "769baecc-09a0-423e-99a5-337e6de27289"
+                },
+                {
+                    "description": "Footprint BT1",
+                    "pos": {
+                        "x": 143.5,
+                        "y": 105.8
+                    },
+                    "uuid": "9b529c97-76f2-4d7e-a77d-5b0397407692"
+                }
+            ],
+            "severity": "error",
+            "type": "pth_inside_courtyard"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Rectangle on Edge.Cuts",
+                    "pos": {
+                        "x": 86.5,
+                        "y": 62.0
+                    },
+                    "uuid": "25158899-f49f-4123-aa54-55b3b31bbf2b"
+                },
+                {
+                    "description": "Circle of J1 on F.Silkscreen",
+                    "pos": {
+                        "x": 86.5,
+                        "y": 92.0
+                    },
+                    "uuid": "1be5631b-6f3a-4d8b-895e-a98ae00a643d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Rectangle on Edge.Cuts",
+                    "pos": {
+                        "x": 86.5,
+                        "y": 62.0
+                    },
+                    "uuid": "25158899-f49f-4123-aa54-55b3b31bbf2b"
+                },
+                {
+                    "description": "Rectangle of U2 on F.Silkscreen",
+                    "pos": {
+                        "x": 125.65,
+                        "y": 125.85
+                    },
+                    "uuid": "d8bbe522-57b2-46e4-aebe-23e6cbea53b5"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of SW1 (GND)",
+                    "pos": {
+                        "x": 93.34,
+                        "y": 82.7
+                    },
+                    "uuid": "7549ffd9-f910-42e3-bb3a-c30d2e1042bb"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of SW1 (SW)",
+                    "pos": {
+                        "x": 98.42,
+                        "y": 82.7
+                    },
+                    "uuid": "63104782-0741-4aa9-b467-ddeeb24e4019"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of SW1 (DT)",
+                    "pos": {
+                        "x": 100.96,
+                        "y": 82.7
+                    },
+                    "uuid": "5f577f9f-e5e3-4b72-8e85-c4468a6f47e7"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of SW1 (CLK)",
+                    "pos": {
+                        "x": 103.5,
+                        "y": 82.7
+                    },
+                    "uuid": "f7d54832-b1b9-4b48-954d-cbc7a3186013"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of U3 (GND)",
+                    "pos": {
+                        "x": 146.33,
+                        "y": 101.91
+                    },
+                    "uuid": "7776287f-bc3a-45f4-9fbe-de6fabb77162"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of U3 (GND)",
+                    "pos": {
+                        "x": 146.33,
+                        "y": 116.91
+                    },
+                    "uuid": "0ff33390-5893-4eba-92a1-be4b24a687b6"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of U3 (OUT)",
+                    "pos": {
+                        "x": 158.77,
+                        "y": 101.91
+                    },
+                    "uuid": "a26ef187-6cea-45ef-b44a-c1241e369f5a"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of U3 (VIN)",
+                    "pos": {
+                        "x": 158.77,
+                        "y": 116.91
+                    },
+                    "uuid": "a9ce667d-d03b-44ae-9855-907903f06790"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of SW2 (GND)",
+                    "pos": {
+                        "x": 189.22,
+                        "y": 82.7
+                    },
+                    "uuid": "a29b595e-0df5-49ad-bc87-8bbd6a5bac27"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of SW2 (SW)",
+                    "pos": {
+                        "x": 194.3,
+                        "y": 82.7
+                    },
+                    "uuid": "76e2004e-6663-4b2c-95c5-7ca55b67c96b"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of SW2 (DT)",
+                    "pos": {
+                        "x": 196.84,
+                        "y": 82.7
+                    },
+                    "uuid": "9f6690b3-1e12-468f-9df6-051ecf9f2409"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of SW2 (CLK)",
+                    "pos": {
+                        "x": 199.38,
+                        "y": 82.7
+                    },
+                    "uuid": "ba8396f3-8cf4-4236-83b9-3bfe9dccbb84"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of DISP1 (2: CS)",
+                    "pos": {
+                        "x": 113.5,
+                        "y": 71.65
+                    },
+                    "uuid": "b49711e2-f3a8-4d34-ac13-2f1590e614ed"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of DISP1 (3: DC)",
+                    "pos": {
+                        "x": 113.5,
+                        "y": 74.19
+                    },
+                    "uuid": "edb3c6e7-3468-4f4f-8652-3c29cd76b713"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of DISP1 (1: BUSY)",
+                    "pos": {
+                        "x": 114.0,
+                        "y": 69.11
+                    },
+                    "uuid": "e7f1bdc0-de5b-427a-98a6-dd49577f57e3"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of DISP1 (4: RES)",
+                    "pos": {
+                        "x": 114.0,
+                        "y": 76.73
+                    },
+                    "uuid": "c405325d-f77c-44cf-98c7-7ff5ae7fb712"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of DISP1 (5: SDA)",
+                    "pos": {
+                        "x": 114.0,
+                        "y": 79.27
+                    },
+                    "uuid": "9c1317da-2b4b-467e-aaeb-73df0b0a2070"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of DISP1 (6: SCL)",
+                    "pos": {
+                        "x": 114.0,
+                        "y": 81.81
+                    },
+                    "uuid": "5d841a58-4af7-4833-aef6-c4899cfe7540"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of DISP1 (7: VCC)",
+                    "pos": {
+                        "x": 114.0,
+                        "y": 84.35
+                    },
+                    "uuid": "a50f292e-4736-4669-98d6-2e67309a27c3"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of DISP1 (8: GND)",
+                    "pos": {
+                        "x": 114.0,
+                        "y": 86.89
+                    },
+                    "uuid": "1292f850-7448-4bad-9a90-ece7e2d1832b"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of U2 (OUT+)",
+                    "pos": {
+                        "x": 123.2,
+                        "y": 103.05
+                    },
+                    "uuid": "5f13ac30-8c53-4117-bca7-04f3c8293518"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of U2 (IN+)",
+                    "pos": {
+                        "x": 123.2,
+                        "y": 118.45
+                    },
+                    "uuid": "603a6364-4824-4dc6-ad23-b2e5f8171472"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of U2 (B+)",
+                    "pos": {
+                        "x": 126.4,
+                        "y": 103.05
+                    },
+                    "uuid": "f938c4c9-9f40-43c5-a47b-c314a46bc935"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of U2 (USB-C)",
+                    "pos": {
+                        "x": 130.1,
+                        "y": 124.65
+                    },
+                    "uuid": "1b81be77-e33e-4040-9d21-3bc4e200afcb"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of U2 (B-)",
+                    "pos": {
+                        "x": 133.8,
+                        "y": 103.05
+                    },
+                    "uuid": "2c9ecdff-968b-417d-baf4-2662f618733e"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of U2 (OUT-)",
+                    "pos": {
+                        "x": 137.0,
+                        "y": 103.05
+                    },
+                    "uuid": "748c03bf-c002-4172-b45f-6a9292dcfcde"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of U2 (IN-)",
+                    "pos": {
+                        "x": 137.0,
+                        "y": 118.45
+                    },
+                    "uuid": "abfffa28-e1d7-400c-94a2-c518dadf7055"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of SW4 (IN)",
+                    "pos": {
+                        "x": 109.92,
+                        "y": 118.0
+                    },
+                    "uuid": "d5185ae7-0602-4584-830e-a6db5b8da6bb"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of SW4 (PWR SW)",
+                    "pos": {
+                        "x": 112.46,
+                        "y": 121.8
+                    },
+                    "uuid": "31bf33de-3bb2-4ec1-ac6f-1d7d7a444feb"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of SW4 (SW)",
+                    "pos": {
+                        "x": 115.0,
+                        "y": 118.0
+                    },
+                    "uuid": "379891a1-dfc8-4577-8bf7-9929be8264ed"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of U1 (44)",
+                    "pos": {
+                        "x": 119.44,
+                        "y": 64.93
+                    },
+                    "uuid": "ff6e232b-055d-4585-b15c-2ed6f322da35"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of U1 (22)",
+                    "pos": {
+                        "x": 119.44,
+                        "y": 92.93
+                    },
+                    "uuid": "c1c72b3a-615e-4242-bd33-3f59fab12268"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of U1 (23)",
+                    "pos": {
+                        "x": 172.78,
+                        "y": 64.93
+                    },
+                    "uuid": "a3d9e461-241a-44ba-b9a1-c13e3496813f"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Text height out of range (board setup constraints silk text height min height 0.8000 mm; actual 0.7000 mm)",
+            "items": [
+                {
+                    "description": "Footprint text of U1 (1)",
+                    "pos": {
+                        "x": 172.78,
+                        "y": 92.93
+                    },
+                    "uuid": "01ada028-920b-4e02-99f8-3ba0e414514c"
+                }
+            ],
+            "severity": "warning",
+            "type": "text_height"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of SW5 on F.Silkscreen",
+                    "pos": {
+                        "x": 96.25,
+                        "y": 100.0
+                    },
+                    "uuid": "58827f4c-5e25-489b-a9f5-0b4ebb7c93bd"
+                },
+                {
+                    "description": "Footprint text of J1 (4: PASS)",
+                    "pos": {
+                        "x": 95.0,
+                        "y": 99.62
+                    },
+                    "uuid": "a267b935-c478-464f-bd84-fc42a470d2cc"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of R3 on F.Silkscreen",
+                    "pos": {
+                        "x": 165.34,
+                        "y": 119.3
+                    },
+                    "uuid": "f786ccf4-bfad-4734-beff-5108033d7a96"
+                },
+                {
+                    "description": "PTH pad 1 [/VBAT_SW] of R3",
+                    "pos": {
+                        "x": 165.34,
+                        "y": 119.3
+                    },
+                    "uuid": "a304ddd1-342c-4f9d-9eef-6d85c71a542c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of R3 on F.Silkscreen",
+                    "pos": {
+                        "x": 173.62,
+                        "y": 119.3
+                    },
+                    "uuid": "5b21d7b0-9dd0-40a8-a76f-8e82c913df70"
+                },
+                {
+                    "description": "PTH pad 2 [/BATSENSE] of R3",
+                    "pos": {
+                        "x": 175.5,
+                        "y": 119.3
+                    },
+                    "uuid": "6b146d1e-bdfa-452b-9ddd-fa1332ada54a"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of R4 on F.Silkscreen",
+                    "pos": {
+                        "x": 179.19,
+                        "y": 119.3
+                    },
+                    "uuid": "e8296c87-8a9a-4e9e-83d0-3d1d7f7826c7"
+                },
+                {
+                    "description": "PTH pad 1 [/BATSENSE] of R4",
+                    "pos": {
+                        "x": 179.19,
+                        "y": 119.3
+                    },
+                    "uuid": "05681bfb-074c-4a7b-8b19-5e8866642417"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Footprint text of J2 (1: V+)",
+                    "pos": {
+                        "x": 193.0,
+                        "y": 92.0
+                    },
+                    "uuid": "de648e52-4473-4f1b-8d66-af340338a6fa"
+                },
+                {
+                    "description": "NPTH pad of H2",
+                    "pos": {
+                        "x": 192.25,
+                        "y": 92.0
+                    },
+                    "uuid": "9b685c28-9b48-41b9-a877-0dff5ba142a3"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of R2 on F.Silkscreen",
+                    "pos": {
+                        "x": 188.92,
+                        "y": 115.5
+                    },
+                    "uuid": "bc7eec78-d4ec-4375-9c25-086362a2dcd9"
+                },
+                {
+                    "description": "PTH pad 1 [+3V3] of R2",
+                    "pos": {
+                        "x": 188.92,
+                        "y": 115.5
+                    },
+                    "uuid": "fb6d2a6b-0238-4e73-b215-f4e8ae95b044"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of R4 on F.Silkscreen",
+                    "pos": {
+                        "x": 187.47,
+                        "y": 119.3
+                    },
+                    "uuid": "a027cba9-6fb6-44a5-9ac5-ccee53bfe79d"
+                },
+                {
+                    "description": "PTH pad 2 [GND] of R4",
+                    "pos": {
+                        "x": 189.35,
+                        "y": 119.3
+                    },
+                    "uuid": "3c272037-50f0-4b5e-a38b-de7d324a5e25"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of R2 on F.Silkscreen",
+                    "pos": {
+                        "x": 197.2,
+                        "y": 115.5
+                    },
+                    "uuid": "9b5fc4f1-3546-436a-91a2-fbeb65bb3cb9"
+                },
+                {
+                    "description": "PTH pad 2 [/CHAIN_RX] of R2",
+                    "pos": {
+                        "x": 199.08,
+                        "y": 115.5
+                    },
+                    "uuid": "9d1c0b64-2833-4fe3-885a-71ab67d9f67b"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Rectangle of SW3 on F.Silkscreen",
+                    "pos": {
+                        "x": 178.25,
+                        "y": 100.0
+                    },
+                    "uuid": "fdf9de82-e3b8-4b7f-8251-e14acf53ed03"
+                },
+                {
+                    "description": "PTH pad 2 [GND] of SW3",
+                    "pos": {
+                        "x": 190.5,
+                        "y": 103.5
+                    },
+                    "uuid": "472d822c-b022-404a-a43c-b63fc6890363"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Rectangle of SW3 on F.Silkscreen",
+                    "pos": {
+                        "x": 178.25,
+                        "y": 100.0
+                    },
+                    "uuid": "fdf9de82-e3b8-4b7f-8251-e14acf53ed03"
+                },
+                {
+                    "description": "PTH pad 2 [GND] of SW3",
+                    "pos": {
+                        "x": 190.5,
+                        "y": 108.5
+                    },
+                    "uuid": "e5b01b71-ac1c-4c8c-b709-2a0e27ce0634"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Rectangle of SW3 on F.Silkscreen",
+                    "pos": {
+                        "x": 178.25,
+                        "y": 100.0
+                    },
+                    "uuid": "fdf9de82-e3b8-4b7f-8251-e14acf53ed03"
+                },
+                {
+                    "description": "PTH pad 1 [/BTN_START] of SW3",
+                    "pos": {
+                        "x": 178.0,
+                        "y": 103.5
+                    },
+                    "uuid": "bc3cf1f0-78e7-44e5-bc7b-ba6c34971579"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Rectangle of SW3 on F.Silkscreen",
+                    "pos": {
+                        "x": 178.25,
+                        "y": 100.0
+                    },
+                    "uuid": "fdf9de82-e3b8-4b7f-8251-e14acf53ed03"
+                },
+                {
+                    "description": "PTH pad 1 [/BTN_START] of SW3",
+                    "pos": {
+                        "x": 178.0,
+                        "y": 108.5
+                    },
+                    "uuid": "d89b818c-cd19-4c2e-9c7d-f44212e03908"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of R1 on F.Silkscreen",
+                    "pos": {
+                        "x": 196.5,
+                        "y": 112.66
+                    },
+                    "uuid": "4f2dfff6-2572-4ae4-b482-626fc163eaa5"
+                },
+                {
+                    "description": "PTH pad 1 [+3V3] of R1",
+                    "pos": {
+                        "x": 196.5,
+                        "y": 112.66
+                    },
+                    "uuid": "12c3a148-0bdf-4e46-9816-5872112a395f"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of R1 on F.Silkscreen",
+                    "pos": {
+                        "x": 196.5,
+                        "y": 104.38
+                    },
+                    "uuid": "451b6180-742d-484a-9d84-30dc3d075d99"
+                },
+                {
+                    "description": "PTH pad 2 [/CHAIN_TX] of R1",
+                    "pos": {
+                        "x": 196.5,
+                        "y": 102.5
+                    },
+                    "uuid": "8d6f5f2b-331a-47e8-b7d2-a21f192b3317"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Footprint text of J1 (1: V+)",
+                    "pos": {
+                        "x": 94.0,
+                        "y": 92.0
+                    },
+                    "uuid": "b7bc6c2b-57b5-431d-bb49-2c72779d7e47"
+                },
+                {
+                    "description": "NPTH pad of H1",
+                    "pos": {
+                        "x": 96.25,
+                        "y": 92.0
+                    },
+                    "uuid": "bf894560-de82-43f2-8975-dd70451ee2c3"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Rectangle of SW5 on F.Silkscreen",
+                    "pos": {
+                        "x": 96.25,
+                        "y": 100.0
+                    },
+                    "uuid": "58827f4c-5e25-489b-a9f5-0b4ebb7c93bd"
+                },
+                {
+                    "description": "PTH pad 1 [/BTN_STOP] of SW5",
+                    "pos": {
+                        "x": 96.0,
+                        "y": 103.5
+                    },
+                    "uuid": "211ad210-e27c-4314-b319-47266b30076e"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Rectangle of SW5 on F.Silkscreen",
+                    "pos": {
+                        "x": 96.25,
+                        "y": 100.0
+                    },
+                    "uuid": "58827f4c-5e25-489b-a9f5-0b4ebb7c93bd"
+                },
+                {
+                    "description": "PTH pad 1 [/BTN_STOP] of SW5",
+                    "pos": {
+                        "x": 96.0,
+                        "y": 108.5
+                    },
+                    "uuid": "05931cfb-d61b-4c66-be45-68065c085259"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Rectangle of SW5 on F.Silkscreen",
+                    "pos": {
+                        "x": 96.25,
+                        "y": 100.0
+                    },
+                    "uuid": "58827f4c-5e25-489b-a9f5-0b4ebb7c93bd"
+                },
+                {
+                    "description": "PTH pad 2 [GND] of SW5",
+                    "pos": {
+                        "x": 108.5,
+                        "y": 103.5
+                    },
+                    "uuid": "5bafecb2-22ee-4243-a2ac-6d34bbbdae10"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Rectangle of SW5 on F.Silkscreen",
+                    "pos": {
+                        "x": 96.25,
+                        "y": 100.0
+                    },
+                    "uuid": "58827f4c-5e25-489b-a9f5-0b4ebb7c93bd"
+                },
+                {
+                    "description": "PTH pad 2 [GND] of SW5",
+                    "pos": {
+                        "x": 108.5,
+                        "y": 108.5
+                    },
+                    "uuid": "91c03bb9-a994-42c4-a04d-c61b25359632"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of U1 on B.Silkscreen",
+                    "pos": {
+                        "x": 175.11,
+                        "y": 92.43
+                    },
+                    "uuid": "272d5ed9-2aaa-44a4-926a-74a7a2478654"
+                },
+                {
+                    "description": "Footprint text of U1 (22)",
+                    "pos": {
+                        "x": 119.44,
+                        "y": 92.93
+                    },
+                    "uuid": "c1c72b3a-615e-4242-bd33-3f59fab12268"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of U1 on B.Silkscreen",
+                    "pos": {
+                        "x": 175.11,
+                        "y": 92.43
+                    },
+                    "uuid": "272d5ed9-2aaa-44a4-926a-74a7a2478654"
+                },
+                {
+                    "description": "Footprint text of U1 (44)",
+                    "pos": {
+                        "x": 119.44,
+                        "y": 64.93
+                    },
+                    "uuid": "ff6e232b-055d-4585-b15c-2ed6f322da35"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of U1 on B.Silkscreen",
+                    "pos": {
+                        "x": 175.11,
+                        "y": 92.43
+                    },
+                    "uuid": "272d5ed9-2aaa-44a4-926a-74a7a2478654"
+                },
+                {
+                    "description": "Footprint text of U1 (23)",
+                    "pos": {
+                        "x": 172.78,
+                        "y": 64.93
+                    },
+                    "uuid": "a3d9e461-241a-44ba-b9a1-c13e3496813f"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        }
+    ]
+}

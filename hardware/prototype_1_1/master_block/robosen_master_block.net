@@ -1,0 +1,2543 @@
+(export
+	(version "E")
+	(design
+		(source "C:\\Users\\nnnn\\Projects\\robosen_block\\hardware\\kicad\\robosen_master_block.kicad_sch")
+		(date "2026-10-04T19:01:43")
+		(tool "Eeschema 10.0.6")
+		(sheet
+			(number "1")
+			(name "/")
+			(tstamps "/")
+			(title_block
+				(title "Robosen K1 Master Block Carrier Board")
+				(company "Robosen Tangible Coding Block Project")
+				(rev "v1.0")
+				(date "2026-10-04")
+				(source "robosen_master_block.kicad_sch")
+				(comment
+					(number "1")
+					(value "Dual Rotary Knobs, 2.13 E-Paper Display, Config Dock & Run Chain Ports, Li-Ion BMS & 3.3V Buck-Boost")
+				)
+				(comment
+					(number "2")
+					(value "")
+				)
+				(comment
+					(number "3")
+					(value "")
+				)
+				(comment
+					(number "4")
+					(value "")
+				)
+				(comment
+					(number "5")
+					(value "")
+				)
+				(comment
+					(number "6")
+					(value "")
+				)
+				(comment
+					(number "7")
+					(value "")
+				)
+				(comment
+					(number "8")
+					(value "")
+				)
+				(comment
+					(number "9")
+					(value "")
+				)
+			)
+		)
+	)
+	(components
+		(comp
+			(ref "BT1")
+			(value "18650 3.7V 3500mAh")
+			(footprint "robosen_master:18650_Battery_Holder_Single")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:18650_Battery_Holder_Single")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "18650_Cell")
+				(description "Single-cell 18650 3.7V Lithium-Ion Battery Holder")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "fad659b7-1342-4370-a4a1-001bcca1f631")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C1")
+			(value "100nF (ADC Filter)")
+			(footprint "robosen_master:C_Disc_P2.54mm")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:C_Disc_P2.54mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "C")
+				(description "Unpolarized Ceramic Capacitor 2.54mm pitch")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "33f82832-e283-4d7e-b21c-97ed1df14bc6")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "DISP1")
+			(value "2.13in_EPaper_SSD1680")
+			(footprint "robosen_master:EPaper_2.13in_Header_1x08")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:EPaper_2.13in_Header_1x08")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "EPaper_8Pin")
+				(description "2.13 inch E-Paper Display Module Header (SPI, SSD1680)")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "51f3cc39-516d-48aa-b202-0b8b979408d8")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "8")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J1")
+			(value "CONFIG_DOCK_PORT")
+			(footprint "robosen_master:Pogo_4Pin_Dock_2.54mm")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:Pogo_4Pin_Dock_2.54mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "Pogo_4Pin")
+				(description "4-Pin Pogo Connector / Dock Socket (2.54mm pitch)")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "2418eb42-72b7-4f6e-a3ca-4670fc12ec22")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J2")
+			(value "RUN_CHAIN_PORT")
+			(footprint "robosen_master:Pogo_4Pin_Dock_2.54mm")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:Pogo_4Pin_Dock_2.54mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "Pogo_4Pin")
+				(description "4-Pin Pogo Connector / Dock Socket (2.54mm pitch)")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b9ab1799-bc41-4e39-9b0a-d6bc25eb144d")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R1")
+			(value "10k (Pull-up)")
+			(footprint "robosen_master:R_Axial_P10.16mm")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:R_Axial_P10.16mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "R")
+				(description "Resistor 0.25W Axial Through-Hole")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "d641538a-ac34-4b69-b215-6f645c3b03f6")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R2")
+			(value "10k (Pull-up)")
+			(footprint "robosen_master:R_Axial_P10.16mm")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:R_Axial_P10.16mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "R")
+				(description "Resistor 0.25W Axial Through-Hole")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "c6319524-7da0-4464-91a0-033d563c4f19")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R3")
+			(value "100k (1% Batt Div)")
+			(footprint "robosen_master:R_Axial_P10.16mm")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:R_Axial_P10.16mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "R")
+				(description "Resistor 0.25W Axial Through-Hole")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1ae131c1-c210-4b25-80ff-8d64fed5add5")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R4")
+			(value "100k (1% Batt Div)")
+			(footprint "robosen_master:R_Axial_P10.16mm")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:R_Axial_P10.16mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "R")
+				(description "Resistor 0.25W Axial Through-Hole")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "9f0424d8-509e-4b50-84af-5faf0f54e723")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "SW1")
+			(value "Knob 1 (Action)")
+			(footprint "robosen_master:KY-040_Rotary_Encoder_Module")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:KY-040_Rotary_Encoder_Module")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "KY-040")
+				(description "KY-040 Incremental Rotary Encoder Module with Pushbutton")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "35094beb-de0a-4b6e-988f-aaf77343a3bb")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "SW2")
+			(value "Knob 2 (Param)")
+			(footprint "robosen_master:KY-040_Rotary_Encoder_Module")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:KY-040_Rotary_Encoder_Module")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "KY-040")
+				(description "KY-040 Incremental Rotary Encoder Module with Pushbutton")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "e4e03502-b21d-4264-85cf-d3a41a493b55")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "SW3")
+			(value "CONFIRM_START (Green)")
+			(footprint "robosen_master:SW_PUSH_12x12mm")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:SW_PUSH_12x12mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "SW_Push")
+				(description "12x12mm Push Button Switch Tactile Momentary")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "4e8d8837-6ce5-4f52-8801-bfc18c53c50d")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "SW4")
+			(value "POWER_SWITCH")
+			(footprint "robosen_master:SW_Power_2Wire_Pads")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:SW_Power_2Wire_Pads")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "SW_SPST")
+				(description "Single-Pole Single-Throw 2-Wire Power Switch")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "2bd867f7-8592-4955-b0f3-a9acdf324f7e")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "SW5")
+			(value "CANCEL_STOP (Red)")
+			(footprint "robosen_master:SW_PUSH_12x12mm")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:SW_PUSH_12x12mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "SW_Push")
+				(description "12x12mm Push Button Switch Tactile Momentary")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "754da7fc-cc9e-4e45-aebf-64a7812100f7")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U1")
+			(value "ESP32-S3-DevKitC-1")
+			(footprint "robosen_master:ESP32-S3-DevKitC-1-Socket")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:ESP32-S3-DevKitC-1-Socket")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "ESP32-S3-DevKitC-1")
+				(description "ESP32-S3 Dual-Core WiFi/BLE 44-Pin Development Board Socket")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "23972106-ba41-4092-a068-5d0cecfe5893")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "9")
+						)
+						(pin
+							(num "10")
+						)
+						(pin
+							(num "11")
+						)
+						(pin
+							(num "12")
+						)
+						(pin
+							(num "13")
+						)
+						(pin
+							(num "14")
+						)
+						(pin
+							(num "15")
+						)
+						(pin
+							(num "16")
+						)
+						(pin
+							(num "17")
+						)
+						(pin
+							(num "18")
+						)
+						(pin
+							(num "19")
+						)
+						(pin
+							(num "20")
+						)
+						(pin
+							(num "21")
+						)
+						(pin
+							(num "22")
+						)
+						(pin
+							(num "23")
+						)
+						(pin
+							(num "24")
+						)
+						(pin
+							(num "25")
+						)
+						(pin
+							(num "26")
+						)
+						(pin
+							(num "27")
+						)
+						(pin
+							(num "28")
+						)
+						(pin
+							(num "29")
+						)
+						(pin
+							(num "30")
+						)
+						(pin
+							(num "31")
+						)
+						(pin
+							(num "32")
+						)
+						(pin
+							(num "33")
+						)
+						(pin
+							(num "34")
+						)
+						(pin
+							(num "35")
+						)
+						(pin
+							(num "36")
+						)
+						(pin
+							(num "37")
+						)
+						(pin
+							(num "38")
+						)
+						(pin
+							(num "39")
+						)
+						(pin
+							(num "40")
+						)
+						(pin
+							(num "41")
+						)
+						(pin
+							(num "42")
+						)
+						(pin
+							(num "43")
+						)
+						(pin
+							(num "44")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U2")
+			(value "TP4056_USB-C_BMS")
+			(footprint "robosen_master:TP4056_Type-C_Module")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:TP4056_Type-C_Module")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "TP4056_Module")
+				(description "TP4056 1A Li-Ion Battery Charger & DW01A Protection Module with Type-C")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "a4b3919c-53f5-47d5-a918-1d6a1ee88045")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "4")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U3")
+			(value "TPS63020_3.3V_BuckBoost")
+			(footprint "robosen_master:TPS63020_BuckBoost_Module")
+			(fields
+				(field
+					(name "Footprint") "robosen_master:TPS63020_BuckBoost_Module")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "robosen_master")
+				(part "TPS63020_Module")
+				(description "High Efficiency Single Inductor Buck-Boost Converter 3.3V Module (Horizontal)")
+			)
+			(property
+				(name "Sheetname")
+				(value "robosen_master_block")
+			)
+			(property
+				(name "Sheetfile")
+				(value "robosen_master_block.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "d4cad509-9588-4556-8334-3304d8ded373")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "8")
+						)
+					)
+				)
+			)
+		)
+	)
+	(groups)
+	(variants)
+	(libparts
+		(libpart
+			(lib "robosen_master")
+			(part "18650_Cell")
+			(description "Single-cell 18650 3.7V Lithium-Ion Battery Holder")
+			(fields
+				(field
+					(name "Reference") "BT")
+				(field
+					(name "Value") "18650_Li-ion")
+				(field
+					(name "Footprint") "robosen_master:18650_Battery_Holder_Single")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Single-cell 18650 3.7V Lithium-Ion Battery Holder")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "+")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "-")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "robosen_master")
+			(part "C")
+			(description "Unpolarized Ceramic Capacitor 2.54mm pitch")
+			(fields
+				(field
+					(name "Reference") "C")
+				(field
+					(name "Value") "C")
+				(field
+					(name "Footprint") "robosen_master:C_Disc_P2.54mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized Ceramic Capacitor 2.54mm pitch")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "2")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "robosen_master")
+			(part "EPaper_8Pin")
+			(description "2.13 inch E-Paper Display Module Header (SPI, SSD1680)")
+			(docs "DEPG0213BN / SSD1680")
+			(fields
+				(field
+					(name "Reference") "DISP")
+				(field
+					(name "Value") "EPaper_2.13in")
+				(field
+					(name "Footprint") "robosen_master:EPaper_2.13in_Header_1x08")
+				(field
+					(name "Datasheet") "DEPG0213BN / SSD1680")
+				(field
+					(name "Description") "2.13 inch E-Paper Display Module Header (SPI, SSD1680)")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "BUSY")
+					(type "output")
+				)
+				(pin
+					(num "2")
+					(name "CS")
+					(type "input")
+				)
+				(pin
+					(num "3")
+					(name "DC")
+					(type "input")
+				)
+				(pin
+					(num "4")
+					(name "RES")
+					(type "input")
+				)
+				(pin
+					(num "5")
+					(name "SDA")
+					(type "input")
+				)
+				(pin
+					(num "6")
+					(name "SCL")
+					(type "input")
+				)
+				(pin
+					(num "7")
+					(name "VCC")
+					(type "power_in")
+				)
+				(pin
+					(num "8")
+					(name "GND")
+					(type "power_in")
+				)
+			)
+		)
+		(libpart
+			(lib "robosen_master")
+			(part "ESP32-S3-DevKitC-1")
+			(description "ESP32-S3 Dual-Core WiFi/BLE 44-Pin Development Board Socket")
+			(docs "https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html")
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "ESP32-S3-DevKitC-1")
+				(field
+					(name "Footprint") "robosen_master:ESP32-S3-DevKitC-1-Socket")
+				(field
+					(name "Datasheet") "https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html")
+				(field
+					(name "Description") "ESP32-S3 Dual-Core WiFi/BLE 44-Pin Development Board Socket")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "3V3")
+					(type "power_in")
+				)
+				(pin
+					(num "2")
+					(name "3V3")
+					(type "power_in")
+				)
+				(pin
+					(num "3")
+					(name "EN/RST")
+					(type "input")
+				)
+				(pin
+					(num "4")
+					(name "GPIO4")
+					(type "bidirectional")
+				)
+				(pin
+					(num "5")
+					(name "GPIO5")
+					(type "bidirectional")
+				)
+				(pin
+					(num "6")
+					(name "GPIO6")
+					(type "bidirectional")
+				)
+				(pin
+					(num "7")
+					(name "GPIO7")
+					(type "bidirectional")
+				)
+				(pin
+					(num "8")
+					(name "GPIO15")
+					(type "bidirectional")
+				)
+				(pin
+					(num "9")
+					(name "GPIO16")
+					(type "bidirectional")
+				)
+				(pin
+					(num "10")
+					(name "GPIO17")
+					(type "bidirectional")
+				)
+				(pin
+					(num "11")
+					(name "GPIO18")
+					(type "bidirectional")
+				)
+				(pin
+					(num "12")
+					(name "GPIO8")
+					(type "bidirectional")
+				)
+				(pin
+					(num "13")
+					(name "GPIO3")
+					(type "bidirectional")
+				)
+				(pin
+					(num "14")
+					(name "GPIO46")
+					(type "bidirectional")
+				)
+				(pin
+					(num "15")
+					(name "GPIO9")
+					(type "bidirectional")
+				)
+				(pin
+					(num "16")
+					(name "GPIO10")
+					(type "bidirectional")
+				)
+				(pin
+					(num "17")
+					(name "GPIO11")
+					(type "bidirectional")
+				)
+				(pin
+					(num "18")
+					(name "GPIO12")
+					(type "bidirectional")
+				)
+				(pin
+					(num "19")
+					(name "GPIO13")
+					(type "bidirectional")
+				)
+				(pin
+					(num "20")
+					(name "GPIO14")
+					(type "bidirectional")
+				)
+				(pin
+					(num "21")
+					(name "5V")
+					(type "power_in")
+				)
+				(pin
+					(num "22")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "23")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "24")
+					(name "TX/IO43")
+					(type "bidirectional")
+				)
+				(pin
+					(num "25")
+					(name "RX/IO44")
+					(type "bidirectional")
+				)
+				(pin
+					(num "26")
+					(name "GPIO1")
+					(type "bidirectional")
+				)
+				(pin
+					(num "27")
+					(name "GPIO2")
+					(type "bidirectional")
+				)
+				(pin
+					(num "28")
+					(name "GPIO42")
+					(type "bidirectional")
+				)
+				(pin
+					(num "29")
+					(name "GPIO41")
+					(type "bidirectional")
+				)
+				(pin
+					(num "30")
+					(name "GPIO40")
+					(type "bidirectional")
+				)
+				(pin
+					(num "31")
+					(name "GPIO39")
+					(type "bidirectional")
+				)
+				(pin
+					(num "32")
+					(name "GPIO38")
+					(type "bidirectional")
+				)
+				(pin
+					(num "33")
+					(name "GPIO37")
+					(type "bidirectional")
+				)
+				(pin
+					(num "34")
+					(name "GPIO36")
+					(type "bidirectional")
+				)
+				(pin
+					(num "35")
+					(name "GPIO35")
+					(type "bidirectional")
+				)
+				(pin
+					(num "36")
+					(name "GPIO0")
+					(type "bidirectional")
+				)
+				(pin
+					(num "37")
+					(name "GPIO45")
+					(type "bidirectional")
+				)
+				(pin
+					(num "38")
+					(name "GPIO48")
+					(type "bidirectional")
+				)
+				(pin
+					(num "39")
+					(name "GPIO47")
+					(type "bidirectional")
+				)
+				(pin
+					(num "40")
+					(name "GPIO21")
+					(type "bidirectional")
+				)
+				(pin
+					(num "41")
+					(name "GPIO20")
+					(type "bidirectional")
+				)
+				(pin
+					(num "42")
+					(name "GPIO19")
+					(type "bidirectional")
+				)
+				(pin
+					(num "43")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "44")
+					(name "GND")
+					(type "power_in")
+				)
+			)
+		)
+		(libpart
+			(lib "robosen_master")
+			(part "KY-040")
+			(description "KY-040 Incremental Rotary Encoder Module with Pushbutton")
+			(fields
+				(field
+					(name "Reference") "SW")
+				(field
+					(name "Value") "KY-040")
+				(field
+					(name "Footprint") "robosen_master:KY-040_Rotary_Encoder_Module")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "KY-040 Incremental Rotary Encoder Module with Pushbutton")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "CLK")
+					(type "output")
+				)
+				(pin
+					(num "2")
+					(name "DT")
+					(type "output")
+				)
+				(pin
+					(num "3")
+					(name "SW")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "+")
+					(type "power_in")
+				)
+				(pin
+					(num "5")
+					(name "GND")
+					(type "power_in")
+				)
+			)
+		)
+		(libpart
+			(lib "robosen_master")
+			(part "Pogo_4Pin")
+			(description "4-Pin Pogo Connector / Dock Socket (2.54mm pitch)")
+			(fields
+				(field
+					(name "Reference") "J")
+				(field
+					(name "Value") "Pogo_4Pin")
+				(field
+					(name "Footprint") "robosen_master:Pogo_4Pin_Dock_2.54mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "4-Pin Pogo Connector / Dock Socket (2.54mm pitch)")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "V+")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "DATA")
+					(type "bidirectional")
+				)
+				(pin
+					(num "4")
+					(name "PASS")
+					(type "bidirectional")
+				)
+			)
+		)
+		(libpart
+			(lib "robosen_master")
+			(part "R")
+			(description "Resistor 0.25W Axial Through-Hole")
+			(fields
+				(field
+					(name "Reference") "R")
+				(field
+					(name "Value") "R")
+				(field
+					(name "Footprint") "robosen_master:R_Axial_P10.16mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor 0.25W Axial Through-Hole")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "2")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "robosen_master")
+			(part "SW_Push")
+			(description "12x12mm Push Button Switch Tactile Momentary")
+			(fields
+				(field
+					(name "Reference") "SW")
+				(field
+					(name "Value") "SW_Push_12mm")
+				(field
+					(name "Footprint") "robosen_master:SW_PUSH_12x12mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "12x12mm Push Button Switch Tactile Momentary")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "2")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "robosen_master")
+			(part "SW_SPST")
+			(description "Single-Pole Single-Throw 2-Wire Power Switch")
+			(fields
+				(field
+					(name "Reference") "SW")
+				(field
+					(name "Value") "SW_SPST")
+				(field
+					(name "Footprint") "robosen_master:SW_Power_2Wire_Pads")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Single-Pole Single-Throw 2-Wire Power Switch")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "2")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "robosen_master")
+			(part "TP4056_Module")
+			(description "TP4056 1A Li-Ion Battery Charger & DW01A Protection Module with Type-C")
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "TP4056_Type-C")
+				(field
+					(name "Footprint") "robosen_master:TP4056_Type-C_Module")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "TP4056 1A Li-Ion Battery Charger & DW01A Protection Module with Type-C")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "OUT+")
+					(type "power_out")
+				)
+				(pin
+					(num "2")
+					(name "B+")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "B-")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "OUT-")
+					(type "power_in")
+				)
+				(pin
+					(num "5")
+					(name "IN-")
+					(type "passive")
+				)
+				(pin
+					(num "6")
+					(name "IN+")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "robosen_master")
+			(part "TPS63020_Module")
+			(description "High Efficiency Single Inductor Buck-Boost Converter 3.3V Module (Horizontal)")
+			(docs "Texas Instruments TPS63020")
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "TPS63020_BuckBoost")
+				(field
+					(name "Footprint") "robosen_master:TPS63020_BuckBoost_Module")
+				(field
+					(name "Datasheet") "Texas Instruments TPS63020")
+				(field
+					(name "Description") "High Efficiency Single Inductor Buck-Boost Converter 3.3V Module (Horizontal)")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "2")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "3")
+					(name "VIN")
+					(type "power_in")
+				)
+				(pin
+					(num "4")
+					(name "VIN")
+					(type "power_in")
+				)
+				(pin
+					(num "5")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "6")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "7")
+					(name "OUT")
+					(type "power_out")
+				)
+				(pin
+					(num "8")
+					(name "OUT")
+					(type "passive")
+				)
+			)
+		)
+	)
+	(libraries
+		(library
+			(logical "robosen_master")
+			(uri "${KIPRJMOD}/robosen_master.kicad_sym")
+		)
+	)
+	(nets
+		(net
+			(code "1")
+			(name "+3V3")
+			(class "Default")
+			(node
+				(ref "DISP1")
+				(pin "7")
+				(pinfunction "VCC_7")
+				(pintype "power_in")
+			)
+			(node
+				(ref "J1")
+				(pin "1")
+				(pinfunction "V+_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J2")
+				(pin "1")
+				(pinfunction "V+_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R1")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R2")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "SW1")
+				(pin "4")
+				(pinfunction "+_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "SW2")
+				(pin "4")
+				(pinfunction "+_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U1")
+				(pin "1")
+				(pinfunction "3V3_1")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U1")
+				(pin "2")
+				(pinfunction "3V3_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U3")
+				(pin "7")
+				(pinfunction "OUT_7")
+				(pintype "power_out")
+			)
+			(node
+				(ref "U3")
+				(pin "8")
+				(pinfunction "OUT_8")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "2")
+			(name "/BATSENSE")
+			(class "Default")
+			(node
+				(ref "C1")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R3")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R4")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "26")
+				(pinfunction "GPIO1_26")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "3")
+			(name "/BTN_START")
+			(class "Default")
+			(node
+				(ref "SW3")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "20")
+				(pinfunction "GPIO14_20")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "4")
+			(name "/BTN_STOP")
+			(class "Default")
+			(node
+				(ref "SW5")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "27")
+				(pinfunction "GPIO2_27")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "5")
+			(name "/CFG_RX")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "3")
+				(pinfunction "DATA_3")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U1")
+				(pin "11")
+				(pinfunction "GPIO18_11")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "6")
+			(name "/CFG_TX")
+			(class "Default")
+			(node
+				(ref "J1")
+				(pin "4")
+				(pinfunction "PASS_4")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U1")
+				(pin "10")
+				(pinfunction "GPIO17_10")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "7")
+			(name "/CHAIN_RX")
+			(class "Default")
+			(node
+				(ref "J2")
+				(pin "4")
+				(pinfunction "PASS_4")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "R2")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "9")
+				(pinfunction "GPIO16_9")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "8")
+			(name "/CHAIN_TX")
+			(class "Default")
+			(node
+				(ref "J2")
+				(pin "3")
+				(pinfunction "DATA_3")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "R1")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "8")
+				(pinfunction "GPIO15_8")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "9")
+			(name "/EPD_BUSY")
+			(class "Default")
+			(node
+				(ref "DISP1")
+				(pin "1")
+				(pinfunction "BUSY_1")
+				(pintype "output")
+			)
+			(node
+				(ref "U1")
+				(pin "4")
+				(pinfunction "GPIO4_4")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "10")
+			(name "/EPD_CS")
+			(class "Default")
+			(node
+				(ref "DISP1")
+				(pin "2")
+				(pinfunction "CS_2")
+				(pintype "input")
+			)
+			(node
+				(ref "U1")
+				(pin "7")
+				(pinfunction "GPIO7_7")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "11")
+			(name "/EPD_DC")
+			(class "Default")
+			(node
+				(ref "DISP1")
+				(pin "3")
+				(pinfunction "DC_3")
+				(pintype "input")
+			)
+			(node
+				(ref "U1")
+				(pin "6")
+				(pinfunction "GPIO6_6")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "12")
+			(name "/EPD_MOSI")
+			(class "Default")
+			(node
+				(ref "DISP1")
+				(pin "5")
+				(pinfunction "SDA_5")
+				(pintype "input")
+			)
+			(node
+				(ref "U1")
+				(pin "32")
+				(pinfunction "GPIO38_32")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "13")
+			(name "/EPD_RES")
+			(class "Default")
+			(node
+				(ref "DISP1")
+				(pin "4")
+				(pinfunction "RES_4")
+				(pintype "input")
+			)
+			(node
+				(ref "U1")
+				(pin "5")
+				(pinfunction "GPIO5_5")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "14")
+			(name "/EPD_SCK")
+			(class "Default")
+			(node
+				(ref "DISP1")
+				(pin "6")
+				(pinfunction "SCL_6")
+				(pintype "input")
+			)
+			(node
+				(ref "U1")
+				(pin "40")
+				(pinfunction "GPIO21_40")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "15")
+			(name "/K1_CLK")
+			(class "Default")
+			(node
+				(ref "SW1")
+				(pin "1")
+				(pinfunction "CLK_1")
+				(pintype "output")
+			)
+			(node
+				(ref "U1")
+				(pin "12")
+				(pinfunction "GPIO8_12")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "16")
+			(name "/K1_DT")
+			(class "Default")
+			(node
+				(ref "SW1")
+				(pin "2")
+				(pinfunction "DT_2")
+				(pintype "output")
+			)
+			(node
+				(ref "U1")
+				(pin "15")
+				(pinfunction "GPIO9_15")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "17")
+			(name "/K1_SW")
+			(class "Default")
+			(node
+				(ref "SW1")
+				(pin "3")
+				(pinfunction "SW_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "16")
+				(pinfunction "GPIO10_16")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "18")
+			(name "/K2_CLK")
+			(class "Default")
+			(node
+				(ref "SW2")
+				(pin "1")
+				(pinfunction "CLK_1")
+				(pintype "output")
+			)
+			(node
+				(ref "U1")
+				(pin "17")
+				(pinfunction "GPIO11_17")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "19")
+			(name "/K2_DT")
+			(class "Default")
+			(node
+				(ref "SW2")
+				(pin "2")
+				(pinfunction "DT_2")
+				(pintype "output")
+			)
+			(node
+				(ref "U1")
+				(pin "18")
+				(pinfunction "GPIO12_18")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "20")
+			(name "/K2_SW")
+			(class "Default")
+			(node
+				(ref "SW2")
+				(pin "3")
+				(pinfunction "SW_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "19")
+				(pinfunction "GPIO13_19")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "21")
+			(name "/VBAT_GND")
+			(class "Default")
+			(node
+				(ref "BT1")
+				(pin "2")
+				(pinfunction "-_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U2")
+				(pin "3")
+				(pinfunction "B-_3")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "22")
+			(name "/VBAT_PROT")
+			(class "Default")
+			(node
+				(ref "SW4")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U2")
+				(pin "1")
+				(pinfunction "OUT+_1")
+				(pintype "power_out")
+			)
+		)
+		(net
+			(code "23")
+			(name "/VBAT_RAW")
+			(class "Default")
+			(node
+				(ref "BT1")
+				(pin "1")
+				(pinfunction "+_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U2")
+				(pin "2")
+				(pinfunction "B+_2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "24")
+			(name "/VBAT_SW")
+			(class "Default")
+			(node
+				(ref "R3")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "SW4")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "3")
+				(pinfunction "VIN_3")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U3")
+				(pin "4")
+				(pinfunction "VIN_4")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "25")
+			(name "GND")
+			(class "Default")
+			(node
+				(ref "C1")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "DISP1")
+				(pin "8")
+				(pinfunction "GND_8")
+				(pintype "power_in")
+			)
+			(node
+				(ref "J1")
+				(pin "2")
+				(pinfunction "GND_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "J2")
+				(pin "2")
+				(pinfunction "GND_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R4")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "SW1")
+				(pin "5")
+				(pinfunction "GND_5")
+				(pintype "power_in")
+			)
+			(node
+				(ref "SW2")
+				(pin "5")
+				(pinfunction "GND_5")
+				(pintype "power_in")
+			)
+			(node
+				(ref "SW3")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "SW5")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "22")
+				(pinfunction "GND_22")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U1")
+				(pin "23")
+				(pinfunction "GND_23")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U1")
+				(pin "43")
+				(pinfunction "GND_43")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U1")
+				(pin "44")
+				(pinfunction "GND_44")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U2")
+				(pin "4")
+				(pinfunction "OUT-_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U3")
+				(pin "1")
+				(pinfunction "GND_1")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U3")
+				(pin "2")
+				(pinfunction "GND_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U3")
+				(pin "5")
+				(pinfunction "GND_5")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U3")
+				(pin "6")
+				(pinfunction "GND_6")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "26")
+			(name "unconnected-(U1-5V-Pad21)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "21")
+				(pinfunction "5V_21")
+				(pintype "power_in+no_connect")
+			)
+		)
+		(net
+			(code "27")
+			(name "unconnected-(U1-EN{slash}RST-Pad3)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "3")
+				(pinfunction "EN/RST_3")
+				(pintype "input+no_connect")
+			)
+		)
+		(net
+			(code "28")
+			(name "unconnected-(U1-GPIO0-Pad36)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "36")
+				(pinfunction "GPIO0_36")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "29")
+			(name "unconnected-(U1-GPIO3-Pad13)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "13")
+				(pinfunction "GPIO3_13")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "30")
+			(name "unconnected-(U1-GPIO19-Pad42)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "42")
+				(pinfunction "GPIO19_42")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "31")
+			(name "unconnected-(U1-GPIO20-Pad41)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "41")
+				(pinfunction "GPIO20_41")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "32")
+			(name "unconnected-(U1-GPIO35-Pad35)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "35")
+				(pinfunction "GPIO35_35")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "33")
+			(name "unconnected-(U1-GPIO36-Pad34)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "34")
+				(pinfunction "GPIO36_34")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "34")
+			(name "unconnected-(U1-GPIO37-Pad33)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "33")
+				(pinfunction "GPIO37_33")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "35")
+			(name "unconnected-(U1-GPIO39-Pad31)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "31")
+				(pinfunction "GPIO39_31")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "36")
+			(name "unconnected-(U1-GPIO40-Pad30)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "30")
+				(pinfunction "GPIO40_30")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "37")
+			(name "unconnected-(U1-GPIO41-Pad29)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "29")
+				(pinfunction "GPIO41_29")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "38")
+			(name "unconnected-(U1-GPIO42-Pad28)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "28")
+				(pinfunction "GPIO42_28")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "39")
+			(name "unconnected-(U1-GPIO45-Pad37)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "37")
+				(pinfunction "GPIO45_37")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "40")
+			(name "unconnected-(U1-GPIO46-Pad14)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "14")
+				(pinfunction "GPIO46_14")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "41")
+			(name "unconnected-(U1-GPIO47-Pad39)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "39")
+				(pinfunction "GPIO47_39")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "42")
+			(name "unconnected-(U1-GPIO48-Pad38)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "38")
+				(pinfunction "GPIO48_38")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "43")
+			(name "unconnected-(U1-RX{slash}IO44-Pad25)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "25")
+				(pinfunction "RX/IO44_25")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "44")
+			(name "unconnected-(U1-TX{slash}IO43-Pad24)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "24")
+				(pinfunction "TX/IO43_24")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "45")
+			(name "unconnected-(U2-IN+-Pad6)")
+			(class "Default")
+			(node
+				(ref "U2")
+				(pin "6")
+				(pinfunction "IN+_6")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "46")
+			(name "unconnected-(U2-IN--Pad5)")
+			(class "Default")
+			(node
+				(ref "U2")
+				(pin "5")
+				(pinfunction "IN-_5")
+				(pintype "passive+no_connect")
+			)
+		)
+	)
+)

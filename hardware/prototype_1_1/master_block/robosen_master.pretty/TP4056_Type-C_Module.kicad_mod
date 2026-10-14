@@ -1,0 +1,95 @@
+(footprint "TP4056_Type-C_Module"
+	(version 20240108)
+	(generator "antigravity-kicad-generator")
+	(layer "F.Cu")
+	(descr "TP4056 USB Type-C 1A Lithium Battery Charger & Protection Module (Horizontal 25.6x17mm, 28mm with USB-C, Right: OUT+, B+, B-, OUT-, Left: IN+, IN-)")
+	(tags "TP4056 USB-C Charger Li-ion 18650 BMS")
+	(property "Reference" "REF**"
+		(at 0 -10.5 0)
+		(layer "F.SilkS")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "TP4056_Type-C"
+		(at 0 10.5 0)
+		(layer "F.Fab")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr through_hole)
+	(fp_rect
+		(start -12.8 -8.5)
+		(end 12.8 8.5)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill none)
+		(layer "F.SilkS")
+	)
+	(fp_rect
+		(start -15.2 -4.45)
+		(end -12.8 4.45)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(fill none)
+		(layer "F.SilkS")
+	)
+	(fp_rect
+		(start -15.7 -9.0)
+		(end 13.3 9.0)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill none)
+		(layer "F.CrtYd")
+	)
+	(fp_text user "USB-C"
+		(at -14.0 0 90)
+		(layer "F.SilkS")
+		(effects
+			(font
+				(size 0.7 0.7)
+				(thickness 0.1)
+			)
+		)
+	)
+	(fp_text user "TP4056 + BMS"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" thru_hole rect (at 10.85 -6.90) (size 1.8 1.8) (drill 1.0) (layers "*.Cu" "*.Mask"))
+	(fp_text user "OUT+" (at 7.6 -6.90 0) (layer "F.SilkS") (effects (font (size 0.7 0.7) (thickness 0.1))))
+
+	(pad "2" thru_hole circle (at 10.85 -3.70) (size 1.8 1.8) (drill 1.0) (layers "*.Cu" "*.Mask"))
+	(fp_text user "B+" (at 7.6 -3.70 0) (layer "F.SilkS") (effects (font (size 0.7 0.7) (thickness 0.1))))
+
+	(pad "3" thru_hole circle (at 10.85 3.70) (size 1.8 1.8) (drill 1.0) (layers "*.Cu" "*.Mask"))
+	(fp_text user "B-" (at 7.6 3.70 0) (layer "F.SilkS") (effects (font (size 0.7 0.7) (thickness 0.1))))
+
+	(pad "4" thru_hole circle (at 10.85 6.90) (size 1.8 1.8) (drill 1.0) (layers "*.Cu" "*.Mask"))
+	(fp_text user "OUT-" (at 7.6 6.90 0) (layer "F.SilkS") (effects (font (size 0.7 0.7) (thickness 0.1))))
+
+	(pad "5" thru_hole circle (at -10.85 6.90) (size 1.8 1.8) (drill 1.0) (layers "*.Cu" "*.Mask"))
+	(fp_text user "IN-" (at -7.8 6.90 0) (layer "F.SilkS") (effects (font (size 0.7 0.7) (thickness 0.1))))
+
+	(pad "6" thru_hole circle (at -10.85 -6.90) (size 1.8 1.8) (drill 1.0) (layers "*.Cu" "*.Mask"))
+	(fp_text user "IN+" (at -7.8 -6.90 0) (layer "F.SilkS") (effects (font (size 0.7 0.7) (thickness 0.1))))
+)

@@ -1,0 +1,21 @@
+(footprint "C_Disc_P2.54mm"
+	(version 20240108)
+	(generator "antigravity-kicad-generator")
+	(layer "F.Cu")
+	(descr "Ceramic Disc / MLCC Capacitor, 2.54mm (0.1 in) lead pitch, 4.0mm width x 2.4mm depth")
+	(tags "Capacitor Ceramic Disc MLCC THT 2.54mm 0.1in")
+	(property "Reference" "REF**"
+		(at 0 -2.4 0)
+		(layer "F.SilkS")
+		(effects (font (size 1 1) (thickness 0.15)))
+	)
+	(property "Value" "C"
+		(at 0 2.4 0)
+		(layer "F.Fab")
+		(effects (font (size 1 1) (thickness 0.15)))
+	)
+	(attr through_hole)
+	(fp_rect (start -2.2 -1.2) (end 2.2 1.2) (stroke (width 0.15) (type solid)) (fill none) (layer "F.SilkS"))
+	(pad "1" thru_hole rect (at -1.27 0) (size 1.6 1.6) (drill 0.85) (layers "*.Cu" "*.Mask"))
+	(pad "2" thru_hole circle (at 1.27 0) (size 1.6 1.6) (drill 0.85) (layers "*.Cu" "*.Mask"))
+)

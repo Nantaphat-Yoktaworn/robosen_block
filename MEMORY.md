@@ -52,12 +52,18 @@ robosen_block/
 │   │   ├── robosen_master_block_gerbers.zip # 10-file JLCPCB production package (ORDERED)
 │   │   ├── fp-lib-table & sym-lib-table  # Local footprint and symbol library registries
 │   │   └── robosen_master.pretty/        # 12 verified footprints (.kicad_mod)
-│   └── action_block/                     # KiCad 10 Action Block Modular Carrier PCB Project
-│       ├── action_block.kicad_pro        # Action Block project file
-│       ├── action_block.kicad_pcb        # Routed PCB layout (32.0 x 32.0 mm, centered pogo docks)
-│       ├── robosen_action_block_gerbers.zip # 10-file JLCPCB production package (ORDERED)
-│       ├── fp-lib-table & sym-lib-table  # Local footprint and symbol library registries
-│       └── action_block.pretty/          # Custom footprints (.kicad_mod)
+│   ├── action_block/                     # KiCad 10 Action Block Modular Carrier PCB Project
+│   │   ├── action_block.kicad_pro        # Action Block project file
+│   │   ├── action_block.kicad_pcb        # Routed PCB layout (32.0 x 32.0 mm, centered pogo docks)
+│   │   ├── robosen_action_block_gerbers.zip # 10-file JLCPCB production package (ORDERED)
+│   │   ├── fp-lib-table & sym-lib-table  # Local footprint and symbol library registries
+│   │   └── action_block.pretty/          # Custom footprints (.kicad_mod)
+│   └── prototype_1_1/                    # Prototype #1-1 Respin (ESP32-S3 Socket Spacing Fix)
+│       ├── master_block/                 # Corrected Master PCB (25.40 mm socket spacing, 100% routed)
+│       │   ├── robosen_master_block.kicad_pcb
+│       │   ├── robosen_master_block_gerbers.zip # Fresh production Gerbers for JLCPCB re-order
+│       │   └── reports/ (DRC & SVG audits)
+│       └── action_block/                 # Self-contained duplicate of Action Block (verified correct)
 ├── recordings/
 │   ├── dumps/                            # Raw BLE packet captures & diagnostic logs
 │   └── K1/
@@ -112,6 +118,7 @@ robosen_block/
 ├── PHYSICAL_BLOCK_SYSTEM_SPEC.md         # Hardware & electrical spec for modular tangible coding blocks (v3.0)
 ├── PROTOTYPE_00_SPEC.md                  # Prototype #0 engineering specification & breadboard pinouts
 ├── PROTOTYPE_01_SPEC.md                  # Prototype #1 engineering specification & custom PCB production release
+├── PROTOTYPE_01_1_SPEC.md                # Prototype #1-1 engineering specification (Master Block PCB respin with corrected ESP32-S3 25.40mm row spacing)
 ├── IMPROVEMENT_PLAN.md                   # 5-Pillar master improvement plan & roadmap
 ├── ROBOSEN_K1_DOCUMENTATION.md           # Complete official K1 documentation & user manual
 └── MEMORY.md                             # Master project memory & knowledge base (this file)
