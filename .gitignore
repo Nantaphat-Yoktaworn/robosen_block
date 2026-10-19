@@ -36,6 +36,9 @@ plans/*.xlsx
 # Binary build artifacts
 *.elf
 *.o
+*.d
+build/
+**/build/
 
 # KiCad Temporary, Backups & Local Preferences
 *.kicad_prl
