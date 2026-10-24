@@ -876,7 +876,7 @@ void loop() {
   if (k2Clk != lastK2Clk && k2Clk == LOW) {
     lastUserActivity = now;
     // Inverted so Clockwise INCREASES the parameter
-    bool cw = (digitalRead(PIN_K2_DT) == k2Clk);
+    bool cw = (digitalRead(PIN_K2_DT) != k2Clk);
     if (currentState == STATE_ACTION_MENU) {
       RobosenAction& act = ACTIONS[currentActionIndex];
       if (cw) {
@@ -1754,12 +1754,21 @@ void updateEInkActionMenu() {
     display.setCursor(55, 68);
     display.print(act.paramUnit);
 
-    // Visual Dots / Gauge for Parameter (1 to 5)
+    // Visual Dots / Gauge for Parameter (matches action capacity: 3 for Reps, 4 for Turns, 5 for Steps)
     display.setFont();
-    for (int i = 0; i < 5; i++) {
+    int stepSize = (act.paramStep > 0) ? act.paramStep : 1;
+    int totalDots = ((act.paramMax - act.paramMin) / stepSize) + 1;
+    if (totalDots < 1) totalDots = 1;
+    if (totalDots > 5) totalDots = 5;
+
+    int currentDot = ((act.paramVal - act.paramMin) / stepSize) + 1;
+    if (currentDot < 0) currentDot = 0;
+    if (currentDot > totalDots) currentDot = totalDots;
+
+    for (int i = 0; i < totalDots; i++) {
       int dotX = 180 + (i * 12);
       int dotY = 62;
-      if (i < act.paramVal) {
+      if (i < currentDot) {
         display.fillCircle(dotX, dotY, 4, GxEPD_BLACK);
       } else {
         display.drawCircle(dotX, dotY, 4, GxEPD_BLACK);

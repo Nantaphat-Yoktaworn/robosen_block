@@ -543,7 +543,7 @@ void setup() {
 void loop() {
   // 1. Process Rotary Encoders (Knob 2 inverted on PCB layout so CW = +)
   bool k1Active = updateEncoder(encKnob1, false);
-  bool k2Active = updateEncoder(encKnob2, true);
+  bool k2Active = updateEncoder(encKnob2, false);
 
   // 2. Process Tactile Push Buttons
   bool startActive = updateButton(btnStart);

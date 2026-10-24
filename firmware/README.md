@@ -8,7 +8,7 @@ This directory contains the complete source code, flashing scripts, and document
 
 | Subdirectory | Target Hardware | Role / Description | Status |
 |:---|:---|:---|:---|
-| **[`esp32_master/`](file:///C:/Users/nnnn/Projects/robosen_block/firmware/esp32_master/)** | ESP32-S3 DevKitC-1 | **Master Block Controller**: Dual-knob UI, 2.13" E-Paper driver, BLE 5.0 Robosen client, Config Dock (UART1) & Run Chain (UART2). | ⚠️ **Update Required** (Add Red Button `GPIO2` & Battery Sense `GPIO1`) |
+| **[`esp32_master/`](esp32_master/)** | ESP32-S3 DevKitC-1 | **Master Block Controller**: Dual-knob UI, 2.13" E-Paper driver, BLE 5.0 Robosen client, Config Dock (UART1) & Run Chain (UART2). | ✅ **Production Ready** (Carrier PCB 4-Input & Battery ADC verified) |
 | **[`ch32v003_action_block/`](file:///C:/Users/nnnn/Projects/robosen_block/firmware/ch32v003_action_block/)** | WCH CH32V003 RISC-V | **Modular Action Block**: Solid slave block with 192-byte flash token storage, WS2812B RGB light feedback, and single-wire UART cascade. | ✅ **Production Ready** |
 | **[`ch32v003_end_block/`](file:///C:/Users/nnnn/Projects/robosen_block/firmware/ch32v003_end_block/)** | WCH CH32V003 RISC-V | **Smart End Terminator**: Closing block that loops downstream execution data back to Master RX return rail with green ready LED indicator. | ✅ **Production Ready** |
 | **[`master_soldering_test/`](file:///C:/Users/nnnn/Projects/robosen_block/firmware/master_soldering_test/)** | ESP32-S3 DevKitC-1 | **All-Input Hardware Verification Suite**: Diagnostic firmware testing both rotary encoders (`SW1`, `SW2`), dual push buttons (`SW3`, `SW5`), battery ADC monitor (`GPIO 1`), WS2812 RGB LED (`GPIO 48`), and pure-text 2.13" E-Paper display. | ✅ **Hardware Verified** |
