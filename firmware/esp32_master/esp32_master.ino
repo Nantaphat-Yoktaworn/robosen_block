@@ -203,13 +203,46 @@ const unsigned long RETRY_INTERVAL_MS = 2000;
 unsigned long lastConnectAttemptTime = 0;
 int connectAttemptCounter = 0;
 
-// Debounce, Activity & Timing States for 4 UI Inputs
-int lastK1Clk = HIGH;
-int lastK2Clk = HIGH;
-unsigned long startBtnPressTime = 0;
-bool startBtnHeld = false;
-unsigned long stopBtnPressTime = 0;
-bool stopBtnHeld = false;
+// --- ROTARY ENCODER HARDWARE INTERRUPT STATE ---
+volatile int k1Delta = 0;
+volatile int k2Delta = 0;
+volatile unsigned long lastK1IsrUs = 0;
+volatile unsigned long lastK2IsrUs = 0;
+
+void IRAM_ATTR isrK1() {
+  unsigned long nowUs = micros();
+  if (nowUs - lastK1IsrUs < 8000) return; // 8ms debounce filter
+  lastK1IsrUs = nowUs;
+  if (digitalRead(PIN_K1_DT) == HIGH) {
+    k1Delta++;
+  } else {
+    k1Delta--;
+  }
+}
+
+void IRAM_ATTR isrK2() {
+  unsigned long nowUs = micros();
+  if (nowUs - lastK2IsrUs < 8000) return; // 8ms debounce filter
+  lastK2IsrUs = nowUs;
+  // Direction swapped so Clockwise INCREASES parameter
+  if (digitalRead(PIN_K2_DT) == HIGH) {
+    k2Delta++;
+  } else {
+    k2Delta--;
+  }
+}
+
+// --- NON-BLOCKING LED BLIP & SCREEN REFRESH SETTLE STATE ---
+unsigned long ledBlipUntil = 0;
+bool screenNeedsUpdate = false;
+unsigned long lastKnobTurnTime = 0;
+const unsigned long SCREEN_SETTLE_MS = 200; // 200ms settle delay before partial refresh
+
+void triggerLedBlip(uint8_t r, uint8_t g, uint8_t b) {
+  setStatusLED(r, g, b);
+  ledBlipUntil = millis() + 50; // 50ms tactile feedback
+}
+
 unsigned long lastUserActivity = 0;
 unsigned long lastHeartbeatTime = 0;
 
@@ -253,6 +286,7 @@ class RobosenClientCallback : public BLEClientCallbacks {
 };
 
 void updateStatusLED() {
+  if (ledBlipUntil > 0 && millis() < ledBlipUntil) return; // Preserve active tactile feedback blip
   if (currentState == STATE_RUNNING) {
     setStatusLED(0, 100, 20); // 🟢 Bright Green: Chain actively executing
   } else if (currentState == STATE_BLE_SCANNING) {
@@ -548,8 +582,8 @@ void setup() {
   // Configure Battery Voltage ADC Pin (ADC1_CH0)
   pinMode(PIN_BATSENSE, INPUT);
 
-  lastK1Clk = digitalRead(PIN_K1_CLK);
-  lastK2Clk = digitalRead(PIN_K2_CLK);
+  attachInterrupt(digitalPinToInterrupt(PIN_K1_CLK), isrK1, FALLING);
+  attachInterrupt(digitalPinToInterrupt(PIN_K2_CLK), isrK2, FALLING);
 
   // Load Saved Robot Binding from NVS Flash
   preferences.begin("robosen_cfg", false);
@@ -594,9 +628,13 @@ void setup() {
 void loop() {
   unsigned long now = millis();
 
-  // --------------------------------------------------------------------------
-  // --- 0. CONFIG DOCK MONITORING & ACTION QUERY ENGINE ---
-  // --------------------------------------------------------------------------
+  // --- 0. LED TACTILE FEEDBACK TIMEOUT ---
+  if (ledBlipUntil > 0 && now >= ledBlipUntil) {
+    ledBlipUntil = 0;
+    updateStatusLED();
+  }
+
+  // --- 1. CONFIG DOCK MONITORING & ACTION QUERY ENGINE ---
   pollConfigDock();
 
   // Serial Monitor Interactive Test ('t' = Ping Config Dock, 'r' = Run Chain)
@@ -617,57 +655,184 @@ void loop() {
     }
   }
 
-  // --------------------------------------------------------------------------
-  // --- 1. MASTER START / CONFIRM BUTTON (SW3 - GPIO 14: 3s HOLD FOR PAIRING) ---
-  // --------------------------------------------------------------------------
-  int btnState = digitalRead(PIN_START_BTN);
-  if (btnState == LOW) {
+  // --- 2. ROTARY ENCODER DELTA PROCESSING (INTERRUPT-DRIVEN) ---
+  int d1 = 0, d2 = 0;
+  if (k1Delta != 0 || k2Delta != 0) {
+    noInterrupts();
+    d1 = k1Delta; k1Delta = 0;
+    d2 = k2Delta; k2Delta = 0;
+    interrupts();
+  }
+
+  if (d1 != 0) {
     lastUserActivity = now;
-    if (startBtnPressTime == 0) {
-      startBtnPressTime = millis();
-      startBtnHeld = false;
-      Serial.println("\n[BUTTON] Start button pressed... (Hold 3s to switch robot)");
-    } else if (!startBtnHeld) {
-      unsigned long heldDuration = millis() - startBtnPressTime;
+    lastKnobTurnTime = now;
+    screenNeedsUpdate = true;
+    triggerLedBlip(0, 80, 80); // Cyan tactile feedback
 
-      // Print live hold countdown every 700ms so user has real-time feedback
-      static unsigned long lastHoldPrint = 0;
-      if (millis() - lastHoldPrint >= 700) {
-        lastHoldPrint = millis();
-        Serial.printf("[BUTTON] Start Holding: %lu / 3000 ms...\n", heldDuration);
+    if (currentState == STATE_ACTION_MENU) {
+      currentActionIndex = (currentActionIndex + d1) % TOTAL_ACTIONS;
+      while (currentActionIndex < 0) currentActionIndex += TOTAL_ACTIONS;
+      Serial.printf("🔄 [KNOB 1] Action: %s\n", ACTIONS[currentActionIndex].name);
+    } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
+      currentBleIndex = (currentBleIndex + d1) % bleDeviceCount;
+      while (currentBleIndex < 0) currentBleIndex += bleDeviceCount;
+      Serial.printf("🔄 [BLE LIST] %d: %s\n", currentBleIndex + 1, bleList[currentBleIndex].name.c_str());
+    }
+  }
+
+  if (d2 != 0) {
+    lastUserActivity = now;
+    lastKnobTurnTime = now;
+    screenNeedsUpdate = true;
+    triggerLedBlip(80, 0, 80); // Magenta tactile feedback
+
+    if (currentState == STATE_ACTION_MENU) {
+      RobosenAction& act = ACTIONS[currentActionIndex];
+      act.paramVal += (d2 * act.paramStep);
+      if (act.paramVal > act.paramMax) act.paramVal = act.paramMax;
+      if (act.paramVal < act.paramMin) act.paramVal = act.paramMin;
+      Serial.printf("🔄 [KNOB 2] Parameter: %d %s\n", act.paramVal, act.paramUnit);
+    } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
+      currentBleIndex = (currentBleIndex + d2) % bleDeviceCount;
+      while (currentBleIndex < 0) currentBleIndex += bleDeviceCount;
+      Serial.printf("🔄 [BLE LIST] %d: %s\n", currentBleIndex + 1, bleList[currentBleIndex].name.c_str());
+    }
+  }
+
+  // --- 3. KNOB 1 SWITCH (GPIO 10 - ACTIVE LOW) ---
+  int k1SwRaw = digitalRead(PIN_K1_SW);
+  static int lastK1SwRaw = HIGH;
+  static unsigned long lastK1SwDebounce = 0;
+  static bool k1SwPressed = false;
+
+  if (k1SwRaw != lastK1SwRaw) {
+    lastK1SwDebounce = now;
+    lastK1SwRaw = k1SwRaw;
+  }
+  if (now - lastK1SwDebounce > 30) {
+    if (k1SwRaw == LOW && !k1SwPressed) {
+      k1SwPressed = true;
+      lastUserActivity = now;
+      triggerLedBlip(0, 80, 40); // Emerald Green
+      if (currentState == STATE_ACTION_MENU) {
+        if (isBlockDocked) {
+          RobosenAction& act = ACTIONS[currentActionIndex];
+          Serial.printf("\n>>> [CONFIG DOCK] Flashing '%s' (%d %s) into docked Action Block... <<<\n",
+                        act.name, act.paramVal, act.paramUnit);
+          writeConfigToDockedBlock(act.tokenID, (uint8_t)act.paramVal);
+          triggerLedBlip(0, 80, 40);
+        } else {
+          Serial.printf("\n>>> [KNOB 1 CLICK] Selected Action: %s <<<\n", ACTIONS[currentActionIndex].name);
+          if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
+            Serial.println("[BLE STATUS] ⚡ Knob clicked while disconnected: Immediate connection attempt...");
+            if (connectToRobot()) {
+              connectAttemptCounter = 0;
+              renderActionMenu();
+            }
+            lastConnectAttemptTime = millis();
+          } else {
+            triggerLedBlip(0, 60, 30);
+          }
+        }
+      } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
+        pairedMAC  = bleList[currentBleIndex].address;
+        pairedName = bleList[currentBleIndex].name;
+        preferences.putString("paired_mac", pairedMAC);
+        preferences.putString("paired_name", pairedName);
+        currentState = STATE_ACTION_MENU;
+        connectAttemptCounter = 0;
+        renderActionMenu();
+        connectToRobot();
+        lastConnectAttemptTime = millis();
       }
+    } else if (k1SwRaw == HIGH && k1SwPressed) {
+      k1SwPressed = false;
+    }
+  }
 
-      if (heldDuration >= 3000) {
-        startBtnHeld = true;
+  // --- 4. KNOB 2 SWITCH (GPIO 13 - ACTIVE LOW) ---
+  int k2SwRaw = digitalRead(PIN_K2_SW);
+  static int lastK2SwRaw = HIGH;
+  static unsigned long lastK2SwDebounce = 0;
+  static bool k2SwPressed = false;
+
+  if (k2SwRaw != lastK2SwRaw) {
+    lastK2SwDebounce = now;
+    lastK2SwRaw = k2SwRaw;
+  }
+  if (now - lastK2SwDebounce > 30) {
+    if (k2SwRaw == LOW && !k2SwPressed) {
+      k2SwPressed = true;
+      lastUserActivity = now;
+      triggerLedBlip(80, 0, 80); // Magenta
+      if (currentState == STATE_ACTION_MENU) {
+        RobosenAction& act = ACTIONS[currentActionIndex];
+        act.paramVal = act.paramMin;
+        Serial.printf("\n>>> [KNOB 2 CLICK] Reset %s Parameter to %d %s <<<\n", 
+                      act.name, act.paramVal, act.paramUnit);
+        screenNeedsUpdate = true;
+        lastKnobTurnTime = now;
+      } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
+        pairedMAC  = bleList[currentBleIndex].address;
+        pairedName = bleList[currentBleIndex].name;
+        preferences.putString("paired_mac", pairedMAC);
+        preferences.putString("paired_name", pairedName);
+        setStatusLED(0, 50, 0);
+        currentState = STATE_ACTION_MENU;
+        connectAttemptCounter = 0;
+        renderActionMenu();
+        connectToRobot();
+        lastConnectAttemptTime = millis();
+      }
+    } else if (k2SwRaw == HIGH && k2SwPressed) {
+      k2SwPressed = false;
+    }
+  }
+
+  // --- 5. MASTER START / CONFIRM BUTTON (SW3 - GPIO 14: 3s HOLD FOR PAIRING) ---
+  int startRaw = digitalRead(PIN_START_BTN);
+  static int lastStartRaw = HIGH;
+  static unsigned long lastStartDebounce = 0;
+  static bool startBtnPressed = false;
+  static unsigned long startPressStart = 0;
+  static bool startBtnHeld3s = false;
+
+  if (startRaw != lastStartRaw) {
+    lastStartDebounce = now;
+    lastStartRaw = startRaw;
+  }
+
+  if (now - lastStartDebounce > 30) {
+    if (startRaw == LOW && !startBtnPressed) {
+      startBtnPressed = true;
+      startPressStart = now;
+      startBtnHeld3s = false;
+      lastUserActivity = now;
+      triggerLedBlip(0, 100, 0); // Green
+      Serial.println("\n[BUTTON] Start button pressed... (Hold 3s to switch robot)");
+    } else if (startRaw == LOW && startBtnPressed) {
+      lastUserActivity = now;
+      if (!startBtnHeld3s && (now - startPressStart >= 3000)) {
+        startBtnHeld3s = true;
         Serial.println("\n[SYSTEM] 🎯 3-Second Hold Confirmed! Opening Teacher Pairing Menu...");
         runBleScan();
-        startBtnPressTime = 0;
-        return; // Return immediately to avoid processing other logic
       }
-    }
-    // While button is held, return early to prevent BLE retry from interrupting!
-    delay(10);
-    return;
-  } else {
-    // Start button was released
-    if (startBtnPressTime > 0) {
+    } else if (startRaw == HIGH && startBtnPressed) {
+      startBtnPressed = false;
       lastUserActivity = now;
-      unsigned long duration = millis() - startBtnPressTime;
-      startBtnPressTime = 0;
-      if (duration < 3000 && !startBtnHeld) {
+      unsigned long heldDuration = now - startPressStart;
+      if (!startBtnHeld3s && heldDuration >= 40 && heldDuration < 3000) {
         if (currentState == STATE_ACTION_MENU) {
-          Serial.println("\n[SYSTEM] Start button pressed: Initiating Run Chain (GPIO 15/16)...");
+          Serial.println("\n[SYSTEM] Start button clicked: Initiating Run Chain (GPIO 15/16)...");
           if (!executeRunChain()) {
             Serial.println("\n[SYSTEM] ⚠️ Chain execution aborted: No valid return packet received from return rail!");
-            Serial.println("[SYSTEM] Ensure all blocks and the Smart End Block are connected magnetically.\n");
-            // Flash red on onboard status LED to warn user of broken chain
             setStatusLED(50, 0, 0);
             delay(500);
             updateStatusLED();
           }
         } else if (currentState == STATE_BLE_PAIRING_MENU) {
           if (bleDeviceCount > 0) {
-            // Confirm highlighted robot target
             pairedMAC  = bleList[currentBleIndex].address;
             pairedName = bleList[currentBleIndex].name;
             preferences.putString("paired_mac", pairedMAC);
@@ -683,31 +848,34 @@ void loop() {
           }
         }
       }
-      startBtnHeld = false;
     }
   }
 
-  // --------------------------------------------------------------------------
-  // --- 1.1 MASTER STOP / CANCEL BUTTON (SW5 - GPIO 2: 3s HOLD FOR DISCONNECT) ---
-  // --------------------------------------------------------------------------
-  int stopBtnState = digitalRead(PIN_STOP_BTN);
-  if (stopBtnState == LOW) {
-    lastUserActivity = now;
-    if (stopBtnPressTime == 0) {
-      stopBtnPressTime = millis();
-      stopBtnHeld = false;
+  // --- 6. MASTER STOP / CANCEL BUTTON (SW5 - GPIO 2: 3s HOLD FOR DISCONNECT) ---
+  int stopRaw = digitalRead(PIN_STOP_BTN);
+  static int lastStopRaw = HIGH;
+  static unsigned long lastStopDebounce = 0;
+  static bool stopBtnPressed = false;
+  static unsigned long stopPressStart = 0;
+  static bool stopBtnHeld3s = false;
+
+  if (stopRaw != lastStopRaw) {
+    lastStopDebounce = now;
+    lastStopRaw = stopRaw;
+  }
+
+  if (now - lastStopDebounce > 30) {
+    if (stopRaw == LOW && !stopBtnPressed) {
+      stopBtnPressed = true;
+      stopPressStart = now;
+      stopBtnHeld3s = false;
+      lastUserActivity = now;
+      triggerLedBlip(100, 0, 0); // Red
       Serial.println("\n[BUTTON] Red Stop/Cancel button pressed... (Hold 3s to disconnect BLE)");
-    } else if (!stopBtnHeld) {
-      unsigned long heldDuration = millis() - stopBtnPressTime;
-
-      static unsigned long lastStopHoldPrint = 0;
-      if (millis() - lastStopHoldPrint >= 700) {
-        lastStopHoldPrint = millis();
-        Serial.printf("[BUTTON] Stop Holding: %lu / 3000 ms...\n", heldDuration);
-      }
-
-      if (heldDuration >= 3000) {
-        stopBtnHeld = true;
+    } else if (stopRaw == LOW && stopBtnPressed) {
+      lastUserActivity = now;
+      if (!stopBtnHeld3s && (now - stopPressStart >= 3000)) {
+        stopBtnHeld3s = true;
         Serial.println("\n[SYSTEM] 🎯 3-Second Stop Hold Confirmed! Disconnecting BLE session...");
         if (pClient != nullptr && pClient->isConnected()) {
           pClient->disconnect();
@@ -717,19 +885,12 @@ void loop() {
         setStatusLED(60, 0, 0);
         delay(300);
         updateStatusLED();
-        stopBtnPressTime = 0;
-        return;
       }
-    }
-    delay(10);
-    return;
-  } else {
-    // Stop button was released
-    if (stopBtnPressTime > 0) {
+    } else if (stopRaw == HIGH && stopBtnPressed) {
+      stopBtnPressed = false;
       lastUserActivity = now;
-      unsigned long duration = millis() - stopBtnPressTime;
-      stopBtnPressTime = 0;
-      if (duration < 3000 && !stopBtnHeld) {
+      unsigned long heldDuration = now - stopPressStart;
+      if (!stopBtnHeld3s && heldDuration >= 40 && heldDuration < 3000) {
         if (currentState == STATE_ACTION_MENU) {
           if (isBlockDocked) {
             Serial.println("\n[CANCEL] Dismissed docked block configuration.");
@@ -749,17 +910,13 @@ void loop() {
           updateStatusLED();
         }
       }
-      stopBtnHeld = false;
     }
   }
 
-  // --------------------------------------------------------------------------
-  // --- 2. CONTINUOUS AUTO-RECONNECT & BACKGROUND HEARTBEAT ---
-  // --------------------------------------------------------------------------
+  // --- 7. CONTINUOUS AUTO-RECONNECT & BACKGROUND HEARTBEAT ---
   if (currentState == STATE_ACTION_MENU) {
     if (isConnected && pRemoteChar != nullptr && pClient != nullptr && pClient->isConnected()) {
       connectAttemptCounter = 0;
-      // Send handshake ping (0x0B) every 5 seconds when idle to keep Robosen awake
       if (now - lastHeartbeatTime >= 5000) {
         lastHeartbeatTime = now;
         uint8_t pingPacket[] = {0xFF, 0xFF, 0x02, 0x0B, 0x0D};
@@ -768,18 +925,15 @@ void loop() {
         }
       }
     } else {
-      // Disconnected: CONTINUOUSLY retry with 1s scan + 2s pause
+      // Disconnected: retry only if user has been inactive for >= 5s
       if (pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
-        // Only retry if user is not actively tweaking knobs in the last 1.5s
-        if (now - lastUserActivity > 1500) {
+        if (now - lastUserActivity > 5000) {
           if (now - lastConnectAttemptTime >= RETRY_INTERVAL_MS) {
             connectAttemptCounter++;
             Serial.printf("[BLE STATUS] ⏳ [Attempt #%d] Checking for %s (%s)... (1s scan)\n", 
                           connectAttemptCounter, pairedName.c_str(), pairedMAC.c_str());
 
             bool success = connectToRobot();
-
-            // Set timestamp AFTER scan finishes so there is ALWAYS a full 2000ms pause!
             lastConnectAttemptTime = millis();
 
             if (success) {
@@ -796,141 +950,15 @@ void loop() {
     }
   }
 
-  // --------------------------------------------------------------------------
-  // --- 3. KNOB 1: ACTION SELECTOR (CLK: 8, DT: 9, SW: 10) ---
-  // --------------------------------------------------------------------------
-  int k1Clk = digitalRead(PIN_K1_CLK);
-  if (k1Clk != lastK1Clk && k1Clk == LOW) {
-    lastUserActivity = now;
-    bool cw = (digitalRead(PIN_K1_DT) != k1Clk);
+  // --- 8. SETTLE-DELAYED E-PAPER REFRESH ---
+  if (screenNeedsUpdate && (now - lastKnobTurnTime >= SCREEN_SETTLE_MS)) {
+    screenNeedsUpdate = false;
     if (currentState == STATE_ACTION_MENU) {
-      currentActionIndex = cw ? (currentActionIndex + 1) % TOTAL_ACTIONS 
-                              : (currentActionIndex - 1 + TOTAL_ACTIONS) % TOTAL_ACTIONS;
       renderActionMenu();
-    } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
-      currentBleIndex = cw ? (currentBleIndex + 1) % bleDeviceCount 
-                           : (currentBleIndex - 1 + bleDeviceCount) % bleDeviceCount;
+    } else if (currentState == STATE_BLE_PAIRING_MENU) {
       renderPairingMenu();
     }
-    delay(5);
   }
-  lastK1Clk = k1Clk;
-
-  // Knob 1 Click (Select Action / Confirm)
-  static bool lastK1Sw = HIGH;
-  bool k1Sw = digitalRead(PIN_K1_SW);
-  if (lastK1Sw == HIGH && k1Sw == LOW) {
-    lastUserActivity = now;
-    if (currentState == STATE_ACTION_MENU) {
-      if (isBlockDocked) {
-        // Write the currently selected action & parameter to the docked Action Block!
-        RobosenAction& act = ACTIONS[currentActionIndex];
-        Serial.printf("\n>>> [CONFIG DOCK] Flashing '%s' (%d %s) into docked Action Block... <<<\n",
-                      act.name, act.paramVal, act.paramUnit);
-        writeConfigToDockedBlock(act.tokenID, (uint8_t)act.paramVal);
-        setStatusLED(0, 80, 40); // Emerald Green Flash
-        delay(100);
-        updateStatusLED();
-      } else {
-        Serial.printf("\n>>> [KNOB 1 CLICK] Selected Action: %s <<<\n", ACTIONS[currentActionIndex].name);
-        if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
-          Serial.println("[BLE STATUS] ⚡ Knob clicked while disconnected: Immediate connection attempt...");
-          if (connectToRobot()) {
-            connectAttemptCounter = 0;
-            renderActionMenu();
-          }
-          lastConnectAttemptTime = millis();
-        } else {
-          setStatusLED(0, 60, 30);
-          delay(80);
-          updateStatusLED();
-        }
-      }
-    } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
-      // Save BLE Device & Switch Target
-      pairedMAC  = bleList[currentBleIndex].address;
-      pairedName = bleList[currentBleIndex].name;
-      preferences.putString("paired_mac", pairedMAC);
-      preferences.putString("paired_name", pairedName);
-
-      Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
-      Serial.printf("║  [BLE STATUS] Selected Robot: %-41s║\n", pairedName.c_str());
-      Serial.printf("║  Target MAC:                  %-41s║\n", pairedMAC.c_str());
-      Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
-
-      currentState = STATE_ACTION_MENU;
-      connectAttemptCounter = 0;
-      renderActionMenu();
-      Serial.println("[BLE STATUS] ⏳ Connecting to newly selected robot...");
-      connectToRobot();
-      lastConnectAttemptTime = millis();
-    }
-    delay(200);
-  }
-  lastK1Sw = k1Sw;
-
-  // --------------------------------------------------------------------------
-  // --- 4. KNOB 2: PARAMETER ADJUSTER (CLK: 11, DT: 12, SW: 13) ---
-  // --------------------------------------------------------------------------
-  int k2Clk = digitalRead(PIN_K2_CLK);
-  if (k2Clk != lastK2Clk && k2Clk == LOW) {
-    lastUserActivity = now;
-    // Inverted so Clockwise INCREASES the parameter
-    bool cw = (digitalRead(PIN_K2_DT) != k2Clk);
-    if (currentState == STATE_ACTION_MENU) {
-      RobosenAction& act = ACTIONS[currentActionIndex];
-      if (cw) {
-        act.paramVal += act.paramStep;
-        if (act.paramVal > act.paramMax) act.paramVal = act.paramMax;
-      } else {
-        act.paramVal -= act.paramStep;
-        if (act.paramVal < act.paramMin) act.paramVal = act.paramMin;
-      }
-      renderActionMenu();
-    } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
-      currentBleIndex = cw ? (currentBleIndex + 1) % bleDeviceCount 
-                           : (currentBleIndex - 1 + bleDeviceCount) % bleDeviceCount;
-      renderPairingMenu();
-    }
-    delay(5);
-  }
-  lastK2Clk = k2Clk;
-
-  // Knob 2 Click (Reset Parameter in Action Menu | Confirm & Save in Pairing Menu)
-  static bool lastK2Sw = HIGH;
-  bool k2Sw = digitalRead(PIN_K2_SW);
-  if (lastK2Sw == HIGH && k2Sw == LOW) {
-    lastUserActivity = now;
-    if (currentState == STATE_ACTION_MENU) {
-      RobosenAction& act = ACTIONS[currentActionIndex];
-      act.paramVal = act.paramMin; // Reset to default minimum
-      Serial.printf("\n>>> [KNOB 2 CLICK] Reset %s Parameter to %d %s <<<\n", 
-                    act.name, act.paramVal, act.paramUnit);
-      renderActionMenu();
-    } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
-      // Save BLE Device into NVS Flash & Switch Target
-      pairedMAC  = bleList[currentBleIndex].address;
-      pairedName = bleList[currentBleIndex].name;
-      preferences.putString("paired_mac", pairedMAC);
-      preferences.putString("paired_name", pairedName);
-
-      Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
-      Serial.printf("║  [BLE STATUS] Selected Robot: %-41s║\n", pairedName.c_str());
-      Serial.printf("║  Target MAC:                  %-41s║\n", pairedMAC.c_str());
-      Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
-
-      setStatusLED(0, 50, 0); // 🟢 Confirmed Green
-      currentState = STATE_ACTION_MENU;
-      connectAttemptCounter = 0;
-      delay(200);
-      renderActionMenu();
-      Serial.println("[BLE STATUS] ⏳ Connecting to newly selected robot...");
-      connectToRobot();
-      lastConnectAttemptTime = millis();
-    }
-    delay(200);
-  }
-  lastK2Sw = k2Sw;
 }
 
 // ==============================================================================
