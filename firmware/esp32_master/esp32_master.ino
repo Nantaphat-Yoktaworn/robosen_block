@@ -232,11 +232,45 @@ void IRAM_ATTR isrK2() {
   }
 }
 
-// --- NON-BLOCKING LED BLIP & SCREEN REFRESH SETTLE STATE ---
+// --- NON-BLOCKING LED BLIP & ASYNC FREERTOS E-INK DISPLAY STATE ---
 unsigned long ledBlipUntil = 0;
-bool screenNeedsUpdate = false;
-unsigned long lastKnobTurnTime = 0;
-const unsigned long SCREEN_SETTLE_MS = 200; // 200ms settle delay before partial refresh
+String lastUiEventMsg = "";
+unsigned long lastUiEventTime = 0;
+
+// FreeRTOS Display & BLE Synchronization State
+SemaphoreHandle_t bleMutex = nullptr;
+volatile bool einkFullDirty = false;
+volatile bool einkCenterDirty = false;
+volatile bool einkScanningDirty = false;
+volatile bool einkRunChainDirty = false;
+volatile bool einkNeedsCrispSettle = false;
+volatile bool einkForceReinit = false;
+volatile unsigned long lastEInkInputMs = 0;
+volatile unsigned long epdWaitStartMs = 0;
+
+// Snapshot state for Run Chain E-Ink screen
+volatile int rcSnapStep = 0;
+volatile int rcSnapTotal = 0;
+char rcSnapName[32] = "";
+volatile int rcSnapParam = 0;
+char rcSnapUnit[12] = "";
+
+void requestEInkFullUpdate() {
+  lastEInkInputMs = millis();
+  einkFullDirty = true;
+}
+
+void requestEInkCenterUpdate() {
+  lastEInkInputMs = millis();
+  einkCenterDirty = true;
+  einkNeedsCrispSettle = true;
+}
+
+void setUiEventFeedback(const char* msg) {
+  lastUiEventMsg = msg;
+  lastUiEventTime = millis();
+  requestEInkFullUpdate();
+}
 
 void triggerLedBlip(uint8_t r, uint8_t g, uint8_t b) {
   setStatusLED(r, g, b);
@@ -250,7 +284,7 @@ unsigned long lastHeartbeatTime = 0;
 void renderActionMenu();
 void renderPairingMenu();
 void runBleScan();
-bool connectToRobot();
+bool connectToRobot(bool quietBg = false);
 bool sendRobosenPacket(const RobosenAction& action);
 void updateStatusLED();
 void pollConfigDock();
@@ -267,6 +301,7 @@ void updateEInkActionMenu();
 void updateEInkPairingMenu();
 void updateEInkScanning();
 void updateEInkRunChain(int currentStep, int totalSteps, const char* actionName, int paramVal, const char* paramUnit);
+void startBackgroundTasks();
 
 // BLE Client Callbacks for Connection Life-Cycle Management
 class RobosenClientCallback : public BLEClientCallbacks {
@@ -343,9 +378,9 @@ bool abortableDelay(unsigned long ms) {
 // ==============================================================================
 // 5. DIRECT PERSISTENT BLE CONNECTION MANAGER (FAST 1s NON-BLOCKING SCAN CHECK)
 // ==============================================================================
-bool connectToRobot() {
+bool connectToRobot(bool quietBg) {
   if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
-    Serial.println("[BLE STATUS] ⚠️ No robot paired in NVS flash. Hold Start for 3s to pair.");
+    if (!quietBg) Serial.println("[BLE STATUS] ⚠️ No robot paired in NVS flash. Hold Start for 3s to pair.");
     updateStatusLED();
     return false;
   }
@@ -355,7 +390,9 @@ bool connectToRobot() {
     return true;
   }
 
-  setStatusLED(40, 30, 0); // 🟡 Yellow: Scanning / Connecting
+  if (!quietBg) {
+    setStatusLED(40, 30, 0); // 🟡 Yellow: Active foreground connecting
+  }
 
   if (pClient != nullptr && pClient->isConnected()) {
     pClient->disconnect();
@@ -559,13 +596,28 @@ void setup() {
   pinMode(PIN_CHAIN_RX, INPUT_PULLUP);
   ChainSerial.begin(115200, SERIAL_8N1, PIN_CHAIN_RX, PIN_CHAIN_TX);
 
-  // Initialize 2.13" E-Ink Display (DEPG0213BN / SSD1680)
+  // Initialize 2.13" E-Ink Display (DEPG0213BN / SSD1680) at 8MHz SPI with 0 serial diag overhead
   Serial.println("[SYSTEM] Initializing 2.13\" E-Ink display (SPI SCL=21, SDA=38)...");
   SPI.begin(PIN_EPD_SCL, -1, PIN_EPD_SDA, -1);
-  display.epd2.selectSPI(SPI, SPISettings(4000000, MSBFIRST, SPI_MODE0));
-  // initial = false eliminates disruptive boot flashing and 10s busy timeouts
-  display.init(115200, false, 2, false);
+  display.epd2.selectSPI(SPI, SPISettings(8000000, MSBFIRST, SPI_MODE0));
+
+  // Perform clean hardware reset pulse on SSD1680 display controller
+  pinMode(PIN_EPD_RES, OUTPUT);
+  digitalWrite(PIN_EPD_RES, HIGH);
+  delay(15);
+  digitalWrite(PIN_EPD_RES, LOW);
+  delay(25);
+  digitalWrite(PIN_EPD_RES, HIGH);
+  delay(60);
+
+  // Pass 0 for serial_diag_bitrate so GxEPD2 never stalls UART TX
+  display.init(0, false, 10, false);
   display.setRotation(1); // 250 width x 122 height (Landscape)
+  display.setFullWindow();
+  display.epd2.writeScreenBufferAgain(0x00); // Preload Previous (0x26) & Current (0x24) as Black
+  display.epd2.writeScreenBuffer(0xFF);      // Set Current (0x24) to White
+  display.epd2.refresh(true);                // Drive entire panel Black -> White in 727ms
+  display.epd2.writeScreenBufferAgain(0xFF); // Sync Previous (0x26) & Current (0x24) as White
 
   // Configure Internal Pull-Up Resistors for all 4 UI inputs (2 Encoders + 2 Buttons)
   pinMode(PIN_K1_CLK, INPUT_PULLUP);
@@ -617,6 +669,7 @@ void setup() {
     Serial.println("[BLE STATUS] ⚠️ No paired robot configured in flash. Hold Start for 3s to pair.");
   }
 
+  startBackgroundTasks();
   renderActionMenu();
   lastUserActivity = millis();
   lastConnectAttemptTime = millis();
@@ -652,6 +705,9 @@ void loop() {
       if (!executeRunChain()) {
         Serial.println("[RUN CHAIN TEST] ⚠️ Run chain execution failed (No blocks / End block found).");
       }
+    } else if (c == 'f' || c == 'F') {
+      Serial.println("\n[E-INK TEST] Queuing hardware reset + Dual-Buffer E-Ink Sync Refresh on Core 0...");
+      einkForceReinit = true;
     }
   }
 
@@ -666,25 +722,23 @@ void loop() {
 
   if (d1 != 0) {
     lastUserActivity = now;
-    lastKnobTurnTime = now;
-    screenNeedsUpdate = true;
     triggerLedBlip(0, 80, 80); // Cyan tactile feedback
 
     if (currentState == STATE_ACTION_MENU) {
       currentActionIndex = (currentActionIndex + d1) % TOTAL_ACTIONS;
       while (currentActionIndex < 0) currentActionIndex += TOTAL_ACTIONS;
+      requestEInkCenterUpdate(); // Targeted middle-band fast update on Core 0
       Serial.printf("🔄 [KNOB 1] Action: %s\n", ACTIONS[currentActionIndex].name);
     } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
       currentBleIndex = (currentBleIndex + d1) % bleDeviceCount;
       while (currentBleIndex < 0) currentBleIndex += bleDeviceCount;
+      requestEInkFullUpdate();
       Serial.printf("🔄 [BLE LIST] %d: %s\n", currentBleIndex + 1, bleList[currentBleIndex].name.c_str());
     }
   }
 
   if (d2 != 0) {
     lastUserActivity = now;
-    lastKnobTurnTime = now;
-    screenNeedsUpdate = true;
     triggerLedBlip(80, 0, 80); // Magenta tactile feedback
 
     if (currentState == STATE_ACTION_MENU) {
@@ -692,10 +746,12 @@ void loop() {
       act.paramVal += (d2 * act.paramStep);
       if (act.paramVal > act.paramMax) act.paramVal = act.paramMax;
       if (act.paramVal < act.paramMin) act.paramVal = act.paramMin;
+      requestEInkCenterUpdate(); // Targeted middle-band fast update on Core 0
       Serial.printf("🔄 [KNOB 2] Parameter: %d %s\n", act.paramVal, act.paramUnit);
     } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
       currentBleIndex = (currentBleIndex + d2) % bleDeviceCount;
       while (currentBleIndex < 0) currentBleIndex += bleDeviceCount;
+      requestEInkFullUpdate();
       Serial.printf("🔄 [BLE LIST] %d: %s\n", currentBleIndex + 1, bleList[currentBleIndex].name.c_str());
     }
   }
@@ -728,11 +784,15 @@ void loop() {
             Serial.println("[BLE STATUS] ⚡ Knob clicked while disconnected: Immediate connection attempt...");
             if (connectToRobot()) {
               connectAttemptCounter = 0;
-              renderActionMenu();
+              setUiEventFeedback("BLE: CONNECTED TO ROBOT!");
+            } else {
+              connectAttemptCounter++;
+              setUiEventFeedback("K1 CLICK: ROBOT OFFLINE");
             }
             lastConnectAttemptTime = millis();
           } else {
             triggerLedBlip(0, 60, 30);
+            setUiEventFeedback("K1 CLICK: ACTION SELECTED");
           }
         }
       } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
@@ -771,8 +831,7 @@ void loop() {
         act.paramVal = act.paramMin;
         Serial.printf("\n>>> [KNOB 2 CLICK] Reset %s Parameter to %d %s <<<\n", 
                       act.name, act.paramVal, act.paramUnit);
-        screenNeedsUpdate = true;
-        lastKnobTurnTime = now;
+        setUiEventFeedback("K2 CLICK: PARAM RESET");
       } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
         pairedMAC  = bleList[currentBleIndex].address;
         pairedName = bleList[currentBleIndex].name;
@@ -830,6 +889,7 @@ void loop() {
             setStatusLED(50, 0, 0);
             delay(500);
             updateStatusLED();
+            setUiEventFeedback("START: NO CHAIN BLOCKS!");
           }
         } else if (currentState == STATE_BLE_PAIRING_MENU) {
           if (bleDeviceCount > 0) {
@@ -902,6 +962,7 @@ void loop() {
             setStatusLED(80, 0, 0);
             delay(200);
             updateStatusLED();
+            setUiEventFeedback("STOP: EMERGENCY HALT!");
           }
         } else if (currentState == STATE_BLE_PAIRING_MENU || currentState == STATE_BLE_SCANNING) {
           Serial.println("\n[CANCEL] Cancelled pairing/scan, returning to Action Menu.");
@@ -913,52 +974,22 @@ void loop() {
     }
   }
 
-  // --- 7. CONTINUOUS AUTO-RECONNECT & BACKGROUND HEARTBEAT ---
-  if (currentState == STATE_ACTION_MENU) {
-    if (isConnected && pRemoteChar != nullptr && pClient != nullptr && pClient->isConnected()) {
-      connectAttemptCounter = 0;
-      if (now - lastHeartbeatTime >= 5000) {
-        lastHeartbeatTime = now;
-        uint8_t pingPacket[] = {0xFF, 0xFF, 0x02, 0x0B, 0x0D};
-        if (pRemoteChar->canWrite()) {
+  // --- 7. BACKGROUND HEARTBEAT (WHEN CONNECTED) ---
+  // Note: Disconnected BLE auto-reconnect runs in bleReconnectTask on Core 0 (zero input blocking!)
+  if (currentState == STATE_ACTION_MENU && isConnected) {
+    if (now - lastHeartbeatTime >= 5000) {
+      lastHeartbeatTime = now;
+      if (bleMutex != nullptr && xSemaphoreTake(bleMutex, 0) == pdTRUE) {
+        if (pRemoteChar != nullptr && pClient != nullptr && pClient->isConnected() && pRemoteChar->canWrite()) {
+          uint8_t pingPacket[] = {0xFF, 0xFF, 0x02, 0x0B, 0x0D};
           pRemoteChar->writeValue(pingPacket, sizeof(pingPacket));
         }
-      }
-    } else {
-      // Disconnected: retry only if user has been inactive for >= 5s
-      if (pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
-        if (now - lastUserActivity > 5000) {
-          if (now - lastConnectAttemptTime >= RETRY_INTERVAL_MS) {
-            connectAttemptCounter++;
-            Serial.printf("[BLE STATUS] ⏳ [Attempt #%d] Checking for %s (%s)... (1s scan)\n", 
-                          connectAttemptCounter, pairedName.c_str(), pairedMAC.c_str());
-
-            bool success = connectToRobot();
-            lastConnectAttemptTime = millis();
-
-            if (success) {
-              connectAttemptCounter = 0;
-              Serial.println("[BLE STATUS] ✅ Successfully connected to robot!");
-              renderActionMenu();
-            } else {
-              Serial.printf("[BLE STATUS] ❌ Attempt #%d: Robot not detected. Pausing 2s... (Hold Start 3s to switch)\n",
-                            connectAttemptCounter);
-            }
-          }
-        }
+        xSemaphoreGive(bleMutex);
       }
     }
   }
 
-  // --- 8. SETTLE-DELAYED E-PAPER REFRESH ---
-  if (screenNeedsUpdate && (now - lastKnobTurnTime >= SCREEN_SETTLE_MS)) {
-    screenNeedsUpdate = false;
-    if (currentState == STATE_ACTION_MENU) {
-      renderActionMenu();
-    } else if (currentState == STATE_BLE_PAIRING_MENU) {
-      renderPairingMenu();
-    }
-  }
+  delay(1); // Yield 1ms for ultra-responsive >500Hz input/LED polling
 }
 
 // ==============================================================================
@@ -1710,266 +1741,471 @@ void renderPairingMenu() {
 }
 
 // ==============================================================================
-// 11. E-INK DISPLAY CONTROLLER IMPLEMENTATION (DEPG0213BN / SSD1680)
+// 11. E-INK DISPLAY CONTROLLER IMPLEMENTATION (DEPG0213BN / SSD1680 - DUAL CORE)
 // ==============================================================================
 
-/**
- * Renders the main Master Block user interface onto the 2.13" E-Paper display.
- * Uses Fast Partial Refresh with zero-flicker transitions.
- */
-void updateEInkActionMenu() {
-  display.setPartialWindow(0, 0, display.width(), display.height());
-  display.firstPage();
-  do {
-    display.fillScreen(GxEPD_WHITE);
+// Factory Symmetric High-Contrast LUT (727ms, 10x3 = 30 symmetric frames):
+// Drives B->W (-15V) and W->B (+15V) with 100% equal & opposite duration so
+// fringe fields never bleed white into black text.
+const uint8_t LUT_STD_727MS[153] PROGMEM = {
+  0x0, 0x40, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x80, 0x80, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x40, 0x40, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x80, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0A, 0x0, 0x0, 0x0, 0x0, 0x0, 0x2,
+  0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x0, 0x0, 0x0
+};
 
-    int16_t w = display.width();
-    int16_t h = display.height();
+// Fast Symmetric Partial LUT (~380ms, 8x2 = 16 symmetric transition frames + 2 symmetric clamp frames)
+const uint8_t LUT_FAST_280MS[153] PROGMEM = {
+  0x0, 0x40, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x80, 0x80, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x40, 0x40, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x80, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x08, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1,
+  0x2, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+  0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x0, 0x0, 0x0
+};
 
-    // 1. Frame border
-    display.drawRect(0, 0, w, h, GxEPD_BLACK);
-    display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
+void loadCustomEInkLut(bool fastMode) {
+  const uint8_t* lut = fastMode ? LUT_FAST_280MS : LUT_STD_727MS;
+  SPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE0));
+  digitalWrite(PIN_EPD_DC, LOW);
+  digitalWrite(PIN_EPD_CS, LOW);
+  SPI.transfer(0x32);
+  digitalWrite(PIN_EPD_CS, HIGH);
+  digitalWrite(PIN_EPD_DC, HIGH);
+  digitalWrite(PIN_EPD_CS, LOW);
+  for (uint16_t i = 0; i < 153; i++) {
+    SPI.transfer(pgm_read_byte(&lut[i]));
+  }
+  digitalWrite(PIN_EPD_CS, HIGH);
+  SPI.endTransaction();
+}
 
-    // 2. Top Title Bar (Inverted Header)
-    display.fillRect(2, 2, w - 4, 20, GxEPD_BLACK);
-    display.setTextColor(GxEPD_WHITE);
-    display.setFont(&FreeSansBold9pt7b);
-    display.setCursor(6, 17);
-    display.print("ROBOSEN K1");
+// Non-blocking FreeRTOS yield + 1.2s watchdog guard during GxEPD2 _waitWhileBusy
+void epdBusyYieldCallback(const void* param) {
+  vTaskDelay(pdMS_TO_TICKS(2));
+  if (millis() - epdWaitStartMs > 1200) {
+    // Force SSD1680 out of stuck BUSY state immediately instead of stalling 10s
+    digitalWrite(PIN_EPD_RES, LOW);
+    delayMicroseconds(200);
+    digitalWrite(PIN_EPD_RES, HIGH);
+    einkForceReinit = true;
+  }
+}
 
-    // Header Status & Battery Monitor
-    display.setFont(); // Default 5x7 font
-    display.setTextSize(1);
+void drawActionMenuToBuffer(bool invertMiddle = false) {
+  display.setFullWindow();
+  display.fillScreen(GxEPD_WHITE);
 
-    float vbat = readBatteryVoltage();
-    int batPct = calculateBatteryPercent(vbat);
+  int16_t w = display.width();
+  int16_t h = display.height();
 
-    // Battery icon & percentage in header (top-right)
-    int batX = w - 38;
-    int batY = 6;
-    display.drawRect(batX, batY, 20, 10, GxEPD_WHITE);
-    display.fillRect(batX + 20, batY + 2, 2, 6, GxEPD_WHITE); // terminal tip
-    int fillW = map(batPct, 0, 100, 0, 16);
-    if (fillW > 0) {
-      display.fillRect(batX + 2, batY + 2, fillW, 6, GxEPD_WHITE);
-    }
+  // 1. Frame border
+  display.drawRect(0, 0, w, h, GxEPD_BLACK);
+  display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
 
-    // Top-Right Status Badge (left of battery icon)
-    display.setCursor(batX - 78, 8);
-    if (isConnected) {
-      display.print("[CONNECTED]");
-    } else if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
-      display.print("[UNPAIRED]");
-    } else if (connectAttemptCounter > 0) {
-      display.printf("[RETRY #%d]", connectAttemptCounter);
+  // 2. Top Title Bar (Inverted Header)
+  display.fillRect(2, 2, w - 4, 20, GxEPD_BLACK);
+  display.setTextColor(GxEPD_WHITE);
+  display.setFont(&FreeSansBold9pt7b);
+  display.setCursor(6, 17);
+  display.print("ROBOSEN K1");
+
+  // Header Status & Battery Monitor
+  display.setFont();
+  display.setTextSize(1);
+
+  float vbat = readBatteryVoltage();
+  int batPct = calculateBatteryPercent(vbat);
+
+  int batX = w - 38;
+  int batY = 6;
+  display.drawRect(batX, batY, 20, 10, GxEPD_WHITE);
+  display.fillRect(batX + 20, batY + 2, 2, 6, GxEPD_WHITE);
+  int fillW = map(batPct, 0, 100, 0, 16);
+  if (fillW > 0) {
+    display.fillRect(batX + 2, batY + 2, fillW, 6, GxEPD_WHITE);
+  }
+
+  display.setCursor(batX - 78, 8);
+  if (isConnected) {
+    display.print("[CONNECTED]");
+  } else if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
+    display.print("[UNPAIRED]");
+  } else if (connectAttemptCounter > 0) {
+    display.printf("[RETRY #%d]", connectAttemptCounter);
+  } else {
+    display.print("[SEARCHING]");
+  }
+
+  // 3. Center Action & Parameter Section (y = 24..79)
+  uint16_t midFg = invertMiddle ? GxEPD_WHITE : GxEPD_BLACK;
+  if (invertMiddle) {
+    display.fillRect(2, 24, w - 4, 56, GxEPD_BLACK);
+  }
+  int actIdx = currentActionIndex;
+  if (actIdx < 0 || actIdx >= TOTAL_ACTIONS) actIdx = 0;
+  RobosenAction act = ACTIONS[actIdx];
+
+  display.setTextColor(midFg);
+  display.setFont(&FreeSansBold9pt7b);
+  display.setCursor(8, 44);
+  display.print(act.name);
+
+  display.setCursor(10, 68);
+  display.printf("[%d]", act.paramVal);
+
+  display.setCursor(55, 68);
+  display.print(act.paramUnit);
+
+  display.setFont();
+  int stepSize = (act.paramStep > 0) ? act.paramStep : 1;
+  int totalDots = ((act.paramMax - act.paramMin) / stepSize) + 1;
+  if (totalDots < 1) totalDots = 1;
+  if (totalDots > 5) totalDots = 5;
+
+  int currentDot = ((act.paramVal - act.paramMin) / stepSize) + 1;
+  if (currentDot < 0) currentDot = 0;
+  if (currentDot > totalDots) currentDot = totalDots;
+
+  for (int i = 0; i < totalDots; i++) {
+    int dotX = 180 + (i * 12);
+    int dotY = 62;
+    if (i < currentDot) {
+      display.fillCircle(dotX, dotY, 4, midFg);
     } else {
-      display.print("[SEARCHING]");
+      display.drawCircle(dotX, dotY, 4, midFg);
     }
+  }
+  display.setTextColor(GxEPD_BLACK);
 
-    // 3. Center Action & Parameter Section
-    RobosenAction& act = ACTIONS[currentActionIndex];
+  // 4. Horizontal Divider Line
+  display.drawLine(2, 82, w - 3, 82, GxEPD_BLACK);
 
-    // Action Name
-    display.setTextColor(GxEPD_BLACK);
-    display.setFont(&FreeSansBold9pt7b);
-    display.setCursor(8, 44);
-    display.print(act.name);
-
-    // Parameter Value & Unit
-    display.setCursor(10, 68);
-    display.printf("[%d]", act.paramVal);
-
-    display.setCursor(55, 68);
-    display.print(act.paramUnit);
-
-    // Visual Dots / Gauge for Parameter (matches action capacity: 3 for Reps, 4 for Turns, 5 for Steps)
-    display.setFont();
-    int stepSize = (act.paramStep > 0) ? act.paramStep : 1;
-    int totalDots = ((act.paramMax - act.paramMin) / stepSize) + 1;
-    if (totalDots < 1) totalDots = 1;
-    if (totalDots > 5) totalDots = 5;
-
-    int currentDot = ((act.paramVal - act.paramMin) / stepSize) + 1;
-    if (currentDot < 0) currentDot = 0;
-    if (currentDot > totalDots) currentDot = totalDots;
-
-    for (int i = 0; i < totalDots; i++) {
-      int dotX = 180 + (i * 12);
-      int dotY = 62;
-      if (i < currentDot) {
-        display.fillCircle(dotX, dotY, 4, GxEPD_BLACK);
-      } else {
-        display.drawCircle(dotX, dotY, 4, GxEPD_BLACK);
-      }
-    }
-
-    // 4. Horizontal Divider Line
-    display.drawLine(2, 82, w - 3, 82, GxEPD_BLACK);
-
-    // 5. Bottom Config Dock Status Area (4 UI Input hints)
-    display.setFont();
-    display.setTextSize(1);
-    display.setCursor(8, 89);
-    if (isBlockDocked) {
-      display.printf("DOCK: [0x%02X] %s (%d %s)", 
-                     dockedActionId, getActionNameByToken(dockedActionId),
-                     dockedParamVal, getParamUnitByToken(dockedActionId));
-      display.setCursor(8, 103);
-      display.print("K1 Click: Flash | Stop (Red): Cancel");
+  // 5. Bottom Config Dock Status Area
+  display.setFont();
+  display.setTextSize(1);
+  display.setCursor(8, 89);
+  if (isBlockDocked) {
+    display.printf("DOCK: [0x%02X] %s (%d %s)", 
+                   dockedActionId, getActionNameByToken(dockedActionId),
+                   dockedParamVal, getParamUnitByToken(dockedActionId));
+    display.setCursor(8, 103);
+    display.print("K1 Click: Flash | Stop (Red): Cancel");
+  } else {
+    display.printf("DOCK: EMPTY  |  Bat: %.2fV (%d%%)", vbat, batPct);
+    display.setCursor(8, 103);
+    if (lastUiEventMsg.length() > 0 && (millis() - lastUiEventTime < 3000)) {
+      display.printf(">> %s", lastUiEventMsg.c_str());
     } else {
-      display.printf("DOCK: EMPTY  |  Bat: %.2fV (%d%%)", vbat, batPct);
-      display.setCursor(8, 103);
       display.print("Start: Run | Stop: Halt | Hold St: Pair");
     }
-
-  } while (display.nextPage());
+  }
 }
 
-/**
- * Renders the Teacher BLE Pairing Menu on the E-Ink display.
- */
+void drawPairingMenuToBuffer() {
+  display.setFullWindow();
+  display.fillScreen(GxEPD_WHITE);
+  int16_t w = display.width();
+  int16_t h = display.height();
+
+  display.drawRect(0, 0, w, h, GxEPD_BLACK);
+  display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
+
+  display.fillRect(2, 2, w - 4, 20, GxEPD_BLACK);
+  display.setTextColor(GxEPD_WHITE);
+  display.setFont(&FreeSansBold9pt7b);
+  display.setCursor(6, 17);
+  display.print("PAIR ROBOT (BLE)");
+
+  display.setFont();
+  display.setTextSize(1);
+  display.setCursor(170, 8);
+  display.printf("%d FOUND", bleDeviceCount);
+
+  display.setTextColor(GxEPD_BLACK);
+  if (bleDeviceCount == 0) {
+    display.setCursor(14, 46);
+    display.print("No K1 robots found in range.");
+    display.setCursor(14, 62);
+    display.print("Ensure robot is powered ON.");
+  } else {
+    int startIdx = (currentBleIndex / 3) * 3;
+    int yPos = 32;
+    for (int i = startIdx; i < bleDeviceCount && i < startIdx + 3; i++) {
+      if (i == currentBleIndex) {
+        display.fillRect(4, yPos - 2, w - 8, 15, GxEPD_BLACK);
+        display.setTextColor(GxEPD_WHITE);
+        display.setCursor(8, yPos);
+        display.printf("> %-16s %3ddBm", bleList[i].name.substring(0, 16).c_str(), bleList[i].rssi);
+      } else {
+        display.setTextColor(GxEPD_BLACK);
+        display.setCursor(8, yPos);
+        display.printf("  %-16s %3ddBm", bleList[i].name.substring(0, 16).c_str(), bleList[i].rssi);
+      }
+      yPos += 16;
+    }
+  }
+
+  display.drawLine(2, 92, w - 3, 92, GxEPD_BLACK);
+  display.setTextColor(GxEPD_BLACK);
+  display.setFont();
+  display.setCursor(8, 98);
+  display.print("Knob: Select  |  Start/Click: Confirm");
+  display.setCursor(8, 110);
+  display.print("Stop (Red): Cancel & Return");
+}
+
+void drawScanningToBuffer() {
+  display.setFullWindow();
+  display.fillScreen(GxEPD_WHITE);
+  int16_t w = display.width();
+  int16_t h = display.height();
+
+  display.drawRect(0, 0, w, h, GxEPD_BLACK);
+  display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
+
+  display.fillRect(2, 2, w - 4, 20, GxEPD_BLACK);
+  display.setTextColor(GxEPD_WHITE);
+  display.setFont(&FreeSansBold9pt7b);
+  display.setCursor(6, 17);
+  display.print("BLE SCANNING...");
+
+  display.setFont();
+  display.setTextColor(GxEPD_BLACK);
+  display.setTextSize(1);
+  display.setCursor(16, 46);
+  display.print("Searching nearby Robosen K1 robots...");
+  display.setCursor(16, 62);
+  display.print("Sorting by RSSI signal strength.");
+
+  display.drawLine(2, 92, w - 3, 92, GxEPD_BLACK);
+  display.setCursor(8, 102);
+  display.print("Stop Button (Red): Cancel scan");
+}
+
+void drawRunChainToBuffer(int currentStep, int totalSteps, const char* actionName, int paramVal, const char* paramUnit) {
+  display.setFullWindow();
+  display.fillScreen(GxEPD_WHITE);
+  int16_t w = display.width();
+  int16_t h = display.height();
+
+  display.drawRect(0, 0, w, h, GxEPD_BLACK);
+  display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
+
+  display.fillRect(2, 2, w - 4, 20, GxEPD_BLACK);
+  display.setTextColor(GxEPD_WHITE);
+  display.setFont(&FreeSansBold9pt7b);
+  display.setCursor(6, 17);
+  display.print("RUNNING CHAIN");
+
+  display.setFont();
+  display.setTextSize(1);
+  display.setCursor(170, 8);
+  if (totalSteps > 0) {
+    display.printf("STEP %d/%d", currentStep, totalSteps);
+  } else {
+    display.print("PHASE 1");
+  }
+
+  display.setTextColor(GxEPD_BLACK);
+  display.setFont(&FreeSansBold9pt7b);
+  display.setCursor(10, 48);
+  display.print(actionName);
+
+  display.setFont();
+  display.setTextSize(2);
+  display.setCursor(10, 64);
+  if (paramVal > 0) {
+    display.printf("%d %s", paramVal, paramUnit);
+  } else {
+    display.print("Active");
+  }
+
+  display.drawLine(2, 92, w - 3, 92, GxEPD_BLACK);
+  display.setTextSize(1);
+  display.setCursor(8, 102);
+  display.print("Run Chain Active | Stop (Red): Halt");
+}
+
+// Non-blocking UI request wrappers (called from Core 1)
+void updateEInkActionMenu() {
+  requestEInkFullUpdate();
+}
+
 void updateEInkPairingMenu() {
-  display.setPartialWindow(0, 0, display.width(), display.height());
-  display.firstPage();
-  do {
-    display.fillScreen(GxEPD_WHITE);
-    int16_t w = display.width();
-    int16_t h = display.height();
+  requestEInkFullUpdate();
+}
 
-    // Frame
-    display.drawRect(0, 0, w, h, GxEPD_BLACK);
-    display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
+void updateEInkScanning() {
+  einkScanningDirty = true;
+}
 
-    // Header
-    display.fillRect(2, 2, w - 4, 20, GxEPD_BLACK);
-    display.setTextColor(GxEPD_WHITE);
-    display.setFont(&FreeSansBold9pt7b);
-    display.setCursor(6, 17);
-    display.print("PAIR ROBOT (BLE)");
+void updateEInkRunChain(int currentStep, int totalSteps, const char* actionName, int paramVal, const char* paramUnit) {
+  rcSnapStep = currentStep;
+  rcSnapTotal = totalSteps;
+  strncpy(rcSnapName, actionName ? actionName : "", sizeof(rcSnapName) - 1);
+  rcSnapName[sizeof(rcSnapName) - 1] = '\0';
+  rcSnapParam = paramVal;
+  strncpy(rcSnapUnit, paramUnit ? paramUnit : "", sizeof(rcSnapUnit) - 1);
+  rcSnapUnit[sizeof(rcSnapUnit) - 1] = '\0';
+  einkRunChainDirty = true;
+}
 
-    display.setFont();
-    display.setTextSize(1);
-    display.setCursor(170, 8);
-    display.printf("%d FOUND", bleDeviceCount);
+// Dedicated Core 0 E-Ink Rendering Task (0ms impact on Core 1 inputs/LED)
+void einkDisplayTask(void* pvParameters) {
+  display.epd2.setBusyCallback(epdBusyYieldCallback);
 
-    // Device List
-    display.setTextColor(GxEPD_BLACK);
-    if (bleDeviceCount == 0) {
-      display.setCursor(14, 46);
-      display.print("No K1 robots found in range.");
-      display.setCursor(14, 62);
-      display.print("Ensure robot is powered ON.");
-    } else {
-      int startIdx = (currentBleIndex / 3) * 3;
-      int yPos = 32;
-      for (int i = startIdx; i < bleDeviceCount && i < startIdx + 3; i++) {
-        if (i == currentBleIndex) {
-          display.fillRect(4, yPos - 2, w - 8, 15, GxEPD_BLACK);
-          display.setTextColor(GxEPD_WHITE);
-          display.setCursor(8, yPos);
-          display.printf("> %-16s %3ddBm", bleList[i].name.substring(0, 16).c_str(), bleList[i].rssi);
+  while (true) {
+    unsigned long now = millis();
+
+    // 1. Self-healing hardware reset & dual-buffer sync if requested or BUSY timed out
+    if (einkForceReinit) {
+      einkForceReinit = false;
+      pinMode(PIN_EPD_RES, OUTPUT);
+      digitalWrite(PIN_EPD_RES, HIGH); vTaskDelay(pdMS_TO_TICKS(15));
+      digitalWrite(PIN_EPD_RES, LOW);  vTaskDelay(pdMS_TO_TICKS(25));
+      digitalWrite(PIN_EPD_RES, HIGH); vTaskDelay(pdMS_TO_TICKS(60));
+      display.init(0, false, 10, false);
+      display.setRotation(1);
+      display.setFullWindow();
+      display.epd2.setBusyCallback(epdBusyYieldCallback);
+      loadCustomEInkLut(false);
+      epdWaitStartMs = millis();
+      display.epd2.writeScreenBufferAgain(0x00);
+      display.epd2.writeScreenBuffer(0xFF);
+      display.epd2.refresh(true);
+      display.epd2.writeScreenBufferAgain(0xFF);
+      einkFullDirty = true;
+    }
+
+    // 2. Immediate BLE Scanning Screen
+    if (einkScanningDirty) {
+      einkScanningDirty = false;
+      loadCustomEInkLut(true);
+      drawScanningToBuffer();
+      epdWaitStartMs = millis();
+      display.display(true);
+      continue;
+    }
+
+    // 3. Immediate Run Chain Step Screen
+    if (einkRunChainDirty) {
+      einkRunChainDirty = false;
+      loadCustomEInkLut(true);
+      drawRunChainToBuffer(rcSnapStep, rcSnapTotal, rcSnapName, rcSnapParam, rcSnapUnit);
+      epdWaitStartMs = millis();
+      display.display(true);
+      continue;
+    }
+
+    // 4. Interactive Updates (Full uses Factory 727ms LUT; Knob turns use Fast Symmetric LUT)
+    if ((einkFullDirty || einkCenterDirty) && (now - lastEInkInputMs >= 30)) {
+      bool doFull = einkFullDirty;
+      einkFullDirty = false;
+      einkCenterDirty = false;
+
+      // Use full 30-frame factory LUT for full-screen updates (boot, dock, buttons);
+      // use fast symmetric LUT only for rapid middle-band knob turns.
+      loadCustomEInkLut(!doFull);
+      epdWaitStartMs = millis();
+
+      if (currentState == STATE_BLE_PAIRING_MENU) {
+        loadCustomEInkLut(false);
+        drawPairingMenuToBuffer();
+        display.display(true);
+      } else if (currentState == STATE_ACTION_MENU) {
+        drawActionMenuToBuffer(false);
+        if (doFull) {
+          display.display(true);
         } else {
-          display.setTextColor(GxEPD_BLACK);
-          display.setCursor(8, yPos);
-          display.printf("  %-16s %3ddBm", bleList[i].name.substring(0, 16).c_str(), bleList[i].rssi);
+          // Targeted middle-band update (y=24, h=56, multiples of 8): header & footer never flicker!
+          display.displayWindow(2, 24, 246, 56);
         }
-        yPos += 16;
+      }
+      continue;
+    }
+
+    // 5. Hybrid Adaptive Settle Pass: 350ms after knob stops, drive BOTH Black text (1->0)
+    //    AND White background (0->1) in the middle band with full 30-frame symmetric factory LUT!
+    if (einkNeedsCrispSettle && !einkFullDirty && !einkCenterDirty && (now - lastEInkInputMs >= 350)) {
+      einkNeedsCrispSettle = false;
+      loadCustomEInkLut(false); // Factory 30-frame symmetric LUT
+      epdWaitStartMs = millis();
+
+      if (currentState == STATE_ACTION_MENU) {
+        // Pre-load 0x26 (Previous RAM) with middle band INVERTED (White text on Black bg):
+        // - Every Black text pixel in middle band sees 1 -> 0 (LUT2: full 30-frame +15V Black!)
+        // - Every White bg pixel in middle band sees 0 -> 1 (LUT1: full 30-frame -15V White!)
+        // - Header & Footer see 0 -> 0 / 1 -> 1 (untouched, zero flicker!)
+        drawActionMenuToBuffer(true);
+        display.nextPageToPrevious();
+        drawActionMenuToBuffer(false);
+        display.display(true);
+      }
+      continue;
+    }
+
+    vTaskDelay(pdMS_TO_TICKS(12));
+  }
+}
+
+// Dedicated Core 0 Background BLE Reconnect Task (prevents 1s BLE scan from blocking inputs/LED)
+void bleReconnectTask(void* pvParameters) {
+  while (true) {
+    unsigned long now = millis();
+    if (currentState == STATE_ACTION_MENU && !isConnected) {
+      if (pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
+        if ((now - lastUserActivity > 5000) && (now - lastConnectAttemptTime >= 3000)) {
+          if (bleMutex != nullptr && xSemaphoreTake(bleMutex, pdMS_TO_TICKS(50)) == pdTRUE) {
+            // Re-verify user hasn't touched controls before starting 1s scan
+            if (currentState == STATE_ACTION_MENU && !isConnected && (millis() - lastUserActivity > 5000)) {
+              connectAttemptCounter++;
+              bool ok = connectToRobot(true); // quietBg = true: does not hijack RGB LED!
+              lastConnectAttemptTime = millis();
+              if (ok) {
+                connectAttemptCounter = 0;
+                Serial.println("[BLE STATUS] ✅ Background auto-reconnect succeeded!");
+                updateStatusLED();
+                requestEInkFullUpdate();
+              }
+            }
+            xSemaphoreGive(bleMutex);
+          }
+        }
       }
     }
-
-    // Divider & Footer
-    display.drawLine(2, 92, w - 3, 92, GxEPD_BLACK);
-    display.setTextColor(GxEPD_BLACK);
-    display.setFont();
-    display.setCursor(8, 98);
-    display.print("Knob: Select  |  Start/Click: Confirm");
-    display.setCursor(8, 110);
-    display.print("Stop (Red): Cancel & Return");
-
-  } while (display.nextPage());
+    vTaskDelay(pdMS_TO_TICKS(250));
+  }
 }
 
-/**
- * Displays Scanning screen while BLE scan is active (4 seconds).
- */
-void updateEInkScanning() {
-  display.setPartialWindow(0, 0, display.width(), display.height());
-  display.firstPage();
-  do {
-    display.fillScreen(GxEPD_WHITE);
-    int16_t w = display.width();
-    int16_t h = display.height();
-
-    display.drawRect(0, 0, w, h, GxEPD_BLACK);
-    display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
-
-    display.fillRect(2, 2, w - 4, 20, GxEPD_BLACK);
-    display.setTextColor(GxEPD_WHITE);
-    display.setFont(&FreeSansBold9pt7b);
-    display.setCursor(6, 17);
-    display.print("BLE SCANNING...");
-
-    display.setFont();
-    display.setTextColor(GxEPD_BLACK);
-    display.setTextSize(1);
-    display.setCursor(16, 46);
-    display.print("Searching nearby Robosen K1 robots...");
-    display.setCursor(16, 62);
-    display.print("Sorting by RSSI signal strength.");
-
-    display.drawLine(2, 92, w - 3, 92, GxEPD_BLACK);
-    display.setCursor(8, 102);
-    display.print("Stop Button (Red): Cancel scan");
-  } while (display.nextPage());
-}
-
-/**
- * Displays Run Chain real-time execution status on E-Ink screen.
- */
-void updateEInkRunChain(int currentStep, int totalSteps, const char* actionName, int paramVal, const char* paramUnit) {
-  display.setPartialWindow(0, 0, display.width(), display.height());
-  display.firstPage();
-  do {
-    display.fillScreen(GxEPD_WHITE);
-    int16_t w = display.width();
-    int16_t h = display.height();
-
-    display.drawRect(0, 0, w, h, GxEPD_BLACK);
-    display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
-
-    display.fillRect(2, 2, w - 4, 20, GxEPD_BLACK);
-    display.setTextColor(GxEPD_WHITE);
-    display.setFont(&FreeSansBold9pt7b);
-    display.setCursor(6, 17);
-    display.print("RUNNING CHAIN");
-
-    display.setFont();
-    display.setTextSize(1);
-    display.setCursor(170, 8);
-    if (totalSteps > 0) {
-      display.printf("STEP %d/%d", currentStep, totalSteps);
-    } else {
-      display.print("PHASE 1");
-    }
-
-    // Action Name
-    display.setTextColor(GxEPD_BLACK);
-    display.setFont(&FreeSansBold9pt7b);
-    display.setCursor(10, 48);
-    display.print(actionName);
-
-    display.setFont();
-    display.setTextSize(2);
-    display.setCursor(10, 64);
-    if (paramVal > 0) {
-      display.printf("%d %s", paramVal, paramUnit);
-    } else {
-      display.print("Active");
-    }
-
-    display.drawLine(2, 92, w - 3, 92, GxEPD_BLACK);
-    display.setTextSize(1);
-    display.setCursor(8, 102);
-    display.print("Run Chain Active | Stop (Red): Halt");
-  } while (display.nextPage());
+void startBackgroundTasks() {
+  bleMutex = xSemaphoreCreateMutex();
+  xTaskCreatePinnedToCore(einkDisplayTask,  "EInkTask", 8192, nullptr, 2, nullptr, 0);
+  xTaskCreatePinnedToCore(bleReconnectTask, "BleTask",  6144, nullptr, 1, nullptr, 0);
 }
