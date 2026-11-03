@@ -10,21 +10,31 @@
 
 ```
 robosen_block/
-├── assignments/
-│   ├── as01_เอกสารสรุปงานวิจัยที่เกี่ยวข้อง.pdf # Academic literature review (4 verified research papers)
-│   └── RESEARCH_SUMMARY.md               # Presentation-ready markdown summary of AS01 research papers
+├── archive/
+│   └── prototype_1_0_retired/            # Retired Prototype #1.0 files (22.86mm socket spacing defect archive)
+│       └── master_block/
 ├── bin/
 │   └── k1.js                             # Node.js CLI executable wrapper
 ├── docs/
+│   ├── assignments/                      # Academic research reviews (AS01)
+│   │   ├── as01_เอกสารสรุปงานวิจัยที่เกี่ยวข้อง.pdf
+│   │   └── RESEARCH_SUMMARY.md
 │   ├── diagrams/                         # High-resolution architectural and protocol data-flow diagrams
+│   ├── plans/                            # 14-Week operational plan and timeline infographics
+│   │   ├── robosen_14_weeks_plan.md
+│   │   └── TIMELINE_INFOGRAPHIC.md
 │   ├── reports/                          # Academic literature review reports & summaries
+│   ├── specs/                            # Engineering specifications & technical reports
+│   │   ├── PHYSICAL_BLOCK_SYSTEM_SPEC.md # Hardware & electrical spec for modular tangible coding blocks
+│   │   ├── PROTOTYPE_00_SPEC.md          # Prototype #0: Breadboard proof-of-concept spec
+│   │   ├── PROTOTYPE_01_SPEC.md          # Prototype #1: Custom PCB carrier production release
+│   │   ├── PROTOTYPE_01_1_SPEC.md        # Prototype #1-1: Master Block PCB respin spec (25.40mm row spacing)
+│   │   ├── IMPROVEMENT_PLAN.md           # 5-Pillar master improvement plan & roadmap
+│   │   └── ROBOSEN_K1_DOCUMENTATION.md   # Complete official K1 documentation & user manual
 │   ├── K1_HARDWARE_AUDIT_REPORT.md       # Complete live hardware verification & audit report
 │   ├── master_block_wiring.html          # Interactive Master Block BOM & color-coded wiring guide
 │   └── mounting_and_enclosure_spec.md    # Master Block mounting hole & 3D enclosure specification
 ├── firmware/
-│   ├── arduino_uno_ch32v003_programmer/
-│   │   ├── arduino_uno_ch32v003_programmer.ino # Arduino Uno R3 Ardulink SWIO flasher
-│   │   └── README.md
 │   ├── ch32v003_action_block/
 │   │   ├── main.c                        # Unified CH32V003 Action Block firmware (2-Phase Binary V2, Config Dock, WS2812B)
 │   │   ├── funconfig.h                   # CH32V003 configuration header
@@ -38,18 +48,21 @@ robosen_block/
 │   │   ├── build.ps1                     # Native RISC-V build script (2016-byte binary)
 │   │   ├── end_block.bin                 # Pre-compiled ready-to-flash binary (Token 0xEE)
 │   │   └── README.md
-│   ├── esp32_ch32v003_programmer/
-│   │   ├── esp32_ch32v003_programmer.ino # ESP32 / ESP32-S3 SWIO programmer firmware
-│   │   ├── dmi.cpp / .h, swio.cpp / .h, target.cpp / .h # DMI / SWIO physical protocol stack
-│   │   ├── flash_tool.py                 # Python host CLI flasher with chunked flashing & verification
+│   ├── esp32_master/
+│   │   ├── esp32_master.ino              # Master Block C++ firmware (ESP32-S3 BLE Central, NVS flash, Dual-Knob UI, Run Chain Engine)
 │   │   └── README.md
-│   └── esp32_master/
-│       └── esp32_master.ino              # Master Block C++ firmware (ESP32-S3 BLE Central, NVS flash, Dual-Knob UI, Run Chain Engine)
+│   ├── tests/
+│   │   ├── master_soldering_test/        # Hardware bring-up and soldering diagnostic firmware
+│   │   └── standalone_eink_test/         # Isolated 2.13" E-Paper benchmark sketch
+│   ├── tools_programmer/
+│   │   ├── esp32_ch32v003_programmer/    # ESP32 1-wire SWIO programmer firmware & flash_tool.py
+│   │   └── arduino_uno_ch32v003_programmer/ # Arduino Uno Ardulink SWIO flasher
+│   └── README.md
 ├── hardware/
-│   ├── master_block/                     # KiCad 10 Master Block Motherboard Carrier PCB Project
+│   ├── master_block/                     # KiCad 10 Master Block Motherboard Carrier PCB Project (Corrected 25.40mm spacing)
 │   │   ├── robosen_master_block.kicad_pro# Master project file
 │   │   ├── robosen_master_block.kicad_pcb# Routed PCB layout (115.5 x 62.0 mm, dual-layer GND fill)
-│   │   ├── robosen_master_block_gerbers.zip # 10-file JLCPCB production package (ORDERED)
+│   │   ├── robosen_master_block_gerbers.zip # 10-file JLCPCB production package
 │   │   ├── fp-lib-table & sym-lib-table  # Local footprint and symbol library registries
 │   │   └── robosen_master.pretty/        # 12 verified footprints (.kicad_mod)
 │   ├── action_block/                     # KiCad 10 Action Block Modular Carrier PCB Project
@@ -58,12 +71,8 @@ robosen_block/
 │   │   ├── robosen_action_block_gerbers.zip # 10-file JLCPCB production package (ORDERED)
 │   │   ├── fp-lib-table & sym-lib-table  # Local footprint and symbol library registries
 │   │   └── action_block.pretty/          # Custom footprints (.kicad_mod)
-│   └── prototype_1_1/                    # Prototype #1-1 Respin (ESP32-S3 Socket Spacing Fix)
-│       ├── master_block/                 # Corrected Master PCB (25.40 mm socket spacing, 100% routed)
-│       │   ├── robosen_master_block.kicad_pcb
-│       │   ├── robosen_master_block_gerbers.zip # Fresh production Gerbers for JLCPCB re-order
-│       │   └── reports/ (DRC & SVG audits)
-│       └── action_block/                 # Self-contained duplicate of Action Block (verified correct)
+│   ├── preorder_audit_evidence/          # Geometric and ERC/DRC audit logs
+│   └── FINAL_PREORDER_AUDIT_ASTRA.md     # Pre-order dual-agent engineering audit report
 ├── recordings/
 │   ├── dumps/                            # Raw BLE packet captures & diagnostic logs
 │   └── K1/
@@ -78,49 +87,31 @@ robosen_block/
 │   ├── k1_ble_daemon.py                  # Persistent background BLE daemon with dynamic 100% progress ACK (Python/Bleak)
 │   ├── k1_joint_controller.py            # Interactive 17-joint kinematics controller with safeguard limits (Python)
 │   ├── k1_ble_tester.py                  # Live interactive BLE test menu & telemetry monitor (Python/Bleak)
-│   └── k1_action.py                      # Fast one-shot action execution, status, and volume CLI (Python/Bleak)
+│   ├── k1_action.py                      # Fast one-shot action execution, status, and volume CLI (Python/Bleak)
+│   ├── diagrams/                         # Standalone timeline & data flow diagram generators
+│   └── hardware/                         # Automated KiCad footprint & routing audit utilities
+├── simulators/
+│   └── node-red-contrib-robosen-block/   # Custom Node-RED palette simulating physical block daisy chain (v2.0)
+│       ├── lib/                          # Protocol encoder/decoder, CRC-8, and token catalog
+│       ├── nodes/                        # Palette nodes (robosen-master, robosen-smart-block, etc.)
+│       ├── examples/                     # Ready-to-import 2-Phase Binary simulation flow
+│       ├── package.json                  # Node-RED palette package manifest (v2.0.0)
+│       └── README.md                     # Detailed palette documentation & API guide
 ├── src/
 │   ├── K1/
-│   │   ├── llm/
-│   │   │   ├── command/
-│   │   │   │   ├── systemPrompt.txt      # LLM prompt for mapping natural language to actions
-│   │   │   │   └── userPrompt.txt        # User prompt wrapper with allowed actions catalog
-│   │   │   └── joint/
-│   │   │       ├── systemPrompt.txt      # LLM prompt for generating raw 17-servo keyframes
-│   │   │       └── userPrompt.txt        # User prompt wrapper for joint kinematics
+│   │   ├── llm/                          # LLM system & user prompts for command & joint generation
 │   │   └── robot.json                    # Declarative K1 robot specification & kinematics limits
-│   ├── K1.d.ts                           # TypeScript definitions for K1 class
-│   ├── K1.js                             # K1 subclass inheriting from Robot base
-│   ├── Robot.d.ts                        # TypeScript definitions for Robot base class
-│   └── Robot.js                          # Core protocol, BLE transport, HID controller & LLM engine
+│   ├── K1.d.ts / K1.js                   # K1 class inheriting from Robot base
+│   └── Robot.d.ts / Robot.js             # Core protocol, BLE transport, HID controller & LLM engine
 ├── test/
 │   ├── __mocks__/@abandonware/noble.js   # Mock BLE hardware layer for offline unit testing
 │   ├── K1.test.js                        # K1 integration unit tests
 │   └── Robot.test.js                     # Robot protocol & packet encoder tests
-├── node-red-contrib-robosen-block/       # Custom Node-RED palette simulating physical block daisy chain (v2.0)
-│   ├── lib/
-│   │   └── protocol.js                   # Protocol encoder/decoder, CRC-8, and token catalog
-│   ├── nodes/
-│   │   ├── robosen-master.js / .html     # Smart Master Block controller (2-Phase Binary V2, Start button & REST API)
-│   │   ├── robosen-smart-block.js / .html# Smart Action Block (CH32V003 flash model & LED feedback)
-│   │   ├── robosen-smart-end.js / .html  # Smart Active Terminator Block with CRC-8 validation & loopback
-│   │   ├── robosen-protocol-monitor.js / .html # Serial Protocol Bus Analyzer & Packet Sniffer
-│   │   └── robosen-tester.js / .html     # Standalone action tester & direct controller node
-│   ├── examples/
-│   │   └── robosen_smart_block_flow.json # Ready-to-import 2-Phase Binary simulation flow
-│   ├── package.json                      # Node-RED palette package manifest (v2.0.0)
-│   └── README.md                         # Detailed palette documentation & API guide
 ├── index.d.ts                            # Root TypeScript exports
 ├── index.js                              # Package entry point (exports K1 and Robot)
 ├── package.json                          # NPM dependencies and script definitions
 ├── README.md                             # Comprehensive project master README
 ├── PROJECT_SUMMARY.md                    # Executive project summary & scope
-├── PHYSICAL_BLOCK_SYSTEM_SPEC.md         # Hardware & electrical spec for modular tangible coding blocks (v3.0)
-├── PROTOTYPE_00_SPEC.md                  # Prototype #0 engineering specification & breadboard pinouts
-├── PROTOTYPE_01_SPEC.md                  # Prototype #1 engineering specification & custom PCB production release
-├── PROTOTYPE_01_1_SPEC.md                # Prototype #1-1 engineering specification (Master Block PCB respin with corrected ESP32-S3 25.40mm row spacing)
-├── IMPROVEMENT_PLAN.md                   # 5-Pillar master improvement plan & roadmap
-├── ROBOSEN_K1_DOCUMENTATION.md           # Complete official K1 documentation & user manual
 └── MEMORY.md                             # Master project memory & knowledge base (this file)
 ```
 
@@ -392,8 +383,8 @@ A dedicated Node-RED palette simulating the physical block-based tangible progra
 ### Machine Symlink & Simulation Flows:
 - Linked directly into machine's Node-RED via NTFS Directory Junction:
   `C:\Users\poomz\.node-red\node_modules\node-red-contrib-robosen-block` $\longleftrightarrow$ `C:\Users\poomz\nnnn\robosen_block\node-red-contrib-robosen-block`
-- **V2 Smart Block Flow**: [`node-red-contrib-robosen-block/examples/robosen_smart_block_flow.json`](node-red-contrib-robosen-block/examples/robosen_smart_block_flow.json).
-- **V1 Legacy Flow**: [`node-red-contrib-robosen-block/examples/robosen_simulator_flow.json`](node-red-contrib-robosen-block/examples/robosen_simulator_flow.json).
+- **V2 Smart Block Flow**: [`simulators/node-red-contrib-robosen-block/examples/robosen_smart_block_flow.json`](file:///Users/nnnn/Projects/robosen_block/simulators/node-red-contrib-robosen-block/examples/robosen_smart_block_flow.json).
+- **V1 Legacy Flow**: [`simulators/node-red-contrib-robosen-block/examples/robosen_simulator_flow.json`](file:///Users/nnnn/Projects/robosen_block/simulators/node-red-contrib-robosen-block/examples/robosen_simulator_flow.json).
 
 ---
 
@@ -444,8 +435,8 @@ Designed for screenless STEM learning, physical modular coding blocks snap toget
 The `assignments/` folder stores academic project coursework, literature reviews, and research summaries assigned by professors:
 
 ### 11.1 Assignment 01: Literature Review on Related Research
-* **File:** [`assignments/as01_เอกสารสรุปงานวิจัยที่เกี่ยวข้อง.pdf`](assignments/as01_เอกสารสรุปงานวิจัยที่เกี่ยวข้อง.pdf)
-* **Summary:** [`assignments/RESEARCH_SUMMARY.md`](assignments/RESEARCH_SUMMARY.md)
+* **File:** [`docs/assignments/as01_เอกสารสรุปงานวิจัยที่เกี่ยวข้อง.pdf`](file:///Users/nnnn/Projects/robosen_block/docs/assignments/as01_เอกสารสรุปงานวิจัยที่เกี่ยวข้อง.pdf)
+* **Summary:** [`docs/assignments/RESEARCH_SUMMARY.md`](file:///Users/nnnn/Projects/robosen_block/docs/assignments/RESEARCH_SUMMARY.md)
 * **Status:** Verified live against all publisher sources. 100% accurate summaries with strong theoretical and pedagogical alignment to the Tangible Robosen Block project.
 
 | Paper # | Citation & Source | Core Focus & Findings | Project Alignment & Pedagogical Justification |

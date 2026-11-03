@@ -1,12 +1,13 @@
-# Robosen K1 Master Block — KiCad 10 Hardware Project
+# Robosen K1 Master Block — KiCad 10 Hardware Project (Prototype #1-1 Respin)
 
 > **Project:** Custom Carrier Motherboard PCB for Robosen K1 Tangible Coding Block  
+> **Iteration:** Prototype #1-1 (ESP32-S3 Socket Row Spacing Correction Respin)  
 > **KiCad Version:** KiCad 10.0.6 (Fully compatible with KiCad 8.x / 9.x / 10.x)  
 > **Workspace Directory:** `hardware/master_block/`  
 > **Schematic Status:** Fully pre-wired, verified with KiCad ERC (**0 violations**)  
 > **PCB Routing Status:** 100% Routed, verified with KiCad DRC (**0 unconnected items**)  
 > **Fabrication Files:** Gerbers & Excellon drill files generated and packaged in `robosen_master_block_gerbers.zip`  
-> **Order Status:** **ORDERED AT JLCPCB (October 5, 2026)**  
+> **Status:** **READY FOR JLCPCB RE-ORDER (October 14, 2026)**  
 > **Author:** Nantaphat Yoktaworn / Antigravity AI  
 
 ---

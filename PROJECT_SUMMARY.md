@@ -154,19 +154,20 @@ The project is currently in an **advanced software, protocol simulation, and liv
    - Verified live with physical robot `K1-00457` (Firmware `VER:3.03L`, MAC `3C:A5:51:94:97:70`).
 
 2. **Native Python BLE Control & Daemon Layer:**
-   - [`scripts/k1_ble_daemon.py`](scripts/k1_ble_daemon.py): High-performance background daemon holding a persistent BLE connection with IPC JSON messaging.
-   - [`scripts/k1_action.py`](scripts/k1_action.py): Instant action runner and telemetry inspector CLI.
-   - [`scripts/k1_ble_tester.py`](scripts/k1_ble_tester.py): Interactive console telemetry and motion control suite.
+   - [`scripts/k1_ble_daemon.py`](file:///Users/nnnn/Projects/robosen_block/scripts/k1_ble_daemon.py): High-performance background daemon holding a persistent BLE connection with IPC JSON messaging.
+   - [`scripts/k1_action.py`](file:///Users/nnnn/Projects/robosen_block/scripts/k1_action.py): Instant action runner and telemetry inspector CLI.
+   - [`scripts/k1_ble_tester.py`](file:///Users/nnnn/Projects/robosen_block/scripts/k1_ble_tester.py): Interactive console telemetry and motion control suite.
 
-3. **Complete Node-RED Tangible Block Simulator Suite (`node-red-contrib-robosen-block`):**
+3. **Complete Node-RED Tangible Block Simulator Suite (`simulators/node-red-contrib-robosen-block`):**
    - **`robosen-master`**: Simulates the Master Block, emits `0xAA` discovery seed, verifies CRC-8, coordinates BLE execution, and broadcasts `0xBB` real-time step frames.
    - **`robosen-smart-block`**: Simulates the CH32V003 Smart Block with flash parameter storage and dynamic WS2812B RGB LED color states.
    - **`robosen-smart-end`**: Simulates the active end terminator with CRC-8 validation, loopback return, and fault injection capabilities.
    - **`robosen-protocol-monitor`**: Real-time packet analyzer decoding binary hex frames, tokens, parameters, and checksum integrity.
-   - **Ready-to-run simulation flows**: [`robosen_smart_block_flow.json`](node-red-contrib-robosen-block/examples/robosen_smart_block_flow.json) and [`robosen_simulator_flow.json`](node-red-contrib-robosen-block/examples/robosen_simulator_flow.json).
+   - **Ready-to-run simulation flows**: [`robosen_smart_block_flow.json`](file:///Users/nnnn/Projects/robosen_block/simulators/node-red-contrib-robosen-block/examples/robosen_smart_block_flow.json) and [`robosen_simulator_flow.json`](file:///Users/nnnn/Projects/robosen_block/simulators/node-red-contrib-robosen-block/examples/robosen_simulator_flow.json).
 
 4. **Hardware & Electrical Architecture Specifications:**
-   - Completed detailed hardware documentation ([`PHYSICAL_BLOCK_SYSTEM_SPEC.md`](PHYSICAL_BLOCK_SYSTEM_SPEC.md)) defining 4-pin pogo pinout, power consumption, CH32V003 SOP-8 pinouts, and CRC-8 algorithms.
+   - Completed detailed hardware documentation ([`docs/specs/PHYSICAL_BLOCK_SYSTEM_SPEC.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/PHYSICAL_BLOCK_SYSTEM_SPEC.md)) defining 4-pin pogo pinout, power consumption, CH32V003 SOP-8 pinouts, and CRC-8 algorithms.
+
 
 ---
 
@@ -236,26 +237,29 @@ The project is currently in an **advanced software, protocol simulation, and liv
 ### Prototype #0: Breadboard Proof-of-Concept (August–September 2026) ✅ COMPLETE
 - **Architecture**: 5-block solderless breadboard array (Master ESP32-S3 + 3 Action Blocks + 1 Smart End Block).
 - **Validation**: Verified persistent BLE pairing with Robosen K1, 2-phase binary daisy-chain protocol (`0xAA`/`0xBB`), WS2812 light choreography, and 18650 power delivery.
-- **Reference Document**: [`PROTOTYPE_00_SPEC.md`](PROTOTYPE_00_SPEC.md).
+- **Reference Document**: [`docs/specs/PROTOTYPE_00_SPEC.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/PROTOTYPE_00_SPEC.md).
 
 ### Prototype #1: First Custom PCB Fabrication (October 2026) ⚠️ RETIRED (DEFECT FOUND)
 - **Architecture**: Custom 2-layer FR-4 carrier PCBs, standardized 4-pin magnetic pogo docking, self-contained BMS + buck-boost regulator, and software-configurable End Block role via MCU Pin 15 (`PD0`).
 - **Arrival Finding (Oct 14, 2026)**: Action Block carrier PCBs arrived and verified 100% functional. Master Block had an ESP32-S3 socket row spacing defect ($22.86\text{ mm}$ vs required $25.40\text{ mm}$), preventing module socket insertion.
-- **Reference Document**: [`PROTOTYPE_01_SPEC.md`](PROTOTYPE_01_SPEC.md).
+- **Archive Location**: [`archive/prototype_1_0_retired/master_block/`](file:///Users/nnnn/Projects/robosen_block/archive/prototype_1_0_retired/master_block/).
+- **Reference Document**: [`docs/specs/PROTOTYPE_01_SPEC.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/PROTOTYPE_01_SPEC.md).
 
-### Prototype #1-1: Master Block PCB Respin (October 2026) 🚀 READY FOR JLCPCB RE-ORDER
-- **Architecture**: Engineering change order (ECO) respin of Master Block carrier PCB in [`hardware/prototype_1_1/master_block/`](hardware/prototype_1_1/master_block/).
+### Prototype #1-1: Master Block PCB Respin (October 2026) ✅ ACTIVE IN HARDWARE
+- **Architecture**: Engineering change order (ECO) respin of Master Block carrier PCB in [`hardware/master_block/`](file:///Users/nnnn/Projects/robosen_block/hardware/master_block/).
 - **ESP32-S3 Footprint Correction**: `ESP32-S3-DevKitC-1-Socket` pin row separation widened by 1 pitch unit (+100 mil) to exact **$25.40\text{ mm}$ ($1.000\text{ in}$)** standard.
 - **Routing & DRC**: 100% rerouted (**0 unconnected items, 0 copper clearance errors**), 469 tracks, 20 vias, solid GND planes, full M3 mounting hole standoff clearance ($\ge 3.68\text{ mm}$).
-- **Production Package**: Gerbers verified and zipped at [`hardware/prototype_1_1/master_block/robosen_master_block_gerbers.zip`](hardware/prototype_1_1/master_block/robosen_master_block_gerbers.zip).
-- **Reference Document**: [`PROTOTYPE_01_1_SPEC.md`](PROTOTYPE_01_1_SPEC.md).
-2. **Action Block PCB (Modular CH32V003 Carrier):** ✅ **ORDERED & FABRICATION IN PROGRESS (Oct 2026):**
-   - KiCad 10 project ([`hardware/action_block/`](hardware/action_block/)), $32.00 \times 32.00\text{ mm}$ compact square carrier PCB.
-   - Centered Pogo Ports: Both Upstream `IN` and Downstream `OUT` 4-pin pogo docks are mathematically centered at $Y = 72.50\text{ mm}$ for flush collinear docking.
-   - 3-Pin RGB LED Header: Top-to-Bottom order `GND`, `VCC` (+3V3), `IN` (`/LED_DIN`).
-   - Routing: 100% routed (**0 unconnected items, 0 copper clearance errors**), `/RETURN_BUS` detour below MCU ($Y = 87.25\text{ mm}$), $0.60\text{ mm}$ power traces, and continuous GND planes.
-   - Dual-Agent Verified: Audited and cross-verified by Antigravity and Codex Astra (`gpt-6-astra`).
-   - Production Gerbers & drill files: [`hardware/action_block/robosen_action_block_gerbers.zip`](hardware/action_block/robosen_action_block_gerbers.zip).
+- **Production Package**: Gerbers verified and zipped at [`hardware/master_block/robosen_master_block_gerbers.zip`](file:///Users/nnnn/Projects/robosen_block/hardware/master_block/robosen_master_block_gerbers.zip).
+- **Reference Document**: [`docs/specs/PROTOTYPE_01_1_SPEC.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/PROTOTYPE_01_1_SPEC.md).
+
+### 2. Action Block PCB (Modular CH32V003 Carrier): ✅ ORDERED & VERIFIED
+- KiCad 10 project ([`hardware/action_block/`](file:///Users/nnnn/Projects/robosen_block/hardware/action_block/)), $32.00 \times 32.00\text{ mm}$ compact square carrier PCB.
+- Centered Pogo Ports: Both Upstream `IN` and Downstream `OUT` 4-pin pogo docks are mathematically centered at $Y = 72.50\text{ mm}$ for flush collinear docking.
+- 3-Pin RGB LED Header: Top-to-Bottom order `GND`, `VCC` (+3V3), `IN` (`/LED_DIN`).
+- Routing: 100% routed (**0 unconnected items, 0 copper clearance errors**), `/RETURN_BUS` detour below MCU ($Y = 87.25\text{ mm}$), $0.60\text{ mm}$ power traces, and continuous GND planes.
+- Dual-Agent Verified: Audited and cross-verified by Antigravity and Codex Astra (`gpt-6-astra`).
+- Production Gerbers & drill files: [`hardware/action_block/robosen_action_block_gerbers.zip`](file:///Users/nnnn/Projects/robosen_block/hardware/action_block/robosen_action_block_gerbers.zip).
+
 3. **C++ Master Firmware:** ✅ **COMPLETED & VERIFIED ON PHYSICAL HARDWARE (Sept 7–8, 2026):**
    - Implemented dual-knob rotary encoders, persistent BLE auto-reconnect, Config Dock UART driver, and Run Chain Engine (`0xAA`/`0xBB`/`0xFF`) on ESP32-S3 (`firmware/esp32_master`).
    - Verified live detection and non-volatile flash burning into docked CH32V003 Action Blocks.

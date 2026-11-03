@@ -1,0 +1,4701 @@
+{
+  "source": "hardware\\kicad\\robosen_master_block.kicad_pcb",
+  "sha256": "b44805e0233c39378f1b44351a8d4233defd64b724479f33255d2bd5abe69faf",
+  "kicad": "10.0.6",
+  "tracks": 476,
+  "vias": 21,
+  "footprint_count": 21,
+  "track_types": {
+    "PCB_TRACK": 476
+  },
+  "holes": {
+    "H3": {
+      "tracks": [
+        {
+          "radius_mm": 12.691005617976296,
+          "kind": "track",
+          "net": "/BTN_STOP",
+          "layer": "F.Cu",
+          "start": [
+            96.0,
+            108.5
+          ],
+          "end": [
+            96.0,
+            103.5
+          ],
+          "width": 0.25
+        },
+        {
+          "radius_mm": 17.460505395068974,
+          "kind": "track",
+          "net": "/BTN_STOP",
+          "layer": "F.Cu",
+          "start": [
+            109.0,
+            90.5
+          ],
+          "end": [
+            96.0,
+            103.5
+          ],
+          "width": 0.25
+        },
+        {
+          "radius_mm": 17.66488306078952,
+          "kind": "track",
+          "net": "/VBAT_RAW",
+          "layer": "B.Cu",
+          "start": [
+            102.0,
+            105.8
+          ],
+          "end": [
+            102.0,
+            105.75
+          ],
+          "width": 0.8
+        },
+        {
+          "radius_mm": 17.705593058499907,
+          "kind": "track",
+          "net": "/VBAT_RAW",
+          "layer": "B.Cu",
+          "start": [
+            102.0,
+            105.75
+          ],
+          "end": [
+            105.25,
+            105.75
+          ],
+          "width": 0.8
+        },
+        {
+          "radius_mm": 17.98180146231593,
+          "kind": "track",
+          "net": "/VBAT_PROT",
+          "layer": "F.Cu",
+          "start": [
+            109.92,
+            120.0
+          ],
+          "end": [
+            109.875,
+            120.0
+          ],
+          "width": 0.8
+        }
+      ],
+      "vias": [
+        {
+          "radius_mm": 38.15858161711116,
+          "kind": "via",
+          "net": "/BTN_STOP",
+          "layer": "F.Cu",
+          "start": [
+            111.25,
+            87.5
+          ],
+          "end": [
+            111.25,
+            87.5
+          ],
+          "width": 0.6
+        },
+        {
+          "radius_mm": 47.62735388063898,
+          "kind": "via",
+          "net": "/BTN_START",
+          "layer": "F.Cu",
+          "start": [
+            126.375,
+            87.625
+          ],
+          "end": [
+            126.375,
+            87.625
+          ],
+          "width": 0.6
+        },
+        {
+          "radius_mm": 52.08230855928364,
+          "kind": "via",
+          "net": "/K1_SW",
+          "layer": "F.Cu",
+          "start": [
+            132.875,
+            88.375
+          ],
+          "end": [
+            132.875,
+            88.375
+          ],
+          "width": 0.6
+        },
+        {
+          "radius_mm": 53.126497405313785,
+          "kind": "via",
+          "net": "/K2_CLK",
+          "layer": "F.Cu",
+          "start": [
+            134.0,
+            88.125
+          ],
+          "end": [
+            134.0,
+            88.125
+          ],
+          "width": 0.6
+        },
+        {
+          "radius_mm": 56.79216780785259,
+          "kind": "via",
+          "net": "/BTN_START",
+          "layer": "F.Cu",
+          "start": [
+            138.0,
+            87.375
+          ],
+          "end": [
+            138.0,
+            87.375
+          ],
+          "width": 0.6
+        }
+      ],
+      "pads": [
+        {
+          "radius_mm": 11.715173,
+          "kind": "pad",
+          "ref": "SW5",
+          "pad": "1",
+          "net": "/BTN_STOP",
+          "position": [
+            96.0,
+            108.5
+          ]
+        },
+        {
+          "radius_mm": 16.259458,
+          "kind": "pad",
+          "ref": "SW5",
+          "pad": "1",
+          "net": "/BTN_STOP",
+          "position": [
+            96.0,
+            103.5
+          ]
+        },
+        {
+          "radius_mm": 16.393291,
+          "kind": "pad",
+          "ref": "BT1",
+          "pad": "1",
+          "net": "/VBAT_RAW",
+          "position": [
+            102.0,
+            105.8
+          ]
+        }
+      ],
+      "position": [
+        91.5,
+        120.5
+      ]
+    },
+    "H2": {
+      "tracks": [
+        {
+          "radius_mm": 3.6767265814363874,
+          "kind": "track",
+          "net": "/K2_DT",
+          "layer": "B.Cu",
+          "start": [
+            191.625,
+            88.25
+          ],
+          "end": [
+            191.75,
+            88.125
+          ],
+          "width": 0.25
+        },
+        {
+          "radius_mm": 3.6767265814363874,
+          "kind": "track",
+          "net": "/K2_DT",
+          "layer": "B.Cu",
+          "start": [
+            191.125,
+            88.25
+          ],
+          "end": [
+            191.625,
+            88.25
+          ],
+          "width": 0.25
+        },
+        {
+          "radius_mm": 3.7094654125444917,
+          "kind": "track",
+          "net": "/K2_DT",
+          "layer": "B.Cu",
+          "start": [
+            191.0,
+            88.375
+          ],
+          "end": [
+            191.125,
+            88.25
+          ],
+          "width": 0.25
+        },
+        {
+          "radius_mm": 3.7094654125444917,
+          "kind": "track",
+          "net": "/K2_DT",
+          "layer": "B.Cu",
+          "start": [
+            190.75,
+            88.375
+          ],
+          "end": [
+            191.0,
+            88.375
+          ],
+          "width": 0.25
+        },
+        {
+          "radius_mm": 3.7338372601082828,
+          "kind": "track",
+          "net": "/K2_DT",
+          "layer": "B.Cu",
+          "start": [
+            190.625,
+            88.5
+          ],
+          "end": [
+            190.75,
+            88.375
+          ],
+          "width": 0.25
+        }
+      ],
+      "vias": [
+        {
+          "radius_mm": 5.004773793480736,
+          "kind": "via",
+          "net": "/K2_DT",
+          "layer": "F.Cu",
+          "start": [
+            195.25,
+            87.625
+          ],
+          "end": [
+            195.25,
+            87.625
+          ],
+          "width": 0.6
+        },
+        {
+          "radius_mm": 19.325398085134477,
+          "kind": "via",
+          "net": "/K2_DT",
+          "layer": "F.Cu",
+          "start": [
+            172.875,
+            88.875
+          ],
+          "end": [
+            172.875,
+            88.875
+          ],
+          "width": 0.6
+        },
+        {
+          "radius_mm": 20.86342658928369,
+          "kind": "via",
+          "net": "/BATSENSE",
+          "layer": "F.Cu",
+          "start": [
+            171.25,
+            89.375
+          ],
+          "end": [
+            171.25,
+            89.375
+          ],
+          "width": 0.6
+        },
+        {
+          "radius_mm": 24.651515485036175,
+          "kind": "via",
+          "net": "/BATSENSE",
+          "layer": "F.Cu",
+          "start": [
+            168.0,
+            86.125
+          ],
+          "end": [
+            168.0,
+            86.125
+          ],
+          "width": 0.6
+        },
+        {
+          "radius_mm": 27.822777689979343,
+          "kind": "via",
+          "net": "/CHAIN_TX",
+          "layer": "F.Cu",
+          "start": [
+            164.25,
+            94.625
+          ],
+          "end": [
+            164.25,
+            94.625
+          ],
+          "width": 0.6
+        }
+      ],
+      "pads": [
+        {
+          "radius_mm": 5.348441,
+          "kind": "pad",
+          "ref": "C1",
+          "pad": "2",
+          "net": "/BATSENSE",
+          "position": [
+            189.5,
+            97.5
+          ]
+        },
+        {
+          "radius_mm": 5.618107,
+          "kind": "pad",
+          "ref": "SW2",
+          "pad": "4",
+          "net": "+3V3",
+          "position": [
+            191.76,
+            85.5
+          ]
+        },
+        {
+          "radius_mm": 5.75,
+          "kind": "pad",
+          "ref": "J2",
+          "pad": "1",
+          "net": "+3V3",
+          "position": [
+            199.0,
+            92.0
+          ]
+        }
+      ],
+      "position": [
+        192.25,
+        92.0
+      ]
+    },
+    "H1": {
+      "tracks": [
+        {
+          "radius_mm": 3.6767265814363874,
+          "kind": "track",
+          "net": "/CFG_RX",
+          "layer": "B.Cu",
+          "start": [
+            96.875,
+            95.75
+          ],
+          "end": [
+            96.75,
+            95.875
+          ],
+          "width": 0.25
+        },
+        {
+          "radius_mm": 3.6767265814363874,
+          "kind": "track",
+          "net": "/CFG_RX",
+          "layer": "B.Cu",
+          "start": [
+            97.375,
+            95.75
+          ],
+          "end": [
+            96.875,
+            95.75
+          ],
+          "width": 0.25
+        },
+        {
+          "radius_mm": 3.7094654125444917,
+          "kind": "track",
+          "net": "/CFG_RX",
+          "layer": "B.Cu",
+          "start": [
+            97.75,
+            95.625
+          ],
+          "end": [
+            97.5,
+            95.625
+          ],
+          "width": 0.25
+        },
+        {
+          "radius_mm": 3.7094654125444917,
+          "kind": "track",
+          "net": "/CFG_RX",
+          "layer": "B.Cu",
+          "start": [
+            97.5,
+            95.625
+          ],
+          "end": [
+            97.375,
+            95.75
+          ],
+          "width": 0.25
+        },
+        {
+          "radius_mm": 3.7338372601082828,
+          "kind": "track",
+          "net": "/CFG_RX",
+          "layer": "B.Cu",
+          "start": [
+            97.875,
+            95.5
+          ],
+          "end": [
+            97.75,
+            95.625
+          ],
+          "width": 0.25
+        }
+      ],
+      "vias": [
+        {
+          "radius_mm": 15.360459763365824,
+          "kind": "via",
+          "net": "/BTN_STOP",
+          "layer": "F.Cu",
+          "start": [
+            111.25,
+            87.5
+          ],
+          "end": [
+            111.25,
+            87.5
+          ],
+          "width": 0.6
+        },
+        {
+          "radius_mm": 30.141029056193222,
+          "kind": "via",
+          "net": "/BTN_START",
+          "layer": "F.Cu",
+          "start": [
+            126.375,
+            87.625
+          ],
+          "end": [
+            126.375,
+            87.625
+          ],
+          "width": 0.6
+        },
+        {
+          "radius_mm": 36.5039569883457,
+          "kind": "via",
+          "net": "/K1_SW",
+          "layer": "F.Cu",
+          "start": [
+            132.875,
+            88.375
+          ],
+          "end": [
+            132.875,
+            88.375
+          ],
+          "width": 0.6
+        },
+        {
+          "radius_mm": 37.648361295318146,
+          "kind": "via",
+          "net": "/K2_CLK",
+          "layer": "F.Cu",
+          "start": [
+            134.0,
+            88.125
+          ],
+          "end": [
+            134.0,
+            88.125
+          ],
+          "width": 0.6
+        },
+        {
+          "radius_mm": 39.57010158000604,
+          "kind": "via",
+          "net": "/EPD_RES",
+          "layer": "F.Cu",
+          "start": [
+            134.5,
+            80.75
+          ],
+          "end": [
+            134.5,
+            80.75
+          ],
+          "width": 0.6
+        }
+      ],
+      "pads": [
+        {
+          "radius_mm": 5.609756,
+          "kind": "pad",
+          "ref": "SW1",
+          "pad": "4",
+          "net": "+3V3",
+          "position": [
+            95.88,
+            85.5
+          ]
+        },
+        {
+          "radius_mm": 5.75,
+          "kind": "pad",
+          "ref": "J1",
+          "pad": "1",
+          "net": "+3V3",
+          "position": [
+            89.5,
+            92.0
+          ]
+        },
+        {
+          "radius_mm": 5.951945,
+          "kind": "pad",
+          "ref": "SW1",
+          "pad": "3",
+          "net": "/K1_SW",
+          "position": [
+            98.42,
+            85.5
+          ]
+        }
+      ],
+      "position": [
+        96.25,
+        92.0
+      ]
+    },
+    "H4": {
+      "tracks": [
+        {
+          "radius_mm": 5.290385489510424,
+          "kind": "track",
+          "net": "/CHAIN_RX",
+          "layer": "F.Cu",
+          "start": [
+            199.08,
+            115.5
+          ],
+          "end": [
+            199.125,
+            115.5
+          ],
+          "width": 0.25
+        },
+        {
+          "radius_mm": 5.3078284530251825,
+          "kind": "track",
+          "net": "/CHAIN_RX",
+          "layer": "F.Cu",
+          "start": [
+            199.125,
+            115.5
+          ],
+          "end": [
+            199.125,
+            107.625
+          ],
+          "width": 0.25
+        },
+        {
+          "radius_mm": 7.08018215018859,
+          "kind": "track",
+          "net": "+3V3",
+          "layer": "F.Cu",
+          "start": [
+            191.25,
+            113.125
+          ],
+          "end": [
+            195.75,
+            113.125
+          ],
+          "width": 0.8
+        },
+        {
+          "radius_mm": 7.08018215018859,
+          "kind": "track",
+          "net": "+3V3",
+          "layer": "F.Cu",
+          "start": [
+            195.75,
+            113.125
+          ],
+          "end": [
+            196.25,
+            112.625
+          ],
+          "width": 0.8
+        },
+        {
+          "radius_mm": 7.455927698241631,
+          "kind": "track",
+          "net": "+3V3",
+          "layer": "F.Cu",
+          "start": [
+            196.5,
+            112.66
+          ],
+          "end": [
+            196.5,
+            112.625
+          ],
+          "width": 0.8
+        }
+      ],
+      "vias": [
+        {
+          "radius_mm": 32.62154499715954,
+          "kind": "via",
+          "net": "/K2_DT",
+          "layer": "F.Cu",
+          "start": [
+            195.25,
+            87.625
+          ],
+          "end": [
+            195.25,
+            87.625
+          ],
+          "width": 0.6
+        },
+        {
+          "radius_mm": 39.47632775910818,
+          "kind": "via",
+          "net": "/K2_DT",
+          "layer": "F.Cu",
+          "start": [
+            172.875,
+            88.875
+          ],
+          "end": [
+            172.875,
+            88.875
+          ],
+          "width": 0.6
+        },
+        {
+          "radius_mm": 40.09589242732484,
+          "kind": "via",
+          "net": "/BATSENSE",
+          "layer": "F.Cu",
+          "start": [
+            171.25,
+            89.375
+          ],
+          "end": [
+            171.25,
+            89.375
+          ],
+          "width": 0.6
+        },
+        {
+          "radius_mm": 41.43820941295877,
+          "kind": "via",
+          "net": "/CHAIN_TX",
+          "layer": "F.Cu",
+          "start": [
+            164.25,
+            94.625
+          ],
+          "end": [
+            164.25,
+            94.625
+          ],
+          "width": 0.6
+        },
+        {
+          "radius_mm": 44.67377708176177,
+          "kind": "via",
+          "net": "/BATSENSE",
+          "layer": "F.Cu",
+          "start": [
+            168.0,
+            86.125
+          ],
+          "end": [
+            168.0,
+            86.125
+          ],
+          "width": 0.6
+        }
+      ],
+      "pads": [
+        {
+          "radius_mm": 4.51453,
+          "kind": "pad",
+          "ref": "R2",
+          "pad": "2",
+          "net": "/CHAIN_RX",
+          "position": [
+            199.08,
+            115.5
+          ]
+        },
+        {
+          "radius_mm": 6.842999,
+          "kind": "pad",
+          "ref": "R4",
+          "pad": "2",
+          "net": "GND",
+          "position": [
+            189.35,
+            119.3
+          ]
+        },
+        {
+          "radius_mm": 6.94,
+          "kind": "pad",
+          "ref": "R1",
+          "pad": "1",
+          "net": "+3V3",
+          "position": [
+            196.5,
+            112.66
+          ]
+        }
+      ],
+      "position": [
+        197.0,
+        120.5
+      ]
+    }
+  },
+  "power": {
+    "+3V3": {
+      "segments": 83,
+      "widths": {
+        "0.8": 83
+      },
+      "length_mm": 157.85640414034202,
+      "layer_lengths": {
+        "F.Cu": 157.85640414034202,
+        "B.Cu": 0
+      },
+      "vias": [],
+      "pads": [
+        {
+          "kind": "pad",
+          "ref": "J1",
+          "pad": "1",
+          "net": "+3V3",
+          "position": [
+            89.5,
+            92.0
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "J2",
+          "pad": "1",
+          "net": "+3V3",
+          "position": [
+            199.0,
+            92.0
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "SW1",
+          "pad": "4",
+          "net": "+3V3",
+          "position": [
+            95.88,
+            85.5
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "U3",
+          "pad": "7",
+          "net": "+3V3",
+          "position": [
+            157.5,
+            97.52
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "U3",
+          "pad": "8",
+          "net": "+3V3",
+          "position": [
+            160.04,
+            97.52
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "SW2",
+          "pad": "4",
+          "net": "+3V3",
+          "position": [
+            191.76,
+            85.5
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "R2",
+          "pad": "1",
+          "net": "+3V3",
+          "position": [
+            188.92,
+            115.5
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "DISP1",
+          "pad": "7",
+          "net": "+3V3",
+          "position": [
+            109.5,
+            84.35
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "R1",
+          "pad": "1",
+          "net": "+3V3",
+          "position": [
+            196.5,
+            112.66
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "U1",
+          "pad": "1",
+          "net": "+3V3",
+          "position": [
+            172.78,
+            90.36
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "U1",
+          "pad": "2",
+          "net": "+3V3",
+          "position": [
+            170.24,
+            90.36
+          ]
+        }
+      ]
+    },
+    "/VBAT_SW": {
+      "segments": 23,
+      "widths": {
+        "0.8": 23
+      },
+      "length_mm": 52.32094951231971,
+      "layer_lengths": {
+        "F.Cu": 52.32094951231971,
+        "B.Cu": 0
+      },
+      "vias": [],
+      "pads": [
+        {
+          "kind": "pad",
+          "ref": "U3",
+          "pad": "3",
+          "net": "/VBAT_SW",
+          "position": [
+            157.5,
+            121.3
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "U3",
+          "pad": "4",
+          "net": "/VBAT_SW",
+          "position": [
+            160.04,
+            121.3
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "SW4",
+          "pad": "2",
+          "net": "/VBAT_SW",
+          "position": [
+            115.0,
+            120.0
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "R3",
+          "pad": "1",
+          "net": "/VBAT_SW",
+          "position": [
+            165.34,
+            119.3
+          ]
+        }
+      ]
+    },
+    "/VBAT_PROT": {
+      "segments": 15,
+      "widths": {
+        "0.8": 15
+      },
+      "length_mm": 25.905817074858803,
+      "layer_lengths": {
+        "F.Cu": 25.905817074858803,
+        "B.Cu": 0
+      },
+      "vias": [],
+      "pads": [
+        {
+          "kind": "pad",
+          "ref": "U2",
+          "pad": "1",
+          "net": "/VBAT_PROT",
+          "position": [
+            123.2,
+            99.8
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "SW4",
+          "pad": "1",
+          "net": "/VBAT_PROT",
+          "position": [
+            109.92,
+            120.0
+          ]
+        }
+      ]
+    },
+    "/VBAT_RAW": {
+      "segments": 8,
+      "widths": {
+        "0.8": 8
+      },
+      "length_mm": 26.966183073676067,
+      "layer_lengths": {
+        "F.Cu": 0,
+        "B.Cu": 26.966183073676067
+      },
+      "vias": [],
+      "pads": [
+        {
+          "kind": "pad",
+          "ref": "U2",
+          "pad": "2",
+          "net": "/VBAT_RAW",
+          "position": [
+            126.4,
+            99.8
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "BT1",
+          "pad": "1",
+          "net": "/VBAT_RAW",
+          "position": [
+            102.0,
+            105.8
+          ]
+        }
+      ]
+    },
+    "/VBAT_GND": {
+      "segments": 12,
+      "widths": {
+        "0.8": 12
+      },
+      "length_mm": 53.85599205235723,
+      "layer_lengths": {
+        "F.Cu": 53.85599205235723,
+        "B.Cu": 0
+      },
+      "vias": [],
+      "pads": [
+        {
+          "kind": "pad",
+          "ref": "U2",
+          "pad": "3",
+          "net": "/VBAT_GND",
+          "position": [
+            133.8,
+            99.8
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "BT1",
+          "pad": "2",
+          "net": "/VBAT_GND",
+          "position": [
+            185.0,
+            105.8
+          ]
+        }
+      ]
+    },
+    "GND": {
+      "segments": 0,
+      "widths": {},
+      "length_mm": 0,
+      "layer_lengths": {
+        "F.Cu": 0,
+        "B.Cu": 0
+      },
+      "vias": [],
+      "pads": [
+        {
+          "kind": "pad",
+          "ref": "J1",
+          "pad": "2",
+          "net": "GND",
+          "position": [
+            89.5,
+            94.54
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "C1",
+          "pad": "1",
+          "net": "GND",
+          "position": [
+            186.96,
+            97.5
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "J2",
+          "pad": "2",
+          "net": "GND",
+          "position": [
+            199.0,
+            94.54
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "SW1",
+          "pad": "5",
+          "net": "GND",
+          "position": [
+            93.34,
+            85.5
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "U3",
+          "pad": "1",
+          "net": "GND",
+          "position": [
+            145.06,
+            121.3
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "U3",
+          "pad": "2",
+          "net": "GND",
+          "position": [
+            147.6,
+            121.3
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "U3",
+          "pad": "5",
+          "net": "GND",
+          "position": [
+            145.06,
+            97.52
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "U3",
+          "pad": "6",
+          "net": "GND",
+          "position": [
+            147.6,
+            97.52
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "SW3",
+          "pad": "2",
+          "net": "GND",
+          "position": [
+            190.5,
+            103.5
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "SW3",
+          "pad": "2",
+          "net": "GND",
+          "position": [
+            190.5,
+            108.5
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "SW2",
+          "pad": "5",
+          "net": "GND",
+          "position": [
+            189.22,
+            85.5
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "SW5",
+          "pad": "2",
+          "net": "GND",
+          "position": [
+            108.5,
+            103.5
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "SW5",
+          "pad": "2",
+          "net": "GND",
+          "position": [
+            108.5,
+            108.5
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "DISP1",
+          "pad": "8",
+          "net": "GND",
+          "position": [
+            109.5,
+            86.89
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "U2",
+          "pad": "4",
+          "net": "GND",
+          "position": [
+            137.0,
+            99.8
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "R4",
+          "pad": "2",
+          "net": "GND",
+          "position": [
+            189.35,
+            119.3
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "U1",
+          "pad": "22",
+          "net": "GND",
+          "position": [
+            119.44,
+            90.36
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "U1",
+          "pad": "23",
+          "net": "GND",
+          "position": [
+            172.78,
+            67.5
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "U1",
+          "pad": "43",
+          "net": "GND",
+          "position": [
+            121.98,
+            67.5
+          ]
+        },
+        {
+          "kind": "pad",
+          "ref": "U1",
+          "pad": "44",
+          "net": "GND",
+          "position": [
+            119.44,
+            67.5
+          ]
+        }
+      ]
+    }
+  },
+  "zones": {
+    "stored": [
+      {
+        "name": "GND plane F.Cu",
+        "net": "GND",
+        "layer": "F.Cu",
+        "area_mm2": 4978.37894913888,
+        "polygons": 5,
+        "antenna_overlap_mm2": 0.0,
+        "clearance_mm": 0.25,
+        "thermal_gap_mm": 0.3,
+        "thermal_spoke_mm": 0.4,
+        "island_removal": 0,
+        "hole_radius_mm": {
+          "H3": 1.8505,
+          "H2": 4.794917,
+          "H1": 1.8505,
+          "H4": 1.8505
+        }
+      },
+      {
+        "name": "GND plane B.Cu",
+        "net": "GND",
+        "layer": "B.Cu",
+        "area_mm2": 5610.026770321256,
+        "polygons": 7,
+        "antenna_overlap_mm2": 0.0,
+        "clearance_mm": 0.25,
+        "thermal_gap_mm": 0.3,
+        "thermal_spoke_mm": 0.4,
+        "island_removal": 0,
+        "hole_radius_mm": {
+          "H3": 1.8505,
+          "H2": 1.8505,
+          "H1": 1.8505,
+          "H4": 1.8505
+        }
+      }
+    ],
+    "refilled": [
+      {
+        "name": "GND plane F.Cu",
+        "net": "GND",
+        "layer": "F.Cu",
+        "area_mm2": 4978.37894913888,
+        "polygons": 5,
+        "antenna_overlap_mm2": 0.0,
+        "clearance_mm": 0.25,
+        "thermal_gap_mm": 0.3,
+        "thermal_spoke_mm": 0.4,
+        "island_removal": 0,
+        "hole_radius_mm": {
+          "H3": 1.8505,
+          "H2": 4.794917,
+          "H1": 1.8505,
+          "H4": 1.8505
+        }
+      },
+      {
+        "name": "GND plane B.Cu",
+        "net": "GND",
+        "layer": "B.Cu",
+        "area_mm2": 5610.026770321256,
+        "polygons": 7,
+        "antenna_overlap_mm2": 0.0,
+        "clearance_mm": 0.25,
+        "thermal_gap_mm": 0.3,
+        "thermal_spoke_mm": 0.4,
+        "island_removal": 0,
+        "hole_radius_mm": {
+          "H3": 1.8505,
+          "H2": 1.8505,
+          "H1": 1.8505,
+          "H4": 1.8505
+        }
+      }
+    ]
+  },
+  "antenna": {
+    "outline": [
+      [
+        181.11,
+        87.68
+      ],
+      [
+        181.11,
+        70.18
+      ],
+      [
+        175.11,
+        70.18
+      ],
+      [
+        175.11,
+        87.68
+      ]
+    ],
+    "copper_intrusions": []
+  },
+  "footprints": [
+    {
+      "ref": "J1",
+      "layer": "F.Cu",
+      "position": [
+        89.5,
+        92.0
+      ],
+      "pads": [
+        {
+          "number": "1",
+          "net": "+3V3",
+          "position": [
+            89.5,
+            92.0
+          ],
+          "size": [
+            2.0,
+            2.0
+          ],
+          "drill": [
+            1.1,
+            1.1
+          ],
+          "shape": 1,
+          "attribute": 0
+        },
+        {
+          "number": "2",
+          "net": "GND",
+          "position": [
+            89.5,
+            94.54
+          ],
+          "size": [
+            2.0,
+            2.0
+          ],
+          "drill": [
+            1.1,
+            1.1
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "3",
+          "net": "/CFG_RX",
+          "position": [
+            89.5,
+            97.08
+          ],
+          "size": [
+            2.0,
+            2.0
+          ],
+          "drill": [
+            1.1,
+            1.1
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "4",
+          "net": "/CFG_TX",
+          "position": [
+            89.5,
+            99.62
+          ],
+          "size": [
+            2.0,
+            2.0
+          ],
+          "drill": [
+            1.1,
+            1.1
+          ],
+          "shape": 0,
+          "attribute": 0
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            87.0,
+            90.2
+          ],
+          "end": [
+            92.0,
+            101.42
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            86.5,
+            92.0
+          ],
+          "end": [
+            86.9,
+            92.0
+          ],
+          "shape": 3
+        }
+      ]
+    },
+    {
+      "ref": "C1",
+      "layer": "F.Cu",
+      "position": [
+        188.23,
+        97.5
+      ],
+      "pads": [
+        {
+          "number": "1",
+          "net": "GND",
+          "position": [
+            186.96,
+            97.5
+          ],
+          "size": [
+            1.6,
+            1.6
+          ],
+          "drill": [
+            0.85,
+            0.85
+          ],
+          "shape": 1,
+          "attribute": 0
+        },
+        {
+          "number": "2",
+          "net": "/BATSENSE",
+          "position": [
+            189.5,
+            97.5
+          ],
+          "size": [
+            1.6,
+            1.6
+          ],
+          "drill": [
+            0.85,
+            0.85
+          ],
+          "shape": 0,
+          "attribute": 0
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            186.03,
+            96.3
+          ],
+          "end": [
+            190.43,
+            98.7
+          ],
+          "shape": 1
+        }
+      ]
+    },
+    {
+      "ref": "J2",
+      "layer": "F.Cu",
+      "position": [
+        199.0,
+        92.0
+      ],
+      "pads": [
+        {
+          "number": "1",
+          "net": "+3V3",
+          "position": [
+            199.0,
+            92.0
+          ],
+          "size": [
+            2.0,
+            2.0
+          ],
+          "drill": [
+            1.1,
+            1.1
+          ],
+          "shape": 1,
+          "attribute": 0
+        },
+        {
+          "number": "2",
+          "net": "GND",
+          "position": [
+            199.0,
+            94.54
+          ],
+          "size": [
+            2.0,
+            2.0
+          ],
+          "drill": [
+            1.1,
+            1.1
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "3",
+          "net": "/CHAIN_TX",
+          "position": [
+            199.0,
+            97.08
+          ],
+          "size": [
+            2.0,
+            2.0
+          ],
+          "drill": [
+            1.1,
+            1.1
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "4",
+          "net": "/CHAIN_RX",
+          "position": [
+            199.0,
+            99.62
+          ],
+          "size": [
+            2.0,
+            2.0
+          ],
+          "drill": [
+            1.1,
+            1.1
+          ],
+          "shape": 0,
+          "attribute": 0
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            196.5,
+            90.2
+          ],
+          "end": [
+            201.5,
+            101.42
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            196.0,
+            92.0
+          ],
+          "end": [
+            196.4,
+            92.0
+          ],
+          "shape": 3
+        }
+      ]
+    },
+    {
+      "ref": "H3",
+      "layer": "F.Cu",
+      "position": [
+        91.5,
+        120.5
+      ],
+      "pads": [
+        {
+          "number": "",
+          "net": "",
+          "position": [
+            91.5,
+            120.5
+          ],
+          "size": [
+            3.2,
+            3.2
+          ],
+          "drill": [
+            3.2,
+            3.2
+          ],
+          "shape": 0,
+          "attribute": 3
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "User.Comments",
+          "start": [
+            91.5,
+            120.5
+          ],
+          "end": [
+            94.7,
+            120.5
+          ],
+          "shape": 3
+        },
+        {
+          "layer": "F.Courtyard",
+          "start": [
+            91.5,
+            120.5
+          ],
+          "end": [
+            94.95,
+            120.5
+          ],
+          "shape": 3
+        }
+      ]
+    },
+    {
+      "ref": "H2",
+      "layer": "F.Cu",
+      "position": [
+        192.25,
+        92.0
+      ],
+      "pads": [
+        {
+          "number": "",
+          "net": "",
+          "position": [
+            192.25,
+            92.0
+          ],
+          "size": [
+            3.2,
+            3.2
+          ],
+          "drill": [
+            3.2,
+            3.2
+          ],
+          "shape": 0,
+          "attribute": 3
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "User.Comments",
+          "start": [
+            192.25,
+            92.0
+          ],
+          "end": [
+            195.45,
+            92.0
+          ],
+          "shape": 3
+        },
+        {
+          "layer": "F.Courtyard",
+          "start": [
+            192.25,
+            92.0
+          ],
+          "end": [
+            195.7,
+            92.0
+          ],
+          "shape": 3
+        }
+      ]
+    },
+    {
+      "ref": "SW1",
+      "layer": "F.Cu",
+      "position": [
+        96.5,
+        75.5
+      ],
+      "pads": [
+        {
+          "number": "",
+          "net": "",
+          "position": [
+            90.0,
+            67.5
+          ],
+          "size": [
+            3.2,
+            3.2
+          ],
+          "drill": [
+            3.2,
+            3.2
+          ],
+          "shape": 0,
+          "attribute": 3
+        },
+        {
+          "number": "",
+          "net": "",
+          "position": [
+            90.0,
+            83.5
+          ],
+          "size": [
+            3.2,
+            3.2
+          ],
+          "drill": [
+            3.2,
+            3.2
+          ],
+          "shape": 0,
+          "attribute": 3
+        },
+        {
+          "number": "1",
+          "net": "/K1_CLK",
+          "position": [
+            103.5,
+            85.5
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 1,
+          "attribute": 0
+        },
+        {
+          "number": "2",
+          "net": "/K1_DT",
+          "position": [
+            100.96,
+            85.5
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "3",
+          "net": "/K1_SW",
+          "position": [
+            98.42,
+            85.5
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "4",
+          "net": "+3V3",
+          "position": [
+            95.88,
+            85.5
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "5",
+          "net": "GND",
+          "position": [
+            93.34,
+            85.5
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            105.5,
+            63.0
+          ],
+          "end": [
+            87.5,
+            88.0
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            90.0,
+            67.5
+          ],
+          "end": [
+            90.0,
+            69.5
+          ],
+          "shape": 3
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            90.0,
+            83.5
+          ],
+          "end": [
+            90.0,
+            85.5
+          ],
+          "shape": 3
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            98.42,
+            73.0
+          ],
+          "end": [
+            98.42,
+            76.0
+          ],
+          "shape": 3
+        },
+        {
+          "layer": "F.Courtyard",
+          "start": [
+            106.0,
+            62.5
+          ],
+          "end": [
+            87.0,
+            88.5
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Fab",
+          "start": [
+            104.42,
+            67.0
+          ],
+          "end": [
+            92.42,
+            79.0
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Fab",
+          "start": [
+            98.42,
+            73.0
+          ],
+          "end": [
+            98.42,
+            77.5
+          ],
+          "shape": 3
+        }
+      ]
+    },
+    {
+      "ref": "U3",
+      "layer": "F.Cu",
+      "position": [
+        152.55,
+        109.41
+      ],
+      "pads": [
+        {
+          "number": "1",
+          "net": "GND",
+          "position": [
+            145.06,
+            121.3
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 1,
+          "attribute": 0
+        },
+        {
+          "number": "2",
+          "net": "GND",
+          "position": [
+            147.6,
+            121.3
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "3",
+          "net": "/VBAT_SW",
+          "position": [
+            157.5,
+            121.3
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "4",
+          "net": "/VBAT_SW",
+          "position": [
+            160.04,
+            121.3
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "5",
+          "net": "GND",
+          "position": [
+            145.06,
+            97.52
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "6",
+          "net": "GND",
+          "position": [
+            147.6,
+            97.52
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "7",
+          "net": "+3V3",
+          "position": [
+            157.5,
+            97.52
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "8",
+          "net": "+3V3",
+          "position": [
+            160.04,
+            97.52
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            143.8,
+            122.57
+          ],
+          "end": [
+            161.3,
+            96.25
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Courtyard",
+          "start": [
+            143.3,
+            123.07
+          ],
+          "end": [
+            161.8,
+            95.75
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Fab",
+          "start": [
+            143.8,
+            98.79
+          ],
+          "end": [
+            148.88,
+            96.25
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Fab",
+          "start": [
+            143.8,
+            122.57
+          ],
+          "end": [
+            148.88,
+            120.03
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Fab",
+          "start": [
+            156.22,
+            98.79
+          ],
+          "end": [
+            161.3,
+            96.25
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Fab",
+          "start": [
+            156.22,
+            122.57
+          ],
+          "end": [
+            161.3,
+            120.03
+          ],
+          "shape": 1
+        }
+      ]
+    },
+    {
+      "ref": "SW3",
+      "layer": "F.Cu",
+      "position": [
+        184.25,
+        106.0
+      ],
+      "pads": [
+        {
+          "number": "1",
+          "net": "/BTN_START",
+          "position": [
+            178.0,
+            103.5
+          ],
+          "size": [
+            2.2,
+            2.2
+          ],
+          "drill": [
+            1.3,
+            1.3
+          ],
+          "shape": 1,
+          "attribute": 0
+        },
+        {
+          "number": "1",
+          "net": "/BTN_START",
+          "position": [
+            178.0,
+            108.5
+          ],
+          "size": [
+            2.2,
+            2.2
+          ],
+          "drill": [
+            1.3,
+            1.3
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "2",
+          "net": "GND",
+          "position": [
+            190.5,
+            103.5
+          ],
+          "size": [
+            2.2,
+            2.2
+          ],
+          "drill": [
+            1.3,
+            1.3
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "2",
+          "net": "GND",
+          "position": [
+            190.5,
+            108.5
+          ],
+          "size": [
+            2.2,
+            2.2
+          ],
+          "drill": [
+            1.3,
+            1.3
+          ],
+          "shape": 0,
+          "attribute": 0
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            178.25,
+            100.0
+          ],
+          "end": [
+            190.25,
+            112.0
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            184.25,
+            106.0
+          ],
+          "end": [
+            187.65,
+            106.0
+          ],
+          "shape": 3
+        },
+        {
+          "layer": "F.Fab",
+          "start": [
+            184.25,
+            106.0
+          ],
+          "end": [
+            185.75,
+            106.0
+          ],
+          "shape": 3
+        }
+      ]
+    },
+    {
+      "ref": "SW2",
+      "layer": "F.Cu",
+      "position": [
+        192.38,
+        75.5
+      ],
+      "pads": [
+        {
+          "number": "",
+          "net": "",
+          "position": [
+            185.88,
+            67.5
+          ],
+          "size": [
+            3.2,
+            3.2
+          ],
+          "drill": [
+            3.2,
+            3.2
+          ],
+          "shape": 0,
+          "attribute": 3
+        },
+        {
+          "number": "",
+          "net": "",
+          "position": [
+            185.88,
+            83.5
+          ],
+          "size": [
+            3.2,
+            3.2
+          ],
+          "drill": [
+            3.2,
+            3.2
+          ],
+          "shape": 0,
+          "attribute": 3
+        },
+        {
+          "number": "1",
+          "net": "/K2_CLK",
+          "position": [
+            199.38,
+            85.5
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 1,
+          "attribute": 0
+        },
+        {
+          "number": "2",
+          "net": "/K2_DT",
+          "position": [
+            196.84,
+            85.5
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "3",
+          "net": "/K2_SW",
+          "position": [
+            194.3,
+            85.5
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "4",
+          "net": "+3V3",
+          "position": [
+            191.76,
+            85.5
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "5",
+          "net": "GND",
+          "position": [
+            189.22,
+            85.5
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            201.38,
+            63.0
+          ],
+          "end": [
+            183.38,
+            88.0
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            185.88,
+            67.5
+          ],
+          "end": [
+            185.88,
+            69.5
+          ],
+          "shape": 3
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            185.88,
+            83.5
+          ],
+          "end": [
+            185.88,
+            85.5
+          ],
+          "shape": 3
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            194.3,
+            73.0
+          ],
+          "end": [
+            194.3,
+            76.0
+          ],
+          "shape": 3
+        },
+        {
+          "layer": "F.Courtyard",
+          "start": [
+            201.88,
+            62.5
+          ],
+          "end": [
+            182.88,
+            88.5
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Fab",
+          "start": [
+            200.3,
+            67.0
+          ],
+          "end": [
+            188.3,
+            79.0
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Fab",
+          "start": [
+            194.3,
+            73.0
+          ],
+          "end": [
+            194.3,
+            77.5
+          ],
+          "shape": 3
+        }
+      ]
+    },
+    {
+      "ref": "SW5",
+      "layer": "F.Cu",
+      "position": [
+        102.25,
+        106.0
+      ],
+      "pads": [
+        {
+          "number": "1",
+          "net": "/BTN_STOP",
+          "position": [
+            96.0,
+            103.5
+          ],
+          "size": [
+            2.2,
+            2.2
+          ],
+          "drill": [
+            1.3,
+            1.3
+          ],
+          "shape": 1,
+          "attribute": 0
+        },
+        {
+          "number": "1",
+          "net": "/BTN_STOP",
+          "position": [
+            96.0,
+            108.5
+          ],
+          "size": [
+            2.2,
+            2.2
+          ],
+          "drill": [
+            1.3,
+            1.3
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "2",
+          "net": "GND",
+          "position": [
+            108.5,
+            103.5
+          ],
+          "size": [
+            2.2,
+            2.2
+          ],
+          "drill": [
+            1.3,
+            1.3
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "2",
+          "net": "GND",
+          "position": [
+            108.5,
+            108.5
+          ],
+          "size": [
+            2.2,
+            2.2
+          ],
+          "drill": [
+            1.3,
+            1.3
+          ],
+          "shape": 0,
+          "attribute": 0
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            96.25,
+            100.0
+          ],
+          "end": [
+            108.25,
+            112.0
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            102.25,
+            106.0
+          ],
+          "end": [
+            105.65,
+            106.0
+          ],
+          "shape": 3
+        },
+        {
+          "layer": "F.Fab",
+          "start": [
+            102.25,
+            106.0
+          ],
+          "end": [
+            103.75,
+            106.0
+          ],
+          "shape": 3
+        }
+      ]
+    },
+    {
+      "ref": "R2",
+      "layer": "F.Cu",
+      "position": [
+        194.0,
+        115.5
+      ],
+      "pads": [
+        {
+          "number": "1",
+          "net": "+3V3",
+          "position": [
+            188.92,
+            115.5
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            0.85,
+            0.85
+          ],
+          "shape": 1,
+          "attribute": 0
+        },
+        {
+          "number": "2",
+          "net": "/CHAIN_RX",
+          "position": [
+            199.08,
+            115.5
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            0.85,
+            0.85
+          ],
+          "shape": 0,
+          "attribute": 0
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            188.92,
+            115.5
+          ],
+          "end": [
+            190.8,
+            115.5
+          ],
+          "shape": 0
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            197.2,
+            115.5
+          ],
+          "end": [
+            199.08,
+            115.5
+          ],
+          "shape": 0
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            190.8,
+            114.2
+          ],
+          "end": [
+            197.2,
+            116.8
+          ],
+          "shape": 1
+        }
+      ]
+    },
+    {
+      "ref": "DISP1",
+      "layer": "F.Cu",
+      "position": [
+        143.5,
+        78.0
+      ],
+      "pads": [
+        {
+          "number": "",
+          "net": "",
+          "position": [
+            110.5,
+            65.5
+          ],
+          "size": [
+            2.2,
+            2.2
+          ],
+          "drill": [
+            2.2,
+            2.2
+          ],
+          "shape": 0,
+          "attribute": 3
+        },
+        {
+          "number": "",
+          "net": "",
+          "position": [
+            110.5,
+            90.5
+          ],
+          "size": [
+            2.2,
+            2.2
+          ],
+          "drill": [
+            2.2,
+            2.2
+          ],
+          "shape": 0,
+          "attribute": 3
+        },
+        {
+          "number": "",
+          "net": "",
+          "position": [
+            176.5,
+            65.5
+          ],
+          "size": [
+            2.2,
+            2.2
+          ],
+          "drill": [
+            2.2,
+            2.2
+          ],
+          "shape": 0,
+          "attribute": 3
+        },
+        {
+          "number": "",
+          "net": "",
+          "position": [
+            176.5,
+            90.5
+          ],
+          "size": [
+            2.2,
+            2.2
+          ],
+          "drill": [
+            2.2,
+            2.2
+          ],
+          "shape": 0,
+          "attribute": 3
+        },
+        {
+          "number": "1",
+          "net": "/EPD_BUSY",
+          "position": [
+            109.5,
+            69.11
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 1,
+          "attribute": 0
+        },
+        {
+          "number": "2",
+          "net": "/EPD_CS",
+          "position": [
+            109.5,
+            71.65
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "3",
+          "net": "/EPD_DC",
+          "position": [
+            109.5,
+            74.19
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "4",
+          "net": "/EPD_RES",
+          "position": [
+            109.5,
+            76.73
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "5",
+          "net": "/EPD_MOSI",
+          "position": [
+            109.5,
+            79.27
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "6",
+          "net": "/EPD_SCK",
+          "position": [
+            109.5,
+            81.81
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "7",
+          "net": "+3V3",
+          "position": [
+            109.5,
+            84.35
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "8",
+          "net": "GND",
+          "position": [
+            109.5,
+            86.89
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            108.0,
+            63.0
+          ],
+          "end": [
+            179.0,
+            93.0
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            110.5,
+            65.5
+          ],
+          "end": [
+            112.3,
+            65.5
+          ],
+          "shape": 3
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            110.5,
+            90.5
+          ],
+          "end": [
+            112.3,
+            90.5
+          ],
+          "shape": 3
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            176.5,
+            65.5
+          ],
+          "end": [
+            178.3,
+            65.5
+          ],
+          "shape": 3
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            176.5,
+            90.5
+          ],
+          "end": [
+            178.3,
+            90.5
+          ],
+          "shape": 3
+        },
+        {
+          "layer": "F.Courtyard",
+          "start": [
+            107.5,
+            62.5
+          ],
+          "end": [
+            179.5,
+            93.5
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Fab",
+          "start": [
+            108.0,
+            63.0
+          ],
+          "end": [
+            179.0,
+            93.0
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Fab",
+          "start": [
+            117.0,
+            63.4
+          ],
+          "end": [
+            176.2,
+            92.6
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Fab",
+          "start": [
+            126.95,
+            66.145
+          ],
+          "end": [
+            175.5,
+            89.855
+          ],
+          "shape": 1
+        }
+      ]
+    },
+    {
+      "ref": "U2",
+      "layer": "F.Cu",
+      "position": [
+        130.1,
+        110.65
+      ],
+      "pads": [
+        {
+          "number": "1",
+          "net": "/VBAT_PROT",
+          "position": [
+            123.2,
+            99.8
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 1,
+          "attribute": 0
+        },
+        {
+          "number": "2",
+          "net": "/VBAT_RAW",
+          "position": [
+            126.4,
+            99.8
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "3",
+          "net": "/VBAT_GND",
+          "position": [
+            133.8,
+            99.8
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "4",
+          "net": "GND",
+          "position": [
+            137.0,
+            99.8
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "5",
+          "net": "unconnected-(U2-IN--Pad5)",
+          "position": [
+            137.0,
+            121.5
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "6",
+          "net": "unconnected-(U2-IN+-Pad6)",
+          "position": [
+            123.2,
+            121.5
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            121.6,
+            123.45
+          ],
+          "end": [
+            138.6,
+            97.85
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            125.65,
+            125.85
+          ],
+          "end": [
+            134.55,
+            123.45
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Courtyard",
+          "start": [
+            121.1,
+            126.35
+          ],
+          "end": [
+            139.1,
+            97.35
+          ],
+          "shape": 1
+        }
+      ]
+    },
+    {
+      "ref": "H1",
+      "layer": "F.Cu",
+      "position": [
+        96.25,
+        92.0
+      ],
+      "pads": [
+        {
+          "number": "",
+          "net": "",
+          "position": [
+            96.25,
+            92.0
+          ],
+          "size": [
+            3.2,
+            3.2
+          ],
+          "drill": [
+            3.2,
+            3.2
+          ],
+          "shape": 0,
+          "attribute": 3
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "User.Comments",
+          "start": [
+            96.25,
+            92.0
+          ],
+          "end": [
+            99.45,
+            92.0
+          ],
+          "shape": 3
+        },
+        {
+          "layer": "F.Courtyard",
+          "start": [
+            96.25,
+            92.0
+          ],
+          "end": [
+            99.7,
+            92.0
+          ],
+          "shape": 3
+        }
+      ]
+    },
+    {
+      "ref": "SW4",
+      "layer": "F.Cu",
+      "position": [
+        112.46,
+        120.0
+      ],
+      "pads": [
+        {
+          "number": "1",
+          "net": "/VBAT_PROT",
+          "position": [
+            109.92,
+            120.0
+          ],
+          "size": [
+            2.4,
+            2.4
+          ],
+          "drill": [
+            1.2,
+            1.2
+          ],
+          "shape": 1,
+          "attribute": 0
+        },
+        {
+          "number": "2",
+          "net": "/VBAT_SW",
+          "position": [
+            115.0,
+            120.0
+          ],
+          "size": [
+            2.4,
+            2.4
+          ],
+          "drill": [
+            1.2,
+            1.2
+          ],
+          "shape": 0,
+          "attribute": 0
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            107.46,
+            117.0
+          ],
+          "end": [
+            117.46,
+            123.0
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "F.Courtyard",
+          "start": [
+            106.96,
+            116.5
+          ],
+          "end": [
+            117.96,
+            123.5
+          ],
+          "shape": 1
+        }
+      ]
+    },
+    {
+      "ref": "R3",
+      "layer": "F.Cu",
+      "position": [
+        170.42,
+        119.3
+      ],
+      "pads": [
+        {
+          "number": "1",
+          "net": "/VBAT_SW",
+          "position": [
+            165.34,
+            119.3
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            0.85,
+            0.85
+          ],
+          "shape": 1,
+          "attribute": 0
+        },
+        {
+          "number": "2",
+          "net": "/BATSENSE",
+          "position": [
+            175.5,
+            119.3
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            0.85,
+            0.85
+          ],
+          "shape": 0,
+          "attribute": 0
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            165.34,
+            119.3
+          ],
+          "end": [
+            167.22,
+            119.3
+          ],
+          "shape": 0
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            173.62,
+            119.3
+          ],
+          "end": [
+            175.5,
+            119.3
+          ],
+          "shape": 0
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            167.22,
+            118.0
+          ],
+          "end": [
+            173.62,
+            120.6
+          ],
+          "shape": 1
+        }
+      ]
+    },
+    {
+      "ref": "R4",
+      "layer": "F.Cu",
+      "position": [
+        184.27,
+        119.3
+      ],
+      "pads": [
+        {
+          "number": "1",
+          "net": "/BATSENSE",
+          "position": [
+            179.19,
+            119.3
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            0.85,
+            0.85
+          ],
+          "shape": 1,
+          "attribute": 0
+        },
+        {
+          "number": "2",
+          "net": "GND",
+          "position": [
+            189.35,
+            119.3
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            0.85,
+            0.85
+          ],
+          "shape": 0,
+          "attribute": 0
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            179.19,
+            119.3
+          ],
+          "end": [
+            181.07,
+            119.3
+          ],
+          "shape": 0
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            187.47,
+            119.3
+          ],
+          "end": [
+            189.35,
+            119.3
+          ],
+          "shape": 0
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            181.07,
+            118.0
+          ],
+          "end": [
+            187.47,
+            120.6
+          ],
+          "shape": 1
+        }
+      ]
+    },
+    {
+      "ref": "H4",
+      "layer": "F.Cu",
+      "position": [
+        197.0,
+        120.5
+      ],
+      "pads": [
+        {
+          "number": "",
+          "net": "",
+          "position": [
+            197.0,
+            120.5
+          ],
+          "size": [
+            3.2,
+            3.2
+          ],
+          "drill": [
+            3.2,
+            3.2
+          ],
+          "shape": 0,
+          "attribute": 3
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "User.Comments",
+          "start": [
+            197.0,
+            120.5
+          ],
+          "end": [
+            200.2,
+            120.5
+          ],
+          "shape": 3
+        },
+        {
+          "layer": "F.Courtyard",
+          "start": [
+            197.0,
+            120.5
+          ],
+          "end": [
+            200.45,
+            120.5
+          ],
+          "shape": 3
+        }
+      ]
+    },
+    {
+      "ref": "R1",
+      "layer": "F.Cu",
+      "position": [
+        196.5,
+        107.58
+      ],
+      "pads": [
+        {
+          "number": "1",
+          "net": "+3V3",
+          "position": [
+            196.5,
+            112.66
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            0.85,
+            0.85
+          ],
+          "shape": 1,
+          "attribute": 0
+        },
+        {
+          "number": "2",
+          "net": "/CHAIN_TX",
+          "position": [
+            196.5,
+            102.5
+          ],
+          "size": [
+            1.8,
+            1.8
+          ],
+          "drill": [
+            0.85,
+            0.85
+          ],
+          "shape": 0,
+          "attribute": 0
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            196.5,
+            104.38
+          ],
+          "end": [
+            196.5,
+            102.5
+          ],
+          "shape": 0
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            196.5,
+            112.66
+          ],
+          "end": [
+            196.5,
+            110.78
+          ],
+          "shape": 0
+        },
+        {
+          "layer": "F.Silkscreen",
+          "start": [
+            195.2,
+            110.78
+          ],
+          "end": [
+            197.8,
+            104.38
+          ],
+          "shape": 1
+        }
+      ]
+    },
+    {
+      "ref": "BT1",
+      "layer": "B.Cu",
+      "position": [
+        143.5,
+        105.8
+      ],
+      "pads": [
+        {
+          "number": "",
+          "net": "",
+          "position": [
+            115.75,
+            105.8
+          ],
+          "size": [
+            3.2,
+            3.2
+          ],
+          "drill": [
+            3.2,
+            3.2
+          ],
+          "shape": 0,
+          "attribute": 3
+        },
+        {
+          "number": "",
+          "net": "",
+          "position": [
+            171.25,
+            105.8
+          ],
+          "size": [
+            3.2,
+            3.2
+          ],
+          "drill": [
+            3.2,
+            3.2
+          ],
+          "shape": 0,
+          "attribute": 3
+        },
+        {
+          "number": "1",
+          "net": "/VBAT_RAW",
+          "position": [
+            102.0,
+            105.8
+          ],
+          "size": [
+            2.4,
+            2.4
+          ],
+          "drill": [
+            1.2,
+            1.2
+          ],
+          "shape": 1,
+          "attribute": 0
+        },
+        {
+          "number": "2",
+          "net": "/VBAT_GND",
+          "position": [
+            185.0,
+            105.8
+          ],
+          "size": [
+            2.4,
+            2.4
+          ],
+          "drill": [
+            1.2,
+            1.2
+          ],
+          "shape": 0,
+          "attribute": 0
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "B.Silkscreen",
+          "start": [
+            104.75,
+            116.05
+          ],
+          "end": [
+            182.25,
+            95.55
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "B.Silkscreen",
+          "start": [
+            115.75,
+            105.8
+          ],
+          "end": [
+            117.75,
+            105.8
+          ],
+          "shape": 3
+        },
+        {
+          "layer": "B.Silkscreen",
+          "start": [
+            171.25,
+            105.8
+          ],
+          "end": [
+            173.25,
+            105.8
+          ],
+          "shape": 3
+        },
+        {
+          "layer": "B.Courtyard",
+          "start": [
+            100.0,
+            116.8
+          ],
+          "end": [
+            187.0,
+            94.8
+          ],
+          "shape": 1
+        }
+      ]
+    },
+    {
+      "ref": "U1",
+      "layer": "B.Cu",
+      "position": [
+        146.11,
+        78.93
+      ],
+      "pads": [
+        {
+          "number": "1",
+          "net": "+3V3",
+          "position": [
+            172.78,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 1,
+          "attribute": 0
+        },
+        {
+          "number": "2",
+          "net": "+3V3",
+          "position": [
+            170.24,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "3",
+          "net": "unconnected-(U1-EN{slash}RST-Pad3)",
+          "position": [
+            167.7,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "4",
+          "net": "/EPD_BUSY",
+          "position": [
+            165.16,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "5",
+          "net": "/EPD_RES",
+          "position": [
+            162.62,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "6",
+          "net": "/EPD_DC",
+          "position": [
+            160.08,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "7",
+          "net": "/EPD_CS",
+          "position": [
+            157.54,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "8",
+          "net": "/CHAIN_TX",
+          "position": [
+            155.0,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "9",
+          "net": "/CHAIN_RX",
+          "position": [
+            152.46,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "10",
+          "net": "/CFG_TX",
+          "position": [
+            149.92,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "11",
+          "net": "/CFG_RX",
+          "position": [
+            147.38,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "12",
+          "net": "/K1_CLK",
+          "position": [
+            144.84,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "13",
+          "net": "unconnected-(U1-GPIO3-Pad13)",
+          "position": [
+            142.3,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "14",
+          "net": "unconnected-(U1-GPIO46-Pad14)",
+          "position": [
+            139.76,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "15",
+          "net": "/K1_DT",
+          "position": [
+            137.22,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "16",
+          "net": "/K1_SW",
+          "position": [
+            134.68,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "17",
+          "net": "/K2_CLK",
+          "position": [
+            132.14,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "18",
+          "net": "/K2_DT",
+          "position": [
+            129.6,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "19",
+          "net": "/K2_SW",
+          "position": [
+            127.06,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "20",
+          "net": "/BTN_START",
+          "position": [
+            124.52,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "21",
+          "net": "unconnected-(U1-5V-Pad21)",
+          "position": [
+            121.98,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "22",
+          "net": "GND",
+          "position": [
+            119.44,
+            90.36
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "23",
+          "net": "GND",
+          "position": [
+            172.78,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 1,
+          "attribute": 0
+        },
+        {
+          "number": "24",
+          "net": "unconnected-(U1-TX{slash}IO43-Pad24)",
+          "position": [
+            170.24,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "25",
+          "net": "unconnected-(U1-RX{slash}IO44-Pad25)",
+          "position": [
+            167.7,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "26",
+          "net": "/BATSENSE",
+          "position": [
+            165.16,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "27",
+          "net": "/BTN_STOP",
+          "position": [
+            162.62,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "28",
+          "net": "unconnected-(U1-GPIO42-Pad28)",
+          "position": [
+            160.08,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "29",
+          "net": "unconnected-(U1-GPIO41-Pad29)",
+          "position": [
+            157.54,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "30",
+          "net": "unconnected-(U1-GPIO40-Pad30)",
+          "position": [
+            155.0,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "31",
+          "net": "unconnected-(U1-GPIO39-Pad31)",
+          "position": [
+            152.46,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "32",
+          "net": "/EPD_MOSI",
+          "position": [
+            149.92,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "33",
+          "net": "unconnected-(U1-GPIO37-Pad33)",
+          "position": [
+            147.38,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "34",
+          "net": "unconnected-(U1-GPIO36-Pad34)",
+          "position": [
+            144.84,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "35",
+          "net": "unconnected-(U1-GPIO35-Pad35)",
+          "position": [
+            142.3,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "36",
+          "net": "unconnected-(U1-GPIO0-Pad36)",
+          "position": [
+            139.76,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "37",
+          "net": "unconnected-(U1-GPIO45-Pad37)",
+          "position": [
+            137.22,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "38",
+          "net": "unconnected-(U1-GPIO48-Pad38)",
+          "position": [
+            134.68,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "39",
+          "net": "unconnected-(U1-GPIO47-Pad39)",
+          "position": [
+            132.14,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "40",
+          "net": "/EPD_SCK",
+          "position": [
+            129.6,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "41",
+          "net": "unconnected-(U1-GPIO20-Pad41)",
+          "position": [
+            127.06,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "42",
+          "net": "unconnected-(U1-GPIO19-Pad42)",
+          "position": [
+            124.52,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "43",
+          "net": "GND",
+          "position": [
+            121.98,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        },
+        {
+          "number": "44",
+          "net": "GND",
+          "position": [
+            119.44,
+            67.5
+          ],
+          "size": [
+            1.7,
+            1.7
+          ],
+          "drill": [
+            1.0,
+            1.0
+          ],
+          "shape": 0,
+          "attribute": 0
+        }
+      ],
+      "graphics": [
+        {
+          "layer": "B.Silkscreen",
+          "start": [
+            175.11,
+            92.43
+          ],
+          "end": [
+            117.11,
+            65.43
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "B.Silkscreen",
+          "start": [
+            181.11,
+            87.68
+          ],
+          "end": [
+            175.11,
+            70.18
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "B.Courtyard",
+          "start": [
+            175.61,
+            92.93
+          ],
+          "end": [
+            116.61,
+            64.93
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "B.Courtyard",
+          "start": [
+            181.61,
+            88.18
+          ],
+          "end": [
+            175.11,
+            69.68
+          ],
+          "shape": 1
+        },
+        {
+          "layer": "B.Fab",
+          "start": [
+            181.11,
+            87.68
+          ],
+          "end": [
+            175.11,
+            70.18
+          ],
+          "shape": 1
+        }
+      ]
+    }
+  ],
+  "battery_ground_clearance": {
+    "F.Cu": {
+      "lower_mm": 0.249023,
+      "upper_mm": 0.25,
+      "overlap_mm2": 0.0
+    },
+    "B.Cu": {
+      "lower_mm": 0.249023,
+      "upper_mm": 0.25,
+      "overlap_mm2": 0.0
+    }
+  },
+  "source_unchanged": true
+}

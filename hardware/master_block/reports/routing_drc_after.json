@@ -1,7 +1,7 @@
 {
     "$schema": "https://schemas.kicad.org/drc.v1.json",
     "coordinate_units": "mm",
-    "date": "2026-10-04T21:05:40",
+    "date": "2026-10-14T12:34:35",
     "ignored_checks": [
         {
             "description": "Footprint has no courtyard defined",
@@ -277,7 +277,7 @@
                     "description": "PTH pad 1 [+3V3] of U1",
                     "pos": {
                         "x": 172.78,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "3175965b-c075-467f-9e94-076eb5468c62"
                 },
@@ -300,7 +300,7 @@
                     "description": "PTH pad 2 [+3V3] of U1",
                     "pos": {
                         "x": 170.24,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "78c35415-2bb1-4859-9166-c4091211174b"
                 },
@@ -323,7 +323,7 @@
                     "description": "PTH pad 3 [unconnected-(U1-EN/RST-Pad3)] of U1",
                     "pos": {
                         "x": 167.7,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "4179ae0c-333f-4014-8118-91b4766c26b6"
                 },
@@ -346,7 +346,7 @@
                     "description": "PTH pad 4 [/EPD_BUSY] of U1",
                     "pos": {
                         "x": 165.16,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "c57e8e5f-1722-4cc2-89b8-48e788302bb8"
                 },
@@ -369,7 +369,7 @@
                     "description": "PTH pad 5 [/EPD_RES] of U1",
                     "pos": {
                         "x": 162.62,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "ebcf9ec8-d8a1-42e0-8351-2aa50da06a7b"
                 },
@@ -392,7 +392,7 @@
                     "description": "PTH pad 6 [/EPD_DC] of U1",
                     "pos": {
                         "x": 160.08,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "d4e341a8-8e55-4e85-a0f9-5e3081dbaae9"
                 },
@@ -415,7 +415,7 @@
                     "description": "PTH pad 7 [/EPD_CS] of U1",
                     "pos": {
                         "x": 157.54,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "54005303-c013-4a4b-9944-85399a067af1"
                 },
@@ -438,7 +438,7 @@
                     "description": "PTH pad 8 [/CHAIN_TX] of U1",
                     "pos": {
                         "x": 155.0,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "381c2e2f-7e7f-412f-abdf-623cda4ce677"
                 },
@@ -461,7 +461,7 @@
                     "description": "PTH pad 9 [/CHAIN_RX] of U1",
                     "pos": {
                         "x": 152.46,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "7114640c-80e6-44e0-aba0-a4b67f0a718c"
                 },
@@ -484,7 +484,7 @@
                     "description": "PTH pad 10 [/CFG_TX] of U1",
                     "pos": {
                         "x": 149.92,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "89fb3a41-968c-40e3-a32a-38ea299b8afb"
                 },
@@ -507,7 +507,7 @@
                     "description": "PTH pad 11 [/CFG_RX] of U1",
                     "pos": {
                         "x": 147.38,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "80afea39-fe54-4c52-863d-52cb8d41aad4"
                 },
@@ -530,7 +530,7 @@
                     "description": "PTH pad 12 [/K1_CLK] of U1",
                     "pos": {
                         "x": 144.84,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "35630085-bd17-4060-87dc-7635a57f9626"
                 },
@@ -553,7 +553,7 @@
                     "description": "PTH pad 13 [unconnected-(U1-GPIO3-Pad13)] of U1",
                     "pos": {
                         "x": 142.3,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "bf4639a9-42cc-4f42-8a70-7dfc53de0d07"
                 },
@@ -576,7 +576,7 @@
                     "description": "PTH pad 14 [unconnected-(U1-GPIO46-Pad14)] of U1",
                     "pos": {
                         "x": 139.76,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "baa47c8e-51e7-4472-a79a-a575d79f7e9d"
                 },
@@ -599,7 +599,7 @@
                     "description": "PTH pad 15 [/K1_DT] of U1",
                     "pos": {
                         "x": 137.22,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "6f7ee2c6-8cad-4d2f-ac49-3cdf2cb8ba09"
                 },
@@ -622,7 +622,7 @@
                     "description": "PTH pad 16 [/K1_SW] of U1",
                     "pos": {
                         "x": 134.68,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "112245a6-00da-4a3d-8a1d-cb2ca9cc3ee0"
                 },
@@ -645,7 +645,7 @@
                     "description": "PTH pad 17 [/K2_CLK] of U1",
                     "pos": {
                         "x": 132.14,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "c119b7d5-8874-4212-87fa-6b367cf1edf7"
                 },
@@ -668,7 +668,7 @@
                     "description": "PTH pad 18 [/K2_DT] of U1",
                     "pos": {
                         "x": 129.6,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "76c80c69-cb2e-4f2a-be98-7f6f32fc07c4"
                 },
@@ -691,7 +691,7 @@
                     "description": "PTH pad 19 [/K2_SW] of U1",
                     "pos": {
                         "x": 127.06,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "f2837a95-fb7a-4806-8d3e-91b96b2e591a"
                 },
@@ -714,7 +714,7 @@
                     "description": "PTH pad 20 [/BTN_START] of U1",
                     "pos": {
                         "x": 124.52,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "d69937b0-7da8-41f9-aef7-4cafcb15c77d"
                 },
@@ -737,7 +737,7 @@
                     "description": "PTH pad 21 [unconnected-(U1-5V-Pad21)] of U1",
                     "pos": {
                         "x": 121.98,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "76210a7f-1a77-43fb-8a64-c153dc809ed5"
                 },
@@ -760,7 +760,7 @@
                     "description": "PTH pad 22 [GND] of U1",
                     "pos": {
                         "x": 119.44,
-                        "y": 90.36
+                        "y": 91.63
                     },
                     "uuid": "92633918-6a76-4680-8b94-85b5fb40edbe"
                 },
@@ -783,7 +783,7 @@
                     "description": "PTH pad 23 [GND] of U1",
                     "pos": {
                         "x": 172.78,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "4886ff52-51bc-4126-97a4-850f1200fe0e"
                 },
@@ -806,7 +806,7 @@
                     "description": "PTH pad 24 [unconnected-(U1-TX/IO43-Pad24)] of U1",
                     "pos": {
                         "x": 170.24,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "716aa056-9580-4682-a976-2dc536509d40"
                 },
@@ -829,7 +829,7 @@
                     "description": "PTH pad 25 [unconnected-(U1-RX/IO44-Pad25)] of U1",
                     "pos": {
                         "x": 167.7,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "2edc5a2e-f6e5-4ee8-8abd-75700ccd9a96"
                 },
@@ -852,7 +852,7 @@
                     "description": "PTH pad 26 [/BATSENSE] of U1",
                     "pos": {
                         "x": 165.16,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "b8a4988d-b2f4-403a-b0d5-e0a58b9250d2"
                 },
@@ -875,7 +875,7 @@
                     "description": "PTH pad 27 [/BTN_STOP] of U1",
                     "pos": {
                         "x": 162.62,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "5b8ae26f-5ea6-40b6-bdda-f115ee23418a"
                 },
@@ -898,7 +898,7 @@
                     "description": "PTH pad 28 [unconnected-(U1-GPIO42-Pad28)] of U1",
                     "pos": {
                         "x": 160.08,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "6f074150-320d-43c9-a9db-be2197660a70"
                 },
@@ -921,7 +921,7 @@
                     "description": "PTH pad 29 [unconnected-(U1-GPIO41-Pad29)] of U1",
                     "pos": {
                         "x": 157.54,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "efa608af-b7b6-4155-b562-5a1ecf8c1282"
                 },
@@ -944,7 +944,7 @@
                     "description": "PTH pad 30 [unconnected-(U1-GPIO40-Pad30)] of U1",
                     "pos": {
                         "x": 155.0,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "f8eac08d-4ec8-499c-a4b8-53c327234ce4"
                 },
@@ -967,7 +967,7 @@
                     "description": "PTH pad 31 [unconnected-(U1-GPIO39-Pad31)] of U1",
                     "pos": {
                         "x": 152.46,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "715b4aa4-eeca-4b49-aa15-68a85f45bd1e"
                 },
@@ -990,7 +990,7 @@
                     "description": "PTH pad 32 [/EPD_MOSI] of U1",
                     "pos": {
                         "x": 149.92,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "03ccd267-7b6f-45a9-9434-51d3e8540577"
                 },
@@ -1013,7 +1013,7 @@
                     "description": "PTH pad 33 [unconnected-(U1-GPIO37-Pad33)] of U1",
                     "pos": {
                         "x": 147.38,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "759cda8e-4c1d-422d-a6b0-b17c82d10e5a"
                 },
@@ -1036,7 +1036,7 @@
                     "description": "PTH pad 34 [unconnected-(U1-GPIO36-Pad34)] of U1",
                     "pos": {
                         "x": 144.84,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "e530d8a8-a1db-443e-a00c-c5755554bda9"
                 },
@@ -1059,7 +1059,7 @@
                     "description": "PTH pad 35 [unconnected-(U1-GPIO35-Pad35)] of U1",
                     "pos": {
                         "x": 142.3,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "f9135a38-b291-4087-9417-4c3482f14147"
                 },
@@ -1082,7 +1082,7 @@
                     "description": "PTH pad 36 [unconnected-(U1-GPIO0-Pad36)] of U1",
                     "pos": {
                         "x": 139.76,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "b115a77f-6b9f-4449-bc10-7c71cfd69d88"
                 },
@@ -1105,7 +1105,7 @@
                     "description": "PTH pad 37 [unconnected-(U1-GPIO45-Pad37)] of U1",
                     "pos": {
                         "x": 137.22,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "74d52901-3075-49f1-99c2-eeaf4da7fcda"
                 },
@@ -1128,7 +1128,7 @@
                     "description": "PTH pad 38 [unconnected-(U1-GPIO48-Pad38)] of U1",
                     "pos": {
                         "x": 134.68,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "1d2e4ac9-1f84-44bf-b1cb-708710058f9d"
                 },
@@ -1151,7 +1151,7 @@
                     "description": "PTH pad 39 [unconnected-(U1-GPIO47-Pad39)] of U1",
                     "pos": {
                         "x": 132.14,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "7b34cb27-1185-4659-bffd-9f595b3476fb"
                 },
@@ -1174,7 +1174,7 @@
                     "description": "PTH pad 40 [/EPD_SCK] of U1",
                     "pos": {
                         "x": 129.6,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "456b7b6a-57fd-4d6b-b707-8812a3a1fa8c"
                 },
@@ -1197,7 +1197,7 @@
                     "description": "PTH pad 41 [unconnected-(U1-GPIO20-Pad41)] of U1",
                     "pos": {
                         "x": 127.06,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "3cccafef-e308-43fa-bafb-a4daf2371abc"
                 },
@@ -1220,7 +1220,7 @@
                     "description": "PTH pad 42 [unconnected-(U1-GPIO19-Pad42)] of U1",
                     "pos": {
                         "x": 124.52,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "64527b4c-9bed-4f82-b1ef-1a375a3a3e37"
                 },
@@ -1243,7 +1243,7 @@
                     "description": "PTH pad 43 [GND] of U1",
                     "pos": {
                         "x": 121.98,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "b88cf192-9059-4f36-a805-f6962859a2f7"
                 },
@@ -1266,7 +1266,7 @@
                     "description": "PTH pad 44 [GND] of U1",
                     "pos": {
                         "x": 119.44,
-                        "y": 67.5
+                        "y": 66.23
                     },
                     "uuid": "0cf45e26-f899-42da-9c11-dfcaa4a9735a"
                 },
@@ -1923,7 +1923,7 @@
                     "description": "Footprint text of U1 (44)",
                     "pos": {
                         "x": 119.44,
-                        "y": 64.93
+                        "y": 63.73
                     },
                     "uuid": "ff6e232b-055d-4585-b15c-2ed6f322da35"
                 }
@@ -1938,7 +1938,7 @@
                     "description": "Footprint text of U1 (22)",
                     "pos": {
                         "x": 119.44,
-                        "y": 92.93
+                        "y": 94.13
                     },
                     "uuid": "c1c72b3a-615e-4242-bd33-3f59fab12268"
                 }
@@ -1953,7 +1953,7 @@
                     "description": "Footprint text of U1 (23)",
                     "pos": {
                         "x": 172.78,
-                        "y": 64.93
+                        "y": 63.73
                     },
                     "uuid": "a3d9e461-241a-44ba-b9a1-c13e3496813f"
                 }
@@ -1968,7 +1968,7 @@
                     "description": "Footprint text of U1 (1)",
                     "pos": {
                         "x": 172.78,
-                        "y": 92.93
+                        "y": 94.13
                     },
                     "uuid": "01ada028-920b-4e02-99f8-3ba0e414514c"
                 }
@@ -2412,75 +2412,6 @@
             ],
             "severity": "warning",
             "type": "silk_over_copper"
-        },
-        {
-            "description": "Silkscreen clearance",
-            "items": [
-                {
-                    "description": "Rectangle of U1 on B.Silkscreen",
-                    "pos": {
-                        "x": 175.11,
-                        "y": 92.43
-                    },
-                    "uuid": "272d5ed9-2aaa-44a4-926a-74a7a2478654"
-                },
-                {
-                    "description": "Footprint text of U1 (22)",
-                    "pos": {
-                        "x": 119.44,
-                        "y": 92.93
-                    },
-                    "uuid": "c1c72b3a-615e-4242-bd33-3f59fab12268"
-                }
-            ],
-            "severity": "warning",
-            "type": "silk_overlap"
-        },
-        {
-            "description": "Silkscreen clearance",
-            "items": [
-                {
-                    "description": "Rectangle of U1 on B.Silkscreen",
-                    "pos": {
-                        "x": 175.11,
-                        "y": 92.43
-                    },
-                    "uuid": "272d5ed9-2aaa-44a4-926a-74a7a2478654"
-                },
-                {
-                    "description": "Footprint text of U1 (44)",
-                    "pos": {
-                        "x": 119.44,
-                        "y": 64.93
-                    },
-                    "uuid": "ff6e232b-055d-4585-b15c-2ed6f322da35"
-                }
-            ],
-            "severity": "warning",
-            "type": "silk_overlap"
-        },
-        {
-            "description": "Silkscreen clearance",
-            "items": [
-                {
-                    "description": "Rectangle of U1 on B.Silkscreen",
-                    "pos": {
-                        "x": 175.11,
-                        "y": 92.43
-                    },
-                    "uuid": "272d5ed9-2aaa-44a4-926a-74a7a2478654"
-                },
-                {
-                    "description": "Footprint text of U1 (23)",
-                    "pos": {
-                        "x": 172.78,
-                        "y": 64.93
-                    },
-                    "uuid": "a3d9e461-241a-44ba-b9a1-c13e3496813f"
-                }
-            ],
-            "severity": "warning",
-            "type": "silk_overlap"
         }
     ]
 }

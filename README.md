@@ -132,25 +132,29 @@ All serial transmissions use binary frames protected by **CRC-8** (Polynomial: $
 
 | Token ID | Command Name | Parameter | Robosen BLE Mapping | LED Color |
 | :---: | :--- | :--- | :--- | :---: |
-| `0x01` | `MOVE_FORWARD` | Steps (`1`–`10`) | `0x01` (Walk Forward) | 🔵 Blue (`#1E88E5`) |
-| `0x02` | `MOVE_BACKWARD`| Steps (`1`–`10`) | `0x05` (Walk Backward) | 🔵 Dark Blue (`#1565C0`) |
+| `0x01` | `MOVE_FORWARD` | Steps (`1`–`5`) | `0x01` (Walk Forward) | 🔵 Blue (`#1E88E5`) |
+| `0x02` | `MOVE_BACKWARD`| Steps (`1`–`5`) | `0x05` (Walk Backward) | 🔵 Dark Blue (`#1565C0`) |
 | `0x03` | `TURN_LEFT` | Angle (`45°`–`180°`) | `0x08` (Turn Left) | 🔷 Cyan (`#00ACC1`) |
 | `0x04` | `TURN_RIGHT` | Angle (`45°`–`180°`) | `0x02` (Turn Right) | 🔷 Cyan (`#00ACC1`) |
 | `0x07` | `MOVE_LEFT` | Side-steps (`1`–`5`)| `0x07` (Step Left) | 🟦 Sky Blue (`#039BE5`) |
 | `0x08` | `MOVE_RIGHT` | Side-steps (`1`–`5`)| `0x03` (Step Right) | 🟦 Sky Blue (`#039BE5`) |
-| `0x10` | `LEFT_PUNCH` | Style (`1`–`3`) | `0x17` (`"ProAction/Left Punch"`) | 🔴 Red (`#E53935`) |
-| `0x11` | `RIGHT_PUNCH`| Style (`1`–`3`) | `0x17` (`"ProAction/Right Punch"`) | 🔴 Bright Red (`#D32F2F`) |
-| `0x12` | `KUNG_FU` | Routine Variant | `0x17` (`"ProAction/Kung Fu"`) | 🟠 Orange (`#FB8C00`) |
-| `0x13` | `BOOGALOO` | Style Variant | `0x17` (`"Action/Boogaloo"`) | 🟣 Magenta (`#8E24AA`) |
-| `0x14` | `PUSH_UPS` | Repetitions (`1`–`3`)| `0x17` (`"ProAction/Push Ups"`) | 🟤 Brown (`#6D4C41`) |
-| `0x15` | `HANDSTAND` | Duration Hold | `0x17` (`"ProAction/Handstand"`) | 🟤 Brown (`#6D4C41`) |
-| `0x16` | `SINGLE_KICK`| Kick Type | `0x17` (`"ProAction/Left Kick"`) | 🔴 Red (`#E53935`) |
-| `0x17` | `DO_SQUATS` | Repetitions (`1`–`3`)| `0x17` (`"ProAction/Do Squats"`) | 🟢 Green (`#43A047`) |
-| `0x18` | `SAY_HELLO` | Greeting Style | `0x17` (`"ProAction/Say Hello"`) | 🩵 Teal (`#00897B`) |
-| `0x19` | `CELEBRATE` | Cheer Style | `0x17` (`"ProAction/Celebrate"`) | 🟡 Yellow (`#FDD835`) |
-| `0x20` | `HEAD_MOVE` | Pan Angle (`42`–`202`)| `0xE8` (Servo index 16) | 🩵 Teal (`#00897B`) |
-| `0x30` | `WAIT_DELAY` | Seconds (`1`–`5`s) | Master sleep delay timer | 🟡 Yellow (`#FBC02D`) |
-| `0x40` | `REPEAT_LOOP`| Iterations (`2x`–`5x`)| Master sub-queue loop | 🟢 Lime (`#7CB342`) |
+| `0x10` | `LEFT_PUNCH` | Reps (`1`–`3`) | `0x17` (`"ProAction/Left Punch"`) | 🔴 Red (`#E53935`) |
+| `0x11` | `RIGHT_PUNCH`| Reps (`1`–`3`) | `0x17` (`"ProAction/Right Punch"`) | 🔴 Bright Red (`#D32F2F`) |
+| `0x12` | `KUNG_FU` | Reps (`1`–`3`) | `0x17` (`"ProAction/Kung Fu"`) | 🟠 Orange (`#FB8C00`) |
+| `0x13` | `BOOGALOO` | Reps (`1`–`3`) | `0x17` (`"Action/Boogaloo"`) | 🟣 Magenta (`#8E24AA`) |
+| `0x14` | `PUSH_UPS` | Reps (`1`–`3`) | `0x17` (`"ProAction/Push Ups"`) | 🟤 Brown (`#6D4C41`) |
+| `0x15` | `HANDSTAND` | Reps (`1`–`3`) | `0x17` (`"ProAction/Handstand"`) | 🟤 Brown (`#6D4C41`) |
+| `0x16` | `SINGLE_KICK`| Reps (`1`–`3`) | `0x17` (`"ProAction/Left Kick"`) | 🔴 Red (`#E53935`) |
+| `0x17` | `DO_SQUATS` | Reps (`1`–`3`) | `0x17` (`"ProAction/Do Squats"`) | 🟢 Green (`#43A047`) |
+| `0x18` | `SAY_HELLO` | Reps (`1`–`3`) | `0x17` (`"ProAction/Say Hello"`) | 🩵 Teal (`#00897B`) |
+| `0x19` | `CELEBRATE` | Reps (`1`–`3`) | `0x17` (`"ProAction/Celebrate"`) | 🟡 Yellow (`#FDD835`) |
+| `0xEE` | `END_CAP` | Smart End Terminator | N/A (Return Rail Loopback) | 🟢 Soft Emerald Green (`#00E020`) |
+| `0x20` | `HEAD_MOVE` *(Sim only)*| Pan Angle (`42`–`202`)| `0xE8` (Servo index 16) | 🩵 Teal (`#00897B`) |
+| `0x30` | `WAIT_DELAY` *(Sim only)*| Seconds (`1`–`5`s) | Master sleep delay timer | 🟡 Yellow (`#FBC02D`) |
+| `0x40` | `REPEAT_LOOP` *(Sim only)*| Iterations (`2x`–`5x`)| Master sub-queue loop | 🟢 Lime (`#7CB342`) |
+
+> ℹ️ **Note:** Tokens `0x01`–`0x19` and `0xEE` are physically supported in the [ESP32 Master firmware](file:///Users/nnnn/Projects/robosen_block/firmware/esp32_master/esp32_master.ino) and [CH32V003 Action Block firmware](file:///Users/nnnn/Projects/robosen_block/firmware/ch32v003_action_block/main.c). Tokens `0x20`, `0x30`, `0x40` are software simulation extensions supported in the Node-RED simulator palette.
+
 
 ---
 
@@ -217,7 +221,7 @@ python scripts/k1_ble_tester.py
 
 ## 🛠️ Hardware & Electrical Specifications
 
-Complete hardware specifications are detailed in [`PHYSICAL_BLOCK_SYSTEM_SPEC.md`](PHYSICAL_BLOCK_SYSTEM_SPEC.md), [`PROTOTYPE_00_SPEC.md`](PROTOTYPE_00_SPEC.md) (Breadboard Proof-of-Concept), and [`PROTOTYPE_01_SPEC.md`](PROTOTYPE_01_SPEC.md) (First Custom PCB Version):
+Complete hardware specifications are detailed in [`docs/specs/PHYSICAL_BLOCK_SYSTEM_SPEC.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/PHYSICAL_BLOCK_SYSTEM_SPEC.md), [`docs/specs/PROTOTYPE_00_SPEC.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/PROTOTYPE_00_SPEC.md) (Breadboard Proof-of-Concept), and [`docs/specs/PROTOTYPE_01_SPEC.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/PROTOTYPE_01_SPEC.md) (First Custom PCB Version):
 
 ### 1. Master Controller Breadboard Wiring & Pinout (Prototype #0)
 
@@ -283,14 +287,15 @@ Complete hardware specifications are detailed in [`PHYSICAL_BLOCK_SYSTEM_SPEC.md
 
 | Module | Hardware Target | Source Location | Description | Status |
 | :--- | :--- | :--- | :--- | :---: |
-| **Master Controller** | ESP32-S3 | [`firmware/esp32_master/`](firmware/esp32_master/) | BLE Central, NVS pairing, Dual-Knob UI, Run Chain Engine (`0xAA`/`0xBB`) | ⚠️ **Update Pending** (Add Red Button `GPIO2` & Battery Sense `GPIO1`) |
-| **Standalone E-Ink Test** | ESP32-S3 | [`firmware/standalone_eink_test/`](firmware/standalone_eink_test/) | 2.13" E-Paper DEPG0213BN driver, zero-flicker boot, live partial benchmark (1.34 Hz) | ✅ Verified |
-| **Action Block Firmware** | WCH CH32V003 | [`firmware/ch32v003_action_block/`](firmware/ch32v003_action_block/) | Unified C RISC-V firmware (2-Phase Binary V2, Config Dock, WS2812B) | ✅ **Flashed on Silicon** |
-| **Smart End Block Firmware** | WCH CH32V003 | [`firmware/ch32v003_end_block/`](firmware/ch32v003_end_block/) | Active loopback line driver, CRC-8 validation, rainbow sparkle (`0xEE`) | ✅ **Flashed on Silicon** |
-| **ESP32 SWIO Programmer** | ESP32 / ESP32-S3 | [`firmware/esp32_ch32v003_programmer/`](firmware/esp32_ch32v003_programmer/) | High-speed 1-wire SWIO debugger & chunked Python flasher (`flash_tool.py`) | ✅ Verified |
-| **Arduino Uno Programmer** | Arduino Uno R3 | [`firmware/arduino_uno_ch32v003_programmer/`](firmware/arduino_uno_ch32v003_programmer/) | Ardulink 16MHz assembly bit-banging flasher for `minichlink` | ✅ Verified |
-| **Master Carrier PCB** | KiCad 10.0.6 | [`hardware/master_block/`](hardware/master_block/) | Custom carrier motherboard PCB project, 12 verified footprints (`robosen_master.pretty`), 0 ERC violations | ✅ **Ordered** |
-| **Action Block PCB** | KiCad 10.0.6 | [`hardware/action_block/`](hardware/action_block/) | 32×32mm modular action block carrier, centered pogo docks, 3-pin RGB header, 0 DRC violations | ✅ **Ordered** |
+| **Master Controller** | ESP32-S3 | [`firmware/esp32_master/`](file:///Users/nnnn/Projects/robosen_block/firmware/esp32_master/) | BLE Central, NVS pairing, Dual-Knob UI, Dual Buttons (Green GPIO 14, Red GPIO 2), Battery ADC (GPIO 1), Run Chain Engine (`0xAA`/`0xBB`) | ✅ **Production Verified** |
+| **Action Block Firmware** | WCH CH32V003 | [`firmware/ch32v003_action_block/`](file:///Users/nnnn/Projects/robosen_block/firmware/ch32v003_action_block/) | Unified C RISC-V firmware (2-Phase Binary V2, Config Dock, WS2812B) | ✅ **Flashed on Silicon** |
+| **Smart End Block Firmware** | WCH CH32V003 | [`firmware/ch32v003_end_block/`](file:///Users/nnnn/Projects/robosen_block/firmware/ch32v003_end_block/) | Active loopback line driver, CRC-8 validation, rainbow sparkle (`0xEE`) | ✅ **Flashed on Silicon** |
+| **Master Soldering Test** | ESP32-S3 | [`firmware/tests/master_soldering_test/`](file:///Users/nnnn/Projects/robosen_block/firmware/tests/master_soldering_test/) | All-input hardware verification suite (encoders, dual buttons, battery sense, e-paper, RGB) | ✅ **Hardware Verified** |
+| **Standalone E-Ink Test** | ESP32-S3 | [`firmware/tests/standalone_eink_test/`](file:///Users/nnnn/Projects/robosen_block/firmware/tests/standalone_eink_test/) | 2.13" E-Paper DEPG0213BN driver benchmark, zero-flicker boot, partial refresh (1.34 Hz) | ✅ **Verified** |
+| **ESP32 SWIO Programmer** | ESP32 / ESP32-S3 | [`firmware/tools_programmer/esp32_ch32v003_programmer/`](file:///Users/nnnn/Projects/robosen_block/firmware/tools_programmer/esp32_ch32v003_programmer/) | High-speed 1-wire SWIO debugger & chunked Python flasher (`flash_tool.py`) | ✅ **Utility** |
+| **Arduino Uno Programmer** | Arduino Uno R3 | [`firmware/tools_programmer/arduino_uno_ch32v003_programmer/`](file:///Users/nnnn/Projects/robosen_block/firmware/tools_programmer/arduino_uno_ch32v003_programmer/) | Ardulink 16MHz assembly bit-banging flasher for `minichlink` | ✅ **Utility** |
+| **Master Carrier PCB** | KiCad 10.0.6 | [`hardware/master_block/`](file:///Users/nnnn/Projects/robosen_block/hardware/master_block/) | Custom carrier motherboard PCB project (25.40mm row spacing, 100% routed, 0 DRC violations) | ✅ **Active Production Design** |
+| **Action Block PCB** | KiCad 10.0.6 | [`hardware/action_block/`](file:///Users/nnnn/Projects/robosen_block/hardware/action_block/) | 32×32mm modular action block carrier, centered pogo docks, 3-pin RGB header, 0 DRC violations | ✅ **Ordered & Verified** |
 
 ---
 
@@ -298,19 +303,25 @@ Complete hardware specifications are detailed in [`PHYSICAL_BLOCK_SYSTEM_SPEC.md
 
 | Document | Description |
 | :--- | :--- |
-| [`docs/master_block_wiring.html`](docs/master_block_wiring.html) | Interactive Master Block BOM, color-coded pinout wiring table, and battery circuit guide |
-| [`hardware/master_block/`](hardware/master_block/) | KiCad 10 Master Block PCB project (Prototype #1 baseline) |
-| [`hardware/action_block/`](hardware/action_block/) | KiCad 10 Action Block PCB project, routing report, and production Gerbers |
-| [`hardware/prototype_1_1/`](hardware/prototype_1_1/) | Prototype #1-1 Respin: Master Block PCB with corrected ESP32-S3 25.40mm row spacing |
-| [`PROJECT_SUMMARY.md`](PROJECT_SUMMARY.md) | Comprehensive executive project summary, mission, and comparison matrix |
-| [`PHYSICAL_BLOCK_SYSTEM_SPEC.md`](PHYSICAL_BLOCK_SYSTEM_SPEC.md) | Hardware, electrical, connector pinout, and 2-phase protocol specifications |
-| [`PROTOTYPE_00_SPEC.md`](PROTOTYPE_00_SPEC.md) | Prototype #0: Breadboard proof-of-concept engineering specification, wiring & test guides |
-| [`PROTOTYPE_01_SPEC.md`](PROTOTYPE_01_SPEC.md) | Prototype #1: First custom PCB release engineering specification, JLCPCB orders & assembly |
-| [`PROTOTYPE_01_1_SPEC.md`](PROTOTYPE_01_1_SPEC.md) | Prototype #1-1: Master Block PCB respin specification (ESP32-S3 footprint correction) |
-| [`IMPROVEMENT_PLAN.md`](IMPROVEMENT_PLAN.md) | 5-Pillar Master Improvement Plan and future production roadmap |
-| [`MEMORY.md`](MEMORY.md) | Master technical knowledge base, verified hardware diagnostics, and opcode catalog |
-| [`ROBOSEN_K1_DOCUMENTATION.md`](ROBOSEN_K1_DOCUMENTATION.md) | Official Robosen K1 reference manual, kinematics, voice commands, and safety guide |
-| [`docs/K1_HARDWARE_AUDIT_REPORT.md`](docs/K1_HARDWARE_AUDIT_REPORT.md) | Live physical robot hardware diagnostics, telemetry verification, and action catalog dump |
+| [`PROJECT_SUMMARY.md`](file:///Users/nnnn/Projects/robosen_block/PROJECT_SUMMARY.md) | Comprehensive executive project summary, mission, and comparison matrix |
+| [`MEMORY.md`](file:///Users/nnnn/Projects/robosen_block/MEMORY.md) | Master technical knowledge base, verified hardware diagnostics, and opcode catalog |
+| [`docs/specs/PHYSICAL_BLOCK_SYSTEM_SPEC.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/PHYSICAL_BLOCK_SYSTEM_SPEC.md) | Hardware, electrical, connector pinout, and 2-phase protocol specifications |
+| [`docs/specs/PROTOTYPE_00_SPEC.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/PROTOTYPE_00_SPEC.md) | Prototype #0: Breadboard proof-of-concept engineering specification, wiring & test guides |
+| [`docs/specs/PROTOTYPE_01_SPEC.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/PROTOTYPE_01_SPEC.md) | Prototype #1: First custom PCB release engineering specification, JLCPCB orders & assembly |
+| [`docs/specs/PROTOTYPE_01_1_SPEC.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/PROTOTYPE_01_1_SPEC.md) | Prototype #1-1: Master Block PCB respin specification (ESP32-S3 25.40mm socket correction) |
+| [`docs/specs/IMPROVEMENT_PLAN.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/IMPROVEMENT_PLAN.md) | 5-Pillar Master Improvement Plan and future production roadmap |
+| [`docs/specs/ROBOSEN_K1_DOCUMENTATION.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/ROBOSEN_K1_DOCUMENTATION.md) | Official Robosen K1 reference manual, kinematics, voice commands, and safety guide |
+| [`docs/master_block_wiring.html`](file:///Users/nnnn/Projects/robosen_block/docs/master_block_wiring.html) | Interactive Master Block BOM, color-coded pinout wiring table, and battery circuit guide |
+| [`docs/mounting_and_enclosure_spec.md`](file:///Users/nnnn/Projects/robosen_block/docs/mounting_and_enclosure_spec.md) | Enclosure, M3 standoff boss clearances, and 3D casing specifications |
+| [`docs/K1_HARDWARE_AUDIT_REPORT.md`](file:///Users/nnnn/Projects/robosen_block/docs/K1_HARDWARE_AUDIT_REPORT.md) | Live physical robot hardware diagnostics, telemetry verification, and action catalog dump |
+| [`docs/plans/robosen_14_weeks_plan.md`](file:///Users/nnnn/Projects/robosen_block/docs/plans/robosen_14_weeks_plan.md) | 14-Week project operational timeline, task breakdown, and milestone tracking |
+| [`docs/plans/TIMELINE_INFOGRAPHIC.md`](file:///Users/nnnn/Projects/robosen_block/docs/plans/TIMELINE_INFOGRAPHIC.md) | Timeline visual concept, ASCII art chart, and Canva design data |
+| [`docs/assignments/RESEARCH_SUMMARY.md`](file:///Users/nnnn/Projects/robosen_block/docs/assignments/RESEARCH_SUMMARY.md) | Academic coursework research review summary (AS01) |
+| [`simulators/node-red-contrib-robosen-block/`](file:///Users/nnnn/Projects/robosen_block/simulators/node-red-contrib-robosen-block/) | Node-RED 2-Phase Binary protocol simulation palette and virtual flow examples |
+| [`hardware/master_block/`](file:///Users/nnnn/Projects/robosen_block/hardware/master_block/) | KiCad 10 Master Block PCB project (Corrected 25.40mm socket spacing, 100% routed) |
+| [`hardware/action_block/`](file:///Users/nnnn/Projects/robosen_block/hardware/action_block/) | KiCad 10 Action Block PCB project, routing report, and production Gerbers |
+| [`archive/prototype_1_0_retired/`](file:///Users/nnnn/Projects/robosen_block/archive/prototype_1_0_retired/) | Retired Prototype #1 files (preserved for historical defect audit) |
+
 
 ---
 
