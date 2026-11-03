@@ -279,7 +279,7 @@ Complete hardware specifications are detailed in [`docs/specs/PHYSICAL_BLOCK_SYS
 - **Master Block MCU:** ESP32-S3 (Dual-Core Xtensa LX7, Native Bluetooth BLE 5.0, SPI for E-Ink, and Dual UARTs for Config Dock & Run Chain).
 - **Master UI & Display:** 2.13" E-Ink E-Paper display (DEPG0213BN / SSD1680, $71 \times 30\text{ mm}$ outline) + Dual Rotary Dials (Action & Parameter) + Dual Tactile Buttons (Green Start/Confirm & Red Stop/Cancel) + Battery Sense Monitor.
 - **Visual Feedback (No Buzzer):** Master & Block WS2812B RGB LEDs with rich light choreography (emerald green flash ACK, data comet compilation wave, live step glowing green, rainbow victory sparkle).
-- **Solid Action Block MCUs:** Ultra-low-cost WCH CH32V003 (32-bit RISC-V, ~$0.15 in SOP-8 package) with internal non-volatile flash parameter storage. No potentiometers or buttons on individual blocks!
+- **Solid Modular Block MCUs (Unified Slave PCB):** Ultra-low-cost WCH CH32V003 (32-bit RISC-V, ~$0.15) with internal non-volatile flash parameter storage. **Action Blocks and Smart End Blocks share the exact same physical carrier PCB** ([`hardware/action_block/`](file:///Users/nnnn/Projects/robosen_block/hardware/action_block/)); End Block mode (`0xEE`) is configured via firmware on MCU Pin 15 (`PD0`), eliminating separate PCB fabrication or manual jumpers. Zero potentiometers or buttons on individual blocks!
 - **Power & Charging:** Single 18650 3.7V Li-ion cell with onboard TP4056 USB-C charging, BMS protection, and TPS63020 3.3V synchronous buck-boost regulator.
 - **Physical Connector:** Standardized 4-pin polarized magnetic pogo connector with reverse-polarity protection and RC debouncing filters.
 
@@ -295,7 +295,7 @@ Complete hardware specifications are detailed in [`docs/specs/PHYSICAL_BLOCK_SYS
 | **ESP32 SWIO Programmer** | ESP32 / ESP32-S3 | [`firmware/tools_programmer/esp32_ch32v003_programmer/`](file:///Users/nnnn/Projects/robosen_block/firmware/tools_programmer/esp32_ch32v003_programmer/) | High-speed 1-wire SWIO debugger & chunked Python flasher (`flash_tool.py`) | ✅ **Utility** |
 | **Arduino Uno Programmer** | Arduino Uno R3 | [`firmware/tools_programmer/arduino_uno_ch32v003_programmer/`](file:///Users/nnnn/Projects/robosen_block/firmware/tools_programmer/arduino_uno_ch32v003_programmer/) | Ardulink 16MHz assembly bit-banging flasher for `minichlink` | ✅ **Utility** |
 | **Master Carrier PCB** | KiCad 10.0.6 | [`hardware/master_block/`](file:///Users/nnnn/Projects/robosen_block/hardware/master_block/) | Custom carrier motherboard PCB project (25.40mm row spacing, 100% routed, 0 DRC violations) | ✅ **Active Production Design** |
-| **Action Block PCB** | KiCad 10.0.6 | [`hardware/action_block/`](file:///Users/nnnn/Projects/robosen_block/hardware/action_block/) | 32×32mm modular action block carrier, centered pogo docks, 3-pin RGB header, 0 DRC violations | ✅ **Ordered & Verified** |
+| **Modular Slave PCB (Action & End)** | KiCad 10.0.6 | [`hardware/action_block/`](file:///Users/nnnn/Projects/robosen_block/hardware/action_block/) | Unified 32×32mm carrier PCB for both Action Blocks and Smart End Blocks (Pin 15 / `PD0` configurable), centered pogo docks, 3-pin RGB header, 0 DRC violations | ✅ **Ordered & Verified** |
 
 ---
 

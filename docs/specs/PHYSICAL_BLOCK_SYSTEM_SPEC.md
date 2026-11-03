@@ -86,9 +86,13 @@ Every action block is an ultra-durable, solid plastic module with **zero moving 
 ### Block 3: End Terminator Block (Sequence Completion Module)
 The End Block marks the physical end of the user's code sequence.
 
-- **Variants**:
-  1. **Passive End Block**: Contains an internal PCB trace bridging **Pin 3 (`UART TX_DOWN`) directly to Pin 4 (`UART RX_BUS`)**.
-  2. **Smart End Block**: Contains a CH32V003 MCU that senses end-of-chain termination, verifies CRC-8, displays a green status LED, and loops data back to the Return RX rail.
+> [!IMPORTANT]
+> **Unified Hardware Carrier (Action Block PCB = End Block PCB)**:  
+> Physically and electronically, the Smart End Block uses the **exact same carrier PCB and BOM** as the Action Block ([`hardware/action_block/`](file:///Users/nnnn/Projects/robosen_block/hardware/action_block/)). There is no separate physical End Block circuit board. Any Action Block docked at the Master Config Dock can be configured with Token `0xEE` ("Smart End Terminator"). When running Token `0xEE`, the CH32V003 MCU dynamically reconfigures Pin 15 (`PD0`) from High-Z input to active push-pull output driver (`GPIO_CFGLR_OUT_10Mhz_PP`) to actively loop the `0xAA` discovery frame onto Net `/RETURN_BUS` (Pin 4). The only difference for students/children is the 3D enclosure (e.g., a distinct Red / "END" cap with a closed downstream side).
+
+- **Implementation Details**:
+  1. **Smart End Block (Active Production Design)**: Built on the unified CH32V003 carrier PCB flashed with Token `0xEE` ([`firmware/ch32v003_end_block/`](file:///Users/nnnn/Projects/robosen_block/firmware/ch32v003_end_block/)). It senses end-of-chain termination, verifies CRC-8, displays a calm emerald green ready LED, actively drives the return bus, and triggers a rainbow victory sparkle upon program completion.
+  2. **Passive End Block (Prototype #0 Concept / Jumper Plug)**: A simple passive plug bridging **Pin 3 (`UART TX_DOWN`) directly to Pin 4 (`UART RX_BUS`)** without an MCU.
 
 ---
 

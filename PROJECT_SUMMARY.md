@@ -252,8 +252,9 @@ The project is currently in an **advanced software, protocol simulation, and liv
 - **Production Package**: Gerbers verified and zipped at [`hardware/master_block/robosen_master_block_gerbers.zip`](file:///Users/nnnn/Projects/robosen_block/hardware/master_block/robosen_master_block_gerbers.zip).
 - **Reference Document**: [`docs/specs/PROTOTYPE_01_1_SPEC.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/PROTOTYPE_01_1_SPEC.md).
 
-### 2. Action Block PCB (Modular CH32V003 Carrier): ✅ ORDERED & VERIFIED
+### 2. Unified Modular Slave PCB (Action Block & Smart End Block Carrier): ✅ ORDERED & VERIFIED
 - KiCad 10 project ([`hardware/action_block/`](file:///Users/nnnn/Projects/robosen_block/hardware/action_block/)), $32.00 \times 32.00\text{ mm}$ compact square carrier PCB.
+- **Unified Carrier Architecture**: Serves as both Action Block and Smart End Block. When flashed with Token `0xEE`, firmware reconfigures MCU Pin 15 (`PD0`) from High-Z input to active push-pull TX driver to loop data back onto `/RETURN_BUS`, eliminating the need for a separate End Block PCB.
 - Centered Pogo Ports: Both Upstream `IN` and Downstream `OUT` 4-pin pogo docks are mathematically centered at $Y = 72.50\text{ mm}$ for flush collinear docking.
 - 3-Pin RGB LED Header: Top-to-Bottom order `GND`, `VCC` (+3V3), `IN` (`/LED_DIN`).
 - Routing: 100% routed (**0 unconnected items, 0 copper clearance errors**), `/RETURN_BUS` detour below MCU ($Y = 87.25\text{ mm}$), $0.60\text{ mm}$ power traces, and continuous GND planes.
