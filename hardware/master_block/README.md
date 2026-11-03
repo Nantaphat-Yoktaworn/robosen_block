@@ -131,7 +131,7 @@ The schematic is organized on an **A3 sheet** into 4 functional zones on a stric
 All 12 custom footprints in `robosen_master.pretty/` have been created and verified against manufacturer mechanical drawings and physical caliper measurements:
 
 ### 1. ESP32-S3-DevKitC-1-Socket (`U1`)
-- **Format:** Dual 22-pin female header sockets spaced **0.900" (22.86 mm)** row-to-row.
+- **Format:** Dual 22-pin female header sockets spaced **1.000" (25.40 mm)** row-to-row (Prototype #1-1 Respin, correcting the retired Prototype #1.0 0.900" / 22.86 mm defect).
 - **Orientation:** Antenna at **TOP**, Dual USB-C ports at **BOTTOM**.
 - **Antenna Overhang & RF Keepout:** $17.5\text{ mm} \text{ wide} \times 6.0\text{ mm} \text{ stick-out}$ ($X \in [-8.75, +8.75]$, $Y \in [-35.0, -29.0]$) with a strict all-layer copper keepout zone (`keepout_copper`) under and around the RF antenna region.
 - **Pin Numbering:**

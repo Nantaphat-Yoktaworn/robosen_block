@@ -804,27 +804,27 @@ The `assignments/` folder stores academic project coursework, literature reviews
 | | `PIN_EPD_SDA` | Display `SDA` (SPI MOSI/DIN) | ESP32-S3 **GPIO 38** (⚪ White) |
 | | Power Rails | Display `VCC` & `GND` | Strictly 3.3V DC & GND |
 
-### 21.5 Planned Upgrade / TODO: Master Block Battery Telemetry (Voltage Divider)
-- **Status:** ⏳ **Deferred / In Backlog** (User to purchase $100\text{ k}\Omega$ resistors; current setup proceeds as-is without internal battery sensing).
-- **Target Hardware Addition:**
-  - $R_1$: $100\text{ k}\Omega$ (1% metal film)
-  - $R_2$: $100\text{ k}\Omega$ (1% metal film)
-  - Optional $C_1$: $100\text{ nF}$ ceramic decoupling cap across $R_2$ for ADC ripple suppression.
+### 21.5 Master Block Battery Telemetry (Voltage Divider - ADC1_CH0)
+- **Status:** ✅ **Implemented & Production Verified** (Hardware 1:1 divider routed on carrier PCB and integrated into ESP32-S3 firmware).
+- **Hardware Circuit:**
+  - $R_3$: $100\text{ k}\Omega$ (1% metal film)
+  - $R_4$: $100\text{ k}\Omega$ (1% metal film)
+  - $C_1$: $100\text{ nF}$ ceramic decoupling cap across $R_4$ for ADC ripple suppression.
 - **Circuit Schematic:**
   ```text
   [TPS63020 VIN (Switched 3.0V - 4.2V)]
                  │
                  ▼
-             [ R1: 100 kΩ ]
+             [ R3: 100 kΩ ]
                  │
                  ├──────────────────────► ESP32-S3 GPIO 1 (ADC1_CH0) [1.5V - 2.1V Safe]
                  │
-             [ R2: 100 kΩ ]
+             [ R4: 100 kΩ ]
                  │
                  ▼
           [ Common GND Rail ]
   ```
-- **Firmware Logic:** Connects to `GPIO 1` (`ADC1_CH0`), samples via `analogReadMilliVolts(1) * 2`, maps $3.30\text{V} (0\%)$ to $4.20\text{V} (100\%)$, and renders battery gauge icon on E-Ink top status bar.
+- **Firmware Logic:** Connects to `GPIO 1` (`ADC1_CH0`), samples via `analogReadMilliVolts(PIN_BATSENSE)`, calculates $V_{BAT} = 2 \times V_{ADC}$, maps $3.20\text{V} (0\%)$ to $4.20\text{V} (100\%)$, and renders dynamic battery gauge icon and percentage on E-Ink top status bar.
 
 
 ---
@@ -861,7 +861,7 @@ The `assignments/` folder stores academic project coursework, literature reviews
 - **Architecture Strategy:** **Modular Daughterboard Carrier PCB (Motherboard)**. The custom PCB houses sockets and headers for the ESP32-S3 DevKit, TP4056 USB-C BMS module, TPS63020 buck-boost module, 18650 holder, KY-040 rotary encoders, 12mm tactile button, power switch, and 2.13" E-Paper display, replacing all breadboards and loose jumper wires with reliable copper traces.
 - **Custom Footprint Library:** Registered locally in `hardware/master_block/fp-lib-table` pointing to `robosen_master.pretty/` (12 verified `.kicad_mod` files) and vector SVGs in `hardware/master_block/footprint_svg/`.
 - **Verified Footprint Inventory (100% Validated via `kicad-cli 10.0.6`):**
-  1. `ESP32-S3-DevKitC-1-Socket.kicad_mod`: Dual 22-pin header socket (0.9" row span) with 6.0mm x 17.5mm antenna overhang and RF all-layer copper keepout.
+  1. `ESP32-S3-DevKitC-1-Socket.kicad_mod`: Dual 22-pin header socket (1.000" / 25.40 mm row span in Prototype #1-1 Respin) with 6.0mm x 17.5mm antenna overhang and RF all-layer copper keepout.
   2. `EPaper_2.13in_Header_1x08.kicad_mod`: 8-pin 2.54mm SPI interface header with full 71.0mm x 30.0mm PCB outline, 4x M2 corner mounting holes, and 2.13" active display area.
   3. `TP4056_Type-C_Module.kicad_mod`: 28mm × 17.3mm outline, connector overhang, and 6 solder pads (`B+`, `B-`, `OUT+`, `OUT-`, `IN+`, `IN-`).
   4. `TPS63020_BuckBoost_Module.kicad_mod`: 25mm × 15mm outline, 5-pin 2.54mm breakout header (`VOUT`, `GND`, `VIN`, `EN`, `PS`).
@@ -886,16 +886,14 @@ The `assignments/` folder stores academic project coursework, literature reviews
     - Vector SVG: `hardware/master_block/schematic_svg/robosen_master_block.svg`
     - Automated Generator: `hardware/master_block/build_schematic.py`
     - Pre-routed PCB Layout: `hardware/master_block/robosen_master_block.kicad_pcb`
-- **Firmware Update Backlog (Hardware Revision Notice):**
-  - Master Block firmware ([`firmware/esp32_master/esp32_master.ino`](file:///C:/Users/nnnn/Projects/robosen_block/firmware/esp32_master/esp32_master.ino)) requires:
-    1. Red Button (`SW5`, `GPIO 2`, `BTN_STOP`) integration for Emergency Halt, Cancel, and Back navigation.
+- **Firmware Implementation & Verification (Hardware Revision Notice):**
+  - Master Block firmware ([`firmware/esp32_master/esp32_master.ino`](file:///Users/nnnn/Projects/robosen_block/firmware/esp32_master/esp32_master.ino)) implements:
+    1. Red Button (`SW5`, `GPIO 2`, `BTN_STOP`) integration for Emergency Halt, Run Abort, Action Dismiss, and long-press BLE Disconnect.
     2. Battery Sense (`GPIO 1`, ADC1_CH0) reading with 1:1 divider math ($V_{BAT} = 2 \times V_{ADC}$) and battery percentage display on E-Paper.
-    3. Documentation provided in [`firmware/esp32_master/README.md`](file:///C:/Users/nnnn/Projects/robosen_block/firmware/esp32_master/README.md).
-- **Manufacturing & Order Status:**
-  - **Status:** **ORDERED AT JLCPCB (October 5, 2026)**
-  - **Gerber Package:** [`hardware/master_block/robosen_master_block_gerbers.zip`](hardware/master_block/robosen_master_block_gerbers.zip) (10 files)
-  - **Fabrication Parameters:** 2 Layers, $115.50\text{ mm} \times 62.00\text{ mm}$, $1.6\text{ mm}$ FR-4, $1\text{ oz}$ copper, Lead-Free HASL finish, Green solder mask, White silkscreen.
-  - **Verification:** KiCad ERC 0 violations, KiCad DRC 0 unconnected items, 0 clearance errors. Dual-agent audited.
+    3. Production verification and wiring documented in [`firmware/esp32_master/README.md`](file:///Users/nnnn/Projects/robosen_block/firmware/esp32_master/README.md).
+- **Manufacturing & Hardware Status Evolution:**
+  - **Prototype #1.0 (In Active Physical Operation):** Fabricated at JLCPCB (October 5, 2026). Action Blocks are 100% verified on silicon and in full use. The Master Block carrier PCB in physical testing is from this batch; the 22.86 mm socket row spacing deviation is bridged via header pin / jumper adaptations to keep the full hardware stack operational for testing and pilots.
+  - **Prototype #1-1 (Planned Future Re-Order):** Completed ECO respin on October 14, 2026 correcting socket row spacing to standard **$25.40\text{ mm}$ ($1.000\text{ in}$)**. 100% routed (469 tracks, 20 vias, 0 DRC violations). Gerbers are packaged at [`hardware/master_block/robosen_master_block_gerbers.zip`](hardware/master_block/robosen_master_block_gerbers.zip) as the plan for the next fabrication run.
 
 ---
 
@@ -922,7 +920,7 @@ The `assignments/` folder stores academic project coursework, literature reviews
   - Pinout (Top-to-Bottom):
     - Pad 1 (Top, $Y = 59.96\text{ mm}$): `GND`
     - Pad 2 (Middle, $Y = 62.50\text{ mm}$): `+3V3` (`VCC`)
-    - Pad 3 (Bottom, $Y = 65.04\text{ mm}$): `/LED_DIN` (driven by CH32V003 `PC4` through a dedicated single segment trace)
+    - Pad 3 (Bottom, $Y = 65.04\text{ mm}$): `/LED_DIN` (driven by CH32V003 `PA2` via socket Pin 6 through a dedicated single segment trace)
 - **Signal & Power Routing Architecture:**
   - Board Outline: $80.50 \le X \le 112.50\text{ mm}$, $56.50 \le Y \le 88.50\text{ mm}$ ($32.00 \times 32.00\text{ mm}$).
   - 37 copper tracks, 0 vias, dual-layer continuous GND polygon planes (`F.Cu` and `B.Cu`).

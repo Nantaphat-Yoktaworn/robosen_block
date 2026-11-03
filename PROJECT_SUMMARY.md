@@ -239,17 +239,17 @@ The project is currently in an **advanced software, protocol simulation, and liv
 - **Validation**: Verified persistent BLE pairing with Robosen K1, 2-phase binary daisy-chain protocol (`0xAA`/`0xBB`), WS2812 light choreography, and 18650 power delivery.
 - **Reference Document**: [`docs/specs/PROTOTYPE_00_SPEC.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/PROTOTYPE_00_SPEC.md).
 
-### Prototype #1: First Custom PCB Fabrication (October 2026) ⚠️ RETIRED (DEFECT FOUND)
+### Prototype #1: First Custom PCB Fabrication (October 2026) ⚡ IN ACTIVE PHYSICAL OPERATION
 - **Architecture**: Custom 2-layer FR-4 carrier PCBs, standardized 4-pin magnetic pogo docking, self-contained BMS + buck-boost regulator, and software-configurable End Block role via MCU Pin 15 (`PD0`).
-- **Arrival Finding (Oct 14, 2026)**: Action Block carrier PCBs arrived and verified 100% functional. Master Block had an ESP32-S3 socket row spacing defect ($22.86\text{ mm}$ vs required $25.40\text{ mm}$), preventing module socket insertion.
-- **Archive Location**: [`archive/prototype_1_0_retired/master_block/`](file:///Users/nnnn/Projects/robosen_block/archive/prototype_1_0_retired/master_block/).
+- **Physical Operation Status**: Action Block carrier PCBs arrived and verified 100% functional on silicon. Master Block PCB arrived with an ESP32-S3 socket row spacing deviation ($22.86\text{ mm}$ vs required $25.40\text{ mm}$); it operates in current physical testing and classroom pilots via header pin adaptations.
+- **Archive Location of Original CAD**: [`archive/prototype_1_0_retired/master_block/`](file:///Users/nnnn/Projects/robosen_block/archive/prototype_1_0_retired/master_block/).
 - **Reference Document**: [`docs/specs/PROTOTYPE_01_SPEC.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/PROTOTYPE_01_SPEC.md).
 
-### Prototype #1-1: Master Block PCB Respin (October 2026) ✅ ACTIVE IN HARDWARE
-- **Architecture**: Engineering change order (ECO) respin of Master Block carrier PCB in [`hardware/master_block/`](file:///Users/nnnn/Projects/robosen_block/hardware/master_block/).
+### Prototype #1-1: Master Block PCB Respin (October 2026) 📐 PLANNED FOR FUTURE RE-ORDER
+- **Architecture**: Engineering change order (ECO) respin of Master Block carrier PCB in [`hardware/master_block/`](file:///Users/nnnn/Projects/robosen_block/hardware/master_block/) prepared as the design for the next fabrication run.
 - **ESP32-S3 Footprint Correction**: `ESP32-S3-DevKitC-1-Socket` pin row separation widened by 1 pitch unit (+100 mil) to exact **$25.40\text{ mm}$ ($1.000\text{ in}$)** standard.
 - **Routing & DRC**: 100% rerouted (**0 unconnected items, 0 copper clearance errors**), 469 tracks, 20 vias, solid GND planes, full M3 mounting hole standoff clearance ($\ge 3.68\text{ mm}$).
-- **Production Package**: Gerbers verified and zipped at [`hardware/master_block/robosen_master_block_gerbers.zip`](file:///Users/nnnn/Projects/robosen_block/hardware/master_block/robosen_master_block_gerbers.zip).
+- **Production Package**: Gerbers verified and zipped at [`hardware/master_block/robosen_master_block_gerbers.zip`](file:///Users/nnnn/Projects/robosen_block/hardware/master_block/robosen_master_block_gerbers.zip) ready for re-order.
 - **Reference Document**: [`docs/specs/PROTOTYPE_01_1_SPEC.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/PROTOTYPE_01_1_SPEC.md).
 
 ### 2. Unified Modular Slave PCB (Action Block & Smart End Block Carrier): ✅ ORDERED & VERIFIED

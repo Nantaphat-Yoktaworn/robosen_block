@@ -67,6 +67,12 @@
   - [x] Uploaded 10-file Gerber package `robosen_master_block_gerbers.zip` to JLCPCB
   - [x] Confirmed 2-layer, 1.6mm FR-4, Lead-Free HASL, 1oz copper specifications
 
+- [x] **9. Prototype #1-1 ECO Respin: ESP32-S3 Socket Row Spacing Correction (October 14, 2026)**
+  - [x] Corrected `ESP32-S3-DevKitC-1-Socket` pin row separation from 22.86 mm to 25.40 mm (+100 mil)
+  - [x] 100% rerouted carrier PCB (469 tracks, 20 vias, 0 unconnected items, 0 copper clearance errors)
+  - [x] Verified M3 mounting clearances (>= 3.68 mm) and solid GND pours
+  - [x] Regenerated production Gerbers `robosen_master_block_gerbers.zip` for JLCPCB re-order
+
 ---
 
 ## 📐 Detailed Engineering Notes for Implementation
