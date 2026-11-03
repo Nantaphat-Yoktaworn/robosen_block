@@ -366,9 +366,6 @@ To avoid disruptive classroom audio noise, all sound buzzers are eliminated in f
 | `0x13` | `DANCE_BOOGALOO`| Track (`1`–`2`) | `0x17` (`"Action/Boogaloo"`) | 🟣 Magenta (`#8E24AA`) |
 | `0x14` | `PUSH_UPS` | Reps (`1`–`3`) | `0x17` (`"ProAction/Push Ups"`) | 🟤 Brown (`#6D4C41`) |
 | `0x15` | `HANDSTAND` | Duration (`1`–`3`) | `0x17` (`"ProAction/Handstand"`) | 🟤 Brown (`#6D4C41`) |
-| `0x20` | `HEAD_MOVE` | Angle (`42`–`202`) | `0xE8` (Servo index 16, standing pose safe) | 🩵 Teal (`#00897B`) |
-| `0x30` | `WAIT_DELAY` | Seconds (`1`–`5`s) | Master internal non-blocking sleep timer | 🟡 Yellow (`#FBC02D`) |
-| `0x40` | `REPEAT_LOOP`| Iterations (`2x`–`5x`)| Master execution queue sub-loop | 🟢 Lime (`#7CB342`) |
 
 ---
 
@@ -386,10 +383,9 @@ To avoid disruptive classroom audio noise, all sound buzzers are eliminated in f
 * **WS2812B Bitbang:** Cycle-accurate assembly routine driving `PA2` at 800 kHz NRZ timing.
 
 ### 10.3 Development & Debugging Utilities
-* **Interactive CLI Runner:** [`scripts/k1_action.py`](file:///C:/Users/poomz/nnnn/robosen_block/scripts/k1_action.py) (Supports all actions, posture resets, and `volume <0-100%>`).
-* **BLE Telemetry Suite:** [`scripts/k1_ble_tester.py`](file:///C:/Users/poomz/nnnn/robosen_block/scripts/k1_ble_tester.py).
-* **17-Joint Kinematics Controller:** [`scripts/k1_joint_controller.py`](file:///C:/Users/poomz/nnnn/robosen_block/scripts/k1_joint_controller.py).
-* **Node-RED Simulation Simulator:** [`node-red-contrib-robosen-block/`](file:///C:/Users/poomz/nnnn/robosen_block/node-red-contrib-robosen-block/).
+* **Interactive CLI Runner:** [`scripts/k1_action.py`](file:///Users/nnnn/Projects/robosen_block/scripts/k1_action.py) (Supports all actions, posture resets, and `volume <0-100%>`).
+* **BLE Telemetry Suite:** [`scripts/k1_ble_tester.py`](file:///Users/nnnn/Projects/robosen_block/scripts/k1_ble_tester.py).
+* **17-Joint Kinematics Controller:** [`scripts/k1_joint_controller.py`](file:///Users/nnnn/Projects/robosen_block/scripts/k1_joint_controller.py).
 
 ---
 
@@ -502,7 +498,7 @@ The complete dual-knob tactile interface and wireless gateway stage of the Maste
    * Target binding verified persistent across hardware resets (`EN` / `RST`) and power cycles.
 3. **End-to-End Binary Packet Transmission:**
    * Connected as BLE Central client to GATT Service `0000ffe0-0000-1000-8000-00805f9b34fb` and Characteristic `0000ffe1-0000-1000-8000-00805f9b34fb`.
-   * Dual BLE Address Mode supported: `BLE_ADDR_RANDOM` (for mobile app simulator) and `BLE_ADDR_PUBLIC` (for Robosen K1 robot).
+   * Dual BLE Address Mode supported: `BLE_ADDR_RANDOM` (for mobile BLE testing / nRF Connect) and `BLE_ADDR_PUBLIC` (for Robosen K1 robot).
    * Verified transmission of live motion packet:
      $$\texttt{[FF FF 16 17 50 72 6F 41 63 74 69 6F 6E 2F 4C 65 66 74 20 50 75 6E 63 68 94]}$$
    * Target GATT server successfully received and verified the raw hex payload and 8-bit checksum.

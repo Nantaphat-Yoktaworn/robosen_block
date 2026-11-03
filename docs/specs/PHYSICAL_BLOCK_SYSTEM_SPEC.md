@@ -242,12 +242,6 @@ To eliminate disruptive audio beeping in busy classroom environments, the system
 | `0x18` | `SAY_HELLO` | Reps (`1`–`3`) | `0x17` (`"ProAction/Say Hello"`) | 🩵 Teal (`#00897B`) |
 | `0x19` | `CELEBRATE` | Reps (`1`–`3`) | `0x17` (`"ProAction/Celebrate"`) | 🟡 Yellow (`#FDD835`) |
 | `0xEE` | `END_CAP` | Smart End Terminator | N/A (Active Return Rail Loopback)| 🟢 Soft Emerald Green (`#00E020`)|
-| `0x20` | `HEAD_MOVE` *(Sim only)*| Angle (`42`–`202`) | `0xE8` (Servo index 16) | 🩵 Teal (`#00897B`) |
-| `0x30` | `WAIT_DELAY` *(Sim only)*| Seconds (`1`–`5`s) | Master internal sleep timer | 🟡 Yellow (`#FBC02D`) |
-| `0x40` | `REPEAT_LOOP` *(Sim only)*| Iterations (`2x`–`5x`)| Master queue sub-loop | 🟢 Lime (`#7CB342`) |
-
-> ℹ️ **Hardware vs. Simulation Note:** Tokens `0x01`–`0x19` and `0xEE` are physically supported in the [ESP32 Master firmware](file:///Users/nnnn/Projects/robosen_block/firmware/esp32_master/esp32_master.ino) and [CH32V003 Action Block firmware](file:///Users/nnnn/Projects/robosen_block/firmware/ch32v003_action_block/main.c). Tokens `0x20` (Head Move), `0x30` (Delay), and `0x40` (Repeat Loop) are software simulation extensions available in the Node-RED simulator palette.
-
 
 ---
 

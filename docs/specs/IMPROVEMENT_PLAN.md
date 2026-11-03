@@ -131,7 +131,6 @@ The Master ESP32-S3 coordinates robot actions and feeds execution states back to
 │       Wait asynchronously until Progress Byte === 100% (0x64)         │
 │     - If Locomotion (0x01-0x08): Start precision hardware step timer  │
 │       When timer expires, send Stop frame (0x0C)                      │
-│     - If Delay (0x30): Run master sleep timer                         │
 │                                                                       │
 │  3. Stabilization Buffer: 300-500ms posture stabilization             │
 └──────────────────────┬────────────────────────────────────────────────┘

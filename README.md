@@ -149,12 +149,6 @@ All serial transmissions use binary frames protected by **CRC-8** (Polynomial: $
 | `0x18` | `SAY_HELLO` | Reps (`1`–`3`) | `0x17` (`"ProAction/Say Hello"`) | 🩵 Teal (`#00897B`) |
 | `0x19` | `CELEBRATE` | Reps (`1`–`3`) | `0x17` (`"ProAction/Celebrate"`) | 🟡 Yellow (`#FDD835`) |
 | `0xEE` | `END_CAP` | Smart End Terminator | N/A (Return Rail Loopback) | 🟢 Soft Emerald Green (`#00E020`) |
-| `0x20` | `HEAD_MOVE` *(Sim only)*| Pan Angle (`42`–`202`)| `0xE8` (Servo index 16) | 🩵 Teal (`#00897B`) |
-| `0x30` | `WAIT_DELAY` *(Sim only)*| Seconds (`1`–`5`s) | Master sleep delay timer | 🟡 Yellow (`#FBC02D`) |
-| `0x40` | `REPEAT_LOOP` *(Sim only)*| Iterations (`2x`–`5x`)| Master sub-queue loop | 🟢 Lime (`#7CB342`) |
-
-> ℹ️ **Note:** Tokens `0x01`–`0x19` and `0xEE` are physically supported in the [ESP32 Master firmware](file:///Users/nnnn/Projects/robosen_block/firmware/esp32_master/esp32_master.ino) and [CH32V003 Action Block firmware](file:///Users/nnnn/Projects/robosen_block/firmware/ch32v003_action_block/main.c). Tokens `0x20`, `0x30`, `0x40` are software simulation extensions supported in the Node-RED simulator palette.
-
 
 ---
 
@@ -166,7 +160,7 @@ To provide 100% reliable Bluetooth Low Energy communication on Windows 11/10 wit
 - **Persistent Long-Lived Connection:** Connects once on startup and keeps the BLE connection alive to eliminate reconnection latency.
 - **Dynamic 100% Action Completion ACK:** Listens to BLE Characteristic `0xFFE1` notifications in real time. Actions resolve the exact millisecond the physical robot emits `action_progress: 100%` (`0x64`), allowing seamless back-to-back chaining without hardcoded delays.
 - **Standing Posture Preservation (`move_head_only`):** Captures live standing angles of all 16 body/leg servos via `0xE9` (`jointSync`) so neck/head articulations rotate smoothly without snapping leg angles or causing balance loss.
-- **Bidirectional JSON IPC:** Communicates over `stdin`/`stdout` with Node-RED and CLI tools.
+- **Bidirectional JSON IPC:** Communicates over `stdin`/`stdout` with CLI tools and background processes.
 
 ### 2. Fast Command-Line Execution CLI ([`scripts/k1_action.py`](scripts/k1_action.py))
 ```powershell
@@ -317,7 +311,6 @@ Complete hardware specifications are detailed in [`docs/specs/PHYSICAL_BLOCK_SYS
 | [`docs/plans/robosen_14_weeks_plan.md`](file:///Users/nnnn/Projects/robosen_block/docs/plans/robosen_14_weeks_plan.md) | 14-Week project operational timeline, task breakdown, and milestone tracking |
 | [`docs/plans/TIMELINE_INFOGRAPHIC.md`](file:///Users/nnnn/Projects/robosen_block/docs/plans/TIMELINE_INFOGRAPHIC.md) | Timeline visual concept, ASCII art chart, and Canva design data |
 | [`docs/assignments/RESEARCH_SUMMARY.md`](file:///Users/nnnn/Projects/robosen_block/docs/assignments/RESEARCH_SUMMARY.md) | Academic coursework research review summary (AS01) |
-| [`simulators/node-red-contrib-robosen-block/`](file:///Users/nnnn/Projects/robosen_block/simulators/node-red-contrib-robosen-block/) | Node-RED 2-Phase Binary protocol simulation palette and virtual flow examples |
 | [`hardware/master_block/`](file:///Users/nnnn/Projects/robosen_block/hardware/master_block/) | KiCad 10 Master Block PCB project (Corrected 25.40mm socket spacing, 100% routed) |
 | [`hardware/action_block/`](file:///Users/nnnn/Projects/robosen_block/hardware/action_block/) | KiCad 10 Action Block PCB project, routing report, and production Gerbers |
 | [`archive/prototype_1_0_retired/`](file:///Users/nnnn/Projects/robosen_block/archive/prototype_1_0_retired/) | Retired Prototype #1 files (preserved for historical defect audit) |

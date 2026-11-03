@@ -145,7 +145,7 @@ sequenceDiagram
 
 ## 4. Current State of the Project
 
-The project is currently in an **advanced software, protocol simulation, and live BLE validation stage**:
+The project is currently in an **active hardware prototyping, protocol verification, and live BLE validation stage**:
 
 ### 4.1 What Has Been Completed & Verified
 1. **Full Robosen K1 BLE Protocol Reverse Engineering:**
@@ -158,12 +158,10 @@ The project is currently in an **advanced software, protocol simulation, and liv
    - [`scripts/k1_action.py`](file:///Users/nnnn/Projects/robosen_block/scripts/k1_action.py): Instant action runner and telemetry inspector CLI.
    - [`scripts/k1_ble_tester.py`](file:///Users/nnnn/Projects/robosen_block/scripts/k1_ble_tester.py): Interactive console telemetry and motion control suite.
 
-3. **Complete Node-RED Tangible Block Simulator Suite (`simulators/node-red-contrib-robosen-block`):**
-   - **`robosen-master`**: Simulates the Master Block, emits `0xAA` discovery seed, verifies CRC-8, coordinates BLE execution, and broadcasts `0xBB` real-time step frames.
-   - **`robosen-smart-block`**: Simulates the CH32V003 Smart Block with flash parameter storage and dynamic WS2812B RGB LED color states.
-   - **`robosen-smart-end`**: Simulates the active end terminator with CRC-8 validation, loopback return, and fault injection capabilities.
-   - **`robosen-protocol-monitor`**: Real-time packet analyzer decoding binary hex frames, tokens, parameters, and checksum integrity.
-   - **Ready-to-run simulation flows**: [`robosen_smart_block_flow.json`](file:///Users/nnnn/Projects/robosen_block/simulators/node-red-contrib-robosen-block/examples/robosen_smart_block_flow.json) and [`robosen_simulator_flow.json`](file:///Users/nnnn/Projects/robosen_block/simulators/node-red-contrib-robosen-block/examples/robosen_simulator_flow.json).
+3. **Python Protocol Verification & BLE Test Suite:**
+   - Decoded and validated 2-Phase Binary (`0xAA`/`0xBB`) frames and CRC-8 integrity.
+   - Interactive command-line tools for live robot control and protocol analysis.
+   - Automated testing scripts validating token sequences, loopback timing, and error handling.
 
 4. **Hardware & Electrical Architecture Specifications:**
    - Completed detailed hardware documentation ([`docs/specs/PHYSICAL_BLOCK_SYSTEM_SPEC.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/PHYSICAL_BLOCK_SYSTEM_SPEC.md)) defining 4-pin pogo pinout, power consumption, CH32V003 SOP-8 pinouts, and CRC-8 algorithms.
@@ -197,7 +195,7 @@ The project is currently in an **advanced software, protocol simulation, and liv
 - **Graceful Error Recovery:** If a child unplugs a block mid-execution, the Master catches the break within 50 ms, stops the robot safely, and flashes the affected block red rather than crashing.
 
 ### Pillar 3: Master ESP32-S3 Standalone Embedded Firmware & Smart NVS Pairing
-- **Full Embedded Port:** Flash the non-blocking command queue directly onto the Master ESP32-S3 in C++ (ESP-IDF / Arduino), eliminating the need for a laptop, Python script, or Node-RED in the final classroom setup.
+- **Full Embedded Port:** Flash the non-blocking command queue directly onto the Master ESP32-S3 in C++ (ESP-IDF / Arduino), eliminating the need for a laptop, tethered PC, or external debugger in the final classroom setup.
 - **Multi-Robot Smart NVS Binding:** Boots and connects directly to the last-paired robot MAC in $<500\,\text{ms}$, preventing classroom crosstalk.
 - **Teacher E-Ink Pairing Menu:** Hold Start for 3 seconds to scan, sort nearby robots by RSSI proximity, select via Knob 1, and save as the new persistent default MAC.
 
@@ -218,16 +216,16 @@ The project is currently in an **advanced software, protocol simulation, and liv
 
 ## 6. Summary Comparison Table
 
-| Metric / Feature | Current State (Software & Simulation) | Target Physical Hardware Product |
+| Metric / Feature | Early Baseline (Developer Breadboard / Python Tools) | Target Physical Hardware Product |
 | :--- | :--- | :--- |
-| **Execution Environment** | Node-RED & Python BLE Background Daemon | Standalone ESP32-S3 Master Block (No PC needed) |
-| **Master UI & Display** | Node-RED Web Dashboard | E-Ink Display + Dual Rotary Dials + Start Button |
-| **Instruction Blocks** | Simulated Node-RED Smart Block Nodes | Solid CH32V003 RISC-V Snap Blocks (No buttons/knobs) |
-| **Configuration Method** | Node-RED UI Dropdowns | Master Block Config Dock (`0xCF` UART Flash) |
-| **Inter-Block Bus** | Simulated 2-Phase Binary Frames (`0xAA`/`0xBB`) | 4-Pin Magnetic Pogo Pin UART Daisy-Chain |
-| **Visual Feedback** | Node-RED UI Status Badges | Addressable WS2812B RGB LEDs (Light Choreography) |
+| **Execution Environment** | Python BLE Daemon / Breadboard Dev Kit | Standalone ESP32-S3 Master Block (No PC needed) |
+| **Master UI & Display** | CLI Terminal / Serial Console | E-Ink Display + Dual Rotary Dials + Start/Stop Buttons |
+| **Instruction Blocks** | Breadboard Slave Test Circuits / Flash CLI | Solid CH32V003 RISC-V Snap Blocks (No buttons/knobs) |
+| **Configuration Method** | Python Serial / Dock Flash Script | Master Block Config Dock (`0xCF` UART Flash) |
+| **Inter-Block Bus** | Jumper Wires / Breadboard UART Daisy-Chain | 4-Pin Magnetic Pogo Pin UART Daisy-Chain |
+| **Visual Feedback** | Breadboard Individual LEDs / Serial Logs | Addressable WS2812B RGB LEDs (Light Choreography) |
 | **Audio Feedback** | System Audio / Console Alerts | Silent Classroom (Robot's built-in speaker only) |
-| **BOM Cost per Block** | N/A (Software) | **~$0.25 – $0.35** per physical block |
+| **BOM Cost per Block** | Dev Boards / Discrete Components | **~$0.25 – $0.35** per physical block |
 | **Target User Experience** | Technical Testing & Developer Prototyping | Screenless, Tactile STEM Toy for Kids $\le 7$ |
 
 ---

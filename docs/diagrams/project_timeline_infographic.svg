@@ -184,10 +184,10 @@
             <!-- Milestone Title -->
             <div style="margin-bottom: 8px;">
                 <div style="font-size: 14px; font-weight: 700; color: #38BDF8; line-height: 1.3;">
-                    ถอดรหัสคำสั่งหุ่นยนต์ครบวงจร, สร้างโปรแกรมสื่อสาร & ระบบจำลองการทำงาน
+                    ถอดรหัสคำสั่งหุ่นยนต์ครบวงจร, สร้างโปรแกรมสื่อสาร & ชุดทดสอบโปรโตคอล
                 </div>
                 <div style="font-size: 11px; color: #64748B; font-style: italic;">
-                    Advanced Protocol Decoding, Control Engine & Logic Simulation
+                    Advanced Protocol Decoding, Control Engine & Protocol Verification Suite
                 </div>
             </div>
 
@@ -230,7 +230,7 @@
                 <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">🛡️</span>
                 <div>
                     <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[การทดสอบ & QA]</strong>
-                    <span> พัฒนาระบบจำลองการสื่อสารเพื่อทดสอบการรับส่งข้อมูลและความถูกต้องของคำสั่ง</span>
+                    <span> พัฒนาชุดทดสอบการสื่อสารอัตโนมัติเพื่อตรวจสอบการรับส่งข้อมูล 2-Phase Binary และ CRC-8</span>
                 </div>
             </div>
             
@@ -406,7 +406,7 @@
                 <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">💻</span>
                 <div>
                     <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[เฟิร์มแวร์ & โปรโตคอล]</strong>
-                    <span> ทดสอบเชื่อมต่อบล็อกจำลองเข้ากับหุ่นยนต์จริง เพื่อยืนยันการส่งคำสั่งไร้สายผ่าน BLE</span>
+                    <span> ทดสอบเชื่อมต่อบล็อกทดลองบนเบรดบอร์ดเข้ากับหุ่นยนต์จริง เพื่อยืนยันการส่งคำสั่งไร้สายผ่าน BLE</span>
                 </div>
             </div>
             

@@ -24,8 +24,8 @@ weeks_data = [
         "week": 2,
         "week_label": "WEEK 02",
         "dates": "23/08/2026 - 29/08/2026",
-        "milestone": "ถอดรหัสคำสั่งหุ่นยนต์ครบวงจร, สร้างโปรแกรมสื่อสาร & ระบบจำลองการทำงาน",
-        "milestone_en": "Advanced Protocol Decoding, Control Engine & Logic Simulation",
+        "milestone": "ถอดรหัสคำสั่งหุ่นยนต์ครบวงจร, สร้างโปรแกรมสื่อสาร & ชุดทดสอบโปรโตคอล",
+        "milestone_en": "Advanced Protocol Decoding, Control Engine & Protocol Verification Suite",
         "status": "เสร็จสิ้น (DONE)",
         "status_code": "done",
         "is_star": False,
@@ -34,7 +34,7 @@ weeks_data = [
             {"cat": "โครงสร้าง & 3D", "icon": "🧊", "text": "สรุปรายการชิ้นส่วนต้นแบบ & วัดขนาดจริงของแผงวงจรเพื่อเตรียมออกแบบเคส"},
             {"cat": "เฟิร์มแวร์ & โปรโตคอล", "icon": "💻", "text": "ถอดรหัสคำสั่งขั้นสูงกว่า 25 รูปแบบ, ระบบตอบกลับ (ACK) & โปรแกรมควบคุมการเคลื่อนไหว"},
             {"cat": "การออกแบบ & สรีรศาสตร์", "icon": "🎨", "text": "วางลำดับขั้นตอนการใช้งาน: เสียบตั้งค่าแท่น -> ต่อเรียงบล็อกแม่เหล็ก -> ไฟบอกสถานะ"},
-            {"cat": "การทดสอบ & QA", "icon": "🛡️", "text": "พัฒนาระบบจำลองการสื่อสารเพื่อทดสอบการรับส่งข้อมูลและความถูกต้องของคำสั่ง"}
+            {"cat": "การทดสอบ & QA", "icon": "🛡️", "text": "พัฒนาชุดทดสอบการสื่อสารอัตโนมัติเพื่อตรวจสอบการรับส่งข้อมูล 2-Phase Binary และ CRC-8"}
         ]
     },
     {
@@ -66,7 +66,7 @@ weeks_data = [
         "summary": [
             {"cat": "ฮาร์ดแวร์ & วงจร", "icon": "⚡", "text": "ออกแบบวงจรไฟฟ้าครบ 3 ส่วน: Master Block, Action Block และ End Block"},
             {"cat": "โครงสร้าง & 3D", "icon": "🧊", "text": "ออกแบบโมเดล 3D: แม่เหล็กป้องกันต่อกลับด้าน, ท่อนำแสงไฟแสดงผล & เคสบล็อกหลัก"},
-            {"cat": "เฟิร์มแวร์ & โปรโตคอล", "icon": "💻", "text": "ทดสอบเชื่อมต่อบล็อกจำลองเข้ากับหุ่นยนต์จริง เพื่อยืนยันการส่งคำสั่งไร้สายผ่าน BLE"},
+            {"cat": "เฟิร์มแวร์ & โปรโตคอล", "icon": "💻", "text": "ทดสอบเชื่อมต่อบล็อกทดลองบนเบรดบอร์ดเข้ากับหุ่นยนต์จริง เพื่อยืนยันการส่งคำสั่งไร้สายผ่าน BLE"},
             {"cat": "การออกแบบ & สรีรศาสตร์", "icon": "🎨", "text": "ออกแบบกราฟิกบนตัวบล็อกและหน้าจอ: ไอคอนคำสั่งอ่านง่าย, แถบสีแบ่งหมวด & ลูกศรทิศทาง"},
             {"cat": "การทดสอบ & QA", "icon": "🛡️", "text": "ตรวจสอบความปลอดภัยทางไฟฟ้าและวงจรควบคุมการชาร์จแบตเตอรี่บนชุดทดลอง"}
         ]
@@ -1009,22 +1009,25 @@ def generate_markdown_timeline():
     return "\n".join(md)
 
 # Run generator
-os.makedirs("C:/Users/nnnn/Projects/robosen_block/docs/diagrams", exist_ok=True)
-os.makedirs("C:/Users/nnnn/Projects/robosen_block/plans", exist_ok=True)
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+DOCS_DIAGRAMS = os.path.join(REPO_ROOT, "docs", "diagrams")
+DOCS_PLANS = os.path.join(REPO_ROOT, "docs", "plans")
+os.makedirs(DOCS_DIAGRAMS, exist_ok=True)
+os.makedirs(DOCS_PLANS, exist_ok=True)
 
 svg_str = generate_svg()
-with open("C:/Users/nnnn/Projects/robosen_block/docs/diagrams/project_timeline_infographic.svg", "w", encoding="utf-8") as f:
+with open(os.path.join(DOCS_DIAGRAMS, "project_timeline_infographic.svg"), "w", encoding="utf-8") as f:
     f.write(svg_str)
 
 html_str = generate_html()
-with open("C:/Users/nnnn/Projects/robosen_block/docs/diagrams/project_timeline_infographic.html", "w", encoding="utf-8") as f:
+with open(os.path.join(DOCS_DIAGRAMS, "project_timeline_infographic.html"), "w", encoding="utf-8") as f:
     f.write(html_str)
 
 md_str = generate_markdown_timeline()
-with open("C:/Users/nnnn/Projects/robosen_block/plans/TIMELINE_INFOGRAPHIC.md", "w", encoding="utf-8") as f:
+with open(os.path.join(DOCS_PLANS, "TIMELINE_INFOGRAPHIC.md"), "w", encoding="utf-8") as f:
     f.write(md_str)
 
 print("Generated all files successfully:")
 print("1. docs/diagrams/project_timeline_infographic.svg")
 print("2. docs/diagrams/project_timeline_infographic.html")
-print("3. plans/TIMELINE_INFOGRAPHIC.md")
+print("3. docs/plans/TIMELINE_INFOGRAPHIC.md")

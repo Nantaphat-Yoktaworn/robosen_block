@@ -1,6 +1,6 @@
 # RobosenJS & Tangible Coding Block System: Master Project Memory
 
-> **System Overview:** Programmatic Control (Node.js & Python SDK), Custom Node-RED Tangible Block Simulator Palette, and Bluetooth Low Energy (BLE) Reverse Engineering for the **Robosen K1 / Interstellar Scout K1 Series** Humanoid Robot.  
+> **System Overview:** Physical Tangible Coding Block System (ESP32-S3 Master & CH32V003 Slaves), Python BLE Control & Telemetry Suite, and Bluetooth Low Energy (BLE) Reverse Engineering for the **Robosen K1 / Interstellar Scout K1 Series** Humanoid Robot.  
 > **Last Updated:** October 5, 2026  
 > **FCC ID:** `2ATNWK1` | **Live Verified Robot ID:** `K1-00457` (`3C:A5:51:94:97:70`) | **Firmware:** `VER:3.03L` (Build: `SH2022-07-23`)
 
@@ -90,13 +90,6 @@ robosen_block/
 │   ├── k1_action.py                      # Fast one-shot action execution, status, and volume CLI (Python/Bleak)
 │   ├── diagrams/                         # Standalone timeline & data flow diagram generators
 │   └── hardware/                         # Automated KiCad footprint & routing audit utilities
-├── simulators/
-│   └── node-red-contrib-robosen-block/   # Custom Node-RED palette simulating physical block daisy chain (v2.0)
-│       ├── lib/                          # Protocol encoder/decoder, CRC-8, and token catalog
-│       ├── nodes/                        # Palette nodes (robosen-master, robosen-smart-block, etc.)
-│       ├── examples/                     # Ready-to-import 2-Phase Binary simulation flow
-│       ├── package.json                  # Node-RED palette package manifest (v2.0.0)
-│       └── README.md                     # Detailed palette documentation & API guide
 ├── src/
 │   ├── K1/
 │   │   ├── llm/                          # LLM system & user prompts for command & joint generation
@@ -337,54 +330,42 @@ python scripts/k1_ble_tester.py
 
 ---
 
-## 8. Node-RED Custom Palette: `node-red-contrib-robosen-block` (v2.0)
+## 8. 2-Phase Binary Protocol Verification & Automated Test Suite
 
-A dedicated Node-RED palette simulating the physical block-based tangible programming system:
+A dedicated protocol verification and testing architecture for the physical block-based tangible programming system:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                       NODE-RED SIMULATED SIGNAL FLOW                                   │
+│                                       PHYSICAL SIGNAL & PROTOCOL FLOW                                  │
 │                                                                                                        │
-│  [ Master Block ] ──Pin 3 (TX)──► [ Smart Block 1 ] ──Pin 3 (TX)──► [ Smart End Terminator ]           │
+│  [ Master Block ] ──Pin 3 (TX)──► [ Action Block 1 ] ──Pin 3 (TX)──► [ Smart End Terminator ]          │
 │  (Emits Seed 0xAA)                (+ Token 0x01, Param 3)           (Validates CRC-8 & Loops to Pin 4) │
 │        ▲                                                                    │                          │
 │        └──────────────────── Pin 4 Return RX & Broadcast Bus ───────────────┘                          │
 │                     │                                                                                  │
 │                     ├──────────────────────────────────────────────┐                                   │
 │                     ▼ (Phase 1: Binary Return)                     ▼ (Phase 2: Live 0xBB Broadcast)    │
-│             [ Master Parser & BLE Queue ]                 [ Smart Block 1 LED: Bright Green! ]         │
+│             [ Master Parser & BLE Queue ]                 [ Action Block 1 LED: Bright Green! ]        │
 │                     │                                                                                  │
 │                     ▼ (Bluetooth Low Energy 4.2)                                                       │
 │           [ Robosen K1 Robot ]                                                                         │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Nodes in Palette (Version 2.0):
-1. **`robosen-master` (Master Block Controller & Gateway):**
-   - Supports 2-Phase Binary Protocol (`0xAA`/`0xBB`) with CRC-8 and legacy CSV strings.
-   - Clickable canvas button sends `0xAA` seed frame down Pin 3.
-   - Output 1: Pin 3 Downstream TX, Output 2: Telemetry, Output 3: Pin 4 RX Broadcast Bus.
-   - Dispatches live BLE commands and broadcasts `0xBB` frames to trigger green active step LEDs on smart blocks in real time!
-   - HTTP Admin REST Endpoints: `/trigger`, `/info`, `/connect`, `/disconnect`, `/status`.
-2. **`robosen-smart-block` (Smart Multi-Action Block - CH32V003):**
-   - Push Button action selector (cycles actions on button click).
-   - Rotary Knob parameter adjuster (steps 1-10, angle 45°-180°, reps 1-5, delay 1-5s).
+### Protocol Validation Highlights:
+1. **Master Block Controller & Gateway:**
+   - Implements 2-Phase Binary Protocol (`0xAA`/`0xBB`) with CRC-8 validation.
+   - Pushes `0xAA` seed frame down Pin 3.
+   - Pin 3 Downstream TX; Pin 4 Return RX & Broadcast Bus.
+   - Dispatches live BLE commands to robot and broadcasts `0xBB` frames to trigger bright green active step LEDs on blocks in real time.
+2. **Action Blocks (WCH CH32V003):**
+   - Solid snap blocks without buttons/knobs (configured at Master Block config dock).
    - Dynamic WS2812B RGB LED state machine: turns **Bright Pulsing Green** when actively executing during Phase 2 broadcast.
-3. **`robosen-smart-end` (Smart Active Terminator):**
-   - Active end-of-chain terminator with CRC-8 validation, footer `0x55` framing, and return loopback into Pin 4.
-   - Built-in fault injection toggle to simulate CRC corruption for error testing.
-4. **`robosen-protocol-monitor` (Bus Analyzer & Packet Inspector):**
-   - Live packet sniffer inspecting raw Hex frames, opcode decoding, parameter tables, and CRC status.
-5. **`robosen-tester` (Action Tester / Direct Controller):**
-   - Standalone testing node with direct BLE execution, properties dashboard card, and REST endpoints.
-6. **`robosen-instruction` / `robosen-end` (Legacy V1 Blocks):**
-   - Maintained for backwards compatibility with single-action CSV chains.
-
-### Machine Symlink & Simulation Flows:
-- Linked directly into machine's Node-RED via NTFS Directory Junction:
-  `C:\Users\poomz\.node-red\node_modules\node-red-contrib-robosen-block` $\longleftrightarrow$ `C:\Users\poomz\nnnn\robosen_block\node-red-contrib-robosen-block`
-- **V2 Smart Block Flow**: [`simulators/node-red-contrib-robosen-block/examples/robosen_smart_block_flow.json`](file:///Users/nnnn/Projects/robosen_block/simulators/node-red-contrib-robosen-block/examples/robosen_smart_block_flow.json).
-- **V1 Legacy Flow**: [`simulators/node-red-contrib-robosen-block/examples/robosen_simulator_flow.json`](file:///Users/nnnn/Projects/robosen_block/simulators/node-red-contrib-robosen-block/examples/robosen_simulator_flow.json).
+3. **Smart End Terminator (Token `0xEE`):**
+   - Active end-of-chain terminator with CRC-8 validation, footer `0x55` framing, and loopback return into Pin 4.
+4. **Python Test & Verification Suite:**
+   - Command-line diagnostic and monitoring tools (`k1_ble_daemon.py`, `k1_action.py`, `k1_ble_tester.py`).
+   - Validates CRC-8 calculation, 2-phase binary framing, dynamic 100% progress ACK resolution, and graceful disconnect recovery.
 
 ---
 
@@ -457,9 +438,9 @@ The `assignments/` folder stores academic project coursework, literature reviews
 
 ### 12.2 What You CAN Do (Permissions Granted by Apache 2.0)
 1. **Public Ownership & Forking:** You can publish and host this repository publicly on GitHub under your name/organization.
-2. **Package Publishing:** You can publish npm packages (`node-red-contrib-robosen-block`) and Python modules.
+2. **Package Publishing:** You can publish Python modules and hardware open-source designs.
 3. **Commercial Exploitation:** You can sell physical tangible blocks, manufacture hardware, or sell software/services built on this repository.
-4. **Modifications & Extensions:** You own the copyright to your own original additions (physical block specs, Node-RED nodes, Python daemons, joint controllers, 2-phase CRC-8 protocol).
+4. **Modifications & Extensions:** You own the copyright to your own original additions (physical block specs, hardware designs, Python daemons, joint controllers, 2-phase CRC-8 protocol).
 5. **Private & Educational Use:** Free use for university research, coursework, and public demos without royalty fees.
 
 ### 12.3 What You MUST Do (Compliance Obligations)
