@@ -79,11 +79,18 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
 3. **Clean Disconnect**:
    - Long-pressing `BTN_STOP` for 3 seconds cleanly disconnects the active BLE session.
 
-### 3.2 Battery Percentage Monitoring (`BATSENSE` on `GPIO 1` / ADC1_CH0)
+### 3.2 Dual Battery Monitoring: Master Block & Robot Telemetry
 
-- Implemented `readBatteryVoltage()` reading calibrated millivolts via `analogReadMilliVolts(PIN_BATSENSE)`.
-- Calculates accurate battery percentage using Li-ion discharge characteristics ($3.20\text{V} - 4.20\text{V}$).
-- Renders real-time battery outline icon and dynamic fill level on the E-Paper status header.
+1. **Master Block Battery Telemetry (`BATSENSE` on `GPIO 1` / ADC1_CH0)**:
+   - Samples precision 1:1 voltage divider via `analogReadMilliVolts(PIN_BATSENSE)`.
+   - Calculates accurate battery percentage using Li-ion discharge characteristics ($3.20\text{V} - 4.20\text{V}$).
+   - Renders battery outline icon and dynamic fill level on the top right of the E-Paper status header.
+
+2. **Robot Battery & State Telemetry (`0x0F` GATT Notifications)**:
+   - Subscribes to BLE notifications on characteristic `0xFFE1` upon connection.
+   - Periodically queries live telemetry via 5-byte Opcode `0x0F` packet `[0xFF, 0xFF, 0x02, 0x0F, 0x11]` every 5 seconds during idle periods (also acting as connection keep-alive).
+   - Extracts live battery percentage (`payload[1]`, 0–100%), speaker volume (`payload[2]`), and auto-stand status.
+   - Dynamically renders `[K1: XX%]` badge on the E-Paper header across all modes when connected.
 
 ### 3.3 Scalable Multi-Mode Switcher & Remote Control (RC) Mode
 
@@ -138,4 +145,5 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
 - [x] Verified Remote Control Mode (`STATE_REMOTE_CONTROL`) with hold-to-walk, 3-gear selector, momentum steering, and 10-stunt catalog.
 - [x] Verified Joint Control Mode (`STATE_JOINT_CONTROL`) with 5 groups, 17 servos, Level 1 $\longleftrightarrow$ Level 2 navigation, Opcode `0xE8` streaming, slider gauge, and zero/standing resets.
 - [x] Verified Unified Button Navigation (`Green = Confirm/Enter/Go`, `Red = Back/Cancel/Stop`) across all 3 modes and menus.
+- [x] Verified Robosen K1 live battery percentage monitoring via Opcode `0x0F` notifications and E-Paper header badge `[K1: XX%]`.
 - [x] Successfully compiled using Arduino CLI for `esp32:esp32:esp32s3` (Zero warnings/errors).

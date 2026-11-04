@@ -341,6 +341,12 @@ BLEClient* pClient = nullptr;
 BLERemoteCharacteristic* pRemoteChar = nullptr;
 volatile bool isConnected = false;
 
+// Live Robot Telemetry State (Opcode 0x0F)
+volatile int robotBatteryPercent = -1;
+volatile bool hasRobotBattery = false;
+volatile uint8_t robotSpeakerVolume = 100;
+volatile bool robotAutoStand = true;
+
 // Retry Timing: 1s fast scan + 2s pause between attempts
 const unsigned long RETRY_INTERVAL_MS = 2000;
 unsigned long lastConnectAttemptTime = 0;
@@ -453,6 +459,10 @@ void sendJointFrameNonBlocking(uint8_t speed = 25);
 void resetActiveJointToCenter();
 void resetAllJointsToStand();
 
+// Robot Telemetry & Battery Monitoring Helpers
+void queryRobotStateNonBlocking();
+void robotNotifyCallback(BLERemoteCharacteristic* pChar, uint8_t* pData, size_t length, bool isNotify);
+
 // E-Ink Display Functions (DEPG0213BN / SSD1680)
 void updateEInkActionMenu();
 void updateEInkPairingMenu();
@@ -476,6 +486,8 @@ class RobosenClientCallback : public BLEClientCallbacks {
   void onDisconnect(BLEClient* pclient) {
     isConnected = false;
     pRemoteChar = nullptr;
+    hasRobotBattery = false;
+    robotBatteryPercent = -1;
     Serial.println("\n[BLE STATUS] 🔴 Robot disconnected / link lost! Resuming retry loop...");
     if (currentState == STATE_ACTION_MENU || currentState == STATE_REMOTE_CONTROL || currentState == STATE_JOINT_CONTROL) {
       updateStatusLED();
@@ -764,6 +776,50 @@ void resetAllJointsToStand() {
 }
 
 // ==============================================================================
+// 4.4 ROBOT TELEMETRY & BATTERY PERCENTAGE MONITOR (OPCODE 0x0F)
+// ==============================================================================
+void queryRobotStateNonBlocking() {
+  if (bleMutex != nullptr && xSemaphoreTake(bleMutex, pdMS_TO_TICKS(40)) == pdTRUE) {
+    if (isConnected && pRemoteChar != nullptr && pRemoteChar->canWrite()) {
+      // 5-byte Opcode 0x0F query: Header(0xFF, 0xFF), Len(0x02), Opcode(0x0F), Checksum(0x11)
+      uint8_t queryPacket[5] = {0xFF, 0xFF, 0x02, 0x0F, 0x11};
+      pRemoteChar->writeValue(queryPacket, sizeof(queryPacket));
+    }
+    xSemaphoreGive(bleMutex);
+  }
+}
+
+void robotNotifyCallback(BLERemoteCharacteristic* pChar, uint8_t* pData, size_t length, bool isNotify) {
+  if (length >= 6 && pData[0] == 0xFF && pData[1] == 0xFF) {
+    uint8_t opcode = pData[3];
+    if (opcode == 0x0F && length >= 12) {
+      // 0x0F Telemetry packet: payload starts at pData[4]
+      // payload[0] = pattern (pData[4])
+      // payload[1] = battery % (pData[5])
+      // payload[2] = volume (pData[6])
+      // payload[3] = progress (pData[7])
+      // payload[4] = autoStand (pData[8])
+      // payload[5] = autoTurn (pData[9])
+      // payload[6] = autoPose (pData[10])
+      // payload[7] = autoOff (pData[11])
+      uint8_t bat = pData[5];
+      if (bat <= 100) {
+        int oldBat = robotBatteryPercent;
+        robotBatteryPercent = (int)bat;
+        hasRobotBattery = true;
+        robotSpeakerVolume = pData[6];
+        robotAutoStand = (pData[8] != 0);
+        if (oldBat != robotBatteryPercent) {
+          Serial.printf("\n[ROBOT TELEMETRY] 🔋 Robot Battery: %d%% | Volume: %d/140 | AutoStand: %s\n",
+                        robotBatteryPercent, robotSpeakerVolume, robotAutoStand ? "ON" : "OFF");
+          requestEInkFullUpdate();
+        }
+      }
+    }
+  }
+}
+
+// ==============================================================================
 // 5. DIRECT PERSISTENT BLE CONNECTION MANAGER (FAST 1s NON-BLOCKING SCAN CHECK)
 // ==============================================================================
 bool connectToRobot(bool quietBg) {
@@ -862,12 +918,19 @@ bool connectToRobot(bool quietBg) {
     return false;
   }
 
+  // Subscribe to robot telemetry notifications (battery, volume, status)
+  if (pRemoteChar->canNotify()) {
+    pRemoteChar->registerForNotify(robotNotifyCallback);
+    Serial.println("[BLE STATUS] 📡 Subscribed to Robot Telemetry Notifications (0xFFE1).");
+  }
+
   isConnected = true;
   Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
   Serial.printf("║  [BLE STATUS: CONNECTED] Target: %-38s║\n", pairedName.c_str());
   Serial.println("║  Persistent link ACTIVE! Ready for instant commands.                   ║");
   Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
   updateStatusLED();
+  queryRobotStateNonBlocking();
   return true;
 }
 
@@ -1554,6 +1617,8 @@ void loop() {
         }
         isConnected = false;
         pRemoteChar = nullptr;
+        hasRobotBattery = false;
+        robotBatteryPercent = -1;
         setStatusLED(60, 0, 0);
         delay(300);
         updateStatusLED();
@@ -1619,17 +1684,11 @@ void loop() {
     }
   }
 
-  // --- 7. BACKGROUND HEARTBEAT (WHEN CONNECTED & IDLE) ---
+  // --- 7. BACKGROUND HEARTBEAT & TELEMETRY QUERY (WHEN CONNECTED & IDLE) ---
   if ((currentState == STATE_ACTION_MENU || (currentState == STATE_REMOTE_CONTROL && currentRcMotion == RC_MOTION_IDLE) || currentState == STATE_JOINT_CONTROL) && isConnected) {
     if (now - lastHeartbeatTime >= 5000) {
       lastHeartbeatTime = now;
-      if (bleMutex != nullptr && xSemaphoreTake(bleMutex, 0) == pdTRUE) {
-        if (pRemoteChar != nullptr && pClient != nullptr && pClient->isConnected() && pRemoteChar->canWrite()) {
-          uint8_t pingPacket[] = {0xFF, 0xFF, 0x02, 0x0B, 0x0D};
-          pRemoteChar->writeValue(pingPacket, sizeof(pingPacket));
-        }
-        xSemaphoreGive(bleMutex);
-      }
+      queryRobotStateNonBlocking();
     }
   }
 
@@ -2304,9 +2363,13 @@ void renderActionMenu() {
   String targetStr = pairedName + " (" + pairedMAC + ")";
   if (targetStr.length() > 34) targetStr = targetStr.substring(0, 31) + "...";
 
-  char statusStr[24];
+  char statusStr[32];
   if (isConnected) {
-    snprintf(statusStr, sizeof(statusStr), "CONNECTED 🟢");
+    if (hasRobotBattery && robotBatteryPercent >= 0) {
+      snprintf(statusStr, sizeof(statusStr), "CONN 🟢 (%d%%)", robotBatteryPercent);
+    } else {
+      snprintf(statusStr, sizeof(statusStr), "CONNECTED 🟢");
+    }
   } else if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
     snprintf(statusStr, sizeof(statusStr), "UNPAIRED 🔴");
   } else if (connectAttemptCounter > 0) {
@@ -2409,7 +2472,11 @@ void renderRemoteControlMenu() {
   Serial.println("║              ROBOSEN K1 LIVE REMOTE CONTROL (HANDHELD RC)              ║");
   const char* gearStr = (currentRcGear == RC_GEAR_FWD) ? "FORWARD [FWD ^]" :
                         (currentRcGear == RC_GEAR_REV) ? "REVERSE [REV v]" : "STRAFE [STRAFE <>]";
-  Serial.printf("║ Active Gear: %-26s Target: %-25s ║\n", gearStr, pairedName.c_str());
+  if (isConnected && hasRobotBattery && robotBatteryPercent >= 0) {
+    Serial.printf("║ Active Gear: %-26s Target: %s (Bat: %d%%) ║\n", gearStr, pairedName.c_str(), robotBatteryPercent);
+  } else {
+    Serial.printf("║ Active Gear: %-26s Target: %-25s ║\n", gearStr, pairedName.c_str());
+  }
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
   Serial.printf("║ Selected Stunt (K2): %-48s ║\n", RC_STUNTS[rcStuntIndex].name);
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
@@ -2433,6 +2500,10 @@ void renderJointControlMenu() {
 
   Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
   Serial.println("║                 ROBOSEN JOINT CONTROL MODE (MODE 3)                    ║");
+  if (isConnected && hasRobotBattery && robotBatteryPercent >= 0) {
+    Serial.printf("║ Target: %-26s Robot Battery: %3d%% (Volume: %-3d)       ║\n",
+                  pairedName.c_str(), robotBatteryPercent, robotSpeakerVolume);
+  }
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
   Serial.printf("║ Group: [%-9s] (%d/%d)   Joint: [%-10s] (ID %2d)                     ║\n",
                 grp.groupName, currentJointGroupIndex + 1, TOTAL_JOINT_GROUPS,
@@ -2566,7 +2637,11 @@ void drawActionMenuToBuffer(bool invertMiddle = false) {
 
   display.setCursor(batX - 78, 8);
   if (isConnected) {
-    display.print("[CONNECTED]");
+    if (hasRobotBattery && robotBatteryPercent >= 0) {
+      display.printf("[K1: %d%%]", robotBatteryPercent);
+    } else {
+      display.print("[CONNECTED]");
+    }
   } else if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
     display.print("[UNPAIRED]");
   } else if (connectAttemptCounter > 0) {
@@ -2821,7 +2896,11 @@ void drawModeSelectMenuToBuffer() {
   display.setTextSize(1);
   display.setCursor(w - 78, 8);
   if (isConnected) {
-    display.print("[CONNECTED]");
+    if (hasRobotBattery && robotBatteryPercent >= 0) {
+      display.printf("[K1: %d%%]", robotBatteryPercent);
+    } else {
+      display.print("[CONNECTED]");
+    }
   } else {
     display.print("[OFFLINE]");
   }
@@ -2889,7 +2968,11 @@ void drawRemoteControlToBuffer(bool invertMiddle) {
 
   display.setCursor(batX - 78, 8);
   if (isConnected) {
-    display.print("[CONNECTED]");
+    if (hasRobotBattery && robotBatteryPercent >= 0) {
+      display.printf("[K1: %d%%]", robotBatteryPercent);
+    } else {
+      display.print("[CONNECTED]");
+    }
   } else if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
     display.print("[UNPAIRED]");
   } else if (connectAttemptCounter > 0) {
@@ -2986,7 +3069,11 @@ void drawJointControlToBuffer(bool invertMiddle) {
 
   display.setCursor(batX - 78, 8);
   if (isConnected) {
-    display.print("[CONNECTED]");
+    if (hasRobotBattery && robotBatteryPercent >= 0) {
+      display.printf("[K1: %d%%]", robotBatteryPercent);
+    } else {
+      display.print("[CONNECTED]");
+    }
   } else if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
     display.print("[UNPAIRED]");
   } else if (connectAttemptCounter > 0) {
