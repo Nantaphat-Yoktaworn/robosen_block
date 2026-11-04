@@ -5,32 +5,36 @@
 > **Framework:** Arduino ESP32 Core 3.x / ESP-IDF  
 > **Display:** 2.13" SPI E-Paper (DEPG0213BN / SSD1680, 122×250, GxEPD2)  
 > **Wireless:** BLE 4.2 / 5.0 Client (Robosen K1 Humanoid Robot GATT Protocol)  
-> **Status:** Fully Functional Prototype #01 — Updated & Verified with Carrier PCB Configuration (4 UI Inputs: 2 Encoders + 2 Buttons)
+> **Status:** Fully Functional Prototype #01 — Updated & Verified with Carrier PCB Configuration (4 UI Inputs: 2 Encoders + 2 Buttons, 3 Operational Modes)
 
 ---
 
 ## 1. System Overview
 
-The Master Block firmware serves as the tangible programming hub for the Robosen K1 humanoid robot:
-1. **Interactive 4-Input Control Surface**:
-   - **Knob 1 (Action Selector - SW1)**: Cycles through pre-programmed robot actions (Walk Forward, Walk Backward, Turn Left, Turn Right, Punch Left, Push-ups, Wave Hand) and menu items.
-   - **Knob 2 (Parameter Adjuster - SW2)**: Adjusts action parameters (step count, degrees, repetition counts).
-   - **Green Start Button (SW3 - GPIO 14)**: Confirm, initiate run chain execution (`0xAA`/`0xBB`), or enter Teacher BLE Pairing discovery (3s hold).
-   - **Red Stop Button (SW5 - GPIO 2)**: Emergency halt / run chain abort, cancel action / dismiss docked config, or cleanly disconnect BLE session (3s hold).
-2. **Battery Voltage Monitor (BATSENSE - GPIO 1 / ADC1_CH0)**:
+The Master Block firmware serves as the tangible programming and interactive control hub for the Robosen K1 humanoid robot:
+1. **Interactive 4-Input Control Surface with Unified Navigation**:
+   - **Universal Confirm / Go**: **Green Start Button (`SW3` - GPIO 14)** or **Knob 1 Click (`SW1` - GPIO 10)** universally executes, enters menus, confirms selections, or triggers run chains.
+   - **Universal Back / Halt**: **Red Stop Button (`SW5` - GPIO 2)** universally halts motion, backs out of sub-menus (Level 2 $\to$ Level 1), cancels configurations, or cleanly disconnects BLE session (3s hold).
+   - **Knob 1 (Encoder SW1)**: Cycles through actions, body groups, or menu options. Hold 1.5s from any mode to open the Universal Mode Switcher.
+   - **Knob 2 (Encoder SW2)**: Fine parameter adjust, stunt selection, or live real-time joint degree articulation.
+2. **3 Operational Modes**:
+   - **Mode 1 (`STATE_ACTION_MENU`)**: Tangible Block Coding & Flash Config Dock.
+   - **Mode 2 (`STATE_REMOTE_CONTROL`)**: Live Handheld RC Steering, 3-Gear Drive, and 10-Stunt Catalog.
+   - **Mode 3 (`STATE_JOINT_CONTROL`)**: Live Real-time Joint Articulation across 5 Anatomical Groups and 17 Servos.
+3. **Battery Voltage Monitor (BATSENSE - GPIO 1 / ADC1_CH0)**:
    - Reads precision 1:1 voltage divider with 100nF filter, calculating live Li-ion battery voltage and percentage.
    - Renders battery gauge icon and percentage on the E-Paper status header.
-3. **Config Dock (UART1, GPIO 17/18)**:
+4. **Config Dock (UART1, GPIO 17/18)**:
    - Detects when a smart action block (CH32V003) is docked onto the 4-pin magnetic dock.
    - Reads the block token, verifies connection, and writes configuration commands (`0xCF`).
-4. **Run Chain Bus (UART2, GPIO 15/16)**:
+5. **Run Chain Bus (UART2, GPIO 15/16)**:
    - Initiates Phase 1 Discovery (`0xAA`) down the physical block chain to sequence and read all snapped-in blocks.
    - Broadcasts Phase 2 Step Execution (`0xBB`) while streaming BLE commands to the robot.
    - Instant emergency halt capability via Red Stop Button.
-5. **E-Paper Display (SPI, GPIO 4, 5, 6, 7, 21, 38)**:
-   - Displays real-time action icons, parameter values, docked block status, battery meter, and 4-input UI hints with fast partial refresh.
-6. **BLE Client Gateway**:
-   - Scans and connects to the Robosen K1 robot (Service `0xFFE0`, Characteristic `0xFFE1`), translating block sequences into Robosen motor/animation opcodes.
+6. **E-Paper Display (SPI, GPIO 4, 5, 6, 7, 21, 38)**:
+   - Displays real-time action icons, parameter values, docked block status, joint slider gauges, battery meter, and 4-input UI hints with fast partial refresh on Core 0.
+7. **BLE Client Gateway**:
+   - Scans and connects to the Robosen K1 robot (Service `0xFFE0`, Characteristic `0xFFE1`), translating block sequences into Robosen motor/animation opcodes and streaming Opcode `0xE8` joint move packets.
 
 ---
 
@@ -85,7 +89,10 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
 
 1. **Universal Multi-Mode Switcher (`STATE_MODE_SELECT_MENU`)**:
    - Holding **Knob 1 Switch (`SW1`, `GPIO 10`) for 1.5 seconds** from any mode immediately halts motion and opens the **Mode Selector Menu** on the 2.13" E-Paper display.
-   - Scalable architecture ready for 3+ modes without button conflicts (`01: Block Coding & Dock` and `02: Remote Control (RC)`).
+   - Scalable 3-mode architecture without button conflicts:
+     - `01: Block Coding & Dock`
+     - `02: Remote Control (RC)`
+     - `03: Joint Control Mode`
    - Turn Knob 1 or Knob 2 to scroll; press Green Start (`SW3`) or click Knob 1 to enter; press Red Stop (`SW5`) to cancel.
 
 2. **Live Handheld Remote Control (RC) Mode (`STATE_REMOTE_CONTROL`)**:
@@ -98,6 +105,26 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
    - **WS2812 RGB LED Telemetry**: Instant 0ms status feedback (Soft Teal = RC Idle, Vivid Green = Walk Fwd, Amber = Walk Rev, Electric Blue = Steer/Strafe, Magenta = Stunt, Red = Stop).
    - **Port Isolation**: Config Dock polling is paused during RC Mode for maximum loop responsiveness and battery conservation.
 
+### 3.4 Joint Control Mode (`STATE_JOINT_CONTROL`)
+
+1. **Two-Level Anatomical Navigation Hierarchy**:
+   - **Level 1 (Body Group Select)**: Knob 1 scrolls through 5 calibrated body groups: `HEAD` (1 servo), `LEFT ARM` (3 servos), `RIGHT ARM` (3 servos), `LEFT LEG` (5 servos), and `RIGHT LEG` (5 servos).
+   - **Level 2 (Joint Articulation)**: Press **Green Button (`SW3`)** or **Knob 1 Click** to enter Level 2 for the active joint. Knob 1 switches between joints in the group; Knob 2 rotates and articulates the active joint angle in real-time.
+   - **Back Navigation**: Press **Red Button (`SW5`)** to back out from Level 2 to Level 1.
+2. **Live Real-time Angle Streaming**:
+   - Streams 30-byte Opcode `0xE8` (`jointMove`, speed 25) non-blocking packets with an adaptive ~45ms rate limiter.
+   - Preserves all 17 servo positions in a live synchronization buffer so non-active servos maintain posture.
+3. **Calibrated Degree & Slider Gauge Display**:
+   - Displays degrees centered around calibrated $0^\circ$ neutral (e.g. `+35 deg`, `-20 deg`, `0 deg (Center)`).
+   - Shows physical hardware min/max limits (`Lim: [min..max]`).
+   - Renders a horizontal slider gauge with min/max ticks, neutral center tick, and real-time position pip.
+4. **Instant Pose Resets**:
+   - **Knob 2 Short Click**: Immediately snaps active joint back to its calibrated $0^\circ$ neutral center.
+   - **Knob 2 Long-Press (1.5s)**: Smoothly resets all 17 servos to calibrated factory standing posture.
+5. **WS2812 RGB LED Telemetry**:
+   - Soft Purple / Indigo: Level 1 Body Group selection.
+   - Vivid Cyan / Teal: Active Level 2 Joint Articulation.
+
 ---
 
 ## 4. Verification & Testing Checklist
@@ -109,4 +136,6 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
 - [x] Verified E-Paper display renders battery meter and updated 4-input UI hints.
 - [x] Verified Multi-Mode Switcher (`STATE_MODE_SELECT_MENU`) via 1.5s Knob 1 hold.
 - [x] Verified Remote Control Mode (`STATE_REMOTE_CONTROL`) with hold-to-walk, 3-gear selector, momentum steering, and 10-stunt catalog.
+- [x] Verified Joint Control Mode (`STATE_JOINT_CONTROL`) with 5 groups, 17 servos, Level 1 $\longleftrightarrow$ Level 2 navigation, Opcode `0xE8` streaming, slider gauge, and zero/standing resets.
+- [x] Verified Unified Button Navigation (`Green = Confirm/Enter/Go`, `Red = Back/Cancel/Stop`) across all 3 modes and menus.
 - [x] Successfully compiled using Arduino CLI for `esp32:esp32:esp32s3` (Zero warnings/errors).
