@@ -175,9 +175,76 @@ enum SystemState {
   STATE_ACTION_MENU, 
   STATE_BLE_SCANNING, 
   STATE_BLE_PAIRING_MENU,
-  STATE_RUNNING
+  STATE_RUNNING,
+  STATE_MODE_SELECT_MENU,
+  STATE_REMOTE_CONTROL
 };
 SystemState currentState = STATE_ACTION_MENU;
+SystemState previousOperationalState = STATE_ACTION_MENU;
+
+// ==============================================================================
+// 4.01 MULTI-MODE SWITCHER & REMOTE CONTROL (RC) DEFINITIONS
+// ==============================================================================
+struct SystemModeItem {
+  const char* name;
+  const char* desc;
+  SystemState state;
+};
+
+SystemModeItem SYSTEM_MODES[] = {
+  {"01: Block Coding & Dock", "Tangible Chain + Flash Dock", STATE_ACTION_MENU},
+  {"02: Remote Control (RC)",  "Live Steering + Stunt Drive", STATE_REMOTE_CONTROL}
+};
+const int TOTAL_SYSTEM_MODES = sizeof(SYSTEM_MODES) / sizeof(SYSTEM_MODES[0]);
+int currentModeMenuIndex = 0;
+
+// Remote Control (RC) Gear Selector: FWD -> REV -> STRAFE
+enum RcGear {
+  RC_GEAR_FWD = 0,
+  RC_GEAR_REV = 1,
+  RC_GEAR_STRAFE = 2
+};
+RcGear currentRcGear = RC_GEAR_FWD;
+
+// Live non-blocking motion state
+enum RcActiveMotion {
+  RC_MOTION_IDLE = 0,
+  RC_MOTION_WALK_FWD,
+  RC_MOTION_WALK_REV,
+  RC_MOTION_TURN_LEFT,
+  RC_MOTION_TURN_RIGHT,
+  RC_MOTION_STRAFE_LEFT,
+  RC_MOTION_STRAFE_RIGHT,
+  RC_MOTION_STUNT
+};
+RcActiveMotion currentRcMotion = RC_MOTION_IDLE;
+
+// Full 10-Stunt Catalog for Knob 2
+struct RcStunt {
+  const char* name;
+  uint8_t opcode;
+  const char* payload;
+  unsigned long durationMs;
+};
+
+const RcStunt RC_STUNTS[] = {
+  {"01: Left Punch",   0x17, "ProAction/Left Punch",   2500},
+  {"02: Right Punch",  0x17, "ProAction/Right Punch",  2500},
+  {"03: Single Kick",  0x17, "ProAction/Left Kick",    7000},
+  {"04: Wave Hand",    0x17, "ProAction/Say Hello",    8500},
+  {"05: Celebrate",    0x17, "ProAction/Celebrate",    8000},
+  {"06: Kung Fu",      0x17, "ProAction/Kung Fu",     11000},
+  {"07: Push-ups",     0x17, "ProAction/Push Ups",    12000},
+  {"08: Squats",       0x17, "ProAction/Do Squats",   20000},
+  {"09: Handstand",    0x17, "ProAction/Handstand",   18000},
+  {"10: Dance",        0x17, "Action/Boogaloo",       55000}
+};
+const int TOTAL_RC_STUNTS = sizeof(RC_STUNTS) / sizeof(RC_STUNTS[0]);
+int rcStuntIndex = 0;
+
+// RC Momentum & Duration Timers
+unsigned long rcSteerActiveUntilMs = 0;
+unsigned long rcStuntEndMs = 0;
 
 Preferences preferences;
 String pairedMAC  = "None (Unpaired)";
@@ -283,6 +350,8 @@ unsigned long lastHeartbeatTime = 0;
 // Forward Declarations
 void renderActionMenu();
 void renderPairingMenu();
+void renderModeSelectMenu();
+void renderRemoteControlMenu();
 void runBleScan();
 bool connectToRobot(bool quietBg = false);
 bool sendRobosenPacket(const RobosenAction& action);
@@ -296,11 +365,21 @@ void sendLocomotionStop();
 bool abortableDelay(unsigned long ms);
 void triggerChainAbort(int count);
 
+// Remote Control & Mode Switcher Helpers
+void sendRawOpcodeNonBlocking(uint8_t opcode);
+void sendStuntPacketNonBlocking(const RcStunt& stunt);
+void stopRcMotionImmediate();
+void updateRemoteControlEngine();
+
 // E-Ink Display Functions (DEPG0213BN / SSD1680)
 void updateEInkActionMenu();
 void updateEInkPairingMenu();
+void updateEInkModeSelectMenu();
+void updateEInkRemoteControl();
 void updateEInkScanning();
 void updateEInkRunChain(int currentStep, int totalSteps, const char* actionName, int paramVal, const char* paramUnit);
+void drawModeSelectMenuToBuffer();
+void drawRemoteControlToBuffer(bool invertMiddle = false);
 void startBackgroundTasks();
 
 // BLE Client Callbacks for Connection Life-Cycle Management
@@ -314,7 +393,7 @@ class RobosenClientCallback : public BLEClientCallbacks {
     isConnected = false;
     pRemoteChar = nullptr;
     Serial.println("\n[BLE STATUS] 🔴 Robot disconnected / link lost! Resuming retry loop...");
-    if (currentState == STATE_ACTION_MENU) {
+    if (currentState == STATE_ACTION_MENU || currentState == STATE_REMOTE_CONTROL) {
       updateStatusLED();
     }
   }
@@ -328,6 +407,29 @@ void updateStatusLED() {
     setStatusLED(0, 0, 40);  // 🔵 Vivid Blue: Active Scanning
   } else if (currentState == STATE_BLE_PAIRING_MENU) {
     setStatusLED(0, 0, 30);  // 🔵 Soft Blue: Pairing Menu Selection
+  } else if (currentState == STATE_MODE_SELECT_MENU) {
+    setStatusLED(40, 0, 80); // 🟣 Purple: Mode Selector Menu
+  } else if (currentState == STATE_REMOTE_CONTROL) {
+    if (!isConnected) {
+      if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
+        setStatusLED(30, 0, 0);  // 🔴 Red: Unpaired
+      } else {
+        setStatusLED(30, 15, 0); // 🟠 Amber/Orange: Paired, reconnecting
+      }
+    } else {
+      if (currentRcMotion == RC_MOTION_WALK_FWD) {
+        setStatusLED(0, 100, 10); // 🟢 Vivid Green: Walking Forward
+      } else if (currentRcMotion == RC_MOTION_WALK_REV) {
+        setStatusLED(100, 50, 0); // 🟠 Vivid Amber-Yellow: Walking Backward
+      } else if (currentRcMotion == RC_MOTION_TURN_LEFT || currentRcMotion == RC_MOTION_TURN_RIGHT ||
+                 currentRcMotion == RC_MOTION_STRAFE_LEFT || currentRcMotion == RC_MOTION_STRAFE_RIGHT) {
+        setStatusLED(0, 40, 100); // 🔵 Vivid Electric Blue: Turning / Strafing
+      } else if (currentRcMotion == RC_MOTION_STUNT) {
+        setStatusLED(90, 0, 90);  // 🟣 Vivid Magenta: Executing Stunt
+      } else {
+        setStatusLED(0, 35, 25);  // 🟢 Soft Teal/Cyan: RC Connected & Ready
+      }
+    }
   } else if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
     setStatusLED(30, 0, 0);  // 🔴 Red: Unpaired
   } else if (!isConnected) {
@@ -373,6 +475,122 @@ bool abortableDelay(unsigned long ms) {
     delay(10);
   }
   return true;
+}
+
+// ==============================================================================
+// 4.2 NON-BLOCKING REMOTE CONTROL (RC) BLE DISPATCH & ENGINE
+// ==============================================================================
+void sendRawOpcodeNonBlocking(uint8_t opcode) {
+  if (bleMutex != nullptr && xSemaphoreTake(bleMutex, pdMS_TO_TICKS(40)) == pdTRUE) {
+    if (isConnected && pRemoteChar != nullptr && pRemoteChar->canWrite()) {
+      uint8_t packet[5];
+      packet[0] = 0xFF;
+      packet[1] = 0xFF;
+      packet[2] = 0x02; // length = 1 (opcode) + 1 (checksum)
+      packet[3] = opcode;
+      packet[4] = (uint8_t)((0x02 + opcode) % 256);
+      pRemoteChar->writeValue(packet, sizeof(packet));
+    }
+    xSemaphoreGive(bleMutex);
+  }
+}
+
+void sendStuntPacketNonBlocking(const RcStunt& stunt) {
+  uint8_t payloadLen = strlen(stunt.payload);
+  uint8_t numBytes = 1 + payloadLen + 1;
+  uint8_t totalPacketLen = 2 + numBytes + 1;
+  uint8_t packet[totalPacketLen];
+
+  packet[0] = 0xFF;
+  packet[1] = 0xFF;
+  packet[2] = numBytes;
+  packet[3] = stunt.opcode;
+
+  uint16_t checksum = numBytes + stunt.opcode;
+  for (int i = 0; i < payloadLen; i++) {
+    packet[4 + i] = (uint8_t)stunt.payload[i];
+    checksum += packet[4 + i];
+  }
+  packet[totalPacketLen - 1] = (uint8_t)(checksum % 256);
+
+  if (bleMutex != nullptr && xSemaphoreTake(bleMutex, pdMS_TO_TICKS(60)) == pdTRUE) {
+    if (isConnected && pRemoteChar != nullptr && pRemoteChar->canWrite()) {
+      pRemoteChar->writeValue(packet, totalPacketLen);
+    }
+    xSemaphoreGive(bleMutex);
+  }
+}
+
+void stopRcMotionImmediate() {
+  if (currentRcMotion != RC_MOTION_IDLE) {
+    sendLocomotionStop();
+    currentRcMotion = RC_MOTION_IDLE;
+  }
+  rcSteerActiveUntilMs = 0;
+  rcStuntEndMs = 0;
+  updateStatusLED();
+}
+
+void updateRemoteControlEngine() {
+  if (currentState != STATE_REMOTE_CONTROL) return;
+  unsigned long now = millis();
+
+  // 1. If executing stunt, check duration
+  if (currentRcMotion == RC_MOTION_STUNT) {
+    if (now >= rcStuntEndMs) {
+      currentRcMotion = RC_MOTION_IDLE;
+      updateStatusLED();
+      Serial.println("[RC] Stunt execution finished. Returned to neutral posture.");
+    }
+    return;
+  }
+
+  // 2. Check steering / strafing momentum window
+  if (currentRcMotion == RC_MOTION_TURN_LEFT || currentRcMotion == RC_MOTION_TURN_RIGHT ||
+      currentRcMotion == RC_MOTION_STRAFE_LEFT || currentRcMotion == RC_MOTION_STRAFE_RIGHT) {
+    if (now >= rcSteerActiveUntilMs) {
+      // Momentum window elapsed! Check if Green Button (gas pedal) is still held
+      if (digitalRead(PIN_START_BTN) == LOW) {
+        if (currentRcGear == RC_GEAR_REV) {
+          currentRcMotion = RC_MOTION_WALK_REV;
+          sendRawOpcodeNonBlocking(0x05);
+          Serial.println("[RC] Auto-resumed Walk Backward (Gas pedal held)");
+        } else {
+          currentRcMotion = RC_MOTION_WALK_FWD;
+          sendRawOpcodeNonBlocking(0x01);
+          Serial.println("[RC] Auto-resumed Walk Forward (Gas pedal held)");
+        }
+        updateStatusLED();
+      } else {
+        sendLocomotionStop();
+        currentRcMotion = RC_MOTION_IDLE;
+        updateStatusLED();
+        Serial.println("[RC] Steer momentum ended -> Stopped (Neutral posture)");
+      }
+    }
+    return;
+  }
+
+  // 3. Green Button (Gas Pedal / Dead-Man Switch)
+  bool gasPedalDown = (digitalRead(PIN_START_BTN) == LOW);
+  if (gasPedalDown) {
+    RcActiveMotion targetWalk = (currentRcGear == RC_GEAR_REV) ? RC_MOTION_WALK_REV : RC_MOTION_WALK_FWD;
+    if (currentRcMotion != targetWalk) {
+      currentRcMotion = targetWalk;
+      uint8_t op = (currentRcGear == RC_GEAR_REV) ? 0x05 : 0x01;
+      sendRawOpcodeNonBlocking(op);
+      updateStatusLED();
+      Serial.printf("[RC] Gas pedal pressed: Walking %s...\n", (currentRcGear == RC_GEAR_REV) ? "Backward" : "Forward");
+    }
+  } else {
+    // Gas pedal released while walking
+    if (currentRcMotion == RC_MOTION_WALK_FWD || currentRcMotion == RC_MOTION_WALK_REV) {
+      sendLocomotionStop();
+      currentRcMotion = RC_MOTION_IDLE;
+      updateStatusLED();
+      Serial.println("[RC] Gas pedal released: Locomotion stop locked.");
+    }
+  }
 }
 
 // ==============================================================================
@@ -487,6 +705,7 @@ bool connectToRobot(bool quietBg) {
 // 5.1 CONFIG DOCK UART MONITOR & POLLING ENGINE
 // ==============================================================================
 void pollConfigDock() {
+  if (currentState != STATE_ACTION_MENU) return;
   unsigned long now = millis();
 
   // 1. Process incoming UART response bytes from Config Dock
@@ -690,6 +909,9 @@ void loop() {
   // --- 1. CONFIG DOCK MONITORING & ACTION QUERY ENGINE ---
   pollConfigDock();
 
+  // --- 1.1 REMOTE CONTROL ENGINE (NON-BLOCKING LOCOMOTION & STEERING MOMENTUM) ---
+  updateRemoteControlEngine();
+
   // Serial Monitor Interactive Test ('t' = Ping Config Dock, 'r' = Run Chain)
   if (Serial.available() > 0) {
     char c = Serial.read();
@@ -729,6 +951,32 @@ void loop() {
       while (currentActionIndex < 0) currentActionIndex += TOTAL_ACTIONS;
       requestEInkCenterUpdate(); // Targeted middle-band fast update on Core 0
       Serial.printf("🔄 [KNOB 1] Action: %s\n", ACTIONS[currentActionIndex].name);
+    } else if (currentState == STATE_MODE_SELECT_MENU) {
+      currentModeMenuIndex = (currentModeMenuIndex + d1) % TOTAL_SYSTEM_MODES;
+      while (currentModeMenuIndex < 0) currentModeMenuIndex += TOTAL_SYSTEM_MODES;
+      requestEInkFullUpdate();
+      Serial.printf("🔄 [MODE SELECT] %s\n", SYSTEM_MODES[currentModeMenuIndex].name);
+    } else if (currentState == STATE_REMOTE_CONTROL) {
+      // Knob 1 Turn: Live Steering or Strafing
+      if (currentRcGear == RC_GEAR_STRAFE) {
+        RcActiveMotion newMotion = (d1 < 0) ? RC_MOTION_STRAFE_LEFT : RC_MOTION_STRAFE_RIGHT;
+        uint8_t op = (d1 < 0) ? 0x07 : 0x03;
+        currentRcMotion = newMotion;
+        rcSteerActiveUntilMs = constrain(now + 550, rcSteerActiveUntilMs + 400, now + 1100);
+        sendRawOpcodeNonBlocking(op);
+        updateStatusLED();
+        Serial.printf("🔄 [RC STEER] Strafe %s\n", (d1 < 0) ? "Left" : "Right");
+      } else {
+        RcActiveMotion newMotion = (d1 < 0) ? RC_MOTION_TURN_LEFT : RC_MOTION_TURN_RIGHT;
+        uint8_t op = (d1 < 0) ? 0x08 : 0x02;
+        currentRcMotion = newMotion;
+        unsigned long dur = (d1 < 0) ? 550 : 900;
+        unsigned long maxWindow = (d1 < 0) ? 1100 : 1500;
+        rcSteerActiveUntilMs = constrain(now + dur, rcSteerActiveUntilMs + 400, now + maxWindow);
+        sendRawOpcodeNonBlocking(op);
+        updateStatusLED();
+        Serial.printf("🔄 [RC STEER] Turn %s\n", (d1 < 0) ? "Left" : "Right");
+      }
     } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
       currentBleIndex = (currentBleIndex + d1) % bleDeviceCount;
       while (currentBleIndex < 0) currentBleIndex += bleDeviceCount;
@@ -748,6 +996,17 @@ void loop() {
       if (act.paramVal < act.paramMin) act.paramVal = act.paramMin;
       requestEInkCenterUpdate(); // Targeted middle-band fast update on Core 0
       Serial.printf("🔄 [KNOB 2] Parameter: %d %s\n", act.paramVal, act.paramUnit);
+    } else if (currentState == STATE_MODE_SELECT_MENU) {
+      currentModeMenuIndex = (currentModeMenuIndex + d2) % TOTAL_SYSTEM_MODES;
+      while (currentModeMenuIndex < 0) currentModeMenuIndex += TOTAL_SYSTEM_MODES;
+      requestEInkFullUpdate();
+      Serial.printf("🔄 [MODE SELECT] %s\n", SYSTEM_MODES[currentModeMenuIndex].name);
+    } else if (currentState == STATE_REMOTE_CONTROL) {
+      // Knob 2 Turn: Scroll 10-Stunt Catalog
+      rcStuntIndex = (rcStuntIndex + d2) % TOTAL_RC_STUNTS;
+      while (rcStuntIndex < 0) rcStuntIndex += TOTAL_RC_STUNTS;
+      requestEInkCenterUpdate(); // Fast middle band refresh on Core 0
+      Serial.printf("🔄 [RC STUNT] %s\n", RC_STUNTS[rcStuntIndex].name);
     } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
       currentBleIndex = (currentBleIndex + d2) % bleDeviceCount;
       while (currentBleIndex < 0) currentBleIndex += bleDeviceCount;
@@ -756,11 +1015,13 @@ void loop() {
     }
   }
 
-  // --- 3. KNOB 1 SWITCH (GPIO 10 - ACTIVE LOW) ---
+  // --- 3. KNOB 1 SWITCH (GPIO 10 - ACTIVE LOW: 1.5s HOLD FOR MODE SELECTOR) ---
   int k1SwRaw = digitalRead(PIN_K1_SW);
   static int lastK1SwRaw = HIGH;
   static unsigned long lastK1SwDebounce = 0;
   static bool k1SwPressed = false;
+  static unsigned long k1SwPressStart = 0;
+  static bool k1SwHeld1500ms = false;
 
   if (k1SwRaw != lastK1SwRaw) {
     lastK1SwDebounce = now;
@@ -769,45 +1030,94 @@ void loop() {
   if (now - lastK1SwDebounce > 30) {
     if (k1SwRaw == LOW && !k1SwPressed) {
       k1SwPressed = true;
+      k1SwPressStart = now;
+      k1SwHeld1500ms = false;
       lastUserActivity = now;
       triggerLedBlip(0, 80, 40); // Emerald Green
-      if (currentState == STATE_ACTION_MENU) {
-        if (isBlockDocked) {
-          RobosenAction& act = ACTIONS[currentActionIndex];
-          Serial.printf("\n>>> [CONFIG DOCK] Flashing '%s' (%d %s) into docked Action Block... <<<\n",
-                        act.name, act.paramVal, act.paramUnit);
-          writeConfigToDockedBlock(act.tokenID, (uint8_t)act.paramVal);
-          triggerLedBlip(0, 80, 40);
-        } else {
-          Serial.printf("\n>>> [KNOB 1 CLICK] Selected Action: %s <<<\n", ACTIONS[currentActionIndex].name);
-          if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
-            Serial.println("[BLE STATUS] ⚡ Knob clicked while disconnected: Immediate connection attempt...");
-            if (connectToRobot()) {
-              connectAttemptCounter = 0;
-              setUiEventFeedback("BLE: CONNECTED TO ROBOT!");
-            } else {
-              connectAttemptCounter++;
-              setUiEventFeedback("K1 CLICK: ROBOT OFFLINE");
-            }
-            lastConnectAttemptTime = millis();
-          } else {
-            triggerLedBlip(0, 60, 30);
-            setUiEventFeedback("K1 CLICK: ACTION SELECTED");
-          }
-        }
-      } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
-        pairedMAC  = bleList[currentBleIndex].address;
-        pairedName = bleList[currentBleIndex].name;
-        preferences.putString("paired_mac", pairedMAC);
-        preferences.putString("paired_name", pairedName);
-        currentState = STATE_ACTION_MENU;
-        connectAttemptCounter = 0;
-        renderActionMenu();
-        connectToRobot();
-        lastConnectAttemptTime = millis();
+    } else if (k1SwRaw == LOW && k1SwPressed) {
+      lastUserActivity = now;
+      if (!k1SwHeld1500ms && (now - k1SwPressStart >= 1500)) {
+        k1SwHeld1500ms = true;
+        Serial.println("\n[SYSTEM] 🎯 1.5-Second Knob 1 Hold Confirmed! Opening Mode Selector Menu...");
+        stopRcMotionImmediate();
+        sendLocomotionStop();
+        previousOperationalState = (currentState == STATE_MODE_SELECT_MENU) ? STATE_ACTION_MENU : currentState;
+        currentState = STATE_MODE_SELECT_MENU;
+        currentModeMenuIndex = (previousOperationalState == STATE_REMOTE_CONTROL) ? 1 : 0;
+        updateStatusLED();
+        renderModeSelectMenu();
       }
     } else if (k1SwRaw == HIGH && k1SwPressed) {
       k1SwPressed = false;
+      lastUserActivity = now;
+      unsigned long heldDuration = now - k1SwPressStart;
+      if (!k1SwHeld1500ms && heldDuration >= 30 && heldDuration < 1500) {
+        if (currentState == STATE_ACTION_MENU) {
+          if (isBlockDocked) {
+            RobosenAction& act = ACTIONS[currentActionIndex];
+            Serial.printf("\n>>> [CONFIG DOCK] Flashing '%s' (%d %s) into docked Action Block... <<<\n",
+                          act.name, act.paramVal, act.paramUnit);
+            writeConfigToDockedBlock(act.tokenID, (uint8_t)act.paramVal);
+            triggerLedBlip(0, 80, 40);
+          } else {
+            Serial.printf("\n>>> [KNOB 1 CLICK] Selected Action: %s <<<\n", ACTIONS[currentActionIndex].name);
+            if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
+              Serial.println("[BLE STATUS] ⚡ Knob clicked while disconnected: Immediate connection attempt...");
+              if (connectToRobot()) {
+                connectAttemptCounter = 0;
+                setUiEventFeedback("BLE: CONNECTED TO ROBOT!");
+              } else {
+                connectAttemptCounter++;
+                setUiEventFeedback("K1 CLICK: ROBOT OFFLINE");
+              }
+              lastConnectAttemptTime = millis();
+            } else {
+              triggerLedBlip(0, 60, 30);
+              setUiEventFeedback("K1 CLICK: ACTION SELECTED");
+            }
+          }
+        } else if (currentState == STATE_MODE_SELECT_MENU) {
+          // Confirm Mode Selection
+          SystemState targetState = SYSTEM_MODES[currentModeMenuIndex].state;
+          Serial.printf("\n[MODE SELECT] 🟢 Selected Mode: %s\n", SYSTEM_MODES[currentModeMenuIndex].name);
+          currentState = targetState;
+          updateStatusLED();
+          if (currentState == STATE_REMOTE_CONTROL) {
+            renderRemoteControlMenu();
+          } else {
+            renderActionMenu();
+          }
+        } else if (currentState == STATE_REMOTE_CONTROL) {
+          // Short-click in RC Mode: Cycle 3-Gear Selector (FWD -> REV -> STRAFE)
+          currentRcGear = (RcGear)((currentRcGear + 1) % 3);
+          const char* gearName = (currentRcGear == RC_GEAR_FWD) ? "FORWARD [FWD ^]" :
+                                 (currentRcGear == RC_GEAR_REV) ? "REVERSE [REV v]" : "STRAFE [STRAFE <>]";
+          Serial.printf("\n>>> [RC GEAR SHIFT] Gear: %s <<<\n", gearName);
+          triggerLedBlip(0, 80, 80);
+          // If currently walking, immediately transition direction
+          if (currentRcMotion == RC_MOTION_WALK_FWD || currentRcMotion == RC_MOTION_WALK_REV) {
+            if (currentRcGear == RC_GEAR_REV) {
+              currentRcMotion = RC_MOTION_WALK_REV;
+              sendRawOpcodeNonBlocking(0x05);
+            } else {
+              currentRcMotion = RC_MOTION_WALK_FWD;
+              sendRawOpcodeNonBlocking(0x01);
+            }
+            updateStatusLED();
+          }
+          requestEInkCenterUpdate();
+        } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
+          pairedMAC  = bleList[currentBleIndex].address;
+          pairedName = bleList[currentBleIndex].name;
+          preferences.putString("paired_mac", pairedMAC);
+          preferences.putString("paired_name", pairedName);
+          currentState = STATE_ACTION_MENU;
+          connectAttemptCounter = 0;
+          renderActionMenu();
+          connectToRobot();
+          lastConnectAttemptTime = millis();
+        }
+      }
     }
   }
 
@@ -832,6 +1142,29 @@ void loop() {
         Serial.printf("\n>>> [KNOB 2 CLICK] Reset %s Parameter to %d %s <<<\n", 
                       act.name, act.paramVal, act.paramUnit);
         setUiEventFeedback("K2 CLICK: PARAM RESET");
+      } else if (currentState == STATE_MODE_SELECT_MENU) {
+        SystemState targetState = SYSTEM_MODES[currentModeMenuIndex].state;
+        Serial.printf("\n[MODE SELECT] 🟢 Selected Mode: %s\n", SYSTEM_MODES[currentModeMenuIndex].name);
+        currentState = targetState;
+        updateStatusLED();
+        if (currentState == STATE_REMOTE_CONTROL) {
+          renderRemoteControlMenu();
+        } else {
+          renderActionMenu();
+        }
+      } else if (currentState == STATE_REMOTE_CONTROL) {
+        // Fire Selected Stunt Instantly
+        if (currentRcMotion != RC_MOTION_IDLE && currentRcMotion != RC_MOTION_STUNT) {
+          sendLocomotionStop();
+          delay(40);
+        }
+        currentRcMotion = RC_MOTION_STUNT;
+        rcStuntEndMs = now + RC_STUNTS[rcStuntIndex].durationMs;
+        sendStuntPacketNonBlocking(RC_STUNTS[rcStuntIndex]);
+        triggerLedBlip(90, 0, 90);
+        updateStatusLED();
+        Serial.printf("\n>>> [RC STUNT] Fired: %s (Duration: %lu ms) <<<\n",
+                      RC_STUNTS[rcStuntIndex].name, RC_STUNTS[rcStuntIndex].durationMs);
       } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
         pairedMAC  = bleList[currentBleIndex].address;
         pairedName = bleList[currentBleIndex].name;
@@ -869,13 +1202,17 @@ void loop() {
       startBtnHeld3s = false;
       lastUserActivity = now;
       triggerLedBlip(0, 100, 0); // Green
-      Serial.println("\n[BUTTON] Start button pressed... (Hold 3s to switch robot)");
+      if (currentState != STATE_REMOTE_CONTROL) {
+        Serial.println("\n[BUTTON] Start button pressed... (Hold 3s to switch robot)");
+      }
     } else if (startRaw == LOW && startBtnPressed) {
       lastUserActivity = now;
       if (!startBtnHeld3s && (now - startPressStart >= 3000)) {
-        startBtnHeld3s = true;
-        Serial.println("\n[SYSTEM] 🎯 3-Second Hold Confirmed! Opening Teacher Pairing Menu...");
-        runBleScan();
+        if (currentState != STATE_REMOTE_CONTROL) {
+          startBtnHeld3s = true;
+          Serial.println("\n[SYSTEM] 🎯 3-Second Hold Confirmed! Opening Teacher Pairing Menu...");
+          runBleScan();
+        }
       }
     } else if (startRaw == HIGH && startBtnPressed) {
       startBtnPressed = false;
@@ -890,6 +1227,16 @@ void loop() {
             delay(500);
             updateStatusLED();
             setUiEventFeedback("START: NO CHAIN BLOCKS!");
+          }
+        } else if (currentState == STATE_MODE_SELECT_MENU) {
+          SystemState targetState = SYSTEM_MODES[currentModeMenuIndex].state;
+          Serial.printf("\n[MODE SELECT] 🟢 Selected Mode: %s\n", SYSTEM_MODES[currentModeMenuIndex].name);
+          currentState = targetState;
+          updateStatusLED();
+          if (currentState == STATE_REMOTE_CONTROL) {
+            renderRemoteControlMenu();
+          } else {
+            renderActionMenu();
           }
         } else if (currentState == STATE_BLE_PAIRING_MENU) {
           if (bleDeviceCount > 0) {
@@ -964,6 +1311,22 @@ void loop() {
             updateStatusLED();
             setUiEventFeedback("STOP: EMERGENCY HALT!");
           }
+        } else if (currentState == STATE_MODE_SELECT_MENU) {
+          Serial.println("\n[CANCEL] Cancelled mode select, returning to previous mode.");
+          currentState = previousOperationalState;
+          updateStatusLED();
+          if (currentState == STATE_REMOTE_CONTROL) {
+            renderRemoteControlMenu();
+          } else {
+            renderActionMenu();
+          }
+        } else if (currentState == STATE_REMOTE_CONTROL) {
+          Serial.println("\n[EMERGENCY STOP] Red Stop button pressed: Emergency halt in RC Mode!");
+          stopRcMotionImmediate();
+          setStatusLED(80, 0, 0);
+          delay(100);
+          updateStatusLED();
+          setUiEventFeedback("RC: EMERGENCY STOP");
         } else if (currentState == STATE_BLE_PAIRING_MENU || currentState == STATE_BLE_SCANNING) {
           Serial.println("\n[CANCEL] Cancelled pairing/scan, returning to Action Menu.");
           currentState = STATE_ACTION_MENU;
@@ -974,9 +1337,8 @@ void loop() {
     }
   }
 
-  // --- 7. BACKGROUND HEARTBEAT (WHEN CONNECTED) ---
-  // Note: Disconnected BLE auto-reconnect runs in bleReconnectTask on Core 0 (zero input blocking!)
-  if (currentState == STATE_ACTION_MENU && isConnected) {
+  // --- 7. BACKGROUND HEARTBEAT (WHEN CONNECTED & IDLE) ---
+  if ((currentState == STATE_ACTION_MENU || (currentState == STATE_REMOTE_CONTROL && currentRcMotion == RC_MOTION_IDLE)) && isConnected) {
     if (now - lastHeartbeatTime >= 5000) {
       lastHeartbeatTime = now;
       if (bleMutex != nullptr && xSemaphoreTake(bleMutex, 0) == pdTRUE) {
@@ -1740,6 +2102,47 @@ void renderPairingMenu() {
   updateEInkPairingMenu();
 }
 
+void renderModeSelectMenu() {
+  Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
+  Serial.println("║                 SYSTEM MODE SELECTOR (SCALABLE 3+ MODES)               ║");
+  Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
+  for (int i = 0; i < TOTAL_SYSTEM_MODES; i++) {
+    char row[100];
+    if (i == currentModeMenuIndex) {
+      snprintf(row, sizeof(row), "║ ► [%-23s] : %-35s ◄ ║", SYSTEM_MODES[i].name, SYSTEM_MODES[i].desc);
+    } else {
+      snprintf(row, sizeof(row), "║   %-25s  : %-35s   ║", SYSTEM_MODES[i].name, SYSTEM_MODES[i].desc);
+    }
+    Serial.println(row);
+  }
+  Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
+  Serial.println("║ • Knob 1/2: Scroll Modes      • Start / Click K1: Confirm Selection    ║");
+  Serial.println("║ • Red Stop: Cancel & Return   • Hold Knob 1 (1.5s): Re-open anywhere   ║");
+  Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+  updateEInkModeSelectMenu();
+}
+
+void renderRemoteControlMenu() {
+  Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
+  Serial.println("║              ROBOSEN K1 LIVE REMOTE CONTROL (HANDHELD RC)              ║");
+  const char* gearStr = (currentRcGear == RC_GEAR_FWD) ? "FORWARD [FWD ^]" :
+                        (currentRcGear == RC_GEAR_REV) ? "REVERSE [REV v]" : "STRAFE [STRAFE <>]";
+  Serial.printf("║ Active Gear: %-26s Target: %-25s ║\n", gearStr, pairedName.c_str());
+  Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
+  Serial.printf("║ Selected Stunt (K2): %-48s ║\n", RC_STUNTS[rcStuntIndex].name);
+  Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
+  Serial.println("║ • Green Button (Hold) : Gas Pedal (Walk in Active Gear)                ║");
+  Serial.println("║ • Green Button (Release): Instant Dead-Man Halt (Locks Standing Posture) ║");
+  Serial.println("║ • Knob 1 Short-Click  : Shift Gear (FWD ^ -> REV v -> STRAFE <>)       ║");
+  Serial.println("║ • Knob 1 Twist        : Live Steering Turn L/R (or Strafe Step L/R)   ║");
+  Serial.println("║ • Knob 2 Twist        : Scroll 10-Stunt Catalog                        ║");
+  Serial.println("║ • Knob 2 Short-Click  : Fire Selected Stunt Instantly (1 Repetition)   ║");
+  Serial.println("║ • Red Stop (Click)    : Immediate Emergency Halt                       ║");
+  Serial.println("║ • Knob 1 Hold (1.5s)  : Return to Universal Mode Selector Menu         ║");
+  Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+  updateEInkRemoteControl();
+}
+
 // ==============================================================================
 // 11. E-INK DISPLAY CONTROLLER IMPLEMENTATION (DEPG0213BN / SSD1680 - DUAL CORE)
 // ==============================================================================
@@ -2062,6 +2465,14 @@ void updateEInkPairingMenu() {
   requestEInkFullUpdate();
 }
 
+void updateEInkModeSelectMenu() {
+  requestEInkFullUpdate();
+}
+
+void updateEInkRemoteControl() {
+  requestEInkFullUpdate();
+}
+
 void updateEInkScanning() {
   einkScanningDirty = true;
 }
@@ -2075,6 +2486,157 @@ void updateEInkRunChain(int currentStep, int totalSteps, const char* actionName,
   strncpy(rcSnapUnit, paramUnit ? paramUnit : "", sizeof(rcSnapUnit) - 1);
   rcSnapUnit[sizeof(rcSnapUnit) - 1] = '\0';
   einkRunChainDirty = true;
+}
+
+void drawModeSelectMenuToBuffer() {
+  display.setFullWindow();
+  display.fillScreen(GxEPD_WHITE);
+  int16_t w = display.width();
+  int16_t h = display.height();
+
+  display.drawRect(0, 0, w, h, GxEPD_BLACK);
+  display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
+
+  // Top Title Bar
+  display.fillRect(2, 2, w - 4, 20, GxEPD_BLACK);
+  display.setTextColor(GxEPD_WHITE);
+  display.setFont(&FreeSansBold9pt7b);
+  display.setCursor(6, 17);
+  display.print("SELECT MODE");
+
+  display.setFont();
+  display.setTextSize(1);
+  display.setCursor(w - 78, 8);
+  if (isConnected) {
+    display.print("[CONNECTED]");
+  } else {
+    display.print("[OFFLINE]");
+  }
+
+  // Modes list
+  int yPos = 30;
+  for (int i = 0; i < TOTAL_SYSTEM_MODES; i++) {
+    if (i == currentModeMenuIndex) {
+      display.fillRect(4, yPos - 2, w - 8, 20, GxEPD_BLACK);
+      display.setTextColor(GxEPD_WHITE);
+      display.setFont(&FreeSansBold9pt7b);
+      display.setCursor(8, yPos + 13);
+      display.printf("> %s", SYSTEM_MODES[i].name);
+    } else {
+      display.setTextColor(GxEPD_BLACK);
+      display.setFont(&FreeSansBold9pt7b);
+      display.setCursor(8, yPos + 13);
+      display.printf("  %s", SYSTEM_MODES[i].name);
+    }
+    yPos += 24;
+  }
+
+  // Footer divider & instructions
+  display.drawLine(2, 86, w - 3, 86, GxEPD_BLACK);
+  display.setTextColor(GxEPD_BLACK);
+  display.setFont();
+  display.setTextSize(1);
+  display.setCursor(8, 93);
+  display.print("Knob 1/2: Scroll Modes");
+  display.setCursor(8, 106);
+  display.print("Start / K1: Confirm | Stop: Cancel");
+}
+
+void drawRemoteControlToBuffer(bool invertMiddle) {
+  display.setFullWindow();
+  display.fillScreen(GxEPD_WHITE);
+  int16_t w = display.width();
+  int16_t h = display.height();
+
+  display.drawRect(0, 0, w, h, GxEPD_BLACK);
+  display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
+
+  // 1. Top Title Bar (Inverted Header)
+  display.fillRect(2, 2, w - 4, 20, GxEPD_BLACK);
+  display.setTextColor(GxEPD_WHITE);
+  display.setFont(&FreeSansBold9pt7b);
+  display.setCursor(6, 17);
+  display.print("REMOTE CONTROL");
+
+  // Header Status & Battery Monitor
+  display.setFont();
+  display.setTextSize(1);
+
+  float vbat = readBatteryVoltage();
+  int batPct = calculateBatteryPercent(vbat);
+
+  int batX = w - 38;
+  int batY = 6;
+  display.drawRect(batX, batY, 20, 10, GxEPD_WHITE);
+  display.fillRect(batX + 20, batY + 2, 2, 6, GxEPD_WHITE);
+  int fillW = map(batPct, 0, 100, 0, 16);
+  if (fillW > 0) {
+    display.fillRect(batX + 2, batY + 2, fillW, 6, GxEPD_WHITE);
+  }
+
+  display.setCursor(batX - 78, 8);
+  if (isConnected) {
+    display.print("[CONNECTED]");
+  } else if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
+    display.print("[UNPAIRED]");
+  } else if (connectAttemptCounter > 0) {
+    display.printf("[RETRY #%d]", connectAttemptCounter);
+  } else {
+    display.print("[SEARCHING]");
+  }
+
+  // 2. Middle Band (y = 24..79, height 56)
+  uint16_t midFg = invertMiddle ? GxEPD_WHITE : GxEPD_BLACK;
+  if (invertMiddle) {
+    display.fillRect(2, 24, w - 4, 56, GxEPD_BLACK);
+  }
+
+  // Line 1: Gear (K1) and Steer guide
+  display.setTextColor(midFg);
+  display.setFont(&FreeSansBold9pt7b);
+  display.setCursor(8, 44);
+  if (currentRcGear == RC_GEAR_FWD) {
+    display.print("GEAR: [ FWD ^ ]");
+  } else if (currentRcGear == RC_GEAR_REV) {
+    display.print("GEAR: [ REV v ]");
+  } else {
+    display.print("GEAR: [ STRAFE <> ]");
+  }
+
+  display.setFont();
+  display.setTextSize(1);
+  display.setCursor(160, 36);
+  if (currentRcGear == RC_GEAR_STRAFE) {
+    display.print("K1: Step L/R");
+  } else {
+    display.print("K1: Steer L/R");
+  }
+
+  // Line 2: Stunt (K2)
+  display.setFont(&FreeSansBold9pt7b);
+  display.setCursor(8, 68);
+  display.print(RC_STUNTS[rcStuntIndex].name);
+
+  display.setFont();
+  display.setTextSize(1);
+  display.setCursor(160, 60);
+  display.print("K2 Click: Fire");
+
+  // 3. Horizontal Divider
+  display.drawLine(2, 82, w - 3, 82, GxEPD_BLACK);
+
+  // 4. Footer Instructions
+  display.setTextColor(GxEPD_BLACK);
+  display.setFont();
+  display.setTextSize(1);
+  display.setCursor(8, 89);
+  display.print("Hold Grn: Walk | Stop: Halt | K1 Click: Gear");
+  display.setCursor(8, 103);
+  if (lastUiEventMsg.length() > 0 && (millis() - lastUiEventTime < 3000)) {
+    display.printf(">> %s", lastUiEventMsg.c_str());
+  } else {
+    display.print("Hold K1 (1.5s): Mode Menu | K2: Pick Stunt");
+  }
 }
 
 // Dedicated Core 0 E-Ink Rendering Task (0ms impact on Core 1 inputs/LED)
@@ -2139,12 +2701,23 @@ void einkDisplayTask(void* pvParameters) {
         loadCustomEInkLut(false);
         drawPairingMenuToBuffer();
         display.display(true);
+      } else if (currentState == STATE_MODE_SELECT_MENU) {
+        loadCustomEInkLut(false);
+        drawModeSelectMenuToBuffer();
+        display.display(true);
       } else if (currentState == STATE_ACTION_MENU) {
         drawActionMenuToBuffer(false);
         if (doFull) {
           display.display(true);
         } else {
           // Targeted middle-band update (y=24, h=56, multiples of 8): header & footer never flicker!
+          display.displayWindow(2, 24, 246, 56);
+        }
+      } else if (currentState == STATE_REMOTE_CONTROL) {
+        drawRemoteControlToBuffer(false);
+        if (doFull) {
+          display.display(true);
+        } else {
           display.displayWindow(2, 24, 246, 56);
         }
       }
@@ -2167,6 +2740,11 @@ void einkDisplayTask(void* pvParameters) {
         display.nextPageToPrevious();
         drawActionMenuToBuffer(false);
         display.display(true);
+      } else if (currentState == STATE_REMOTE_CONTROL) {
+        drawRemoteControlToBuffer(true);
+        display.nextPageToPrevious();
+        drawRemoteControlToBuffer(false);
+        display.display(true);
       }
       continue;
     }
@@ -2179,12 +2757,12 @@ void einkDisplayTask(void* pvParameters) {
 void bleReconnectTask(void* pvParameters) {
   while (true) {
     unsigned long now = millis();
-    if (currentState == STATE_ACTION_MENU && !isConnected) {
+    if ((currentState == STATE_ACTION_MENU || currentState == STATE_REMOTE_CONTROL) && !isConnected) {
       if (pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
         if ((now - lastUserActivity > 5000) && (now - lastConnectAttemptTime >= 3000)) {
           if (bleMutex != nullptr && xSemaphoreTake(bleMutex, pdMS_TO_TICKS(50)) == pdTRUE) {
             // Re-verify user hasn't touched controls before starting 1s scan
-            if (currentState == STATE_ACTION_MENU && !isConnected && (millis() - lastUserActivity > 5000)) {
+            if ((currentState == STATE_ACTION_MENU || currentState == STATE_REMOTE_CONTROL) && !isConnected && (millis() - lastUserActivity > 5000)) {
               connectAttemptCounter++;
               bool ok = connectToRobot(true); // quietBg = true: does not hijack RGB LED!
               lastConnectAttemptTime = millis();

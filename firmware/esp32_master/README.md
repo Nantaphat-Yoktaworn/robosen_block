@@ -81,6 +81,23 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
 - Calculates accurate battery percentage using Li-ion discharge characteristics ($3.20\text{V} - 4.20\text{V}$).
 - Renders real-time battery outline icon and dynamic fill level on the E-Paper status header.
 
+### 3.3 Scalable Multi-Mode Switcher & Remote Control (RC) Mode
+
+1. **Universal Multi-Mode Switcher (`STATE_MODE_SELECT_MENU`)**:
+   - Holding **Knob 1 Switch (`SW1`, `GPIO 10`) for 1.5 seconds** from any mode immediately halts motion and opens the **Mode Selector Menu** on the 2.13" E-Paper display.
+   - Scalable architecture ready for 3+ modes without button conflicts (`01: Block Coding & Dock` and `02: Remote Control (RC)`).
+   - Turn Knob 1 or Knob 2 to scroll; press Green Start (`SW3`) or click Knob 1 to enter; press Red Stop (`SW5`) to cancel.
+
+2. **Live Handheld Remote Control (RC) Mode (`STATE_REMOTE_CONTROL`)**:
+   - **Green Button (`SW3`)**: Hold-to-Walk ("Gas Pedal" / Dead-Man Switch). Holding walks continuously in the active gear direction (`0x01` Forward / `0x05` Reverse); releasing immediately sends `0x0C` stop.
+   - **Knob 1 Short Click**: Cycles 3-gear transmission: `[ FWD ^ ]` $\to$ `[ REV v ]` $\to$ `[ STRAFE <> ]`.
+   - **Knob 1 Twist**: Smooth momentum steering (Turn Left `0x08` / Turn Right `0x02` in FWD/REV gears; Side-step Left `0x07` / Right `0x03` in STRAFE gear). Automatically stops or resumes walking when twist ends.
+   - **Knob 2 Twist**: Scroll through full 10-stunt catalog (`Left/Right Punch`, `Kick`, `Wave`, `Celebrate`, `Kung Fu`, `Push-ups`, `Squats`, `Handstand`, `Dance`).
+   - **Knob 2 Short Click**: Instantly fires selected stunt (1 repetition) with non-blocking BLE dispatch.
+   - **Red Button (`SW5`)**: Immediate emergency halt — halts motion and locks neutral posture.
+   - **WS2812 RGB LED Telemetry**: Instant 0ms status feedback (Soft Teal = RC Idle, Vivid Green = Walk Fwd, Amber = Walk Rev, Electric Blue = Steer/Strafe, Magenta = Stunt, Red = Stop).
+   - **Port Isolation**: Config Dock polling is paused during RC Mode for maximum loop responsiveness and battery conservation.
+
 ---
 
 ## 4. Verification & Testing Checklist
@@ -90,4 +107,6 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
 - [x] Verified Red Button long press (3s) triggers clean BLE disconnect.
 - [x] Verified `analogReadMilliVolts(PIN_BATSENSE)` with 1:1 voltage divider.
 - [x] Verified E-Paper display renders battery meter and updated 4-input UI hints.
+- [x] Verified Multi-Mode Switcher (`STATE_MODE_SELECT_MENU`) via 1.5s Knob 1 hold.
+- [x] Verified Remote Control Mode (`STATE_REMOTE_CONTROL`) with hold-to-walk, 3-gear selector, momentum steering, and 10-stunt catalog.
 - [x] Successfully compiled using Arduino CLI for `esp32:esp32:esp32s3` (Zero warnings/errors).
