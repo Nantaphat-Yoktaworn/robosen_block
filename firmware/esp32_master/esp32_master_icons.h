@@ -378,6 +378,34 @@ const unsigned char ICON_STUNT_BURST[72] PROGMEM = {
 // ==============================================================================
 // 3. REMOTE CONTROL GEAR ICONS
 // ==============================================================================
+// 24x24 monochrome bitmap: ICON_JOYSTICK (Arcade Joystick Controller) (72 bytes)
+const unsigned char ICON_JOYSTICK[72] PROGMEM = {
+  0x00, 0x00, 0x00, // Row  0
+  0x00, 0x00, 0x00, // Row  1
+  0x00, 0x3C, 0x00, // Row  2
+  0x00, 0x7E, 0x00, // Row  3
+  0x00, 0xE7, 0x00, // Row  4
+  0x00, 0xC3, 0x00, // Row  5
+  0x00, 0xC3, 0x00, // Row  6
+  0x00, 0xE7, 0x00, // Row  7
+  0x00, 0x7E, 0x00, // Row  8
+  0x00, 0x3C, 0x00, // Row  9
+  0x00, 0x18, 0x00, // Row 10
+  0x00, 0x18, 0x00, // Row 11
+  0x06, 0x18, 0x00, // Row 12
+  0x06, 0x18, 0x00, // Row 13
+  0x1F, 0xFF, 0xF8, // Row 14
+  0x3F, 0xFF, 0xFC, // Row 15
+  0x30, 0x00, 0x0C, // Row 16
+  0x30, 0x00, 0x0C, // Row 17
+  0x30, 0x00, 0x0C, // Row 18
+  0x30, 0x00, 0x0C, // Row 19
+  0x3F, 0xFF, 0xFC, // Row 20
+  0x1F, 0xFF, 0xF8, // Row 21
+  0x00, 0x00, 0x00, // Row 22
+  0x00, 0x00, 0x00, // Row 23
+};
+
 // 24x24 monochrome bitmap: ICON_GEAR_DRIVE (72 bytes)
 const unsigned char ICON_GEAR_DRIVE[72] PROGMEM = {
   0x00, 0x78, 0x00, // Row  0
@@ -880,23 +908,12 @@ inline const unsigned char* getActionIcon(int actionIdx) {
 }
 
 inline const unsigned char* getGearIcon(int rcGear) {
-  return (rcGear == 1) ? ICON_GEAR_STRAFE : ICON_GEAR_DRIVE;
+  return (rcGear == 1) ? ICON_GEAR_STRAFE : ICON_JOYSTICK;
 }
 
-inline const unsigned char* getStuntIcon(int stuntIdx) {
-  switch (stuntIdx) {
-    case 0: return ICON_PUNCH;           // 01: Left Punch
-    case 1: return ICON_PUNCH;           // 02: Right Punch
-    case 2: return ICON_STUNT_BURST;     // 03: Single Kick (stays unchanged)
-    case 3: return ICON_WAVE;            // 04: Wave Hand
-    case 4: return ICON_STUNT_CELEBRATE; // 05: Celebrate
-    case 5: return ICON_STUNT_KUNGFU;    // 06: Kung Fu
-    case 6: return ICON_PUSHUPS;         // 07: Push-ups
-    case 7: return ICON_PUSHUPS;         // 08: Squats
-    case 8: return ICON_STUNT_BURST;     // 09: Handstand (stays unchanged)
-    case 9: return ICON_STUNT_DANCE;     // 10: Dance
-    default: return ICON_STUNT_BURST;
-  }
+inline const unsigned char* getStuntIcon(int actionIdx) {
+  // Mode 2 uses the exact same action icon set as Mode 1
+  return getActionIcon(actionIdx);
 }
 
 inline const unsigned char* getJointGroupIcon(int groupIdx) {

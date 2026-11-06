@@ -231,28 +231,8 @@ enum RcActiveMotion {
 };
 RcActiveMotion currentRcMotion = RC_MOTION_IDLE;
 
-// Full 10-Stunt Catalog for Knob 2
-struct RcStunt {
-  const char* name;
-  uint8_t opcode;
-  const char* payload;
-  unsigned long durationMs;
-};
-
-const RcStunt RC_STUNTS[] = {
-  {"01: Left Punch",   0x17, "ProAction/Left Punch",   2500},
-  {"02: Right Punch",  0x17, "ProAction/Right Punch",  2500},
-  {"03: Single Kick",  0x17, "ProAction/Left Kick",    7000},
-  {"04: Wave Hand",    0x17, "ProAction/Say Hello",    8500},
-  {"05: Celebrate",    0x17, "ProAction/Celebrate",    8000},
-  {"06: Kung Fu",      0x17, "ProAction/Kung Fu",     11000},
-  {"07: Push-ups",     0x17, "ProAction/Push Ups",    12000},
-  {"08: Squats",       0x17, "ProAction/Do Squats",   20000},
-  {"09: Handstand",    0x17, "ProAction/Handstand",   18000},
-  {"10: Dance",        0x17, "Action/Boogaloo",       55000}
-};
-const int TOTAL_RC_STUNTS = sizeof(RC_STUNTS) / sizeof(RC_STUNTS[0]);
-int rcStuntIndex = 0;
+// Mode 2 Remote Control Action Index (matching Mode 1 ACTIONS catalog)
+int rcActionIndex = 0;
 
 // RC Momentum & Duration Timers
 unsigned long rcSteerActiveUntilMs = 0;
@@ -461,7 +441,7 @@ void triggerChainAbort(int count);
 
 // Remote Control & Mode Switcher Helpers
 void sendRawOpcodeNonBlocking(uint8_t opcode);
-void sendStuntPacketNonBlocking(const RcStunt& stunt);
+void sendStuntPacketNonBlocking(uint8_t opcode, const char* payload);
 void stopRcMotionImmediate();
 void updateRemoteControlEngine();
 
@@ -616,8 +596,8 @@ void sendRawOpcodeNonBlocking(uint8_t opcode) {
   }
 }
 
-void sendStuntPacketNonBlocking(const RcStunt& stunt) {
-  uint8_t payloadLen = strlen(stunt.payload);
+void sendStuntPacketNonBlocking(uint8_t opcode, const char* payload) {
+  uint8_t payloadLen = strlen(payload);
   uint8_t numBytes = 1 + payloadLen + 1;
   uint8_t totalPacketLen = 2 + numBytes + 1;
   uint8_t packet[totalPacketLen];
@@ -625,11 +605,11 @@ void sendStuntPacketNonBlocking(const RcStunt& stunt) {
   packet[0] = 0xFF;
   packet[1] = 0xFF;
   packet[2] = numBytes;
-  packet[3] = stunt.opcode;
+  packet[3] = opcode;
 
-  uint16_t checksum = numBytes + stunt.opcode;
+  uint16_t checksum = numBytes + opcode;
   for (int i = 0; i < payloadLen; i++) {
-    packet[4 + i] = (uint8_t)stunt.payload[i];
+    packet[4 + i] = (uint8_t)payload[i];
     checksum += packet[4 + i];
   }
   packet[totalPacketLen - 1] = (uint8_t)(checksum % 256);
@@ -656,12 +636,13 @@ void updateRemoteControlEngine() {
   if (currentState != STATE_REMOTE_CONTROL) return;
   unsigned long now = millis();
 
-  // 1. If executing stunt, check duration
+  // 1. If executing action, check duration
   if (currentRcMotion == RC_MOTION_STUNT) {
     if (now >= rcStuntEndMs) {
+      sendLocomotionStop(); // Ensure robot stops and stands if locomotion step was fired
       currentRcMotion = RC_MOTION_IDLE;
       updateStatusLED();
-      Serial.println("[RC] Stunt execution finished. Returned to neutral posture.");
+      Serial.println("[RC] Action execution finished. Returned to neutral posture.");
     }
     return;
   }
@@ -1265,11 +1246,11 @@ void loop() {
       requestEInkCenterUpdate(); // Targeted middle-band fast update on Core 0
       Serial.printf("🔄 [KNOB 2] Parameter: %d %s\n", act.paramVal, act.paramUnit);
     } else if (currentState == STATE_REMOTE_CONTROL) {
-      // Knob 2 Turn: Scroll 10-Stunt Catalog
-      rcStuntIndex = (rcStuntIndex + d2) % TOTAL_RC_STUNTS;
-      while (rcStuntIndex < 0) rcStuntIndex += TOTAL_RC_STUNTS;
+      // Knob 2 Turn: Scroll Actions Catalog (matching Mode 1 ACTIONS)
+      rcActionIndex = (rcActionIndex + d2) % TOTAL_ACTIONS;
+      while (rcActionIndex < 0) rcActionIndex += TOTAL_ACTIONS;
       requestEInkCenterUpdate(); // Fast middle band refresh on Core 0
-      Serial.printf("🔄 [RC STUNT] %s\n", RC_STUNTS[rcStuntIndex].name);
+      Serial.printf("🔄 [RC ACTION] %s\n", ACTIONS[rcActionIndex].name);
     } else if (currentState == STATE_JOINT_CONTROL) {
       const JointDef& j = ALL_JOINTS[currentJointIndex];
       int newPos = (int)currentServoPositions[j.servoId] + (d2 * 5);
@@ -1386,18 +1367,38 @@ void loop() {
                         act.name, act.paramVal, act.paramUnit);
           setUiEventFeedback("K2 CLICK: PARAM RESET");
         } else if (currentState == STATE_REMOTE_CONTROL) {
-          // Fire Selected Stunt Instantly
+          // Fire Selected Action Instantly
           if (currentRcMotion != RC_MOTION_IDLE && currentRcMotion != RC_MOTION_STUNT) {
             sendLocomotionStop();
             delay(40);
           }
           currentRcMotion = RC_MOTION_STUNT;
-          rcStuntEndMs = now + RC_STUNTS[rcStuntIndex].durationMs;
-          sendStuntPacketNonBlocking(RC_STUNTS[rcStuntIndex]);
+          const RobosenAction& act = ACTIONS[rcActionIndex];
+          unsigned long dur = 2000;
+          if (act.opcode == 0x17) {
+            if (strstr(act.payload, "Push Ups") != nullptr) dur = 12000;
+            else if (strstr(act.payload, "Say Hello") != nullptr) dur = 8500;
+            else if (strstr(act.payload, "Left Punch") != nullptr) dur = 2500;
+            else dur = 4000;
+            sendStuntPacketNonBlocking(act.opcode, act.payload);
+          } else if (act.opcode == 0x08) {
+            dur = 1600; // 90 deg turn left
+            sendRawOpcodeNonBlocking(0x08);
+          } else if (act.opcode == 0x02) {
+            dur = 3200; // 90 deg turn right
+            sendRawOpcodeNonBlocking(0x02);
+          } else if (act.opcode == 0x01) {
+            dur = 1400; // 1 step fwd
+            sendRawOpcodeNonBlocking(0x01);
+          } else if (act.opcode == 0x05) {
+            dur = 1400; // 1 step rev
+            sendRawOpcodeNonBlocking(0x05);
+          }
+          rcStuntEndMs = now + dur;
           triggerLedBlip(90, 0, 90);
           updateStatusLED();
-          Serial.printf("\n>>> [RC STUNT] Fired: %s (Duration: %lu ms) <<<\n",
-                        RC_STUNTS[rcStuntIndex].name, RC_STUNTS[rcStuntIndex].durationMs);
+          Serial.printf("\n>>> [RC ACTION] Fired: %s (Duration: %lu ms) <<<\n",
+                        act.name, dur);
         } else if (currentState == STATE_JOINT_CONTROL) {
           // Reset active joint to neutral center (0°)
           resetActiveJointToCenter();
@@ -2383,7 +2384,7 @@ void renderRemoteControlMenu() {
     Serial.printf("║ Active Mode: %-26s Target: %-25s ║\n", gearStr, pairedName.c_str());
   }
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
-  Serial.printf("║ Selected Stunt (K2): %-48s ║\n", RC_STUNTS[rcStuntIndex].name);
+  Serial.printf("║ Selected Action (K2): %-48s ║\n", ACTIONS[rcActionIndex].name);
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
   Serial.println("║ • Green Button (Hold) : Walk FORWARD (0x01) (Dead-Man Gas Pedal)       ║");
   Serial.println("║ • Red Button (Hold)   : Walk BACKWARD (0x05) (Dedicated Reverse Pedal) ║");
@@ -2391,8 +2392,8 @@ void renderRemoteControlMenu() {
   Serial.println("║ • Both Buttons (Hold) : Priority Emergency Safety Halt (0x0C)          ║");
   Serial.println("║ • Knob 1 Short-Click  : Direct Mode Cycle -> Mode 3 (Joints)           ║");
   Serial.println("║ • Knob 1 Twist        : Steering Turn (Turn Left / Right)              ║");
-  Serial.println("║ • Knob 2 Twist        : Scroll 10-Stunt Catalog                        ║");
-  Serial.println("║ • Knob 2 Short-Click  : Fire Selected Stunt Instantly (1 Repetition)   ║");
+  Serial.println("║ • Knob 2 Twist        : Scroll Actions Catalog (Mode 1 Actions)        ║");
+  Serial.println("║ • Knob 2 Short-Click  : Fire Selected Action Instantly                 ║");
   Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
   updateEInkRemoteControl();
 }
@@ -2832,19 +2833,19 @@ void drawRemoteControlToBuffer(bool invertMiddle) {
     display.fillRect(SCREEN_VISIBLE_X_MIN + 1, 23, SCREEN_VISIBLE_WIDTH - 2, 97, GxEPD_BLACK);
   }
 
-  // Left Column: Steering Wheel 48x48 Icon (centered at x=54, y=44)
-  drawBitmap2x(54, 44, getGearIcon(RC_GEAR_DRIVE), 24, 24, midFg);
+  // Left Column: Arcade Joystick 48x48 Icon (centered in left half of visible window: x=68, y=48)
+  drawBitmap2x(68, 48, ICON_JOYSTICK, 24, 24, midFg);
 
-  // Vertical Divider at x=116
-  display.drawFastVLine(116, 36, 68, midFg);
+  // Vertical Divider at calibrated visible center (x = 145)
+  display.drawFastVLine(145, 36, 68, midFg);
 
-  // Right Column: Active Stunt 48x48 Icon + Stunt Number #01..#10
-  drawBitmap2x(126, 44, getStuntIcon(rcStuntIndex), 24, 24, midFg);
+  // Right Column: Active Action 48x48 Icon (from Mode 1) + Action Number #01..#07
+  drawBitmap2x(152, 48, getActionIcon(rcActionIndex), 24, 24, midFg);
 
   display.setTextColor(midFg);
   display.setFont(&FreeSansBold18pt7b);
-  display.setCursor(186, 76);
-  display.printf("#%02d", rcStuntIndex + 1);
+  display.setCursor(204, 80);
+  display.printf("#%02d", rcActionIndex + 1);
 }
 
 void drawJointControlToBuffer(bool invertMiddle) {
