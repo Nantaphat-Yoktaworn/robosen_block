@@ -9,6 +9,8 @@
 #include <GxEPD2_BW.h>
 #include <Adafruit_GFX.h>
 #include <Fonts/FreeSansBold9pt7b.h>
+#include <Fonts/FreeSansBold12pt7b.h>
+#include <Fonts/FreeSansBold18pt7b.h>
 #include "esp32_master_icons.h"
 
 // ==============================================================================
@@ -2685,15 +2687,39 @@ void epdBusyYieldCallback(const void* param) {
   }
 }
 
-void drawDualBatteryHeader(int16_t w, const char* title) {
+void drawBitmap2x(int16_t x, int16_t y, const uint8_t *bitmap, int16_t w, int16_t h, uint16_t color) {
+  for (int16_t j = 0; j < h; j++) {
+    for (int16_t i = 0; i < w; i++) {
+      int byteIdx = j * ((w + 7) / 8) + (i / 8);
+      uint8_t b = pgm_read_byte(&bitmap[byteIdx]);
+      if (b & (0x80 >> (i & 7))) {
+        display.fillRect(x + i * 2, y + j * 2, 2, 2, color);
+      }
+    }
+  }
+}
+
+void drawDualBatteryHeader(int16_t w) {
   // 1. Black header bar (y=2..21, height 20)
   display.fillRect(2, 2, w - 4, 20, GxEPD_BLACK);
 
-  // 2. Title on left
+  // 2. Connected Robot Name / Connection Status on left
   display.setTextColor(GxEPD_WHITE);
   display.setFont(&FreeSansBold9pt7b);
   display.setCursor(6, 17);
-  display.print(title);
+
+  if (isConnected) {
+    String rName = pairedName;
+    if (rName.length() == 0 || rName == "None") rName = "K1";
+    if (rName.length() > 12) rName = rName.substring(0, 12);
+    display.print(rName);
+  } else if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
+    display.print("UNPAIRED");
+  } else if (connectAttemptCounter > 0) {
+    display.print("SEARCHING...");
+  } else {
+    display.print("DISCONNECTED");
+  }
 
   // 3. Dual Battery Gauges (Header Top-Right)
   display.setFont();
@@ -2751,31 +2777,30 @@ void drawActionMenuToBuffer(bool invertMiddle = false) {
   display.drawRect(0, 0, w, h, GxEPD_BLACK);
   display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
 
-  // 2. Dual Battery Header
-  drawDualBatteryHeader(w, "ROBOSEN K1");
+  // 2. Dual Battery Header with Connected Robot Name
+  drawDualBatteryHeader(w);
 
-  // 3. Center Action & Parameter Section (y = 24..79)
+  // 3. Center Action & Parameter Section (y = 24..119, full height)
   uint16_t midFg = invertMiddle ? GxEPD_WHITE : GxEPD_BLACK;
   if (invertMiddle) {
-    display.fillRect(2, 24, w - 4, 56, GxEPD_BLACK);
+    display.fillRect(2, 24, w - 4, 96, GxEPD_BLACK);
   }
   int actIdx = currentActionIndex;
   if (actIdx < 0 || actIdx >= TOTAL_ACTIONS) actIdx = 0;
   RobosenAction act = ACTIONS[actIdx];
 
-  // 24x24 Action Bitmap (Vertically centered at y = 38)
-  display.drawBitmap(8, 38, getActionIcon(actIdx), 24, 24, midFg);
+  // 48x48 Action Bitmap
+  drawBitmap2x(24, 44, getActionIcon(actIdx), 24, 24, midFg);
 
-  // Action Name (clean without numeric prefix if present)
-  const char* actName = (isdigit(act.name[0]) && act.name[2] == ':') ? (act.name + 4) : act.name;
+  // Big Parameter Number (e.g. 1, 2, 90°)
   display.setTextColor(midFg);
-  display.setFont(&FreeSansBold9pt7b);
-  display.setCursor(38, 46);
-  display.print(actName);
-
-  // Parameter Value & Unit
-  display.setCursor(38, 68);
-  display.printf("[%d] %s", act.paramVal, act.paramUnit);
+  display.setFont(&FreeSansBold18pt7b);
+  display.setCursor(95, 76);
+  if (strcmp(act.paramUnit, "Deg°") == 0) {
+    display.printf("%d°", act.paramVal);
+  } else {
+    display.printf("%d", act.paramVal);
+  }
 
   // Parameter Progress Dots
   display.setFont();
@@ -2789,38 +2814,12 @@ void drawActionMenuToBuffer(bool invertMiddle = false) {
   if (currentDot > totalDots) currentDot = totalDots;
 
   for (int i = 0; i < totalDots; i++) {
-    int dotX = 180 + (i * 12);
-    int dotY = 64;
+    int dotX = 96 + (i * 16);
+    int dotY = 96;
     if (i < currentDot) {
       display.fillCircle(dotX, dotY, 4, midFg);
     } else {
       display.drawCircle(dotX, dotY, 4, midFg);
-    }
-  }
-  display.setTextColor(GxEPD_BLACK);
-
-  // 4. Horizontal Divider Line
-  display.drawLine(2, 82, w - 3, 82, GxEPD_BLACK);
-
-  // 5. Bottom Config Dock Status Area
-  display.setFont();
-  display.setTextSize(1);
-  display.setCursor(8, 89);
-  float vbat = readBatteryVoltage();
-  int batPct = calculateBatteryPercent(vbat);
-  if (isBlockDocked) {
-    display.printf("DOCK: [0x%02X] %s (%d %s)", 
-                   dockedActionId, getActionNameByToken(dockedActionId),
-                   dockedParamVal, getParamUnitByToken(dockedActionId));
-    display.setCursor(8, 103);
-    display.print("K1 Click: Flash | Stop (Red): Cancel");
-  } else {
-    display.printf("DOCK: EMPTY  |  Bat: %.2fV (%d%%)", vbat, batPct);
-    display.setCursor(8, 103);
-    if (lastUiEventMsg.length() > 0 && (millis() - lastUiEventTime < 3000)) {
-      display.printf(">> %s", lastUiEventMsg.c_str());
-    } else {
-      display.print("Start: Run | Stop: Halt | Hold St: Pair");
     }
   }
 }
@@ -2995,40 +2994,27 @@ void drawModeSelectMenuToBuffer() {
   display.drawRect(0, 0, w, h, GxEPD_BLACK);
   display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
 
-  // Top Title Bar with Dual Battery Header
-  drawDualBatteryHeader(w, "SELECT MODE");
+  // 1. Dual Battery Header with Connected Robot Name
+  drawDualBatteryHeader(w);
 
-  // Modes list (compact 18px slots for 3 scalable modes)
-  int yPos = 26;
-  for (int i = 0; i < TOTAL_SYSTEM_MODES; i++) {
-    if (i == currentModeMenuIndex) {
-      display.fillRect(4, yPos - 2, 196, 18, GxEPD_BLACK);
-      display.setTextColor(GxEPD_WHITE);
-      display.setFont(&FreeSansBold9pt7b);
-      display.setCursor(8, yPos + 12);
-      display.printf("> %s", SYSTEM_MODES[i].name);
+  // 2. 3-Icon Carousel (Cards at x=14, 93, 172, y=38, 64x64)
+  const int cardX[3] = {14, 93, 172};
+  const int cardY = 38;
+  const int cardW = 64;
+  const int cardH = 64;
+
+  for (int i = 0; i < 3; i++) {
+    bool isSelected = (i == currentModeMenuIndex);
+    if (isSelected) {
+      // Inverted solid black card for selected mode
+      display.fillRect(cardX[i], cardY, cardW, cardH, GxEPD_BLACK);
+      drawBitmap2x(cardX[i] + 8, cardY + 8, getModeBadgeIcon(i), 24, 24, GxEPD_WHITE);
     } else {
-      display.setTextColor(GxEPD_BLACK);
-      display.setFont(&FreeSansBold9pt7b);
-      display.setCursor(8, yPos + 12);
-      display.printf("  %s", SYSTEM_MODES[i].name);
+      // Outlined card for unselected modes
+      display.drawRect(cardX[i], cardY, cardW, cardH, GxEPD_BLACK);
+      drawBitmap2x(cardX[i] + 8, cardY + 8, getModeBadgeIcon(i), 24, 24, GxEPD_BLACK);
     }
-    yPos += 19;
   }
-
-  // Active Mode Badge Preview on the right (24x24 inside framed box)
-  display.drawRect(206, 26, 38, 54, GxEPD_BLACK);
-  display.drawBitmap(213, 41, getModeBadgeIcon(currentModeMenuIndex), 24, 24, GxEPD_BLACK);
-
-  // Footer divider & instructions
-  display.drawLine(2, 86, w - 3, 86, GxEPD_BLACK);
-  display.setTextColor(GxEPD_BLACK);
-  display.setFont();
-  display.setTextSize(1);
-  display.setCursor(8, 93);
-  display.print("Knob 1/2: Scroll Modes");
-  display.setCursor(8, 106);
-  display.print("Start / K1: Confirm | Stop: Cancel");
 }
 
 void drawRemoteControlToBuffer(bool invertMiddle) {
@@ -3040,66 +3026,28 @@ void drawRemoteControlToBuffer(bool invertMiddle) {
   display.drawRect(0, 0, w, h, GxEPD_BLACK);
   display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
 
-  // 1. Top Title Bar with Dual Battery Header
-  drawDualBatteryHeader(w, "RC MODE");
+  // 1. Dual Battery Header with Connected Robot Name
+  drawDualBatteryHeader(w);
 
-  // 2. Middle Band (y = 24..79, height 56)
+  // 2. Center Section (y = 24..119, full height)
   uint16_t midFg = invertMiddle ? GxEPD_WHITE : GxEPD_BLACK;
   if (invertMiddle) {
-    display.fillRect(2, 24, w - 4, 56, GxEPD_BLACK);
+    display.fillRect(2, 24, w - 4, 96, GxEPD_BLACK);
   }
 
-  // Row 1: Gear (K1) 24x24 Icon + Name + Steer Guide (y = 26..50)
-  display.drawBitmap(8, 26, getGearIcon(currentRcGear), 24, 24, midFg);
+  // Left Column: Active Gear 48x48 Icon (Steering Wheel or Strafe arrows)
+  drawBitmap2x(24, 44, getGearIcon(currentRcGear), 24, 24, midFg);
+
+  // Vertical Divider
+  display.drawFastVLine(100, 36, 68, midFg);
+
+  // Right Column: Active Stunt 48x48 Icon + Stunt Number #01..#10
+  drawBitmap2x(120, 44, getStuntIcon(rcStuntIndex), 24, 24, midFg);
 
   display.setTextColor(midFg);
-  display.setFont(&FreeSansBold9pt7b);
-  display.setCursor(38, 43);
-  if (currentRcGear == RC_GEAR_STRAFE) {
-    display.print("STRAFE <>");
-  } else {
-    display.print("DRIVE ^");
-  }
-
-  display.setFont();
-  display.setTextSize(1);
-  display.setCursor(154, 38);
-  if (currentRcGear == RC_GEAR_STRAFE) {
-    display.print("K1: Step L/R");
-  } else {
-    display.print("K1: Steer L/R");
-  }
-
-  // Row 2: Stunt (K2) 24x24 Icon + Name + Fire Guide (y = 53..77)
-  display.drawBitmap(8, 53, getStuntIcon(rcStuntIndex), 24, 24, midFg);
-
-  const char* stuntName = (isdigit(RC_STUNTS[rcStuntIndex].name[0]) && RC_STUNTS[rcStuntIndex].name[2] == ':')
-                          ? (RC_STUNTS[rcStuntIndex].name + 4)
-                          : RC_STUNTS[rcStuntIndex].name;
-  display.setFont(&FreeSansBold9pt7b);
-  display.setCursor(38, 70);
-  display.print(stuntName);
-
-  display.setFont();
-  display.setTextSize(1);
-  display.setCursor(154, 65);
-  display.print("K2 Click: Fire");
-
-  // 3. Horizontal Divider
-  display.drawLine(2, 82, w - 3, 82, GxEPD_BLACK);
-
-  // 4. Footer Instructions
-  display.setTextColor(GxEPD_BLACK);
-  display.setFont();
-  display.setTextSize(1);
-  display.setCursor(8, 89);
-  display.print("Grn: Fwd | Red: Back | K1: Gear Mode");
-  display.setCursor(8, 103);
-  if (lastUiEventMsg.length() > 0 && (millis() - lastUiEventTime < 3000)) {
-    display.printf(">> %s", lastUiEventMsg.c_str());
-  } else {
-    display.print("Hold K1 (1.5s): Mode Menu | K2: Stunt");
-  }
+  display.setFont(&FreeSansBold18pt7b);
+  display.setCursor(176, 76);
+  display.printf("#%02d", rcStuntIndex + 1);
 }
 
 void drawJointControlToBuffer(bool invertMiddle) {
@@ -3111,13 +3059,13 @@ void drawJointControlToBuffer(bool invertMiddle) {
   display.drawRect(0, 0, w, h, GxEPD_BLACK);
   display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
 
-  // 1. Top Title Bar with Dual Battery Header
-  drawDualBatteryHeader(w, "JOINT CTRL");
+  // 1. Dual Battery Header with Connected Robot Name
+  drawDualBatteryHeader(w);
 
-  // 2. Middle Band (y = 24..79, height 56)
+  // 2. Center Section (y = 24..119, full height)
   uint16_t midFg = invertMiddle ? GxEPD_WHITE : GxEPD_BLACK;
   if (invertMiddle) {
-    display.fillRect(2, 24, w - 4, 56, GxEPD_BLACK);
+    display.fillRect(2, 24, w - 4, 96, GxEPD_BLACK);
   }
 
   const JointGroupDef& grp = JOINT_GROUPS[currentJointGroupIndex];
@@ -3125,79 +3073,40 @@ void drawJointControlToBuffer(bool invertMiddle) {
   int currentVal = (int)currentServoPositions[j.servoId];
   int offset = currentVal - (int)j.neutral;
 
-  // 24x24 Body Group Anatomy Icon (Head, L.Arm, R.Arm, L.Leg, R.Leg)
-  display.drawBitmap(8, 38, getJointGroupIcon(currentJointGroupIndex), 24, 24, midFg);
+  // Anatomy 48x48 Icon (Head, L.Arm, R.Arm, L.Leg, R.Leg)
+  drawBitmap2x(14, 34, getJointGroupIcon(currentJointGroupIndex), 24, 24, midFg);
 
-  // Line 1: Group & Joint name (y = 43)
+  // Short Joint Name (strip "L." or "R." prefix)
+  const char* sName = (j.name[1] == '.') ? (j.name + 2) : j.name;
   display.setTextColor(midFg);
-  display.setFont(&FreeSansBold9pt7b);
-  display.setCursor(38, 43);
-  display.printf("%s: %s", grp.groupName, j.name);
+  display.setFont(&FreeSansBold12pt7b);
+  display.setCursor(70, 52);
+  display.print(sName);
 
-  // Level badge on right
-  display.setFont();
-  display.setTextSize(1);
-  display.setCursor(w - 74, 33);
-  if (isJointSelectedLevel2) {
-    display.print("[L2: ANGLE]");
-  } else {
-    display.print("[L1: GROUP]");
-  }
-
-  // Line 2: Degree Display (y = 59)
-  display.setFont(&FreeSansBold9pt7b);
-  display.setCursor(38, 59);
+  // Big Degree Readout (y = 76)
+  display.setCursor(70, 76);
   if (offset > 0) {
-    display.printf("+%d deg", offset);
+    display.printf("+%d°", offset);
   } else if (offset < 0) {
-    display.printf("%d deg", offset);
+    display.printf("%d°", offset);
   } else {
-    display.print("0 deg");
+    display.print("0°");
   }
 
-  // Limits display & Raw value
-  display.setFont();
-  display.setTextSize(1);
-  display.setCursor(136, 51);
-  display.printf("Lim:[%d..%d]", j.minLimit, j.maxLimit);
-
-  display.setCursor(196, 51);
-  display.printf("Raw:%3d", currentVal);
-
-  // Line 3: Visual Slider / Gauge Bar (y = 71)
-  int gaugeX = 38;
-  int gaugeW = 200;
-  int gaugeY = 71;
+  // Full-width Slider Gauge (y = 96)
+  int gaugeX = 14;
+  int gaugeW = 222;
+  int gaugeY = 96;
   display.drawFastHLine(gaugeX, gaugeY, gaugeW, midFg);
-  display.drawFastVLine(gaugeX, gaugeY - 3, 7, midFg);
-  display.drawFastVLine(gaugeX + gaugeW, gaugeY - 3, 7, midFg);
+  display.drawFastVLine(gaugeX, gaugeY - 5, 11, midFg);
+  display.drawFastVLine(gaugeX + gaugeW, gaugeY - 5, 11, midFg);
 
   int centerTickX = map(j.neutral, j.minLimit, j.maxLimit, gaugeX, gaugeX + gaugeW);
-  display.drawFastVLine(centerTickX, gaugeY - 4, 9, midFg);
+  display.drawFastVLine(centerTickX, gaugeY - 6, 13, midFg);
 
   int pipX = map(currentVal, j.minLimit, j.maxLimit, gaugeX, gaugeX + gaugeW);
   pipX = constrain(pipX, gaugeX, gaugeX + gaugeW);
-  display.fillRect(pipX - 2, gaugeY - 3, 5, 7, midFg);
-
-  // 3. Horizontal Divider
-  display.drawLine(2, 82, w - 3, 82, GxEPD_BLACK);
-
-  // 4. Footer Instructions
-  display.setTextColor(GxEPD_BLACK);
-  display.setFont();
-  display.setTextSize(1);
-  display.setCursor(8, 89);
-  if (isJointSelectedLevel2) {
-    display.print("K2: +/-5 deg | K2 Click: Ctr | Stop: Back");
-  } else {
-    display.print("K1: Group/Joint | Grn: Select | Stop: Back");
-  }
-  display.setCursor(8, 103);
-  if (lastUiEventMsg.length() > 0 && (millis() - lastUiEventTime < 3000)) {
-    display.printf(">> %s", lastUiEventMsg.c_str());
-  } else {
-    display.print("Hold K2 (1.5s): Stand | Hold K1: Menu");
-  }
+  display.fillRect(pipX - 3, gaugeY - 5, 7, 11, midFg);
 }
 
 // Dedicated Core 0 E-Ink Rendering Task (0ms impact on Core 1 inputs/LED)
@@ -3271,22 +3180,22 @@ void einkDisplayTask(void* pvParameters) {
         if (doFull) {
           display.display(true);
         } else {
-          // Targeted middle-band update (y=24, h=56, multiples of 8): header & footer never flicker!
-          display.displayWindow(2, 24, 246, 56);
+          // Targeted center update (y=24, h=96): header never flickers!
+          display.displayWindow(2, 24, 246, 96);
         }
       } else if (currentState == STATE_REMOTE_CONTROL) {
         drawRemoteControlToBuffer(false);
         if (doFull) {
           display.display(true);
         } else {
-          display.displayWindow(2, 24, 246, 56);
+          display.displayWindow(2, 24, 246, 96);
         }
       } else if (currentState == STATE_JOINT_CONTROL) {
         drawJointControlToBuffer(false);
         if (doFull) {
           display.display(true);
         } else {
-          display.displayWindow(2, 24, 246, 56);
+          display.displayWindow(2, 24, 246, 96);
         }
       }
       continue;

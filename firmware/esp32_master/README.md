@@ -79,17 +79,18 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
 3. **Clean Disconnect**:
    - Long-pressing `BTN_STOP` for 3 seconds cleanly disconnects the active BLE session.
 
-### 3.2 Dual Battery Monitoring Header & 24×24 Pixel-Art Icon System
+### 3.2 Ultra-Minimal UI, Connected Robot Header & Dual Battery
 
-1. **Dual Battery Header (Top-Right Status Bar Across All Modes)**:
-   - **Robot Cell `[R]`**: Live BLE Opcode `0x0F` telemetry percentage (`0-100%`) with dynamic filled battery outline (`16×9 px`) and positive terminal nub (`2×5 px`). Shows `--` with empty cell when disconnected.
-   - **Master Cell `[M]`**: Real-time ADC voltage divider (`BATSENSE` on `GPIO 1`), converted to accurate percentage (`3.20V - 4.20V`) with dynamic filled battery outline.
+1. **Connected Robot Status Header (Top Bar Across All Modes)**:
+   - **Left Status**: Displays actual connected robot name (e.g. `K1` or `K1 Interstellar`) when paired & connected. Displays `SEARCHING...` while auto-reconnecting, or `DISCONNECTED` when offline.
+   - **Right Battery Cells**: Robot Cell `[R]` (0-100% fill + text, or `--`) and Master Block Cell `[M]` (3.20V-4.20V Li-ion curve).
 
-2. **24×24 Pixel-Art Monochromatic Bitmaps (`esp32_master_icons.h`)**:
-   - **Mode 1 Actions**: Walk Forward, Walk Backward, Turn Left, Turn Right, Punch, Pushups, Wave Hand.
-   - **Mode 2 Remote Control**: Steering Wheel (`ICON_GEAR_DRIVE`), Lateral Arrows (`ICON_GEAR_STRAFE`), Action Starburst Badge (`ICON_STUNT_BURST`).
-   - **Mode 3 Joint Anatomy**: Head, Left Arm, Right Arm, Left Leg, Right Leg body group silhouettes.
-   - **Mode Selector Menu**: Coding Blocks, Gamepad RC, and Articulated Humanoid badges.
+2. **Ultra-Minimal Full-Height Canvas (Zero Clutter)**:
+   - **Footer Key Guides Removed**: All bottom key guides, button hints, and divider lines are removed, leaving a clean, distraction-free display surface.
+   - **Mode 1 (Action Select)**: 48×48 chunky pixel-art action icon + Big Bold Number for count or degrees (e.g. `1`, `90°`) + progress dots.
+   - **Mode 2 (Remote Control)**: 48×48 Gear Icon (Drive/Strafe) on left, 48×48 Stunt Icon with catalog number (`#01`..`#10`) on right.
+   - **Mode 3 (Joint Control)**: 48×48 Anatomy Icon (Head, Arms, Legs) + Short Joint Name (e.g. `Shoulder`, `Elbow`) + Big Degree Readout (`+15°`) + 222px wide slider gauge.
+   - **Mode Selector Carousel**: 3 side-by-side $64\times 64\text{ px}$ mode cards (`[ 🧱 Blocks ]`, `[ 🎮 RC ]`, `[ 🤖 Joints ]`) with an inverted solid-black highlight for the active selection.
 
 ### 3.3 Scalable Multi-Mode Switcher & Remote Control (RC) Mode
 
