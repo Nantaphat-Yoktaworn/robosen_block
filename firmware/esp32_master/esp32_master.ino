@@ -1220,32 +1220,17 @@ void loop() {
       while (currentActionIndex < 0) currentActionIndex += TOTAL_ACTIONS;
       requestEInkCenterUpdate(); // Targeted middle-band fast update on Core 0
       Serial.printf("🔄 [KNOB 1] Action: %s\n", ACTIONS[currentActionIndex].name);
-    } else if (currentState == STATE_MODE_SELECT_MENU) {
-      currentModeMenuIndex = (currentModeMenuIndex + d1) % TOTAL_SYSTEM_MODES;
-      while (currentModeMenuIndex < 0) currentModeMenuIndex += TOTAL_SYSTEM_MODES;
-      requestEInkFullUpdate();
-      Serial.printf("🔄 [MODE SELECT] %s\n", SYSTEM_MODES[currentModeMenuIndex].name);
     } else if (currentState == STATE_REMOTE_CONTROL) {
-      // Knob 1 Turn: Live Steering or Strafing
-      if (currentRcGear == RC_GEAR_STRAFE) {
-        RcActiveMotion newMotion = (d1 < 0) ? RC_MOTION_STRAFE_LEFT : RC_MOTION_STRAFE_RIGHT;
-        uint8_t op = (d1 < 0) ? 0x07 : 0x03;
-        currentRcMotion = newMotion;
-        rcSteerActiveUntilMs = constrain(now + 550, rcSteerActiveUntilMs + 400, now + 1100);
-        sendRawOpcodeNonBlocking(op);
-        updateStatusLED();
-        Serial.printf("🔄 [RC STEER] Strafe %s\n", (d1 < 0) ? "Left" : "Right");
-      } else {
-        RcActiveMotion newMotion = (d1 < 0) ? RC_MOTION_TURN_LEFT : RC_MOTION_TURN_RIGHT;
-        uint8_t op = (d1 < 0) ? 0x08 : 0x02;
-        currentRcMotion = newMotion;
-        unsigned long dur = (d1 < 0) ? 550 : 900;
-        unsigned long maxWindow = (d1 < 0) ? 1100 : 1500;
-        rcSteerActiveUntilMs = constrain(now + dur, rcSteerActiveUntilMs + 400, now + maxWindow);
-        sendRawOpcodeNonBlocking(op);
-        updateStatusLED();
-        Serial.printf("🔄 [RC STEER] Turn %s\n", (d1 < 0) ? "Left" : "Right");
-      }
+      // Knob 1 Turn: Live Rotational Steering (Turn Left / Right)
+      RcActiveMotion newMotion = (d1 < 0) ? RC_MOTION_TURN_LEFT : RC_MOTION_TURN_RIGHT;
+      uint8_t op = (d1 < 0) ? 0x08 : 0x02;
+      currentRcMotion = newMotion;
+      unsigned long dur = (d1 < 0) ? 550 : 900;
+      unsigned long maxWindow = (d1 < 0) ? 1100 : 1500;
+      rcSteerActiveUntilMs = constrain(now + dur, rcSteerActiveUntilMs + 400, now + maxWindow);
+      sendRawOpcodeNonBlocking(op);
+      updateStatusLED();
+      Serial.printf("🔄 [RC STEER] Turn %s\n", (d1 < 0) ? "Left" : "Right");
     } else if (currentState == STATE_JOINT_CONTROL) {
       currentJointIndex = (currentJointIndex + d1) % TOTAL_JOINTS;
       while (currentJointIndex < 0) currentJointIndex += TOTAL_JOINTS;
@@ -1270,11 +1255,6 @@ void loop() {
       if (act.paramVal < act.paramMin) act.paramVal = act.paramMin;
       requestEInkCenterUpdate(); // Targeted middle-band fast update on Core 0
       Serial.printf("🔄 [KNOB 2] Parameter: %d %s\n", act.paramVal, act.paramUnit);
-    } else if (currentState == STATE_MODE_SELECT_MENU) {
-      currentModeMenuIndex = (currentModeMenuIndex + d2) % TOTAL_SYSTEM_MODES;
-      while (currentModeMenuIndex < 0) currentModeMenuIndex += TOTAL_SYSTEM_MODES;
-      requestEInkFullUpdate();
-      Serial.printf("🔄 [MODE SELECT] %s\n", SYSTEM_MODES[currentModeMenuIndex].name);
     } else if (currentState == STATE_REMOTE_CONTROL) {
       // Knob 2 Turn: Scroll 10-Stunt Catalog
       rcStuntIndex = (rcStuntIndex + d2) % TOTAL_RC_STUNTS;
@@ -1302,13 +1282,11 @@ void loop() {
     }
   }
 
-  // --- 3. KNOB 1 SWITCH (GPIO 10 - ACTIVE LOW: 500ms HOLD FOR MODE SELECTOR) ---
+  // --- 3. KNOB 1 SWITCH (GPIO 10 - ACTIVE LOW: DIRECT MODE CYCLE) ---
   int k1SwRaw = digitalRead(PIN_K1_SW);
   static int lastK1SwRaw = HIGH;
   static unsigned long lastK1SwDebounce = 0;
   static bool k1SwPressed = false;
-  static unsigned long k1SwPressStart = 0;
-  static bool k1SwHeld500ms = false;
 
   if (k1SwRaw != lastK1SwRaw) {
     lastK1SwDebounce = now;
@@ -1317,101 +1295,48 @@ void loop() {
   if (now - lastK1SwDebounce > 25) {
     if (k1SwRaw == LOW && !k1SwPressed) {
       k1SwPressed = true;
-      k1SwPressStart = now;
-      k1SwHeld500ms = false;
       lastUserActivity = now;
-      triggerLedBlip(0, 80, 40); // Emerald Green
 
-      // If in Mode Select Menu, CONFIRM IMMEDIATELY on press!
-      if (currentState == STATE_MODE_SELECT_MENU) {
-        SystemState targetState = SYSTEM_MODES[currentModeMenuIndex].state;
-        Serial.printf("\n[MODE SELECT] 🟢 Confirmed Mode via Knob 1 Click: %s\n", SYSTEM_MODES[currentModeMenuIndex].name);
-        currentState = targetState;
-        updateStatusLED();
-        if (currentState == STATE_REMOTE_CONTROL) {
-          renderRemoteControlMenu();
-        } else if (currentState == STATE_JOINT_CONTROL) {
-          renderJointControlMenu();
-        } else {
-          renderActionMenu();
-        }
-      }
-    } else if (k1SwRaw == LOW && k1SwPressed) {
-      lastUserActivity = now;
-      if (!k1SwHeld500ms && (now - k1SwPressStart >= 500)) {
-        k1SwHeld500ms = true;
-        Serial.println("\n[SYSTEM] 🎯 500ms Knob 1 Hold Confirmed! Opening Mode Selector Menu...");
-        triggerLedBlip(80, 0, 120); // Bright Purple Cue
+      if (currentState == STATE_ACTION_MENU) {
+        // Mode 1 -> Mode 2 (Remote Control)
+        Serial.println("\n[MODE CYCLE] ➡️ Switched to Mode 2: Remote Control (RC)");
         stopRcMotionImmediate();
         sendLocomotionStop();
-        previousOperationalState = (currentState == STATE_MODE_SELECT_MENU) ? STATE_ACTION_MENU : currentState;
-        currentState = STATE_MODE_SELECT_MENU;
-        currentModeMenuIndex = (previousOperationalState == STATE_REMOTE_CONTROL) ? 1 :
-                               ((previousOperationalState == STATE_JOINT_CONTROL) ? 2 : 0);
+        currentState = STATE_REMOTE_CONTROL;
+        triggerLedBlip(0, 100, 100); // Vivid Teal
         updateStatusLED();
-        renderModeSelectMenu();
+        renderRemoteControlMenu();
+      } else if (currentState == STATE_REMOTE_CONTROL) {
+        // Mode 2 -> Mode 3 (Joint Control)
+        Serial.println("\n[MODE CYCLE] ➡️ Switched to Mode 3: Joint Control");
+        stopRcMotionImmediate();
+        sendLocomotionStop();
+        currentState = STATE_JOINT_CONTROL;
+        triggerLedBlip(0, 60, 120); // Vivid Cyan/Purple
+        updateStatusLED();
+        renderJointControlMenu();
+      } else if (currentState == STATE_JOINT_CONTROL) {
+        // Mode 3 -> Mode 1 (Block Coding)
+        Serial.println("\n[MODE CYCLE] ➡️ Switched to Mode 1: Block Coding & Dock");
+        stopRcMotionImmediate();
+        sendLocomotionStop();
+        currentState = STATE_ACTION_MENU;
+        triggerLedBlip(0, 80, 40); // Emerald Green
+        updateStatusLED();
+        renderActionMenu();
+      } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
+        pairedMAC  = bleList[currentBleIndex].address;
+        pairedName = bleList[currentBleIndex].name;
+        preferences.putString("paired_mac", pairedMAC);
+        preferences.putString("paired_name", pairedName);
+        currentState = STATE_ACTION_MENU;
+        connectAttemptCounter = 0;
+        renderActionMenu();
+        requestBgReconnect = true;
       }
     } else if (k1SwRaw == HIGH && k1SwPressed) {
       k1SwPressed = false;
       lastUserActivity = now;
-      unsigned long heldDuration = now - k1SwPressStart;
-      if (!k1SwHeld500ms && heldDuration >= 20 && heldDuration < 500) {
-        if (currentState == STATE_ACTION_MENU) {
-          if (isBlockDocked) {
-            RobosenAction& act = ACTIONS[currentActionIndex];
-            Serial.printf("\n>>> [CONFIG DOCK] Flashing '%s' (%d %s) into docked Action Block... <<<\n",
-                          act.name, act.paramVal, act.paramUnit);
-            writeConfigToDockedBlock(act.tokenID, (uint8_t)act.paramVal);
-            triggerLedBlip(0, 80, 40);
-          } else {
-            Serial.printf("\n>>> [KNOB 1 CLICK] Selected Action: %s <<<\n", ACTIONS[currentActionIndex].name);
-            if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
-              Serial.println("[BLE STATUS] ⚡ Knob clicked while disconnected: Triggering background reconnect...");
-              requestBgReconnect = true;
-              setUiEventFeedback("CONNECTING...");
-            } else {
-              triggerLedBlip(0, 60, 30);
-              setUiEventFeedback("K1 CLICK: ACTION SELECTED");
-            }
-          }
-        } else if (currentState == STATE_REMOTE_CONTROL) {
-          if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
-            Serial.println("[BLE STATUS] ⚡ Knob clicked while disconnected in RC Mode: Triggering background reconnect...");
-            requestBgReconnect = true;
-            setUiEventFeedback("CONNECTING...");
-          } else {
-            // Short-click in RC Mode: 2-Way Gear Toggle (DRIVE <-> STRAFE)
-            currentRcGear = (currentRcGear == RC_GEAR_DRIVE) ? RC_GEAR_STRAFE : RC_GEAR_DRIVE;
-            const char* gearName = (currentRcGear == RC_GEAR_DRIVE) ? "DRIVE [TURN]" : "STRAFE [SIDE-STEP]";
-            Serial.printf("\n>>> [RC GEAR TOGGLE] Mode: %s <<<\n", gearName);
-            triggerLedBlip(0, 80, 80);
-            requestEInkCenterUpdate();
-          }
-        } else if (currentState == STATE_JOINT_CONTROL) {
-          if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
-            Serial.println("[BLE STATUS] ⚡ Knob clicked while disconnected in Joint Mode: Triggering background reconnect...");
-            requestBgReconnect = true;
-            setUiEventFeedback("CONNECTING...");
-          } else {
-            sendJointFrameNonBlocking(25);
-            triggerLedBlip(0, 80, 40);
-            const JointDef& j = ALL_JOINTS[currentJointIndex];
-            Serial.printf("\n>>> [JOINT] Sent/Confirmed angle for %s (ID %d: %d deg) <<<\n",
-                          j.name, j.servoId, currentServoPositions[j.servoId]);
-            updateStatusLED();
-            requestEInkCenterUpdate();
-          }
-        } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
-          pairedMAC  = bleList[currentBleIndex].address;
-          pairedName = bleList[currentBleIndex].name;
-          preferences.putString("paired_mac", pairedMAC);
-          preferences.putString("paired_name", pairedName);
-          currentState = STATE_ACTION_MENU;
-          connectAttemptCounter = 0;
-          renderActionMenu();
-          requestBgReconnect = true;
-        }
-      }
     }
   }
 
@@ -1434,21 +1359,6 @@ void loop() {
       k2SwHeld1500ms = false;
       lastUserActivity = now;
       triggerLedBlip(80, 0, 80); // Magenta
-
-      // If in Mode Select Menu, CONFIRM IMMEDIATELY on press!
-      if (currentState == STATE_MODE_SELECT_MENU) {
-        SystemState targetState = SYSTEM_MODES[currentModeMenuIndex].state;
-        Serial.printf("\n[MODE SELECT] 🟢 Confirmed Mode via Knob 2 Click: %s\n", SYSTEM_MODES[currentModeMenuIndex].name);
-        currentState = targetState;
-        updateStatusLED();
-        if (currentState == STATE_REMOTE_CONTROL) {
-          renderRemoteControlMenu();
-        } else if (currentState == STATE_JOINT_CONTROL) {
-          renderJointControlMenu();
-        } else {
-          renderActionMenu();
-        }
-      }
     } else if (k2SwRaw == LOW && k2SwPressed) {
       lastUserActivity = now;
       if (!k2SwHeld1500ms && (now - k2SwPressStart >= 1500)) {
@@ -1462,25 +1372,13 @@ void loop() {
       k2SwPressed = false;
       lastUserActivity = now;
       unsigned long heldDuration = now - k2SwPressStart;
-      if (!k2SwHeld1500ms && heldDuration >= 30 && heldDuration < 1500) {
+      if (!k2SwHeld1500ms && heldDuration >= 20 && heldDuration < 1500) {
         if (currentState == STATE_ACTION_MENU) {
           RobosenAction& act = ACTIONS[currentActionIndex];
           act.paramVal = act.paramMin;
           Serial.printf("\n>>> [KNOB 2 CLICK] Reset %s Parameter to %d %s <<<\n", 
                         act.name, act.paramVal, act.paramUnit);
           setUiEventFeedback("K2 CLICK: PARAM RESET");
-        } else if (currentState == STATE_MODE_SELECT_MENU) {
-          SystemState targetState = SYSTEM_MODES[currentModeMenuIndex].state;
-          Serial.printf("\n[MODE SELECT] 🟢 Selected Mode: %s\n", SYSTEM_MODES[currentModeMenuIndex].name);
-          currentState = targetState;
-          updateStatusLED();
-          if (currentState == STATE_REMOTE_CONTROL) {
-            renderRemoteControlMenu();
-          } else if (currentState == STATE_JOINT_CONTROL) {
-            renderJointControlMenu();
-          } else {
-            renderActionMenu();
-          }
         } else if (currentState == STATE_REMOTE_CONTROL) {
           // Fire Selected Stunt Instantly
           if (currentRcMotion != RC_MOTION_IDLE && currentRcMotion != RC_MOTION_STUNT) {
@@ -1497,17 +1395,6 @@ void loop() {
         } else if (currentState == STATE_JOINT_CONTROL) {
           // Reset active joint to neutral center (0°)
           resetActiveJointToCenter();
-        } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
-          pairedMAC  = bleList[currentBleIndex].address;
-          pairedName = bleList[currentBleIndex].name;
-          preferences.putString("paired_mac", pairedMAC);
-          preferences.putString("paired_name", pairedName);
-          setStatusLED(0, 50, 0);
-          currentState = STATE_ACTION_MENU;
-          connectAttemptCounter = 0;
-          renderActionMenu();
-          connectToRobot();
-          lastConnectAttemptTime = millis();
         }
       }
     }
@@ -1533,21 +1420,7 @@ void loop() {
       startBtnHeld3s = false;
       lastUserActivity = now;
       triggerLedBlip(0, 100, 0); // Green
-
-      // If in Mode Select Menu, CONFIRM IMMEDIATELY on press!
-      if (currentState == STATE_MODE_SELECT_MENU) {
-        SystemState targetState = SYSTEM_MODES[currentModeMenuIndex].state;
-        Serial.printf("\n[MODE SELECT] 🟢 Confirmed Mode via Green Button: %s\n", SYSTEM_MODES[currentModeMenuIndex].name);
-        currentState = targetState;
-        updateStatusLED();
-        if (currentState == STATE_REMOTE_CONTROL) {
-          renderRemoteControlMenu();
-        } else if (currentState == STATE_JOINT_CONTROL) {
-          renderJointControlMenu();
-        } else {
-          renderActionMenu();
-        }
-      } else if (currentState != STATE_REMOTE_CONTROL) {
+      if (currentState != STATE_REMOTE_CONTROL) {
         Serial.println("\n[BUTTON] Start button pressed... (Hold 3s to switch robot)");
       }
     } else if (startRaw == LOW && startBtnPressed) {
@@ -1565,13 +1438,21 @@ void loop() {
       unsigned long heldDuration = now - startPressStart;
       if (!startBtnHeld3s && heldDuration >= 20 && heldDuration < 3000) {
         if (currentState == STATE_ACTION_MENU) {
-          Serial.println("\n[SYSTEM] Start button clicked: Initiating Run Chain (GPIO 15/16)...");
-          if (!executeRunChain()) {
-            Serial.println("\n[SYSTEM] ⚠️ Chain execution aborted: No valid return packet received from return rail!");
-            setStatusLED(50, 0, 0);
-            delay(500);
-            updateStatusLED();
-            setUiEventFeedback("START: NO CHAIN BLOCKS!");
+          if (isBlockDocked) {
+            RobosenAction& act = ACTIONS[currentActionIndex];
+            Serial.printf("\n>>> [CONFIG DOCK] Flashing '%s' (%d %s) into docked Action Block via Green Button... <<<\n",
+                          act.name, act.paramVal, act.paramUnit);
+            writeConfigToDockedBlock(act.tokenID, (uint8_t)act.paramVal);
+            triggerLedBlip(0, 80, 40);
+          } else {
+            Serial.println("\n[SYSTEM] Start button clicked: Initiating Run Chain (GPIO 15/16)...");
+            if (!executeRunChain()) {
+              Serial.println("\n[SYSTEM] ⚠️ Chain execution aborted: No valid return packet received from return rail!");
+              setStatusLED(50, 0, 0);
+              delay(500);
+              updateStatusLED();
+              setUiEventFeedback("START: NO CHAIN BLOCKS!");
+            }
           }
         } else if (currentState == STATE_REMOTE_CONTROL) {
           if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
@@ -1633,25 +1514,12 @@ void loop() {
       stopBtnHeld3s = false;
       lastUserActivity = now;
       triggerLedBlip(100, 0, 0); // Red
-
-      // If in Mode Select Menu, CANCEL IMMEDIATELY on press!
-      if (currentState == STATE_MODE_SELECT_MENU) {
-        Serial.println("\n[CANCEL] Cancelled mode select via Red Button, returning to previous mode.");
-        currentState = previousOperationalState;
-        updateStatusLED();
-        if (currentState == STATE_REMOTE_CONTROL) {
-          renderRemoteControlMenu();
-        } else if (currentState == STATE_JOINT_CONTROL) {
-          renderJointControlMenu();
-        } else {
-          renderActionMenu();
-        }
-      } else if (currentState != STATE_REMOTE_CONTROL) {
+      if (currentState != STATE_REMOTE_CONTROL) {
         Serial.println("\n[BUTTON] Red Stop/Cancel button pressed... (Hold 3s to disconnect BLE)");
       }
     } else if (stopRaw == LOW && stopBtnPressed) {
       lastUserActivity = now;
-      if (currentState != STATE_REMOTE_CONTROL && currentState != STATE_MODE_SELECT_MENU) {
+      if (currentState != STATE_REMOTE_CONTROL) {
         if (!stopBtnHeld3s && (now - stopPressStart >= 3000)) {
           stopBtnHeld3s = true;
           Serial.println("\n[SYSTEM] 🎯 3-Second Stop Hold Confirmed! Disconnecting BLE session...");
@@ -2438,12 +2306,13 @@ void renderActionMenu() {
     Serial.println(line);
   }
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
+  Serial.println("║ • Knob 1 Twist: Select Action Block   • Knob 2 Twist: Adjust Parameter ║");
+  Serial.println("║ • Knob 1 Click: Cycle Mode -> Mode 2 (RC)                              ║");
   if (isBlockDocked) {
-    Serial.println("║ • Knob 1: Select | Click: Burn Config • Knob 2: Adjust Parameter Value ║");
+    Serial.println("║ • Start Click : Flash Config into Docked Block                         ║");
   } else {
-    Serial.println("║ • Knob 1: Select Action (Click: Retry)• Knob 2: Adjust Parameter Value ║");
+    Serial.println("║ • Start Click : Run Chain Sequence    • Hold Start: BLE Pairing (3s)   ║");
   }
-  Serial.println("║ • Start Click: Run Chain Sequence     • Hold Start: BLE Pairing (3s)   ║");
   Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
 
   // Render to 2.13" E-Paper Display
@@ -2501,7 +2370,7 @@ void renderModeSelectMenu() {
 void renderRemoteControlMenu() {
   Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
   Serial.println("║              ROBOSEN K1 LIVE REMOTE CONTROL (HANDHELD RC)              ║");
-  const char* gearStr = (currentRcGear == RC_GEAR_DRIVE) ? "DRIVE [TURN]" : "STRAFE [SIDE-STEP]";
+  const char* gearStr = "DRIVE [STEER]";
   if (isConnected && hasRobotBattery && robotBatteryPercent >= 0) {
     Serial.printf("║ Active Mode: %-26s Target: %s (Bat: %d%%) ║\n", gearStr, pairedName.c_str(), robotBatteryPercent);
   } else {
@@ -2514,11 +2383,10 @@ void renderRemoteControlMenu() {
   Serial.println("║ • Red Button (Hold)   : Walk BACKWARD (0x05) (Dedicated Reverse Pedal) ║");
   Serial.println("║ • Release Button      : Instant Stop & Lock Standing Posture           ║");
   Serial.println("║ • Both Buttons (Hold) : Priority Emergency Safety Halt (0x0C)          ║");
-  Serial.println("║ • Knob 1 Short-Click  : Toggle Gear Mode: [ DRIVE ] <-> [ STRAFE ]     ║");
-  Serial.println("║ • Knob 1 Twist        : Steering Turn (DRIVE) or Side-Step (STRAFE)    ║");
+  Serial.println("║ • Knob 1 Short-Click  : Direct Mode Cycle -> Mode 3 (Joints)           ║");
+  Serial.println("║ • Knob 1 Twist        : Steering Turn (Turn Left / Right)              ║");
   Serial.println("║ • Knob 2 Twist        : Scroll 10-Stunt Catalog                        ║");
   Serial.println("║ • Knob 2 Short-Click  : Fire Selected Stunt Instantly (1 Repetition)   ║");
-  Serial.println("║ • Knob 1 Hold (1.5s)  : Return to Universal Mode Selector Menu         ║");
   Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
   updateEInkRemoteControl();
 }
@@ -2541,11 +2409,11 @@ void renderJointControlMenu() {
                 rawVal, degOffset, j.minLimit, j.maxLimit);
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
   Serial.println("║ • Knob 1: Direct Joint Cycle (All 17 Joints)                           ║");
+  Serial.println("║ • Knob 1 Short-Click: Direct Mode Cycle -> Mode 1 (Blocks)             ║");
   Serial.println("║ • Knob 2: +/- 5 deg Direct Angle Adjust                                ║");
   Serial.println("║ • K2 Click: Reset Active Joint to Neutral (0°)                         ║");
   Serial.println("║ • K2 Hold (1.5s): Reset ALL 17 Servos to Standing Posture              ║");
   Serial.println("║ • Red Stop: Emergency Locomotion Stop                                  ║");
-  Serial.println("║ • Knob 1 Hold (1.5s): Return to Universal Mode Selector Menu           ║");
   Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
   updateEInkJointControl();
 }
@@ -2953,8 +2821,8 @@ void drawRemoteControlToBuffer(bool invertMiddle) {
     display.fillRect(2, 24, w - 4, 96, GxEPD_BLACK);
   }
 
-  // Left Column: Active Gear 48x48 Icon (Steering Wheel or Strafe arrows)
-  drawBitmap2x(24, 44, getGearIcon(currentRcGear), 24, 24, midFg);
+  // Left Column: Steering Wheel 48x48 Icon
+  drawBitmap2x(24, 44, getGearIcon(RC_GEAR_DRIVE), 24, 24, midFg);
 
   // Vertical Divider
   display.drawFastVLine(100, 36, 68, midFg);

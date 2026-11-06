@@ -13,10 +13,12 @@
 
 The Master Block firmware serves as the tangible programming and interactive control hub for the Robosen K1 humanoid robot:
 1. **Interactive 4-Input Control Surface with Unified Navigation**:
-   - **Universal Confirm / Go**: **Green Start Button (`SW3` - GPIO 14)** or **Knob 1 Click (`SW1` - GPIO 10)** universally executes, enters menus, confirms selections, or triggers run chains.
-   - **Universal Back / Halt**: **Red Stop Button (`SW5` - GPIO 2)** universally halts motion, backs out of sub-menus (Level 2 $\to$ Level 1), cancels configurations, or cleanly disconnects BLE session (3s hold).
-   - **Knob 1 (Encoder SW1)**: Cycles through actions, body groups, or menu options. Hold 1.5s from any mode to open the Universal Mode Switcher.
-   - **Knob 2 (Encoder SW2)**: Fine parameter adjust, stunt selection, or live real-time joint degree articulation.
+   - **Direct Mode Cycling**: **Knob 1 Click (`SW1` - GPIO 10)** directly cycles through all modes sequentially with zero hold latency:
+     $$\text{Mode 1 (Block Coding)} \longrightarrow \text{Mode 2 (RC Mode)} \longrightarrow \text{Mode 3 (Joint Control)} \longrightarrow \text{Mode 1}$$
+   - **Universal Confirm / Go**: **Green Start Button (`SW3` - GPIO 14)** in Mode 1 flashes configuration into the docked block (if docked) or executes the physical block chain sequence (if undocked). In Mode 2/3 when disconnected, initiates background BLE reconnection.
+   - **Universal Back / Halt**: **Red Stop Button (`SW5` - GPIO 2)** universally halts motion, dismisses docked configuration, or cleanly disconnects BLE session (3s hold).
+   - **Knob 1 (Encoder SW1)**: Cycles through actions (Mode 1), steers robot turning (Mode 2), or scrolls joints (Mode 3). Single-click cycles modes directly.
+   - **Knob 2 (Encoder SW2)**: Fine parameter adjust (Mode 1), stunt selection & execution (Mode 2), or live real-time joint degree articulation (Mode 3).
 2. **3 Operational Modes**:
    - **Mode 1 (`STATE_ACTION_MENU`)**: Tangible Block Coding & Flash Config Dock.
    - **Mode 2 (`STATE_REMOTE_CONTROL`)**: Live Handheld RC Steering, 3-Gear Drive, and 10-Stunt Catalog.
@@ -92,25 +94,27 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
    - **Mode 3 (Joint Control)**: 48×48 Anatomy Icon (Head, Arms, Legs) + Short Joint Name (e.g. `Shoulder`, `Elbow`) + Big Degree Readout (`+15°`) + 222px wide slider gauge.
    - **Mode Selector Carousel**: 3 side-by-side $64\times 64\text{ px}$ mode cards (`[ 🧱 Blocks ]`, `[ 🎮 RC ]`, `[ 🤖 Joints ]`) with an inverted solid-black highlight for the active selection.
 
-### 3.3 Scalable Multi-Mode Switcher & Remote Control (RC) Mode
+### 3.3 Direct Single-Click Mode Cycling & Remote Control (RC) Mode
 
-1. **Universal Multi-Mode Switcher (`STATE_MODE_SELECT_MENU`)**:
-   - Holding **Knob 1 Switch (`SW1`, `GPIO 10`) for 500ms** from any mode immediately halts motion, flashes a bright purple LED tactile cue, and opens the **Mode Selector Menu** on the 2.13" E-Paper display.
-   - Scalable 3-mode architecture without button conflicts:
-     - `01: Block Coding & Dock`
-     - `02: Remote Control (RC)`
-     - `03: Joint Control Mode`
-   - Turn Knob 1 or Knob 2 to scroll with fast 280ms carousel updates; press Green Start (`SW3`), click Knob 1, or click Knob 2 to enter immediately on press-down; press Red Stop (`SW5`) to cancel.
+1. **Direct Single-Click Mode Cycling (Zero Freezing / 0ms Latency)**:
+   - Single-clicking **Knob 1 Switch (`SW1`, `GPIO 10`)** from any mode immediately stops locomotion and transitions instantly to the next mode in the cycle:
+     $$\text{Mode 1 (Block Coding)} \longrightarrow \text{Mode 2 (RC Mode)} \longrightarrow \text{Mode 3 (Joint Control)} \longrightarrow \text{Mode 1}$$
+   - Completely eliminates hold delays and blocking BLE scans from the UI thread (`loop()`), preventing freezes.
+   - All mode transitions use the fast 280ms symmetric E-Ink LUT (`LUT_FAST_280MS`) for crisp, instant visual updates.
+   - Distinct WS2812 RGB LED color blips confirm mode transitions:
+     - Emerald Green: Mode 1 (Block Coding)
+     - Vivid Teal: Mode 2 (Remote Control)
+     - Cyan / Purple: Mode 3 (Joint Control)
 
 2. **Live Handheld Remote Control (RC) Mode (`STATE_REMOTE_CONTROL`)**:
    - **Green Button (`SW3`)**: Hold-to-Walk Forward ("Gas Pedal" / Dead-Man Switch). Holding walks forward continuously (`0x01`); releasing immediately sends `0x0C` stop.
    - **Red Button (`SW5`)**: Dedicated Hold-to-Walk Backward ("Reverse Pedal"). Holding walks backward continuously (`0x05`); releasing immediately sends `0x0C` stop. Disconnect hold is bypassed in RC mode so reverse can run indefinitely.
    - **Both Buttons Held**: Priority emergency safety halt (`0x0C`).
-   - **Knob 1 Short Click**: 2-way gear toggle: `[ DRIVE ]` (rotational steering) $\longleftrightarrow$ `[ STRAFE ]` (lateral translation).
-   - **Knob 1 Twist**: Smooth momentum steering (Turn Left `0x08` / Turn Right `0x02` in DRIVE mode; Side-step Left `0x07` / Right `0x03` in STRAFE mode). Automatically resumes Forward or Backward walking when twist ends depending on which pedal is held.
+   - **Knob 1 Short Click**: Direct Mode Cycle $\longrightarrow$ Mode 3 (Joint Control).
+   - **Knob 1 Twist**: Pure Drive Steering (Turn Left `0x08` / Turn Right `0x02`). Automatically resumes Forward or Backward walking when twist ends depending on which pedal is held.
    - **Knob 2 Twist**: Scroll through full 10-stunt catalog (`Left/Right Punch`, `Kick`, `Wave`, `Celebrate`, `Kung Fu`, `Push-ups`, `Squats`, `Handstand`, `Dance`).
    - **Knob 2 Short Click**: Instantly fires selected stunt (1 repetition) with non-blocking BLE dispatch.
-   - **WS2812 RGB LED Telemetry**: Instant 0ms status feedback (Soft Teal = RC Idle, Vivid Green = Walk Fwd, Amber = Walk Rev, Electric Blue = Steer/Strafe, Magenta = Stunt, Red = Stop).
+   - **WS2812 RGB LED Telemetry**: Instant 0ms status feedback (Soft Teal = RC Idle, Vivid Green = Walk Fwd, Amber = Walk Rev, Electric Blue = Steer, Magenta = Stunt, Red = Stop).
    - **Port Isolation**: Config Dock polling is paused during RC Mode for maximum loop responsiveness and battery conservation.
 
 ### 3.4 Streamlined Flat 17-Joint Controller (`STATE_JOINT_CONTROL`)
@@ -141,9 +145,10 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
 - [x] Verified Red Button long press (3s) triggers clean BLE disconnect.
 - [x] Verified `analogReadMilliVolts(PIN_BATSENSE)` with 1:1 voltage divider.
 - [x] Verified E-Paper display renders battery meter and updated 4-input UI hints.
-- [x] Verified Multi-Mode Switcher (`STATE_MODE_SELECT_MENU`) via 1.5s Knob 1 hold.
-- [x] Verified Remote Control Mode (`STATE_REMOTE_CONTROL`) with hold-to-walk, 3-gear selector, momentum steering, and 10-stunt catalog.
-- [x] Verified Joint Control Mode (`STATE_JOINT_CONTROL`) with 5 groups, 17 servos, Level 1 $\longleftrightarrow$ Level 2 navigation, Opcode `0xE8` streaming, slider gauge, and zero/standing resets.
-- [x] Verified Unified Button Navigation (`Green = Confirm/Enter/Go`, `Red = Back/Cancel/Stop`) across all 3 modes and menus.
-- [x] Verified Robosen K1 live battery percentage monitoring via Opcode `0x0F` notifications and E-Paper header badge `[K1: XX%]`.
-- [x] Successfully compiled using Arduino CLI for `esp32:esp32:esp32s3` (Zero warnings/errors).
+- [x] Verified Direct Single-Click Mode Cycling via Knob 1 (`SW1`) with zero latency and non-blocking BLE.
+- [x] Verified Green Start Button (`SW3`) flashes docked block configuration in Mode 1 when docked, or initiates run chain when undocked.
+- [x] Verified Remote Control Mode (`STATE_REMOTE_CONTROL`) with hold-to-walk forward/reverse, pure drive steering, and 10-stunt catalog.
+- [x] Verified Joint Control Mode (`STATE_JOINT_CONTROL`) with flat 17-servo sequence, Opcode `0xE8` streaming, slider gauge, and zero/standing resets.
+- [x] Verified background Core 0 BLE reconnection eliminating UI stalls and freezes.
+- [x] Verified Robosen K1 live battery percentage monitoring via Opcode `0x0F` notifications and E-Paper header badge.
+- [x] Successfully compiled using Arduino CLI for `esp32:esp32:esp32s3` and flashed to hardware (Zero warnings/errors).
