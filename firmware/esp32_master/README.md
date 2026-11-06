@@ -97,10 +97,11 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
 ### 3.3 Direct Single-Click Mode Cycling & Remote Control (RC) Mode
 
 1. **Direct Single-Click Mode Cycling (Zero Freezing / 0ms Latency)**:
-   - Single-clicking **Knob 1 Switch (`SW1`, `GPIO 10`)** from any mode immediately stops locomotion and transitions instantly to the next mode in the cycle:
+   - Single-clicking **Knob 1 Switch (`SW1`, `GPIO 10`)** from any mode immediately transitions to the next mode in the cycle with 0ms latency:
      $$\text{Mode 1 (Block Coding)} \longrightarrow \text{Mode 2 (RC Mode)} \longrightarrow \text{Mode 3 (Joint Control)} \longrightarrow \text{Mode 1}$$
-   - Completely eliminates hold delays and blocking BLE scans from the UI thread (`loop()`), preventing freezes.
-   - All mode transitions use the fast 280ms symmetric E-Ink LUT (`LUT_FAST_280MS`) for crisp, instant visual updates.
+   - **Zero-Timeout Non-Blocking USB CDC**: `Serial.setTxTimeoutMs(0)` eliminates the 2-second hardware transmit stall that occurred when USB serial ring buffers filled up without an active host monitor.
+   - **Zero Redundant BLE Stop Packets**: Mode transitions from Mode 1 or Mode 3 dispatch 0 BLE packets. Leaving Mode 2 only dispatches a locomotion stop if the robot was actively walking forward/backward (`currentRcMotion != RC_MOTION_IDLE`).
+   - All mode transitions use the fast 280ms symmetric E-Ink LUT (`LUT_FAST_280MS`) for crisp visual updates without blocking inputs.
    - Distinct WS2812 RGB LED color blips confirm mode transitions:
      - Emerald Green: Mode 1 (Block Coding)
      - Vivid Teal: Mode 2 (Remote Control)

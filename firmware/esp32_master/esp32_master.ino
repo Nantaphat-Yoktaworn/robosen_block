@@ -1071,6 +1071,7 @@ void pollConfigDock() {
 // ==============================================================================
 void setup() {
   Serial.begin(115200);
+  Serial.setTxTimeoutMs(0); // Non-blocking USB CDC: 0ms timeout prevents loop freeze when USB CDC buffer fills
   delay(1500);
 
   // Initialize Config Dock UART (Serial1 on Pins 18 RX, 17 TX @ 115200)
@@ -1298,28 +1299,25 @@ void loop() {
       lastUserActivity = now;
 
       if (currentState == STATE_ACTION_MENU) {
-        // Mode 1 -> Mode 2 (Remote Control)
-        Serial.println("\n[MODE CYCLE] ➡️ Switched to Mode 2: Remote Control (RC)");
-        stopRcMotionImmediate();
-        sendLocomotionStop();
+        // Mode 1 -> Mode 2 (Remote Control) — Instantaneous switch, zero blocking BLE calls
+        Serial.println("\n[MODE] ➡️ Switched to Mode 2: Remote Control (RC)");
         currentState = STATE_REMOTE_CONTROL;
         triggerLedBlip(0, 100, 100); // Vivid Teal
         updateStatusLED();
         renderRemoteControlMenu();
       } else if (currentState == STATE_REMOTE_CONTROL) {
-        // Mode 2 -> Mode 3 (Joint Control)
-        Serial.println("\n[MODE CYCLE] ➡️ Switched to Mode 3: Joint Control");
-        stopRcMotionImmediate();
-        sendLocomotionStop();
+        // Mode 2 -> Mode 3 (Joint Control) — Only stop if robot was actively walking
+        Serial.println("\n[MODE] ➡️ Switched to Mode 3: Joint Control");
+        if (currentRcMotion != RC_MOTION_IDLE) {
+          stopRcMotionImmediate();
+        }
         currentState = STATE_JOINT_CONTROL;
         triggerLedBlip(0, 60, 120); // Vivid Cyan/Purple
         updateStatusLED();
         renderJointControlMenu();
       } else if (currentState == STATE_JOINT_CONTROL) {
-        // Mode 3 -> Mode 1 (Block Coding)
-        Serial.println("\n[MODE CYCLE] ➡️ Switched to Mode 1: Block Coding & Dock");
-        stopRcMotionImmediate();
-        sendLocomotionStop();
+        // Mode 3 -> Mode 1 (Block Coding) — Instantaneous switch, zero blocking BLE calls
+        Serial.println("\n[MODE] ➡️ Switched to Mode 1: Block Coding & Dock");
         currentState = STATE_ACTION_MENU;
         triggerLedBlip(0, 80, 40); // Emerald Green
         updateStatusLED();
