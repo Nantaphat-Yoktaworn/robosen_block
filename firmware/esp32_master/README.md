@@ -81,18 +81,24 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
 3. **Clean Disconnect**:
    - Long-pressing `BTN_STOP` for 3 seconds cleanly disconnects the active BLE session.
 
-### 3.2 Ultra-Minimal UI, Connected Robot Header & Dual Battery
+### 3.2 Calibrated Bezel Viewport & Minimal UI (210×122 Visible Area)
 
-1. **Connected Robot Status Header (Top Bar Across All Modes)**:
-   - **Left Status**: Displays actual connected robot name (e.g. `K1` or `K1 Interstellar`) when paired & connected. Displays `SEARCHING...` while auto-reconnecting, or `DISCONNECTED` when offline.
-   - **Right Battery Cells**: Exact master block firmware battery style ($20\times 10\text{ px}$ cell outline with $2\times 6\text{ px}$ terminal tip) for both Robot Cell `[R]` (0-100% fill + text, or `--`) and Master Block Cell `[M]` (3.20V-4.20V Li-ion curve).
+1. **Calibrated 3D Enclosure Viewport Alignment**:
+   - The hardware enclosure clips the leftmost 40 pixels of the 2.13" display ($x=0..39$).
+   - The active visible area is defined as:
+     - `SCREEN_VISIBLE_X_MIN = 40`, `SCREEN_VISIBLE_X_MAX = 249` (Width: 210 px)
+     - `SCREEN_VISIBLE_Y_MIN = 0`, `SCREEN_VISIBLE_Y_MAX = 121` (Height: 122 px)
+   - A 1px border box frames the active viewport at $(40, 0, 210, 122)$.
 
-2. **Ultra-Minimal Full-Height Canvas (Zero Clutter)**:
-   - **Footer Key Guides Removed**: All bottom key guides, button hints, and divider lines are removed, leaving a clean, distraction-free display surface.
-   - **Mode 1 (Action Select)**: 48×48 chunky pixel-art action icon + Big Bold Number for count or degrees (e.g. `1`, `90°`), dots removed.
-   - **Mode 2 (Remote Control)**: 48×48 Gear Icon (Drive/Strafe) on left, 48×48 Stunt Icon with catalog number (`#01`..`#10`) on right.
-   - **Mode 3 (Joint Control)**: 48×48 Anatomy Icon (Head, Arms, Legs) + Short Joint Name (e.g. `Shoulder`, `Elbow`) + Big Degree Readout (`+15°`) + 222px wide slider gauge.
-   - **Mode Selector Carousel**: 3 side-by-side $64\times 64\text{ px}$ mode cards (`[ 🧱 Blocks ]`, `[ 🎮 RC ]`, `[ 🤖 Joints ]`) with an inverted solid-black highlight for the active selection.
+2. **Connected Robot Status Header (Top Bar Across All Modes)**:
+   - **Left Status**: Displays actual connected robot name at $x=45$ (truncated to max 8 chars, e.g. `K1-0026` or `K1`). Displays `SEARCH` while auto-reconnecting, or `DISCONN` when offline.
+   - **Right Battery Cells**: Compact dual battery indicators ($20\times 10\text{ px}$ cell outline with $2\times 6\text{ px}$ terminal tip) for Robot Cell `[R]` ($x=126$) and Master Block Cell `[M]` ($x=188$), fitting comfortably inside the right margin ($x \le 245$).
+
+3. **Centered Mode Content (Inside X=[40..249])**:
+   - **Mode 1 (Action Select)**: 48×48 action icon centered in left zone ($x=58$), Big Bold Parameter Number centered in right zone ($x=140$).
+   - **Mode 2 (Remote Control)**: Steering Wheel icon at $x=54$, vertical divider at $x=116$, 48×48 Stunt Icon at $x=126$, Stunt Number `#01`..`#10` at $x=186$.
+   - **Mode 3 (Joint Control)**: 48×48 Anatomy Icon at $x=48$, Joint Name and Degree Offset at $x=106$, Full-width Slider Gauge spanning $x=46..242$ (196px width).
+   - **Fast Partial Window**: Middle updates target `displayWindow(40, 24, 210, 96)` without touching the header.
 
 ### 3.3 Direct Single-Click Mode Cycling & Remote Control (RC) Mode
 

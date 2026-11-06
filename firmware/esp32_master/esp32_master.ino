@@ -57,6 +57,14 @@ GxEPD2_BW<GxEPD2_213_BN, GxEPD2_213_BN::HEIGHT> display(
   GxEPD2_213_BN(PIN_EPD_CS, PIN_EPD_DC, PIN_EPD_RES, PIN_EPD_BUSY)
 );
 
+// --- 2.13" E-PAPER DISPLAY VISIBLE VIEWPORT DEFINITIONS (CALIBRATED FOR 3D BEZEL) ---
+#define SCREEN_VISIBLE_X_MIN    40
+#define SCREEN_VISIBLE_Y_MIN     0
+#define SCREEN_VISIBLE_X_MAX   249
+#define SCREEN_VISIBLE_Y_MAX   121
+#define SCREEN_VISIBLE_WIDTH   210
+#define SCREEN_VISIBLE_HEIGHT  122
+
 // --- ONBOARD WS2812 RGB STATUS LED ---
 #ifndef RGB_BUILTIN
   #define RGB_BUILTIN 48       // ESP32-S3 DevKitC-1 onboard RGB
@@ -2507,25 +2515,25 @@ void drawBitmap2x(int16_t x, int16_t y, const uint8_t *bitmap, int16_t w, int16_
 }
 
 void drawDualBatteryHeader(int16_t w) {
-  // 1. Black header bar (y=2..21, height 20)
-  display.fillRect(2, 2, w - 4, 20, GxEPD_BLACK);
+  // 1. Black header bar (y=2..21, height 20) within visible area (x=41..248)
+  display.fillRect(SCREEN_VISIBLE_X_MIN + 1, 2, SCREEN_VISIBLE_WIDTH - 2, 20, GxEPD_BLACK);
 
-  // 2. Connected Robot Name / Connection Status on left
+  // 2. Connected Robot Name / Connection Status on left (x=45, y=17)
   display.setTextColor(GxEPD_WHITE);
   display.setFont(&FreeSansBold9pt7b);
-  display.setCursor(6, 17);
+  display.setCursor(SCREEN_VISIBLE_X_MIN + 5, 17);
 
   if (isConnected) {
     String rName = pairedName;
     if (rName.length() == 0 || rName == "None") rName = "K1";
-    if (rName.length() > 12) rName = rName.substring(0, 12);
+    if (rName.length() > 8) rName = rName.substring(0, 8); // Max 8 chars to avoid overlap with battery cells
     display.print(rName);
   } else if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
     display.print("UNPAIRED");
   } else if (connectAttemptCounter > 0) {
-    display.print("SEARCHING...");
+    display.print("SEARCH");
   } else {
-    display.print("DISCONNECTED");
+    display.print("DISCONN");
   }
 
   // 3. Dual Battery Gauges (Header Top-Right) in exact Main Firmware 20x10 Outline Style
@@ -2578,9 +2586,8 @@ void drawActionMenuToBuffer(bool invertMiddle = false) {
   int16_t w = display.width();
   int16_t h = display.height();
 
-  // 1. Frame border
-  display.drawRect(0, 0, w, h, GxEPD_BLACK);
-  display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
+  // 1. Frame border around visible window
+  display.drawRect(SCREEN_VISIBLE_X_MIN, SCREEN_VISIBLE_Y_MIN, SCREEN_VISIBLE_WIDTH, SCREEN_VISIBLE_HEIGHT, GxEPD_BLACK);
 
   // 2. Dual Battery Header with Connected Robot Name
   drawDualBatteryHeader(w);
@@ -2588,19 +2595,19 @@ void drawActionMenuToBuffer(bool invertMiddle = false) {
   // 3. Center Action & Parameter Section (y = 24..119, full height)
   uint16_t midFg = invertMiddle ? GxEPD_WHITE : GxEPD_BLACK;
   if (invertMiddle) {
-    display.fillRect(2, 24, w - 4, 96, GxEPD_BLACK);
+    display.fillRect(SCREEN_VISIBLE_X_MIN + 1, 23, SCREEN_VISIBLE_WIDTH - 2, 97, GxEPD_BLACK);
   }
   int actIdx = currentActionIndex;
   if (actIdx < 0 || actIdx >= TOTAL_ACTIONS) actIdx = 0;
   RobosenAction act = ACTIONS[actIdx];
 
-  // 48x48 Action Bitmap (centered vertically at y = 48)
-  drawBitmap2x(24, 48, getActionIcon(actIdx), 24, 24, midFg);
+  // 48x48 Action Bitmap (centered in left half: x=58, y=48)
+  drawBitmap2x(58, 48, getActionIcon(actIdx), 24, 24, midFg);
 
-  // Big Parameter Number (e.g. 1, 2, 90°)
+  // Big Parameter Number (centered in right half: x=140, y=80)
   display.setTextColor(midFg);
   display.setFont(&FreeSansBold18pt7b);
-  display.setCursor(105, 80);
+  display.setCursor(140, 80);
   if (strcmp(act.paramUnit, "Deg°") == 0) {
     display.printf("%d°", act.paramVal);
   } else {
@@ -2614,50 +2621,49 @@ void drawPairingMenuToBuffer() {
   int16_t w = display.width();
   int16_t h = display.height();
 
-  display.drawRect(0, 0, w, h, GxEPD_BLACK);
-  display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
+  display.drawRect(SCREEN_VISIBLE_X_MIN, SCREEN_VISIBLE_Y_MIN, SCREEN_VISIBLE_WIDTH, SCREEN_VISIBLE_HEIGHT, GxEPD_BLACK);
 
-  display.fillRect(2, 2, w - 4, 20, GxEPD_BLACK);
+  display.fillRect(SCREEN_VISIBLE_X_MIN + 1, 2, SCREEN_VISIBLE_WIDTH - 2, 20, GxEPD_BLACK);
   display.setTextColor(GxEPD_WHITE);
   display.setFont(&FreeSansBold9pt7b);
-  display.setCursor(6, 17);
+  display.setCursor(SCREEN_VISIBLE_X_MIN + 5, 17);
   display.print("PAIR ROBOT (BLE)");
 
   display.setFont();
   display.setTextSize(1);
-  display.setCursor(170, 8);
+  display.setCursor(185, 8);
   display.printf("%d FOUND", bleDeviceCount);
 
   display.setTextColor(GxEPD_BLACK);
   if (bleDeviceCount == 0) {
-    display.setCursor(14, 46);
+    display.setCursor(SCREEN_VISIBLE_X_MIN + 10, 46);
     display.print("No K1 robots found in range.");
-    display.setCursor(14, 62);
+    display.setCursor(SCREEN_VISIBLE_X_MIN + 10, 62);
     display.print("Ensure robot is powered ON.");
   } else {
     int startIdx = (currentBleIndex / 3) * 3;
     int yPos = 32;
     for (int i = startIdx; i < bleDeviceCount && i < startIdx + 3; i++) {
       if (i == currentBleIndex) {
-        display.fillRect(4, yPos - 2, w - 8, 15, GxEPD_BLACK);
+        display.fillRect(SCREEN_VISIBLE_X_MIN + 2, yPos - 2, SCREEN_VISIBLE_WIDTH - 4, 15, GxEPD_BLACK);
         display.setTextColor(GxEPD_WHITE);
-        display.setCursor(8, yPos);
+        display.setCursor(SCREEN_VISIBLE_X_MIN + 6, yPos);
         display.printf("> %-16s %3ddBm", bleList[i].name.substring(0, 16).c_str(), bleList[i].rssi);
       } else {
         display.setTextColor(GxEPD_BLACK);
-        display.setCursor(8, yPos);
+        display.setCursor(SCREEN_VISIBLE_X_MIN + 6, yPos);
         display.printf("  %-16s %3ddBm", bleList[i].name.substring(0, 16).c_str(), bleList[i].rssi);
       }
       yPos += 16;
     }
   }
 
-  display.drawLine(2, 92, w - 3, 92, GxEPD_BLACK);
+  display.drawLine(SCREEN_VISIBLE_X_MIN + 2, 92, SCREEN_VISIBLE_X_MAX - 2, 92, GxEPD_BLACK);
   display.setTextColor(GxEPD_BLACK);
   display.setFont();
-  display.setCursor(8, 98);
-  display.print("Knob: Select  |  Start/Click: Confirm");
-  display.setCursor(8, 110);
+  display.setCursor(SCREEN_VISIBLE_X_MIN + 6, 98);
+  display.print("Knob: Select  |  Start: Confirm");
+  display.setCursor(SCREEN_VISIBLE_X_MIN + 6, 110);
   display.print("Stop (Red): Cancel & Return");
 }
 
@@ -2667,25 +2673,24 @@ void drawScanningToBuffer() {
   int16_t w = display.width();
   int16_t h = display.height();
 
-  display.drawRect(0, 0, w, h, GxEPD_BLACK);
-  display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
+  display.drawRect(SCREEN_VISIBLE_X_MIN, SCREEN_VISIBLE_Y_MIN, SCREEN_VISIBLE_WIDTH, SCREEN_VISIBLE_HEIGHT, GxEPD_BLACK);
 
-  display.fillRect(2, 2, w - 4, 20, GxEPD_BLACK);
+  display.fillRect(SCREEN_VISIBLE_X_MIN + 1, 2, SCREEN_VISIBLE_WIDTH - 2, 20, GxEPD_BLACK);
   display.setTextColor(GxEPD_WHITE);
   display.setFont(&FreeSansBold9pt7b);
-  display.setCursor(6, 17);
+  display.setCursor(SCREEN_VISIBLE_X_MIN + 5, 17);
   display.print("BLE SCANNING...");
 
   display.setFont();
   display.setTextColor(GxEPD_BLACK);
   display.setTextSize(1);
-  display.setCursor(16, 46);
+  display.setCursor(SCREEN_VISIBLE_X_MIN + 8, 46);
   display.print("Searching nearby Robosen K1 robots...");
-  display.setCursor(16, 62);
+  display.setCursor(SCREEN_VISIBLE_X_MIN + 8, 62);
   display.print("Sorting by RSSI signal strength.");
 
-  display.drawLine(2, 92, w - 3, 92, GxEPD_BLACK);
-  display.setCursor(8, 102);
+  display.drawLine(SCREEN_VISIBLE_X_MIN + 2, 92, SCREEN_VISIBLE_X_MAX - 2, 92, GxEPD_BLACK);
+  display.setCursor(SCREEN_VISIBLE_X_MIN + 6, 102);
   display.print("Stop Button (Red): Cancel scan");
 }
 
@@ -2695,18 +2700,17 @@ void drawRunChainToBuffer(int currentStep, int totalSteps, const char* actionNam
   int16_t w = display.width();
   int16_t h = display.height();
 
-  display.drawRect(0, 0, w, h, GxEPD_BLACK);
-  display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
+  display.drawRect(SCREEN_VISIBLE_X_MIN, SCREEN_VISIBLE_Y_MIN, SCREEN_VISIBLE_WIDTH, SCREEN_VISIBLE_HEIGHT, GxEPD_BLACK);
 
-  display.fillRect(2, 2, w - 4, 20, GxEPD_BLACK);
+  display.fillRect(SCREEN_VISIBLE_X_MIN + 1, 2, SCREEN_VISIBLE_WIDTH - 2, 20, GxEPD_BLACK);
   display.setTextColor(GxEPD_WHITE);
   display.setFont(&FreeSansBold9pt7b);
-  display.setCursor(6, 17);
+  display.setCursor(SCREEN_VISIBLE_X_MIN + 5, 17);
   display.print("RUNNING CHAIN");
 
   display.setFont();
   display.setTextSize(1);
-  display.setCursor(170, 8);
+  display.setCursor(185, 8);
   if (totalSteps > 0) {
     display.printf("STEP %d/%d", currentStep, totalSteps);
   } else {
@@ -2715,21 +2719,21 @@ void drawRunChainToBuffer(int currentStep, int totalSteps, const char* actionNam
 
   display.setTextColor(GxEPD_BLACK);
   display.setFont(&FreeSansBold9pt7b);
-  display.setCursor(10, 48);
+  display.setCursor(SCREEN_VISIBLE_X_MIN + 10, 48);
   display.print(actionName);
 
   display.setFont();
   display.setTextSize(2);
-  display.setCursor(10, 64);
+  display.setCursor(SCREEN_VISIBLE_X_MIN + 10, 64);
   if (paramVal > 0) {
     display.printf("%d %s", paramVal, paramUnit);
   } else {
     display.print("Active");
   }
 
-  display.drawLine(2, 92, w - 3, 92, GxEPD_BLACK);
+  display.drawLine(SCREEN_VISIBLE_X_MIN + 2, 92, SCREEN_VISIBLE_X_MAX - 2, 92, GxEPD_BLACK);
   display.setTextSize(1);
-  display.setCursor(8, 102);
+  display.setCursor(SCREEN_VISIBLE_X_MIN + 6, 102);
   display.print("Run Chain Active | Stop (Red): Halt");
 }
 
@@ -2807,30 +2811,30 @@ void drawRemoteControlToBuffer(bool invertMiddle) {
   int16_t w = display.width();
   int16_t h = display.height();
 
-  display.drawRect(0, 0, w, h, GxEPD_BLACK);
-  display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
+  // 1. Frame border around visible window
+  display.drawRect(SCREEN_VISIBLE_X_MIN, SCREEN_VISIBLE_Y_MIN, SCREEN_VISIBLE_WIDTH, SCREEN_VISIBLE_HEIGHT, GxEPD_BLACK);
 
-  // 1. Dual Battery Header with Connected Robot Name
+  // 2. Dual Battery Header with Connected Robot Name
   drawDualBatteryHeader(w);
 
-  // 2. Center Section (y = 24..119, full height)
+  // 3. Center Section (y = 24..119, full height)
   uint16_t midFg = invertMiddle ? GxEPD_WHITE : GxEPD_BLACK;
   if (invertMiddle) {
-    display.fillRect(2, 24, w - 4, 96, GxEPD_BLACK);
+    display.fillRect(SCREEN_VISIBLE_X_MIN + 1, 23, SCREEN_VISIBLE_WIDTH - 2, 97, GxEPD_BLACK);
   }
 
-  // Left Column: Steering Wheel 48x48 Icon
-  drawBitmap2x(24, 44, getGearIcon(RC_GEAR_DRIVE), 24, 24, midFg);
+  // Left Column: Steering Wheel 48x48 Icon (centered at x=54, y=44)
+  drawBitmap2x(54, 44, getGearIcon(RC_GEAR_DRIVE), 24, 24, midFg);
 
-  // Vertical Divider
-  display.drawFastVLine(100, 36, 68, midFg);
+  // Vertical Divider at x=116
+  display.drawFastVLine(116, 36, 68, midFg);
 
   // Right Column: Active Stunt 48x48 Icon + Stunt Number #01..#10
-  drawBitmap2x(120, 44, getStuntIcon(rcStuntIndex), 24, 24, midFg);
+  drawBitmap2x(126, 44, getStuntIcon(rcStuntIndex), 24, 24, midFg);
 
   display.setTextColor(midFg);
   display.setFont(&FreeSansBold18pt7b);
-  display.setCursor(176, 76);
+  display.setCursor(186, 76);
   display.printf("#%02d", rcStuntIndex + 1);
 }
 
@@ -2840,34 +2844,34 @@ void drawJointControlToBuffer(bool invertMiddle) {
   int16_t w = display.width();
   int16_t h = display.height();
 
-  display.drawRect(0, 0, w, h, GxEPD_BLACK);
-  display.drawRect(1, 1, w - 2, h - 2, GxEPD_BLACK);
+  // 1. Frame border around visible window
+  display.drawRect(SCREEN_VISIBLE_X_MIN, SCREEN_VISIBLE_Y_MIN, SCREEN_VISIBLE_WIDTH, SCREEN_VISIBLE_HEIGHT, GxEPD_BLACK);
 
-  // 1. Dual Battery Header with Connected Robot Name
+  // 2. Dual Battery Header with Connected Robot Name
   drawDualBatteryHeader(w);
 
-  // 2. Center Section (y = 24..119, full height)
+  // 3. Center Section (y = 24..119, full height)
   uint16_t midFg = invertMiddle ? GxEPD_WHITE : GxEPD_BLACK;
   if (invertMiddle) {
-    display.fillRect(2, 24, w - 4, 96, GxEPD_BLACK);
+    display.fillRect(SCREEN_VISIBLE_X_MIN + 1, 23, SCREEN_VISIBLE_WIDTH - 2, 97, GxEPD_BLACK);
   }
 
   const JointDef& j = ALL_JOINTS[currentJointIndex];
   int currentVal = (int)currentServoPositions[j.servoId];
   int offset = currentVal - (int)j.neutral;
 
-  // Anatomy 48x48 Icon (Head, L.Arm, R.Arm, L.Leg, R.Leg)
-  drawBitmap2x(14, 34, getJointGroupIcon(j.groupIconIdx), 24, 24, midFg);
+  // Anatomy 48x48 Icon (Head, L.Arm, R.Arm, L.Leg, R.Leg at x=48)
+  drawBitmap2x(48, 34, getJointGroupIcon(j.groupIconIdx), 24, 24, midFg);
 
   // Short Joint Name (strip "L." or "R." prefix)
   const char* sName = (j.name[1] == '.') ? (j.name + 2) : j.name;
   display.setTextColor(midFg);
   display.setFont(&FreeSansBold12pt7b);
-  display.setCursor(70, 52);
+  display.setCursor(106, 52);
   display.print(sName);
 
   // Big Degree Readout (y = 76)
-  display.setCursor(70, 76);
+  display.setCursor(106, 76);
   if (offset > 0) {
     display.printf("+%d°", offset);
   } else if (offset < 0) {
@@ -2876,9 +2880,9 @@ void drawJointControlToBuffer(bool invertMiddle) {
     display.print("0°");
   }
 
-  // Full-width Slider Gauge (y = 96)
-  int gaugeX = 14;
-  int gaugeW = 222;
+  // Full-width Slider Gauge (y = 96, x=46..242)
+  int gaugeX = 46;
+  int gaugeW = 196;
   int gaugeY = 96;
   display.drawFastHLine(gaugeX, gaugeY, gaugeW, midFg);
   display.drawFastVLine(gaugeX, gaugeY - 5, 11, midFg);
@@ -2963,22 +2967,22 @@ void einkDisplayTask(void* pvParameters) {
         if (doFull) {
           display.display(true);
         } else {
-          // Targeted center update (y=24, h=96): header never flickers!
-          display.displayWindow(2, 24, 246, 96);
+          // Targeted center update within visible bezel area (x=40..249, y=24, h=96): header never flickers!
+          display.displayWindow(SCREEN_VISIBLE_X_MIN, 24, SCREEN_VISIBLE_WIDTH, 96);
         }
       } else if (currentState == STATE_REMOTE_CONTROL) {
         drawRemoteControlToBuffer(false);
         if (doFull) {
           display.display(true);
         } else {
-          display.displayWindow(2, 24, 246, 96);
+          display.displayWindow(SCREEN_VISIBLE_X_MIN, 24, SCREEN_VISIBLE_WIDTH, 96);
         }
       } else if (currentState == STATE_JOINT_CONTROL) {
         drawJointControlToBuffer(false);
         if (doFull) {
           display.display(true);
         } else {
-          display.displayWindow(2, 24, 246, 96);
+          display.displayWindow(SCREEN_VISIBLE_X_MIN, 24, SCREEN_VISIBLE_WIDTH, 96);
         }
       }
       continue;
