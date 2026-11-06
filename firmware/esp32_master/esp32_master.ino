@@ -461,6 +461,7 @@ void resetAllJointsToStand();
 
 // Robot Telemetry & Battery Monitoring Helpers
 void queryRobotStateNonBlocking();
+void sendHeartbeatPingNonBlocking();
 void robotNotifyCallback(BLERemoteCharacteristic* pChar, uint8_t* pData, size_t length, bool isNotify);
 
 // E-Ink Display Functions (DEPG0213BN / SSD1680)
@@ -784,6 +785,17 @@ void queryRobotStateNonBlocking() {
       // 5-byte Opcode 0x0F query: Header(0xFF, 0xFF), Len(0x02), Opcode(0x0F), Checksum(0x11)
       uint8_t queryPacket[5] = {0xFF, 0xFF, 0x02, 0x0F, 0x11};
       pRemoteChar->writeValue(queryPacket, sizeof(queryPacket));
+    }
+    xSemaphoreGive(bleMutex);
+  }
+}
+
+void sendHeartbeatPingNonBlocking() {
+  if (bleMutex != nullptr && xSemaphoreTake(bleMutex, pdMS_TO_TICKS(40)) == pdTRUE) {
+    if (isConnected && pRemoteChar != nullptr && pRemoteChar->canWrite()) {
+      // Proven 5-byte Opcode 0x0B Ping Packet from main firmware
+      uint8_t pingPacket[5] = {0xFF, 0xFF, 0x02, 0x0B, 0x0D};
+      pRemoteChar->writeValue(pingPacket, sizeof(pingPacket));
     }
     xSemaphoreGive(bleMutex);
   }
@@ -1360,40 +1372,64 @@ void loop() {
             renderActionMenu();
           }
         } else if (currentState == STATE_REMOTE_CONTROL) {
-          // Short-click in RC Mode: Cycle 3-Gear Selector (FWD -> REV -> STRAFE)
-          currentRcGear = (RcGear)((currentRcGear + 1) % 3);
-          const char* gearName = (currentRcGear == RC_GEAR_FWD) ? "FORWARD [FWD ^]" :
-                                 (currentRcGear == RC_GEAR_REV) ? "REVERSE [REV v]" : "STRAFE [STRAFE <>]";
-          Serial.printf("\n>>> [RC GEAR SHIFT] Gear: %s <<<\n", gearName);
-          triggerLedBlip(0, 80, 80);
-          // If currently walking, immediately transition direction
-          if (currentRcMotion == RC_MOTION_WALK_FWD || currentRcMotion == RC_MOTION_WALK_REV) {
-            if (currentRcGear == RC_GEAR_REV) {
-              currentRcMotion = RC_MOTION_WALK_REV;
-              sendRawOpcodeNonBlocking(0x05);
+          if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
+            Serial.println("[BLE STATUS] ⚡ Knob clicked while disconnected in RC Mode: Immediate connection attempt...");
+            if (connectToRobot()) {
+              connectAttemptCounter = 0;
+              setUiEventFeedback("BLE: CONNECTED!");
             } else {
-              currentRcMotion = RC_MOTION_WALK_FWD;
-              sendRawOpcodeNonBlocking(0x01);
+              connectAttemptCounter++;
+              setUiEventFeedback("RC: ROBOT OFFLINE");
+            }
+            lastConnectAttemptTime = millis();
+          } else {
+            // Short-click in RC Mode: Cycle 3-Gear Selector (FWD -> REV -> STRAFE)
+            currentRcGear = (RcGear)((currentRcGear + 1) % 3);
+            const char* gearName = (currentRcGear == RC_GEAR_FWD) ? "FORWARD [FWD ^]" :
+                                   (currentRcGear == RC_GEAR_REV) ? "REVERSE [REV v]" : "STRAFE [STRAFE <>]";
+            Serial.printf("\n>>> [RC GEAR SHIFT] Gear: %s <<<\n", gearName);
+            triggerLedBlip(0, 80, 80);
+            // If currently walking, immediately transition direction
+            if (currentRcMotion == RC_MOTION_WALK_FWD || currentRcMotion == RC_MOTION_WALK_REV) {
+              if (currentRcGear == RC_GEAR_REV) {
+                currentRcMotion = RC_MOTION_WALK_REV;
+                sendRawOpcodeNonBlocking(0x05);
+              } else {
+                currentRcMotion = RC_MOTION_WALK_FWD;
+                sendRawOpcodeNonBlocking(0x01);
+              }
+              updateStatusLED();
+            }
+            requestEInkCenterUpdate();
+          }
+        } else if (currentState == STATE_JOINT_CONTROL) {
+          if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
+            Serial.println("[BLE STATUS] ⚡ Knob clicked while disconnected in Joint Mode: Immediate connection attempt...");
+            if (connectToRobot()) {
+              connectAttemptCounter = 0;
+              setUiEventFeedback("BLE: CONNECTED!");
+            } else {
+              connectAttemptCounter++;
+              setUiEventFeedback("JOINT: ROBOT OFFLINE");
+            }
+            lastConnectAttemptTime = millis();
+          } else {
+            if (!isJointSelectedLevel2) {
+              isJointSelectedLevel2 = true;
+              triggerLedBlip(0, 100, 100);
+              Serial.printf("\n>>> [JOINT] Entered Level 2 (Angle Control) for %s -> %s <<<\n",
+                            JOINT_GROUPS[currentJointGroupIndex].groupName,
+                            JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex].name);
+            } else {
+              sendJointFrameNonBlocking(25);
+              triggerLedBlip(0, 80, 40);
+              Serial.printf("\n>>> [JOINT] Confirmed angle for %s (%d) <<<\n",
+                            JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex].name,
+                            currentServoPositions[JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex].servoId]);
             }
             updateStatusLED();
+            requestEInkCenterUpdate();
           }
-          requestEInkCenterUpdate();
-        } else if (currentState == STATE_JOINT_CONTROL) {
-          if (!isJointSelectedLevel2) {
-            isJointSelectedLevel2 = true;
-            triggerLedBlip(0, 100, 100);
-            Serial.printf("\n>>> [JOINT] Entered Level 2 (Angle Control) for %s -> %s <<<\n",
-                          JOINT_GROUPS[currentJointGroupIndex].groupName,
-                          JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex].name);
-          } else {
-            sendJointFrameNonBlocking(25);
-            triggerLedBlip(0, 80, 40);
-            Serial.printf("\n>>> [JOINT] Confirmed angle for %s (%d) <<<\n",
-                          JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex].name,
-                          currentServoPositions[JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex].servoId]);
-          }
-          updateStatusLED();
-          requestEInkCenterUpdate();
         } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
           pairedMAC  = bleList[currentBleIndex].address;
           pairedName = bleList[currentBleIndex].name;
@@ -1550,22 +1586,46 @@ void loop() {
           } else {
             renderActionMenu();
           }
-        } else if (currentState == STATE_JOINT_CONTROL) {
-          if (!isJointSelectedLevel2) {
-            isJointSelectedLevel2 = true;
-            triggerLedBlip(0, 100, 100);
-            Serial.printf("\n[GREEN CONFIRM] Entered Level 2 for %s -> %s\n",
-                          JOINT_GROUPS[currentJointGroupIndex].groupName,
-                          JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex].name);
-          } else {
-            sendJointFrameNonBlocking(25);
-            triggerLedBlip(0, 80, 40);
-            Serial.printf("\n[GREEN CONFIRM] Confirmed angle for %s (%d)\n",
-                          JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex].name,
-                          currentServoPositions[JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex].servoId]);
+        } else if (currentState == STATE_REMOTE_CONTROL) {
+          if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
+            Serial.println("[BLE STATUS] ⚡ Green Start clicked while disconnected in RC Mode: Immediate connection attempt...");
+            if (connectToRobot()) {
+              connectAttemptCounter = 0;
+              setUiEventFeedback("BLE: CONNECTED!");
+            } else {
+              connectAttemptCounter++;
+              setUiEventFeedback("RC: ROBOT OFFLINE");
+            }
+            lastConnectAttemptTime = millis();
           }
-          updateStatusLED();
-          requestEInkCenterUpdate();
+        } else if (currentState == STATE_JOINT_CONTROL) {
+          if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
+            Serial.println("[BLE STATUS] ⚡ Green Start clicked while disconnected in Joint Mode: Immediate connection attempt...");
+            if (connectToRobot()) {
+              connectAttemptCounter = 0;
+              setUiEventFeedback("BLE: CONNECTED!");
+            } else {
+              connectAttemptCounter++;
+              setUiEventFeedback("JOINT: ROBOT OFFLINE");
+            }
+            lastConnectAttemptTime = millis();
+          } else {
+            if (!isJointSelectedLevel2) {
+              isJointSelectedLevel2 = true;
+              triggerLedBlip(0, 100, 100);
+              Serial.printf("\n[GREEN CONFIRM] Entered Level 2 for %s -> %s\n",
+                            JOINT_GROUPS[currentJointGroupIndex].groupName,
+                            JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex].name);
+            } else {
+              sendJointFrameNonBlocking(25);
+              triggerLedBlip(0, 80, 40);
+              Serial.printf("\n[GREEN CONFIRM] Confirmed angle for %s (%d)\n",
+                            JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex].name,
+                            currentServoPositions[JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex].servoId]);
+            }
+            updateStatusLED();
+            requestEInkCenterUpdate();
+          }
         } else if (currentState == STATE_BLE_PAIRING_MENU) {
           if (bleDeviceCount > 0) {
             pairedMAC  = bleList[currentBleIndex].address;
@@ -1684,11 +1744,18 @@ void loop() {
     }
   }
 
-  // --- 7. BACKGROUND HEARTBEAT & TELEMETRY QUERY (WHEN CONNECTED & IDLE) ---
+  // --- 7. BACKGROUND HYBRID HEARTBEAT & TELEMETRY QUERY (WHEN CONNECTED & IDLE) ---
   if ((currentState == STATE_ACTION_MENU || (currentState == STATE_REMOTE_CONTROL && currentRcMotion == RC_MOTION_IDLE) || currentState == STATE_JOINT_CONTROL) && isConnected) {
-    if (now - lastHeartbeatTime >= 5000) {
+    if (now - lastHeartbeatTime >= 3000) {
       lastHeartbeatTime = now;
+      static uint8_t heartbeatCounter = 0;
+      heartbeatCounter++;
+      // Every cycle (3s): query live battery and state (Opcode 0x0F)
       queryRobotStateNonBlocking();
+      // Every other cycle (6s) or if telemetry unread: send proven Opcode 0x0B Ping from main
+      if ((heartbeatCounter % 2 == 0) || !hasRobotBattery) {
+        sendHeartbeatPingNonBlocking();
+      }
     }
   }
 
@@ -2892,17 +2959,35 @@ void drawModeSelectMenuToBuffer() {
   display.setCursor(6, 17);
   display.print("SELECT MODE");
 
+  // Header Status & Battery Monitor (Identical to Main Firmware UI)
   display.setFont();
   display.setTextSize(1);
-  display.setCursor(w - 78, 8);
+
+  float vbat = readBatteryVoltage();
+  int batPct = calculateBatteryPercent(vbat);
+
+  int batX = w - 38;
+  int batY = 6;
+  display.drawRect(batX, batY, 20, 10, GxEPD_WHITE);
+  display.fillRect(batX + 20, batY + 2, 2, 6, GxEPD_WHITE);
+  int fillW = map(batPct, 0, 100, 0, 16);
+  if (fillW > 0) {
+    display.fillRect(batX + 2, batY + 2, fillW, 6, GxEPD_WHITE);
+  }
+
+  display.setCursor(batX - 78, 8);
   if (isConnected) {
     if (hasRobotBattery && robotBatteryPercent >= 0) {
       display.printf("[K1: %d%%]", robotBatteryPercent);
     } else {
       display.print("[CONNECTED]");
     }
+  } else if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
+    display.print("[UNPAIRED]");
+  } else if (connectAttemptCounter > 0) {
+    display.printf("[RETRY #%d]", connectAttemptCounter);
   } else {
-    display.print("[OFFLINE]");
+    display.print("[SEARCHING]");
   }
 
   // Modes list (compact 18px slots for 3 scalable modes)
