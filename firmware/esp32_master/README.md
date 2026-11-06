@@ -103,12 +103,13 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
    - Turn Knob 1 or Knob 2 to scroll; press Green Start (`SW3`) or click Knob 1 to enter; press Red Stop (`SW5`) to cancel.
 
 2. **Live Handheld Remote Control (RC) Mode (`STATE_REMOTE_CONTROL`)**:
-   - **Green Button (`SW3`)**: Hold-to-Walk ("Gas Pedal" / Dead-Man Switch). Holding walks continuously in the active gear direction (`0x01` Forward / `0x05` Reverse); releasing immediately sends `0x0C` stop.
-   - **Knob 1 Short Click**: Cycles 3-gear transmission: `[ FWD ^ ]` $\to$ `[ REV v ]` $\to$ `[ STRAFE <> ]`.
-   - **Knob 1 Twist**: Smooth momentum steering (Turn Left `0x08` / Turn Right `0x02` in FWD/REV gears; Side-step Left `0x07` / Right `0x03` in STRAFE gear). Automatically stops or resumes walking when twist ends.
+   - **Green Button (`SW3`)**: Hold-to-Walk Forward ("Gas Pedal" / Dead-Man Switch). Holding walks forward continuously (`0x01`); releasing immediately sends `0x0C` stop.
+   - **Red Button (`SW5`)**: Dedicated Hold-to-Walk Backward ("Reverse Pedal"). Holding walks backward continuously (`0x05`); releasing immediately sends `0x0C` stop. Disconnect hold is bypassed in RC mode so reverse can run indefinitely.
+   - **Both Buttons Held**: Priority emergency safety halt (`0x0C`).
+   - **Knob 1 Short Click**: 2-way gear toggle: `[ DRIVE ]` (rotational steering) $\longleftrightarrow$ `[ STRAFE ]` (lateral translation).
+   - **Knob 1 Twist**: Smooth momentum steering (Turn Left `0x08` / Turn Right `0x02` in DRIVE mode; Side-step Left `0x07` / Right `0x03` in STRAFE mode). Automatically resumes Forward or Backward walking when twist ends depending on which pedal is held.
    - **Knob 2 Twist**: Scroll through full 10-stunt catalog (`Left/Right Punch`, `Kick`, `Wave`, `Celebrate`, `Kung Fu`, `Push-ups`, `Squats`, `Handstand`, `Dance`).
    - **Knob 2 Short Click**: Instantly fires selected stunt (1 repetition) with non-blocking BLE dispatch.
-   - **Red Button (`SW5`)**: Immediate emergency halt — halts motion and locks neutral posture.
    - **WS2812 RGB LED Telemetry**: Instant 0ms status feedback (Soft Teal = RC Idle, Vivid Green = Walk Fwd, Amber = Walk Rev, Electric Blue = Steer/Strafe, Magenta = Stunt, Red = Stop).
    - **Port Isolation**: Config Dock polling is paused during RC Mode for maximum loop responsiveness and battery conservation.
 

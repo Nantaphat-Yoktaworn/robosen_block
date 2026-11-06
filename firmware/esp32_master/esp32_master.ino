@@ -200,13 +200,12 @@ SystemModeItem SYSTEM_MODES[] = {
 const int TOTAL_SYSTEM_MODES = sizeof(SYSTEM_MODES) / sizeof(SYSTEM_MODES[0]);
 int currentModeMenuIndex = 0;
 
-// Remote Control (RC) Gear Selector: FWD -> REV -> STRAFE
+// Remote Control (RC) Gear Selector: 2-way toggle DRIVE <-> STRAFE
 enum RcGear {
-  RC_GEAR_FWD = 0,
-  RC_GEAR_REV = 1,
-  RC_GEAR_STRAFE = 2
+  RC_GEAR_DRIVE = 0,
+  RC_GEAR_STRAFE = 1
 };
-RcGear currentRcGear = RC_GEAR_FWD;
+RcGear currentRcGear = RC_GEAR_DRIVE;
 
 // Live non-blocking motion state
 enum RcActiveMotion {
@@ -656,22 +655,30 @@ void updateRemoteControlEngine() {
     return;
   }
 
+  // Read pedals
+  bool fwdHeld = (digitalRead(PIN_START_BTN) == LOW);
+  bool revHeld = (digitalRead(PIN_STOP_BTN) == LOW);
+
   // 2. Check steering / strafing momentum window
   if (currentRcMotion == RC_MOTION_TURN_LEFT || currentRcMotion == RC_MOTION_TURN_RIGHT ||
       currentRcMotion == RC_MOTION_STRAFE_LEFT || currentRcMotion == RC_MOTION_STRAFE_RIGHT) {
     if (now >= rcSteerActiveUntilMs) {
-      // Momentum window elapsed! Check if Green Button (gas pedal) is still held
-      if (digitalRead(PIN_START_BTN) == LOW) {
-        if (currentRcGear == RC_GEAR_REV) {
-          currentRcMotion = RC_MOTION_WALK_REV;
-          sendRawOpcodeNonBlocking(0x05);
-          Serial.println("[RC] Auto-resumed Walk Backward (Gas pedal held)");
-        } else {
-          currentRcMotion = RC_MOTION_WALK_FWD;
-          sendRawOpcodeNonBlocking(0x01);
-          Serial.println("[RC] Auto-resumed Walk Forward (Gas pedal held)");
-        }
+      // Momentum window elapsed! Check if Forward or Reverse pedal is still held
+      if (fwdHeld && revHeld) {
+        sendLocomotionStop();
+        currentRcMotion = RC_MOTION_IDLE;
         updateStatusLED();
+        Serial.println("[RC] Both pedals held -> Safety Stop");
+      } else if (fwdHeld) {
+        currentRcMotion = RC_MOTION_WALK_FWD;
+        sendRawOpcodeNonBlocking(0x01);
+        updateStatusLED();
+        Serial.println("[RC] Auto-resumed Walk Forward (Green held)");
+      } else if (revHeld) {
+        currentRcMotion = RC_MOTION_WALK_REV;
+        sendRawOpcodeNonBlocking(0x05);
+        updateStatusLED();
+        Serial.println("[RC] Auto-resumed Walk Backward (Red held)");
       } else {
         sendLocomotionStop();
         currentRcMotion = RC_MOTION_IDLE;
@@ -682,24 +689,36 @@ void updateRemoteControlEngine() {
     return;
   }
 
-  // 3. Green Button (Gas Pedal / Dead-Man Switch)
-  bool gasPedalDown = (digitalRead(PIN_START_BTN) == LOW);
-  if (gasPedalDown) {
-    RcActiveMotion targetWalk = (currentRcGear == RC_GEAR_REV) ? RC_MOTION_WALK_REV : RC_MOTION_WALK_FWD;
-    if (currentRcMotion != targetWalk) {
-      currentRcMotion = targetWalk;
-      uint8_t op = (currentRcGear == RC_GEAR_REV) ? 0x05 : 0x01;
-      sendRawOpcodeNonBlocking(op);
+  // 3. Dual Pedal Handling: Green (Forward) & Red (Dedicated Reverse)
+  if (fwdHeld && revHeld) {
+    // Both pedals pressed: immediate safety priority halt
+    if (currentRcMotion != RC_MOTION_IDLE) {
+      sendLocomotionStop();
+      currentRcMotion = RC_MOTION_IDLE;
       updateStatusLED();
-      Serial.printf("[RC] Gas pedal pressed: Walking %s...\n", (currentRcGear == RC_GEAR_REV) ? "Backward" : "Forward");
+      Serial.println("[RC] ⚠️ Both Forward and Reverse pedals held! Safety priority halt.");
+    }
+  } else if (fwdHeld) {
+    if (currentRcMotion != RC_MOTION_WALK_FWD) {
+      currentRcMotion = RC_MOTION_WALK_FWD;
+      sendRawOpcodeNonBlocking(0x01);
+      updateStatusLED();
+      Serial.println("[RC] Green pedal held: Walking Forward...");
+    }
+  } else if (revHeld) {
+    if (currentRcMotion != RC_MOTION_WALK_REV) {
+      currentRcMotion = RC_MOTION_WALK_REV;
+      sendRawOpcodeNonBlocking(0x05);
+      updateStatusLED();
+      Serial.println("[RC] Red pedal held: Walking Backward (Dedicated Reverse)...");
     }
   } else {
-    // Gas pedal released while walking
+    // Neither pedal held
     if (currentRcMotion == RC_MOTION_WALK_FWD || currentRcMotion == RC_MOTION_WALK_REV) {
       sendLocomotionStop();
       currentRcMotion = RC_MOTION_IDLE;
       updateStatusLED();
-      Serial.println("[RC] Gas pedal released: Locomotion stop locked.");
+      Serial.println("[RC] Pedal released: Locomotion stop locked.");
     }
   }
 }
@@ -1383,23 +1402,11 @@ void loop() {
             }
             lastConnectAttemptTime = millis();
           } else {
-            // Short-click in RC Mode: Cycle 3-Gear Selector (FWD -> REV -> STRAFE)
-            currentRcGear = (RcGear)((currentRcGear + 1) % 3);
-            const char* gearName = (currentRcGear == RC_GEAR_FWD) ? "FORWARD [FWD ^]" :
-                                   (currentRcGear == RC_GEAR_REV) ? "REVERSE [REV v]" : "STRAFE [STRAFE <>]";
-            Serial.printf("\n>>> [RC GEAR SHIFT] Gear: %s <<<\n", gearName);
+            // Short-click in RC Mode: 2-Way Gear Toggle (DRIVE <-> STRAFE)
+            currentRcGear = (currentRcGear == RC_GEAR_DRIVE) ? RC_GEAR_STRAFE : RC_GEAR_DRIVE;
+            const char* gearName = (currentRcGear == RC_GEAR_DRIVE) ? "DRIVE [TURN]" : "STRAFE [SIDE-STEP]";
+            Serial.printf("\n>>> [RC GEAR TOGGLE] Mode: %s <<<\n", gearName);
             triggerLedBlip(0, 80, 80);
-            // If currently walking, immediately transition direction
-            if (currentRcMotion == RC_MOTION_WALK_FWD || currentRcMotion == RC_MOTION_WALK_REV) {
-              if (currentRcGear == RC_GEAR_REV) {
-                currentRcMotion = RC_MOTION_WALK_REV;
-                sendRawOpcodeNonBlocking(0x05);
-              } else {
-                currentRcMotion = RC_MOTION_WALK_FWD;
-                sendRawOpcodeNonBlocking(0x01);
-              }
-              updateStatusLED();
-            }
             requestEInkCenterUpdate();
           }
         } else if (currentState == STATE_JOINT_CONTROL) {
@@ -1666,22 +1673,26 @@ void loop() {
       stopBtnHeld3s = false;
       lastUserActivity = now;
       triggerLedBlip(100, 0, 0); // Red
-      Serial.println("\n[BUTTON] Red Stop/Cancel button pressed... (Hold 3s to disconnect BLE)");
+      if (currentState != STATE_REMOTE_CONTROL) {
+        Serial.println("\n[BUTTON] Red Stop/Cancel button pressed... (Hold 3s to disconnect BLE)");
+      }
     } else if (stopRaw == LOW && stopBtnPressed) {
       lastUserActivity = now;
-      if (!stopBtnHeld3s && (now - stopPressStart >= 3000)) {
-        stopBtnHeld3s = true;
-        Serial.println("\n[SYSTEM] 🎯 3-Second Stop Hold Confirmed! Disconnecting BLE session...");
-        if (pClient != nullptr && pClient->isConnected()) {
-          pClient->disconnect();
+      if (currentState != STATE_REMOTE_CONTROL) {
+        if (!stopBtnHeld3s && (now - stopPressStart >= 3000)) {
+          stopBtnHeld3s = true;
+          Serial.println("\n[SYSTEM] 🎯 3-Second Stop Hold Confirmed! Disconnecting BLE session...");
+          if (pClient != nullptr && pClient->isConnected()) {
+            pClient->disconnect();
+          }
+          isConnected = false;
+          pRemoteChar = nullptr;
+          hasRobotBattery = false;
+          robotBatteryPercent = -1;
+          setStatusLED(60, 0, 0);
+          delay(300);
+          updateStatusLED();
         }
-        isConnected = false;
-        pRemoteChar = nullptr;
-        hasRobotBattery = false;
-        robotBatteryPercent = -1;
-        setStatusLED(60, 0, 0);
-        delay(300);
-        updateStatusLED();
       }
     } else if (stopRaw == HIGH && stopBtnPressed) {
       stopBtnPressed = false;
@@ -1713,12 +1724,17 @@ void loop() {
             renderActionMenu();
           }
         } else if (currentState == STATE_REMOTE_CONTROL) {
-          Serial.println("\n[EMERGENCY STOP] Red Stop button pressed: Emergency halt in RC Mode!");
-          stopRcMotionImmediate();
-          setStatusLED(80, 0, 0);
-          delay(100);
-          updateStatusLED();
-          setUiEventFeedback("RC: EMERGENCY STOP");
+          if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
+            Serial.println("[BLE STATUS] ⚡ Red button clicked while disconnected in RC Mode: Immediate connection attempt...");
+            if (connectToRobot()) {
+              connectAttemptCounter = 0;
+              setUiEventFeedback("BLE: CONNECTED!");
+            } else {
+              connectAttemptCounter++;
+              setUiEventFeedback("RC: ROBOT OFFLINE");
+            }
+            lastConnectAttemptTime = millis();
+          }
         } else if (currentState == STATE_JOINT_CONTROL) {
           if (isJointSelectedLevel2) {
             isJointSelectedLevel2 = false;
@@ -2537,23 +2553,23 @@ void renderModeSelectMenu() {
 void renderRemoteControlMenu() {
   Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
   Serial.println("║              ROBOSEN K1 LIVE REMOTE CONTROL (HANDHELD RC)              ║");
-  const char* gearStr = (currentRcGear == RC_GEAR_FWD) ? "FORWARD [FWD ^]" :
-                        (currentRcGear == RC_GEAR_REV) ? "REVERSE [REV v]" : "STRAFE [STRAFE <>]";
+  const char* gearStr = (currentRcGear == RC_GEAR_DRIVE) ? "DRIVE [TURN]" : "STRAFE [SIDE-STEP]";
   if (isConnected && hasRobotBattery && robotBatteryPercent >= 0) {
-    Serial.printf("║ Active Gear: %-26s Target: %s (Bat: %d%%) ║\n", gearStr, pairedName.c_str(), robotBatteryPercent);
+    Serial.printf("║ Active Mode: %-26s Target: %s (Bat: %d%%) ║\n", gearStr, pairedName.c_str(), robotBatteryPercent);
   } else {
-    Serial.printf("║ Active Gear: %-26s Target: %-25s ║\n", gearStr, pairedName.c_str());
+    Serial.printf("║ Active Mode: %-26s Target: %-25s ║\n", gearStr, pairedName.c_str());
   }
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
   Serial.printf("║ Selected Stunt (K2): %-48s ║\n", RC_STUNTS[rcStuntIndex].name);
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
-  Serial.println("║ • Green Button (Hold) : Gas Pedal (Walk in Active Gear)                ║");
-  Serial.println("║ • Green Button (Release): Instant Dead-Man Halt (Locks Standing Posture) ║");
-  Serial.println("║ • Knob 1 Short-Click  : Shift Gear (FWD ^ -> REV v -> STRAFE <>)       ║");
-  Serial.println("║ • Knob 1 Twist        : Live Steering Turn L/R (or Strafe Step L/R)   ║");
+  Serial.println("║ • Green Button (Hold) : Walk FORWARD (0x01) (Dead-Man Gas Pedal)       ║");
+  Serial.println("║ • Red Button (Hold)   : Walk BACKWARD (0x05) (Dedicated Reverse Pedal) ║");
+  Serial.println("║ • Release Button      : Instant Stop & Lock Standing Posture           ║");
+  Serial.println("║ • Both Buttons (Hold) : Priority Emergency Safety Halt (0x0C)          ║");
+  Serial.println("║ • Knob 1 Short-Click  : Toggle Gear Mode: [ DRIVE ] <-> [ STRAFE ]     ║");
+  Serial.println("║ • Knob 1 Twist        : Steering Turn (DRIVE) or Side-Step (STRAFE)    ║");
   Serial.println("║ • Knob 2 Twist        : Scroll 10-Stunt Catalog                        ║");
   Serial.println("║ • Knob 2 Short-Click  : Fire Selected Stunt Instantly (1 Repetition)   ║");
-  Serial.println("║ • Red Stop (Click)    : Immediate Emergency Halt                       ║");
   Serial.println("║ • Knob 1 Hold (1.5s)  : Return to Universal Mode Selector Menu         ║");
   Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
   updateEInkRemoteControl();
@@ -3076,12 +3092,10 @@ void drawRemoteControlToBuffer(bool invertMiddle) {
   display.setTextColor(midFg);
   display.setFont(&FreeSansBold9pt7b);
   display.setCursor(8, 44);
-  if (currentRcGear == RC_GEAR_FWD) {
-    display.print("GEAR: [ FWD ^ ]");
-  } else if (currentRcGear == RC_GEAR_REV) {
-    display.print("GEAR: [ REV v ]");
-  } else {
+  if (currentRcGear == RC_GEAR_STRAFE) {
     display.print("GEAR: [ STRAFE <> ]");
+  } else {
+    display.print("GEAR: [ DRIVE ^ ]");
   }
 
   display.setFont();
@@ -3111,12 +3125,12 @@ void drawRemoteControlToBuffer(bool invertMiddle) {
   display.setFont();
   display.setTextSize(1);
   display.setCursor(8, 89);
-  display.print("Hold Grn: Walk | Stop: Halt | K1 Click: Gear");
+  display.print("Grn: Fwd | Red: Back | K1: Gear Mode");
   display.setCursor(8, 103);
   if (lastUiEventMsg.length() > 0 && (millis() - lastUiEventTime < 3000)) {
     display.printf(">> %s", lastUiEventMsg.c_str());
   } else {
-    display.print("Hold K1 (1.5s): Mode Menu | K2: Pick Stunt");
+    display.print("Hold K1 (1.5s): Mode Menu | K2: Stunt");
   }
 }
 
