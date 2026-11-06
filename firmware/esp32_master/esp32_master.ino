@@ -327,31 +327,57 @@ const unsigned long RETRY_INTERVAL_MS = 2000;
 unsigned long lastConnectAttemptTime = 0;
 int connectAttemptCounter = 0;
 
-// --- ROTARY ENCODER HARDWARE INTERRUPT STATE ---
+// --- ROTARY ENCODER STATE MACHINE (BUXTRONIX QUADRATURE DECODER) ---
+// Immune to mechanical contact bounce, detent vibration, and settling recoil.
+#define R_START     0x0
+#define R_CW_FINAL  0x1
+#define R_CW_BEGIN  0x2
+#define R_CW_NEXT   0x3
+#define R_CCW_BEGIN 0x4
+#define R_CCW_FINAL 0x5
+#define R_CCW_NEXT  0x6
+
+#define DIR_NONE 0x00
+#define DIR_CW   0x10
+#define DIR_CCW  0x20
+
+// Full-step state table: emits code when detent reached (both pins HIGH / state 3)
+const unsigned char PROGMEM ttable[7][4] = {
+  // 00         01           10           11
+  {R_START,    R_CW_BEGIN,  R_CCW_BEGIN, R_START},           // R_START
+  {R_CW_NEXT,  R_START,     R_CW_FINAL,  R_START | DIR_CW},  // R_CW_FINAL
+  {R_CW_NEXT,  R_CW_BEGIN,  R_START,     R_START},           // R_CW_BEGIN
+  {R_CW_NEXT,  R_CW_BEGIN,  R_CW_FINAL,  R_START},           // R_CW_NEXT
+  {R_CCW_NEXT, R_START,     R_CCW_BEGIN, R_START},           // R_CCW_BEGIN
+  {R_CCW_NEXT, R_CCW_FINAL, R_START,     R_START | DIR_CCW}, // R_CCW_FINAL
+  {R_CCW_NEXT, R_CCW_FINAL, R_CCW_BEGIN, R_START},           // R_CCW_NEXT
+};
+
+volatile uint8_t k1State = R_START;
+volatile uint8_t k2State = R_START;
 volatile int k1Delta = 0;
 volatile int k2Delta = 0;
-volatile unsigned long lastK1IsrUs = 0;
-volatile unsigned long lastK2IsrUs = 0;
 
 void IRAM_ATTR isrK1() {
-  unsigned long nowUs = micros();
-  if (nowUs - lastK1IsrUs < 8000) return; // 8ms debounce filter
-  lastK1IsrUs = nowUs;
-  if (digitalRead(PIN_K1_DT) == HIGH) {
+  uint8_t pinstate = (digitalRead(PIN_K1_CLK) << 1) | digitalRead(PIN_K1_DT);
+  uint8_t result = pgm_read_byte(&ttable[k1State & 0x0F][pinstate]);
+  k1State = result & 0x0F;
+  uint8_t dir = result & 0x30;
+  if (dir == DIR_CW) {
     k1Delta++;
-  } else {
+  } else if (dir == DIR_CCW) {
     k1Delta--;
   }
 }
 
 void IRAM_ATTR isrK2() {
-  unsigned long nowUs = micros();
-  if (nowUs - lastK2IsrUs < 8000) return; // 8ms debounce filter
-  lastK2IsrUs = nowUs;
-  // Direction swapped so Clockwise INCREASES parameter
-  if (digitalRead(PIN_K2_DT) == HIGH) {
+  uint8_t pinstate = (digitalRead(PIN_K2_CLK) << 1) | digitalRead(PIN_K2_DT);
+  uint8_t result = pgm_read_byte(&ttable[k2State & 0x0F][pinstate]);
+  k2State = result & 0x0F;
+  uint8_t dir = result & 0x30;
+  if (dir == DIR_CW) {
     k2Delta++;
-  } else {
+  } else if (dir == DIR_CCW) {
     k2Delta--;
   }
 }
@@ -1088,8 +1114,11 @@ void setup() {
   // Configure Battery Voltage ADC Pin (ADC1_CH0)
   pinMode(PIN_BATSENSE, INPUT);
 
-  attachInterrupt(digitalPinToInterrupt(PIN_K1_CLK), isrK1, FALLING);
-  attachInterrupt(digitalPinToInterrupt(PIN_K2_CLK), isrK2, FALLING);
+  // Attach CHANGE interrupts on both CLK & DT for full Gray-code quadrature decoding
+  attachInterrupt(digitalPinToInterrupt(PIN_K1_CLK), isrK1, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(PIN_K1_DT),  isrK1, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(PIN_K2_CLK), isrK2, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(PIN_K2_DT),  isrK2, CHANGE);
 
   // Load Saved Robot Binding from NVS Flash
   preferences.begin("robosen_cfg", false);
