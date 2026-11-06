@@ -95,12 +95,12 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
 ### 3.3 Scalable Multi-Mode Switcher & Remote Control (RC) Mode
 
 1. **Universal Multi-Mode Switcher (`STATE_MODE_SELECT_MENU`)**:
-   - Holding **Knob 1 Switch (`SW1`, `GPIO 10`) for 1.5 seconds** from any mode immediately halts motion and opens the **Mode Selector Menu** on the 2.13" E-Paper display.
+   - Holding **Knob 1 Switch (`SW1`, `GPIO 10`) for 500ms** from any mode immediately halts motion, flashes a bright purple LED tactile cue, and opens the **Mode Selector Menu** on the 2.13" E-Paper display.
    - Scalable 3-mode architecture without button conflicts:
      - `01: Block Coding & Dock`
      - `02: Remote Control (RC)`
      - `03: Joint Control Mode`
-   - Turn Knob 1 or Knob 2 to scroll; press Green Start (`SW3`) or click Knob 1 to enter; press Red Stop (`SW5`) to cancel.
+   - Turn Knob 1 or Knob 2 to scroll with fast 280ms carousel updates; press Green Start (`SW3`), click Knob 1, or click Knob 2 to enter immediately on press-down; press Red Stop (`SW5`) to cancel.
 
 2. **Live Handheld Remote Control (RC) Mode (`STATE_REMOTE_CONTROL`)**:
    - **Green Button (`SW3`)**: Hold-to-Walk Forward ("Gas Pedal" / Dead-Man Switch). Holding walks forward continuously (`0x01`); releasing immediately sends `0x0C` stop.

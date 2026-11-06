@@ -389,6 +389,7 @@ unsigned long lastUiEventTime = 0;
 
 // FreeRTOS Display & BLE Synchronization State
 SemaphoreHandle_t bleMutex = nullptr;
+volatile bool requestBgReconnect = false;
 volatile bool einkFullDirty = false;
 volatile bool einkCenterDirty = false;
 volatile bool einkScanningDirty = false;
@@ -408,6 +409,7 @@ char rcSnapUnit[12] = "";
 void requestEInkFullUpdate() {
   lastEInkInputMs = millis();
   einkFullDirty = true;
+  einkNeedsCrispSettle = true;
 }
 
 void requestEInkCenterUpdate() {
@@ -565,10 +567,13 @@ int calculateBatteryPercent(float vbat) {
 }
 
 void sendLocomotionStop() {
-  if (isConnected && pRemoteChar != nullptr && pRemoteChar->canWrite()) {
-    uint8_t stopPacket[] = {0xFF, 0xFF, 0x02, 0x0C, 0x0E};
-    pRemoteChar->writeValue(stopPacket, sizeof(stopPacket));
-    Serial.println("  ► [SAFETY] Locomotion Stop [0xFF, 0xFF, 0x02, 0x0C, 0x0E] dispatched.");
+  if (bleMutex != nullptr && xSemaphoreTake(bleMutex, pdMS_TO_TICKS(40)) == pdTRUE) {
+    if (isConnected && pRemoteChar != nullptr && pRemoteChar->canWrite()) {
+      uint8_t stopPacket[] = {0xFF, 0xFF, 0x02, 0x0C, 0x0E};
+      pRemoteChar->writeValue(stopPacket, sizeof(stopPacket));
+      Serial.println("  ► [SAFETY] Locomotion Stop [0xFF, 0xFF, 0x02, 0x0C, 0x0E] dispatched.");
+    }
+    xSemaphoreGive(bleMutex);
   }
 }
 
@@ -1297,30 +1302,46 @@ void loop() {
     }
   }
 
-  // --- 3. KNOB 1 SWITCH (GPIO 10 - ACTIVE LOW: 1.5s HOLD FOR MODE SELECTOR) ---
+  // --- 3. KNOB 1 SWITCH (GPIO 10 - ACTIVE LOW: 500ms HOLD FOR MODE SELECTOR) ---
   int k1SwRaw = digitalRead(PIN_K1_SW);
   static int lastK1SwRaw = HIGH;
   static unsigned long lastK1SwDebounce = 0;
   static bool k1SwPressed = false;
   static unsigned long k1SwPressStart = 0;
-  static bool k1SwHeld1500ms = false;
+  static bool k1SwHeld500ms = false;
 
   if (k1SwRaw != lastK1SwRaw) {
     lastK1SwDebounce = now;
     lastK1SwRaw = k1SwRaw;
   }
-  if (now - lastK1SwDebounce > 30) {
+  if (now - lastK1SwDebounce > 25) {
     if (k1SwRaw == LOW && !k1SwPressed) {
       k1SwPressed = true;
       k1SwPressStart = now;
-      k1SwHeld1500ms = false;
+      k1SwHeld500ms = false;
       lastUserActivity = now;
       triggerLedBlip(0, 80, 40); // Emerald Green
+
+      // If in Mode Select Menu, CONFIRM IMMEDIATELY on press!
+      if (currentState == STATE_MODE_SELECT_MENU) {
+        SystemState targetState = SYSTEM_MODES[currentModeMenuIndex].state;
+        Serial.printf("\n[MODE SELECT] 🟢 Confirmed Mode via Knob 1 Click: %s\n", SYSTEM_MODES[currentModeMenuIndex].name);
+        currentState = targetState;
+        updateStatusLED();
+        if (currentState == STATE_REMOTE_CONTROL) {
+          renderRemoteControlMenu();
+        } else if (currentState == STATE_JOINT_CONTROL) {
+          renderJointControlMenu();
+        } else {
+          renderActionMenu();
+        }
+      }
     } else if (k1SwRaw == LOW && k1SwPressed) {
       lastUserActivity = now;
-      if (!k1SwHeld1500ms && (now - k1SwPressStart >= 1500)) {
-        k1SwHeld1500ms = true;
-        Serial.println("\n[SYSTEM] 🎯 1.5-Second Knob 1 Hold Confirmed! Opening Mode Selector Menu...");
+      if (!k1SwHeld500ms && (now - k1SwPressStart >= 500)) {
+        k1SwHeld500ms = true;
+        Serial.println("\n[SYSTEM] 🎯 500ms Knob 1 Hold Confirmed! Opening Mode Selector Menu...");
+        triggerLedBlip(80, 0, 120); // Bright Purple Cue
         stopRcMotionImmediate();
         sendLocomotionStop();
         previousOperationalState = (currentState == STATE_MODE_SELECT_MENU) ? STATE_ACTION_MENU : currentState;
@@ -1334,7 +1355,7 @@ void loop() {
       k1SwPressed = false;
       lastUserActivity = now;
       unsigned long heldDuration = now - k1SwPressStart;
-      if (!k1SwHeld1500ms && heldDuration >= 30 && heldDuration < 1500) {
+      if (!k1SwHeld500ms && heldDuration >= 20 && heldDuration < 500) {
         if (currentState == STATE_ACTION_MENU) {
           if (isBlockDocked) {
             RobosenAction& act = ACTIONS[currentActionIndex];
@@ -1345,44 +1366,19 @@ void loop() {
           } else {
             Serial.printf("\n>>> [KNOB 1 CLICK] Selected Action: %s <<<\n", ACTIONS[currentActionIndex].name);
             if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
-              Serial.println("[BLE STATUS] ⚡ Knob clicked while disconnected: Immediate connection attempt...");
-              if (connectToRobot()) {
-                connectAttemptCounter = 0;
-                setUiEventFeedback("BLE: CONNECTED TO ROBOT!");
-              } else {
-                connectAttemptCounter++;
-                setUiEventFeedback("K1 CLICK: ROBOT OFFLINE");
-              }
-              lastConnectAttemptTime = millis();
+              Serial.println("[BLE STATUS] ⚡ Knob clicked while disconnected: Triggering background reconnect...");
+              requestBgReconnect = true;
+              setUiEventFeedback("CONNECTING...");
             } else {
               triggerLedBlip(0, 60, 30);
               setUiEventFeedback("K1 CLICK: ACTION SELECTED");
             }
           }
-        } else if (currentState == STATE_MODE_SELECT_MENU) {
-          // Confirm Mode Selection
-          SystemState targetState = SYSTEM_MODES[currentModeMenuIndex].state;
-          Serial.printf("\n[MODE SELECT] 🟢 Selected Mode: %s\n", SYSTEM_MODES[currentModeMenuIndex].name);
-          currentState = targetState;
-          updateStatusLED();
-          if (currentState == STATE_REMOTE_CONTROL) {
-            renderRemoteControlMenu();
-          } else if (currentState == STATE_JOINT_CONTROL) {
-            renderJointControlMenu();
-          } else {
-            renderActionMenu();
-          }
         } else if (currentState == STATE_REMOTE_CONTROL) {
           if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
-            Serial.println("[BLE STATUS] ⚡ Knob clicked while disconnected in RC Mode: Immediate connection attempt...");
-            if (connectToRobot()) {
-              connectAttemptCounter = 0;
-              setUiEventFeedback("BLE: CONNECTED!");
-            } else {
-              connectAttemptCounter++;
-              setUiEventFeedback("RC: ROBOT OFFLINE");
-            }
-            lastConnectAttemptTime = millis();
+            Serial.println("[BLE STATUS] ⚡ Knob clicked while disconnected in RC Mode: Triggering background reconnect...");
+            requestBgReconnect = true;
+            setUiEventFeedback("CONNECTING...");
           } else {
             // Short-click in RC Mode: 2-Way Gear Toggle (DRIVE <-> STRAFE)
             currentRcGear = (currentRcGear == RC_GEAR_DRIVE) ? RC_GEAR_STRAFE : RC_GEAR_DRIVE;
@@ -1393,15 +1389,9 @@ void loop() {
           }
         } else if (currentState == STATE_JOINT_CONTROL) {
           if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
-            Serial.println("[BLE STATUS] ⚡ Knob clicked while disconnected in Joint Mode: Immediate connection attempt...");
-            if (connectToRobot()) {
-              connectAttemptCounter = 0;
-              setUiEventFeedback("BLE: CONNECTED!");
-            } else {
-              connectAttemptCounter++;
-              setUiEventFeedback("JOINT: ROBOT OFFLINE");
-            }
-            lastConnectAttemptTime = millis();
+            Serial.println("[BLE STATUS] ⚡ Knob clicked while disconnected in Joint Mode: Triggering background reconnect...");
+            requestBgReconnect = true;
+            setUiEventFeedback("CONNECTING...");
           } else {
             sendJointFrameNonBlocking(25);
             triggerLedBlip(0, 80, 40);
@@ -1419,8 +1409,7 @@ void loop() {
           currentState = STATE_ACTION_MENU;
           connectAttemptCounter = 0;
           renderActionMenu();
-          connectToRobot();
-          lastConnectAttemptTime = millis();
+          requestBgReconnect = true;
         }
       }
     }
@@ -1438,13 +1427,28 @@ void loop() {
     lastK2SwDebounce = now;
     lastK2SwRaw = k2SwRaw;
   }
-  if (now - lastK2SwDebounce > 30) {
+  if (now - lastK2SwDebounce > 25) {
     if (k2SwRaw == LOW && !k2SwPressed) {
       k2SwPressed = true;
       k2SwPressStart = now;
       k2SwHeld1500ms = false;
       lastUserActivity = now;
       triggerLedBlip(80, 0, 80); // Magenta
+
+      // If in Mode Select Menu, CONFIRM IMMEDIATELY on press!
+      if (currentState == STATE_MODE_SELECT_MENU) {
+        SystemState targetState = SYSTEM_MODES[currentModeMenuIndex].state;
+        Serial.printf("\n[MODE SELECT] 🟢 Confirmed Mode via Knob 2 Click: %s\n", SYSTEM_MODES[currentModeMenuIndex].name);
+        currentState = targetState;
+        updateStatusLED();
+        if (currentState == STATE_REMOTE_CONTROL) {
+          renderRemoteControlMenu();
+        } else if (currentState == STATE_JOINT_CONTROL) {
+          renderJointControlMenu();
+        } else {
+          renderActionMenu();
+        }
+      }
     } else if (k2SwRaw == LOW && k2SwPressed) {
       lastUserActivity = now;
       if (!k2SwHeld1500ms && (now - k2SwPressStart >= 1500)) {
@@ -1522,20 +1526,34 @@ void loop() {
     lastStartRaw = startRaw;
   }
 
-  if (now - lastStartDebounce > 30) {
+  if (now - lastStartDebounce > 25) {
     if (startRaw == LOW && !startBtnPressed) {
       startBtnPressed = true;
       startPressStart = now;
       startBtnHeld3s = false;
       lastUserActivity = now;
       triggerLedBlip(0, 100, 0); // Green
-      if (currentState != STATE_REMOTE_CONTROL) {
+
+      // If in Mode Select Menu, CONFIRM IMMEDIATELY on press!
+      if (currentState == STATE_MODE_SELECT_MENU) {
+        SystemState targetState = SYSTEM_MODES[currentModeMenuIndex].state;
+        Serial.printf("\n[MODE SELECT] 🟢 Confirmed Mode via Green Button: %s\n", SYSTEM_MODES[currentModeMenuIndex].name);
+        currentState = targetState;
+        updateStatusLED();
+        if (currentState == STATE_REMOTE_CONTROL) {
+          renderRemoteControlMenu();
+        } else if (currentState == STATE_JOINT_CONTROL) {
+          renderJointControlMenu();
+        } else {
+          renderActionMenu();
+        }
+      } else if (currentState != STATE_REMOTE_CONTROL) {
         Serial.println("\n[BUTTON] Start button pressed... (Hold 3s to switch robot)");
       }
     } else if (startRaw == LOW && startBtnPressed) {
       lastUserActivity = now;
       if (!startBtnHeld3s && (now - startPressStart >= 3000)) {
-        if (currentState != STATE_REMOTE_CONTROL) {
+        if (currentState == STATE_ACTION_MENU) {
           startBtnHeld3s = true;
           Serial.println("\n[SYSTEM] 🎯 3-Second Hold Confirmed! Opening Teacher Pairing Menu...");
           runBleScan();
@@ -1545,7 +1563,7 @@ void loop() {
       startBtnPressed = false;
       lastUserActivity = now;
       unsigned long heldDuration = now - startPressStart;
-      if (!startBtnHeld3s && heldDuration >= 40 && heldDuration < 3000) {
+      if (!startBtnHeld3s && heldDuration >= 20 && heldDuration < 3000) {
         if (currentState == STATE_ACTION_MENU) {
           Serial.println("\n[SYSTEM] Start button clicked: Initiating Run Chain (GPIO 15/16)...");
           if (!executeRunChain()) {
@@ -1555,41 +1573,17 @@ void loop() {
             updateStatusLED();
             setUiEventFeedback("START: NO CHAIN BLOCKS!");
           }
-        } else if (currentState == STATE_MODE_SELECT_MENU) {
-          SystemState targetState = SYSTEM_MODES[currentModeMenuIndex].state;
-          Serial.printf("\n[MODE SELECT] 🟢 Selected Mode: %s\n", SYSTEM_MODES[currentModeMenuIndex].name);
-          currentState = targetState;
-          updateStatusLED();
-          if (currentState == STATE_REMOTE_CONTROL) {
-            renderRemoteControlMenu();
-          } else if (currentState == STATE_JOINT_CONTROL) {
-            renderJointControlMenu();
-          } else {
-            renderActionMenu();
-          }
         } else if (currentState == STATE_REMOTE_CONTROL) {
           if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
-            Serial.println("[BLE STATUS] ⚡ Green Start clicked while disconnected in RC Mode: Immediate connection attempt...");
-            if (connectToRobot()) {
-              connectAttemptCounter = 0;
-              setUiEventFeedback("BLE: CONNECTED!");
-            } else {
-              connectAttemptCounter++;
-              setUiEventFeedback("RC: ROBOT OFFLINE");
-            }
-            lastConnectAttemptTime = millis();
+            Serial.println("[BLE STATUS] ⚡ Green Start clicked while disconnected in RC Mode: Triggering background reconnect...");
+            requestBgReconnect = true;
+            setUiEventFeedback("CONNECTING...");
           }
         } else if (currentState == STATE_JOINT_CONTROL) {
           if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
-            Serial.println("[BLE STATUS] ⚡ Green Start clicked while disconnected in Joint Mode: Immediate connection attempt...");
-            if (connectToRobot()) {
-              connectAttemptCounter = 0;
-              setUiEventFeedback("BLE: CONNECTED!");
-            } else {
-              connectAttemptCounter++;
-              setUiEventFeedback("JOINT: ROBOT OFFLINE");
-            }
-            lastConnectAttemptTime = millis();
+            Serial.println("[BLE STATUS] ⚡ Green Start clicked while disconnected in Joint Mode: Triggering background reconnect...");
+            requestBgReconnect = true;
+            setUiEventFeedback("CONNECTING...");
           } else {
             sendJointFrameNonBlocking(25);
             triggerLedBlip(0, 80, 40);
@@ -1632,19 +1626,32 @@ void loop() {
     lastStopRaw = stopRaw;
   }
 
-  if (now - lastStopDebounce > 30) {
+  if (now - lastStopDebounce > 25) {
     if (stopRaw == LOW && !stopBtnPressed) {
       stopBtnPressed = true;
       stopPressStart = now;
       stopBtnHeld3s = false;
       lastUserActivity = now;
       triggerLedBlip(100, 0, 0); // Red
-      if (currentState != STATE_REMOTE_CONTROL) {
+
+      // If in Mode Select Menu, CANCEL IMMEDIATELY on press!
+      if (currentState == STATE_MODE_SELECT_MENU) {
+        Serial.println("\n[CANCEL] Cancelled mode select via Red Button, returning to previous mode.");
+        currentState = previousOperationalState;
+        updateStatusLED();
+        if (currentState == STATE_REMOTE_CONTROL) {
+          renderRemoteControlMenu();
+        } else if (currentState == STATE_JOINT_CONTROL) {
+          renderJointControlMenu();
+        } else {
+          renderActionMenu();
+        }
+      } else if (currentState != STATE_REMOTE_CONTROL) {
         Serial.println("\n[BUTTON] Red Stop/Cancel button pressed... (Hold 3s to disconnect BLE)");
       }
     } else if (stopRaw == LOW && stopBtnPressed) {
       lastUserActivity = now;
-      if (currentState != STATE_REMOTE_CONTROL) {
+      if (currentState != STATE_REMOTE_CONTROL && currentState != STATE_MODE_SELECT_MENU) {
         if (!stopBtnHeld3s && (now - stopPressStart >= 3000)) {
           stopBtnHeld3s = true;
           Serial.println("\n[SYSTEM] 🎯 3-Second Stop Hold Confirmed! Disconnecting BLE session...");
@@ -1664,7 +1671,7 @@ void loop() {
       stopBtnPressed = false;
       lastUserActivity = now;
       unsigned long heldDuration = now - stopPressStart;
-      if (!stopBtnHeld3s && heldDuration >= 40 && heldDuration < 3000) {
+      if (!stopBtnHeld3s && heldDuration >= 20 && heldDuration < 3000) {
         if (currentState == STATE_ACTION_MENU) {
           if (isBlockDocked) {
             Serial.println("\n[CANCEL] Dismissed docked block configuration.");
@@ -1678,28 +1685,11 @@ void loop() {
             updateStatusLED();
             setUiEventFeedback("STOP: EMERGENCY HALT!");
           }
-        } else if (currentState == STATE_MODE_SELECT_MENU) {
-          Serial.println("\n[CANCEL] Cancelled mode select, returning to previous mode.");
-          currentState = previousOperationalState;
-          updateStatusLED();
-          if (currentState == STATE_REMOTE_CONTROL) {
-            renderRemoteControlMenu();
-          } else if (currentState == STATE_JOINT_CONTROL) {
-            renderJointControlMenu();
-          } else {
-            renderActionMenu();
-          }
         } else if (currentState == STATE_REMOTE_CONTROL) {
           if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
-            Serial.println("[BLE STATUS] ⚡ Red button clicked while disconnected in RC Mode: Immediate connection attempt...");
-            if (connectToRobot()) {
-              connectAttemptCounter = 0;
-              setUiEventFeedback("BLE: CONNECTED!");
-            } else {
-              connectAttemptCounter++;
-              setUiEventFeedback("RC: ROBOT OFFLINE");
-            }
-            lastConnectAttemptTime = millis();
+            Serial.println("[BLE STATUS] ⚡ Red button clicked while disconnected in RC Mode: Triggering background reconnect...");
+            requestBgReconnect = true;
+            setUiEventFeedback("CONNECTING...");
           }
         } else if (currentState == STATE_JOINT_CONTROL) {
           Serial.println("\n[EMERGENCY STOP] Red Stop button pressed in Joint Mode: Sending locomotion stop!");
@@ -3089,9 +3079,9 @@ void einkDisplayTask(void* pvParameters) {
       einkFullDirty = false;
       einkCenterDirty = false;
 
-      // Use full 30-frame factory LUT for full-screen updates (boot, dock, buttons);
-      // use fast symmetric LUT only for rapid middle-band knob turns.
-      loadCustomEInkLut(!doFull);
+      // Use fast symmetric 280ms LUT for interactive knob turns and mode switching;
+      // 350ms settle pass below ensures crisp contrast.
+      loadCustomEInkLut(true);
       epdWaitStartMs = millis();
 
       if (currentState == STATE_BLE_PAIRING_MENU) {
@@ -3099,7 +3089,7 @@ void einkDisplayTask(void* pvParameters) {
         drawPairingMenuToBuffer();
         display.display(true);
       } else if (currentState == STATE_MODE_SELECT_MENU) {
-        loadCustomEInkLut(false);
+        loadCustomEInkLut(true); // Fast 280ms LUT for snappy, instant carousel response
         drawModeSelectMenuToBuffer();
         display.display(true);
       } else if (currentState == STATE_ACTION_MENU) {
@@ -3166,12 +3156,15 @@ void einkDisplayTask(void* pvParameters) {
 void bleReconnectTask(void* pvParameters) {
   while (true) {
     unsigned long now = millis();
+    bool userRequested = requestBgReconnect;
+    if (userRequested) requestBgReconnect = false;
+
     if ((currentState == STATE_ACTION_MENU || currentState == STATE_REMOTE_CONTROL || currentState == STATE_JOINT_CONTROL) && !isConnected) {
       if (pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
-        if ((now - lastUserActivity > 5000) && (now - lastConnectAttemptTime >= 3000)) {
+        if (userRequested || ((now - lastUserActivity > 5000) && (now - lastConnectAttemptTime >= 3000))) {
           if (bleMutex != nullptr && xSemaphoreTake(bleMutex, pdMS_TO_TICKS(50)) == pdTRUE) {
-            // Re-verify user hasn't touched controls before starting 1s scan
-            if ((currentState == STATE_ACTION_MENU || currentState == STATE_REMOTE_CONTROL || currentState == STATE_JOINT_CONTROL) && !isConnected && (millis() - lastUserActivity > 5000)) {
+            // Re-verify connection status before starting 1s scan
+            if ((currentState == STATE_ACTION_MENU || currentState == STATE_REMOTE_CONTROL || currentState == STATE_JOINT_CONTROL) && !isConnected) {
               connectAttemptCounter++;
               bool ok = connectToRobot(true); // quietBg = true: does not hijack RGB LED!
               lastConnectAttemptTime = millis();
@@ -3187,7 +3180,7 @@ void bleReconnectTask(void* pvParameters) {
         }
       }
     }
-    vTaskDelay(pdMS_TO_TICKS(250));
+    vTaskDelay(pdMS_TO_TICKS(200));
   }
 }
 
