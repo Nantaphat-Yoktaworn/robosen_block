@@ -83,11 +83,11 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
 
 1. **Connected Robot Status Header (Top Bar Across All Modes)**:
    - **Left Status**: Displays actual connected robot name (e.g. `K1` or `K1 Interstellar`) when paired & connected. Displays `SEARCHING...` while auto-reconnecting, or `DISCONNECTED` when offline.
-   - **Right Battery Cells**: Robot Cell `[R]` (0-100% fill + text, or `--`) and Master Block Cell `[M]` (3.20V-4.20V Li-ion curve).
+   - **Right Battery Cells**: Exact master block firmware battery style ($20\times 10\text{ px}$ cell outline with $2\times 6\text{ px}$ terminal tip) for both Robot Cell `[R]` (0-100% fill + text, or `--`) and Master Block Cell `[M]` (3.20V-4.20V Li-ion curve).
 
 2. **Ultra-Minimal Full-Height Canvas (Zero Clutter)**:
    - **Footer Key Guides Removed**: All bottom key guides, button hints, and divider lines are removed, leaving a clean, distraction-free display surface.
-   - **Mode 1 (Action Select)**: 48×48 chunky pixel-art action icon + Big Bold Number for count or degrees (e.g. `1`, `90°`) + progress dots.
+   - **Mode 1 (Action Select)**: 48×48 chunky pixel-art action icon + Big Bold Number for count or degrees (e.g. `1`, `90°`), dots removed.
    - **Mode 2 (Remote Control)**: 48×48 Gear Icon (Drive/Strafe) on left, 48×48 Stunt Icon with catalog number (`#01`..`#10`) on right.
    - **Mode 3 (Joint Control)**: 48×48 Anatomy Icon (Head, Arms, Legs) + Short Joint Name (e.g. `Shoulder`, `Elbow`) + Big Degree Readout (`+15°`) + 222px wide slider gauge.
    - **Mode Selector Carousel**: 3 side-by-side $64\times 64\text{ px}$ mode cards (`[ 🧱 Blocks ]`, `[ 🎮 RC ]`, `[ 🤖 Joints ]`) with an inverted solid-black highlight for the active selection.
@@ -113,25 +113,24 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
    - **WS2812 RGB LED Telemetry**: Instant 0ms status feedback (Soft Teal = RC Idle, Vivid Green = Walk Fwd, Amber = Walk Rev, Electric Blue = Steer/Strafe, Magenta = Stunt, Red = Stop).
    - **Port Isolation**: Config Dock polling is paused during RC Mode for maximum loop responsiveness and battery conservation.
 
-### 3.4 Joint Control Mode (`STATE_JOINT_CONTROL`)
+### 3.4 Streamlined Flat 17-Joint Controller (`STATE_JOINT_CONTROL`)
 
-1. **Two-Level Anatomical Navigation Hierarchy**:
-   - **Level 1 (Body Group Select)**: Knob 1 scrolls through 5 calibrated body groups: `HEAD` (1 servo), `LEFT ARM` (3 servos), `RIGHT ARM` (3 servos), `LEFT LEG` (5 servos), and `RIGHT LEG` (5 servos).
-   - **Level 2 (Joint Articulation)**: Press **Green Button (`SW3`)** or **Knob 1 Click** to enter Level 2 for the active joint. Knob 1 switches between joints in the group; Knob 2 rotates and articulates the active joint angle in real-time with responsive fixed **$\pm 5^\circ$ steps per knob detent**.
-   - **Back Navigation**: Press **Red Button (`SW5`)** to back out from Level 2 to Level 1.
+1. **Flat Single-Level Navigation Hierarchy**:
+   - **Knob 1 (Left Encoder Twist)**: Directly scrolls through all 17 anatomical joints in sequence (Head Pan $\to$ Left Arm $\to$ Right Arm $\to$ Left Leg $\to$ Right Leg) without requiring any confirmation to enter/exit sub-menus.
+   - **Knob 2 (Right Encoder Twist)**: Directly adjusts and articulates the active joint angle in real-time with responsive fixed **$\pm 5^\circ$ steps per knob detent**.
 2. **Live Real-time Angle Streaming**:
-   - Streams 30-byte Opcode `0xE8` (`jointMove`, speed 25) non-blocking packets with an adaptive ~45ms rate limiter.
+   - Streams 30-byte Opcode `0xE8` (`jointMove`, speed 25) non-blocking packets with an adaptive ~45ms rate limiter directly upon Knob 2 rotation.
    - Preserves all 17 servo positions in a live synchronization buffer so non-active servos maintain posture.
 3. **Calibrated Degree & Slider Gauge Display**:
-   - Displays degrees centered around calibrated $0^\circ$ neutral (e.g. `+35 deg`, `-20 deg`, `0 deg (Center)`).
+   - Displays degrees centered around calibrated $0^\circ$ neutral (e.g. `+35°`, `-20°`, `0° (Center)`).
    - Shows physical hardware min/max limits (`Lim: [min..max]`).
    - Renders a horizontal slider gauge with min/max ticks, neutral center tick, and real-time position pip.
-4. **Instant Pose Resets**:
+4. **Instant Pose Resets & Emergency Stop**:
    - **Knob 2 Short Click**: Immediately snaps active joint back to its calibrated $0^\circ$ neutral center.
    - **Knob 2 Long-Press (1.5s)**: Smoothly resets all 17 servos to calibrated factory standing posture.
+   - **Red Button (`SW5`)**: Emergency safety locomotion halt (`0x0C`).
 5. **WS2812 RGB LED Telemetry**:
-   - Soft Purple / Indigo: Level 1 Body Group selection.
-   - Vivid Cyan / Teal: Active Level 2 Joint Articulation.
+   - Vivid Cyan / Teal: Active Joint Articulation feedback.
 
 ---
 

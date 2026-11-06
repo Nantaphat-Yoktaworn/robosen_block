@@ -256,57 +256,32 @@ unsigned long rcStuntEndMs = 0;
 struct JointDef {
   uint8_t servoId;
   const char* name;
+  uint8_t groupIconIdx; // 0=Head, 1=L.Arm, 2=R.Arm, 3=L.Leg, 4=R.Leg
   uint8_t neutral;
   uint8_t minLimit;
   uint8_t maxLimit;
 };
 
-struct JointGroupDef {
-  const char* groupName;
-  uint8_t jointCount;
-  JointDef joints[5];
+const JointDef ALL_JOINTS[17] = {
+  {16, "Head Pan",   0, 123, 42,  202},
+  {6,  "L.Shoulder", 1, 222, 22,  242},
+  {12, "L.Elbow",    1, 214, 33,  233},
+  {13, "L.Wrist",    1, 146, 16,  216},
+  {7,  "R.Shoulder", 2, 26,  6,   226},
+  {14, "R.Elbow",    2, 42,  34,  224},
+  {15, "R.Wrist",    2, 99,  26,  226},
+  {0,  "L.Thigh",    3, 126, 29,  229},
+  {1,  "L.Calf",     3, 65,  10,  220},
+  {2,  "L.Ankle",    3, 100, 26,  226},
+  {8,  "L.Hip",      3, 125, 103, 133},
+  {9,  "L.Foot",     3, 116, 93,  133},
+  {3,  "R.Thigh",    4, 127, 18,  218},
+  {4,  "R.Calf",     4, 184, 30,  240},
+  {5,  "R.Ankle",    4, 141, 26,  226},
+  {10, "R.Hip",      4, 135, 119, 149},
+  {11, "R.Foot",     4, 120, 105, 145}
 };
-
-const JointGroupDef JOINT_GROUPS[5] = {
-  {
-    "HEAD", 1, {
-      {16, "Head Pan", 123, 42, 202}
-    }
-  },
-  {
-    "LEFT ARM", 3, {
-      {6,  "L.Shoulder", 222, 22, 242},
-      {12, "L.Elbow",    214, 33, 233},
-      {13, "L.Wrist",    146, 16, 216}
-    }
-  },
-  {
-    "RIGHT ARM", 3, {
-      {7,  "R.Shoulder", 26,  6,  226},
-      {14, "R.Elbow",    42,  34, 224},
-      {15, "R.Wrist",    99,  26, 226}
-    }
-  },
-  {
-    "LEFT LEG", 5, {
-      {0, "L.Thigh", 126, 29,  229},
-      {1, "L.Calf",   65, 10,  220},
-      {2, "L.Ankle", 100, 26,  226},
-      {8, "L.Hip",   125, 103, 133},
-      {9, "L.Foot",  116, 93,  133}
-    }
-  },
-  {
-    "RIGHT LEG", 5, {
-      {3,  "R.Thigh", 127, 18,  218},
-      {4,  "R.Calf",  184, 30,  240},
-      {5,  "R.Ankle", 141, 26,  226},
-      {10, "R.Hip",   135, 119, 149},
-      {11, "R.Foot",  120, 105, 145}
-    }
-  }
-};
-const int TOTAL_JOINT_GROUPS = 5;
+const int TOTAL_JOINTS = 17;
 
 // Calibrated factory standing posture baseline
 const uint8_t STANDING_SERVO_DEFAULTS[17] = {
@@ -318,10 +293,8 @@ uint8_t currentServoPositions[17] = {
   126, 65, 100, 127, 184, 141, 222, 26, 125, 116, 135, 120, 214, 146, 42, 99, 123
 };
 
-// Mode 3 navigation state
-int currentJointGroupIndex = 0;      // 0..4
-int currentJointInGroupIndex = 0;    // 0..(jointCount-1)
-bool isJointSelectedLevel2 = false;  // false = Group view (Level 1), true = Joint angle view (Level 2)
+// Mode 3 navigation state (Single flat 17-joint controller)
+int currentJointIndex = 0;      // 0..16
 unsigned long lastJointBleSendMs = 0;
 
 Preferences preferences;
@@ -516,11 +489,7 @@ void updateStatusLED() {
         setStatusLED(30, 15, 0); // 🟠 Amber/Orange: Paired, reconnecting
       }
     } else {
-      if (isJointSelectedLevel2) {
-        setStatusLED(0, 60, 60);  // 🔵 Vivid Cyan/Teal: Active Level 2 Joint Articulation
-      } else {
-        setStatusLED(35, 0, 50);  // 🟣 Soft Purple/Indigo: Joint Control Group Mode
-      }
+      setStatusLED(0, 60, 60);  // 🔵 Vivid Cyan/Teal: Direct Joint Articulation
     }
   } else if (currentState == STATE_REMOTE_CONTROL) {
     if (!isConnected) {
@@ -776,14 +745,13 @@ void sendJointFrameNonBlocking(uint8_t speed) {
 }
 
 void resetActiveJointToCenter() {
-  const JointGroupDef& grp = JOINT_GROUPS[currentJointGroupIndex];
-  const JointDef& j = grp.joints[currentJointInGroupIndex];
+  const JointDef& j = ALL_JOINTS[currentJointIndex];
   currentServoPositions[j.servoId] = j.neutral;
   sendJointFrameNonBlocking(25);
   triggerLedBlip(0, 80, 0);
   requestEInkCenterUpdate();
-  Serial.printf("\n🎯 [JOINT] Reset Joint %d (%s: %s) to neutral (%d)\n",
-                j.servoId, grp.groupName, j.name, j.neutral);
+  Serial.printf("\n🎯 [JOINT] Reset Joint %d (%s) to neutral (%d)\n",
+                j.servoId, j.name, j.neutral);
   setUiEventFeedback("JOINT: RESET TO CTR");
 }
 
@@ -1245,19 +1213,10 @@ void loop() {
         Serial.printf("🔄 [RC STEER] Turn %s\n", (d1 < 0) ? "Left" : "Right");
       }
     } else if (currentState == STATE_JOINT_CONTROL) {
-      if (!isJointSelectedLevel2) {
-        currentJointGroupIndex = (currentJointGroupIndex + d1) % TOTAL_JOINT_GROUPS;
-        while (currentJointGroupIndex < 0) currentJointGroupIndex += TOTAL_JOINT_GROUPS;
-        currentJointInGroupIndex = 0;
-        requestEInkCenterUpdate();
-        Serial.printf("🔄 [JOINT GROUP] %s\n", JOINT_GROUPS[currentJointGroupIndex].groupName);
-      } else {
-        int cnt = JOINT_GROUPS[currentJointGroupIndex].jointCount;
-        currentJointInGroupIndex = (currentJointInGroupIndex + d1) % cnt;
-        while (currentJointInGroupIndex < 0) currentJointInGroupIndex += cnt;
-        requestEInkCenterUpdate();
-        Serial.printf("🔄 [JOINT SELECT] %s -> %s\n", JOINT_GROUPS[currentJointGroupIndex].groupName, JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex].name);
-      }
+      currentJointIndex = (currentJointIndex + d1) % TOTAL_JOINTS;
+      while (currentJointIndex < 0) currentJointIndex += TOTAL_JOINTS;
+      requestEInkCenterUpdate();
+      Serial.printf("🔄 [JOINT SELECT] %d: %s (ID %d)\n", currentJointIndex + 1, ALL_JOINTS[currentJointIndex].name, ALL_JOINTS[currentJointIndex].servoId);
     } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
       currentBleIndex = (currentBleIndex + d1) % bleDeviceCount;
       while (currentBleIndex < 0) currentBleIndex += bleDeviceCount;
@@ -1289,27 +1248,18 @@ void loop() {
       requestEInkCenterUpdate(); // Fast middle band refresh on Core 0
       Serial.printf("🔄 [RC STUNT] %s\n", RC_STUNTS[rcStuntIndex].name);
     } else if (currentState == STATE_JOINT_CONTROL) {
-      if (isJointSelectedLevel2) {
-        const JointDef& j = JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex];
-        int newPos = (int)currentServoPositions[j.servoId] + (d2 * 5);
-        newPos = constrain(newPos, (int)j.minLimit, (int)j.maxLimit);
-        currentServoPositions[j.servoId] = (uint8_t)newPos;
-        if (now - lastJointBleSendMs >= 45) {
-          lastJointBleSendMs = now;
-          sendJointFrameNonBlocking(25);
-        }
-        requestEInkCenterUpdate();
-        int degOffset = (int)currentServoPositions[j.servoId] - (int)j.neutral;
-        Serial.printf("🔄 [JOINT ANGLE] %s (%s): %d (offset %+d°)\n",
-                      JOINT_GROUPS[currentJointGroupIndex].groupName, j.name,
-                      currentServoPositions[j.servoId], degOffset);
-      } else {
-        int cnt = JOINT_GROUPS[currentJointGroupIndex].jointCount;
-        currentJointInGroupIndex = (currentJointInGroupIndex + d2) % cnt;
-        while (currentJointInGroupIndex < 0) currentJointInGroupIndex += cnt;
-        requestEInkCenterUpdate();
-        Serial.printf("🔄 [JOINT PREVIEW] %s -> %s\n", JOINT_GROUPS[currentJointGroupIndex].groupName, JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex].name);
+      const JointDef& j = ALL_JOINTS[currentJointIndex];
+      int newPos = (int)currentServoPositions[j.servoId] + (d2 * 5);
+      newPos = constrain(newPos, (int)j.minLimit, (int)j.maxLimit);
+      currentServoPositions[j.servoId] = (uint8_t)newPos;
+      if (now - lastJointBleSendMs >= 45) {
+        lastJointBleSendMs = now;
+        sendJointFrameNonBlocking(25);
       }
+      requestEInkCenterUpdate();
+      int degOffset = (int)currentServoPositions[j.servoId] - (int)j.neutral;
+      Serial.printf("🔄 [JOINT ANGLE] %s: %d (offset %+d°)\n",
+                    j.name, currentServoPositions[j.servoId], degOffset);
     } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
       currentBleIndex = (currentBleIndex + d2) % bleDeviceCount;
       while (currentBleIndex < 0) currentBleIndex += bleDeviceCount;
@@ -1424,19 +1374,11 @@ void loop() {
             }
             lastConnectAttemptTime = millis();
           } else {
-            if (!isJointSelectedLevel2) {
-              isJointSelectedLevel2 = true;
-              triggerLedBlip(0, 100, 100);
-              Serial.printf("\n>>> [JOINT] Entered Level 2 (Angle Control) for %s -> %s <<<\n",
-                            JOINT_GROUPS[currentJointGroupIndex].groupName,
-                            JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex].name);
-            } else {
-              sendJointFrameNonBlocking(25);
-              triggerLedBlip(0, 80, 40);
-              Serial.printf("\n>>> [JOINT] Confirmed angle for %s (%d) <<<\n",
-                            JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex].name,
-                            currentServoPositions[JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex].servoId]);
-            }
+            sendJointFrameNonBlocking(25);
+            triggerLedBlip(0, 80, 40);
+            const JointDef& j = ALL_JOINTS[currentJointIndex];
+            Serial.printf("\n>>> [JOINT] Sent/Confirmed angle for %s (ID %d: %d deg) <<<\n",
+                          j.name, j.servoId, currentServoPositions[j.servoId]);
             updateStatusLED();
             requestEInkCenterUpdate();
           }
@@ -1620,19 +1562,11 @@ void loop() {
             }
             lastConnectAttemptTime = millis();
           } else {
-            if (!isJointSelectedLevel2) {
-              isJointSelectedLevel2 = true;
-              triggerLedBlip(0, 100, 100);
-              Serial.printf("\n[GREEN CONFIRM] Entered Level 2 for %s -> %s\n",
-                            JOINT_GROUPS[currentJointGroupIndex].groupName,
-                            JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex].name);
-            } else {
-              sendJointFrameNonBlocking(25);
-              triggerLedBlip(0, 80, 40);
-              Serial.printf("\n[GREEN CONFIRM] Confirmed angle for %s (%d)\n",
-                            JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex].name,
-                            currentServoPositions[JOINT_GROUPS[currentJointGroupIndex].joints[currentJointInGroupIndex].servoId]);
-            }
+            sendJointFrameNonBlocking(25);
+            triggerLedBlip(0, 80, 40);
+            const JointDef& j = ALL_JOINTS[currentJointIndex];
+            Serial.printf("\n[GREEN CONFIRM] Confirmed angle for %s (ID %d: %d deg)\n",
+                          j.name, j.servoId, currentServoPositions[j.servoId]);
             updateStatusLED();
             requestEInkCenterUpdate();
           }
@@ -1739,20 +1673,12 @@ void loop() {
             lastConnectAttemptTime = millis();
           }
         } else if (currentState == STATE_JOINT_CONTROL) {
-          if (isJointSelectedLevel2) {
-            isJointSelectedLevel2 = false;
-            Serial.println("\n[RED BACK] Backed out to Level 1 (Group View).");
-            triggerLedBlip(80, 40, 0);
-            updateStatusLED();
-            requestEInkCenterUpdate();
-          } else {
-            Serial.println("\n[EMERGENCY STOP] Red Stop button pressed in Joint Mode: Sending locomotion stop!");
-            sendLocomotionStop();
-            setStatusLED(80, 0, 0);
-            delay(100);
-            updateStatusLED();
-            setUiEventFeedback("JOINT: EMERGENCY STOP");
-          }
+          Serial.println("\n[EMERGENCY STOP] Red Stop button pressed in Joint Mode: Sending locomotion stop!");
+          sendLocomotionStop();
+          setStatusLED(80, 0, 0);
+          delay(100);
+          updateStatusLED();
+          setUiEventFeedback("JOINT: EMERGENCY STOP");
         } else if (currentState == STATE_BLE_PAIRING_MENU || currentState == STATE_BLE_SCANNING) {
           Serial.println("\n[CANCEL] Cancelled pairing/scan, returning to Action Menu.");
           currentState = STATE_ACTION_MENU;
@@ -2579,8 +2505,7 @@ void renderRemoteControlMenu() {
 }
 
 void renderJointControlMenu() {
-  const JointGroupDef& grp = JOINT_GROUPS[currentJointGroupIndex];
-  const JointDef& j = grp.joints[currentJointInGroupIndex];
+  const JointDef& j = ALL_JOINTS[currentJointIndex];
   int rawVal = currentServoPositions[j.servoId];
   int degOffset = rawVal - j.neutral;
 
@@ -2591,20 +2516,17 @@ void renderJointControlMenu() {
                   pairedName.c_str(), robotBatteryPercent, robotSpeakerVolume);
   }
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
-  Serial.printf("║ Group: [%-9s] (%d/%d)   Joint: [%-10s] (ID %2d)                     ║\n",
-                grp.groupName, currentJointGroupIndex + 1, TOTAL_JOINT_GROUPS,
-                j.name, j.servoId);
-  Serial.printf("║ Angle: %3d° (Offset %+3d°)  [Min: %3d°, Max: %3d°]   Level: %-7s     ║\n",
-                rawVal, degOffset, j.minLimit, j.maxLimit,
-                isJointSelectedLevel2 ? "L2 (ANGLE)" : "L1 (GROUP)");
+  Serial.printf("║ Joint: [%-10s] (%2d/%2d)  (ID %2d)                                     ║\n",
+                j.name, currentJointIndex + 1, TOTAL_JOINTS, j.servoId);
+  Serial.printf("║ Angle: %3d° (Offset %+3d°)  [Min: %3d°, Max: %3d°]                          ║\n",
+                rawVal, degOffset, j.minLimit, j.maxLimit);
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
-  Serial.println("║ • Knob 1: Select Group (L1) / Select Joint (L2)                        ║");
-  Serial.println("║ • Knob 2: Fine Angle Adjust (L2)                                       ║");
-  Serial.println("║ • Green / K1 Click: Enter L2 / Confirm Angle                           ║");
-  Serial.println("║ • Red Stop: Back to L1 / Emergency Stop                                ║");
-  Serial.println("║ • K2 Click: Reset Joint to Neutral (0°)                                ║");
+  Serial.println("║ • Knob 1: Direct Joint Cycle (All 17 Joints)                           ║");
+  Serial.println("║ • Knob 2: +/- 5 deg Direct Angle Adjust                                ║");
+  Serial.println("║ • K2 Click: Reset Active Joint to Neutral (0°)                         ║");
   Serial.println("║ • K2 Hold (1.5s): Reset ALL 17 Servos to Standing Posture              ║");
-  Serial.println("║ • K1 Hold (1.5s): Return to Universal Mode Selector Menu               ║");
+  Serial.println("║ • Red Stop: Emergency Locomotion Stop                                  ║");
+  Serial.println("║ • Knob 1 Hold (1.5s): Return to Universal Mode Selector Menu           ║");
   Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
   updateEInkJointControl();
 }
@@ -2721,48 +2643,46 @@ void drawDualBatteryHeader(int16_t w) {
     display.print("DISCONNECTED");
   }
 
-  // 3. Dual Battery Gauges (Header Top-Right)
+  // 3. Dual Battery Gauges (Header Top-Right) in exact Main Firmware 20x10 Outline Style
   display.setFont();
   display.setTextSize(1);
 
   float vbat = readBatteryVoltage();
   int masterPct = calculateBatteryPercent(vbat);
 
-  // --- Robot Battery Cell [R] ---
-  int rx = 138;
-  int ry = 7;
+  // --- Robot Battery Cell [R] (20x10 px outline + 2x6 terminal tip) ---
+  int rx = 126;
   display.setCursor(rx, 8);
   display.print("R");
 
-  display.drawRect(rx + 8, ry, 16, 9, GxEPD_WHITE);
-  display.fillRect(rx + 24, ry + 2, 2, 5, GxEPD_WHITE); // Positive terminal nub
+  display.drawRect(rx + 8, 6, 20, 10, GxEPD_WHITE);
+  display.fillRect(rx + 28, 8, 2, 6, GxEPD_WHITE); // terminal tip
 
   if (isConnected && hasRobotBattery && robotBatteryPercent >= 0) {
-    int fillW = map(constrain(robotBatteryPercent, 0, 100), 0, 100, 0, 12);
+    int fillW = map(constrain(robotBatteryPercent, 0, 100), 0, 100, 0, 16);
     if (fillW > 0) {
-      display.fillRect(rx + 10, ry + 2, fillW, 5, GxEPD_WHITE);
+      display.fillRect(rx + 10, 8, fillW, 6, GxEPD_WHITE);
     }
-    display.setCursor(rx + 28, 8);
+    display.setCursor(rx + 33, 8);
     display.printf("%d%%", robotBatteryPercent);
   } else {
-    display.setCursor(rx + 28, 8);
+    display.setCursor(rx + 33, 8);
     display.print("--");
   }
 
-  // --- Master Battery Cell [M] ---
-  int mx = 194;
-  int my = 7;
+  // --- Master Battery Cell [M] (20x10 px outline + 2x6 terminal tip) ---
+  int mx = 188;
   display.setCursor(mx, 8);
   display.print("M");
 
-  display.drawRect(mx + 8, my, 16, 9, GxEPD_WHITE);
-  display.fillRect(mx + 24, my + 2, 2, 5, GxEPD_WHITE); // Positive terminal nub
+  display.drawRect(mx + 8, 6, 20, 10, GxEPD_WHITE);
+  display.fillRect(mx + 28, 8, 2, 6, GxEPD_WHITE); // terminal tip
 
-  int mFillW = map(constrain(masterPct, 0, 100), 0, 100, 0, 12);
+  int mFillW = map(constrain(masterPct, 0, 100), 0, 100, 0, 16);
   if (mFillW > 0) {
-    display.fillRect(mx + 10, my + 2, mFillW, 5, GxEPD_WHITE);
+    display.fillRect(mx + 10, 8, mFillW, 6, GxEPD_WHITE);
   }
-  display.setCursor(mx + 28, 8);
+  display.setCursor(mx + 33, 8);
   display.printf("%d%%", masterPct);
 }
 
@@ -2789,38 +2709,17 @@ void drawActionMenuToBuffer(bool invertMiddle = false) {
   if (actIdx < 0 || actIdx >= TOTAL_ACTIONS) actIdx = 0;
   RobosenAction act = ACTIONS[actIdx];
 
-  // 48x48 Action Bitmap
-  drawBitmap2x(24, 44, getActionIcon(actIdx), 24, 24, midFg);
+  // 48x48 Action Bitmap (centered vertically at y = 48)
+  drawBitmap2x(24, 48, getActionIcon(actIdx), 24, 24, midFg);
 
   // Big Parameter Number (e.g. 1, 2, 90°)
   display.setTextColor(midFg);
   display.setFont(&FreeSansBold18pt7b);
-  display.setCursor(95, 76);
+  display.setCursor(105, 80);
   if (strcmp(act.paramUnit, "Deg°") == 0) {
     display.printf("%d°", act.paramVal);
   } else {
     display.printf("%d", act.paramVal);
-  }
-
-  // Parameter Progress Dots
-  display.setFont();
-  int stepSize = (act.paramStep > 0) ? act.paramStep : 1;
-  int totalDots = ((act.paramMax - act.paramMin) / stepSize) + 1;
-  if (totalDots < 1) totalDots = 1;
-  if (totalDots > 5) totalDots = 5;
-
-  int currentDot = ((act.paramVal - act.paramMin) / stepSize) + 1;
-  if (currentDot < 0) currentDot = 0;
-  if (currentDot > totalDots) currentDot = totalDots;
-
-  for (int i = 0; i < totalDots; i++) {
-    int dotX = 96 + (i * 16);
-    int dotY = 96;
-    if (i < currentDot) {
-      display.fillCircle(dotX, dotY, 4, midFg);
-    } else {
-      display.drawCircle(dotX, dotY, 4, midFg);
-    }
   }
 }
 
@@ -3068,13 +2967,12 @@ void drawJointControlToBuffer(bool invertMiddle) {
     display.fillRect(2, 24, w - 4, 96, GxEPD_BLACK);
   }
 
-  const JointGroupDef& grp = JOINT_GROUPS[currentJointGroupIndex];
-  const JointDef& j = grp.joints[currentJointInGroupIndex];
+  const JointDef& j = ALL_JOINTS[currentJointIndex];
   int currentVal = (int)currentServoPositions[j.servoId];
   int offset = currentVal - (int)j.neutral;
 
   // Anatomy 48x48 Icon (Head, L.Arm, R.Arm, L.Leg, R.Leg)
-  drawBitmap2x(14, 34, getJointGroupIcon(currentJointGroupIndex), 24, 24, midFg);
+  drawBitmap2x(14, 34, getJointGroupIcon(j.groupIconIdx), 24, 24, midFg);
 
   // Short Joint Name (strip "L." or "R." prefix)
   const char* sName = (j.name[1] == '.') ? (j.name + 2) : j.name;
