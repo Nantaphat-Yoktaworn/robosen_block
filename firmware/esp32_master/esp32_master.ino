@@ -751,7 +751,14 @@ void sendJointFrameNonBlocking(uint8_t speed) {
 
       uint16_t checksum = packet[2] + packet[3];
       for (int i = 0; i < 17; i++) {
-        packet[4 + i] = currentServoPositions[i];
+        uint8_t pos = currentServoPositions[i];
+        if (i == 16) {
+          // Invert Head Pan (Servo 16) so physical head rotation matches UI slider and user expectation
+          // Neutral = 123: 246 - 123 = 123; Min = 42: 246 - 42 -> 202; Max = 202: 246 - 202 -> 44
+          int inverted = 246 - (int)pos;
+          pos = (uint8_t)constrain(inverted, 42, 202);
+        }
+        packet[4 + i] = pos;
         checksum += packet[4 + i];
       }
 
