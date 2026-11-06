@@ -79,18 +79,17 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
 3. **Clean Disconnect**:
    - Long-pressing `BTN_STOP` for 3 seconds cleanly disconnects the active BLE session.
 
-### 3.2 Dual Battery Monitoring: Master Block & Robot Telemetry
+### 3.2 Dual Battery Monitoring Header & 24×24 Pixel-Art Icon System
 
-1. **Master Block Battery Telemetry (`BATSENSE` on `GPIO 1` / ADC1_CH0)**:
-   - Samples precision 1:1 voltage divider via `analogReadMilliVolts(PIN_BATSENSE)`.
-   - Calculates accurate battery percentage using Li-ion discharge characteristics ($3.20\text{V} - 4.20\text{V}$).
-   - Renders battery outline icon and dynamic fill level on the top right of the E-Paper status header.
+1. **Dual Battery Header (Top-Right Status Bar Across All Modes)**:
+   - **Robot Cell `[R]`**: Live BLE Opcode `0x0F` telemetry percentage (`0-100%`) with dynamic filled battery outline (`16×9 px`) and positive terminal nub (`2×5 px`). Shows `--` with empty cell when disconnected.
+   - **Master Cell `[M]`**: Real-time ADC voltage divider (`BATSENSE` on `GPIO 1`), converted to accurate percentage (`3.20V - 4.20V`) with dynamic filled battery outline.
 
-2. **Robot Battery & State Telemetry (`0x0F` GATT Notifications)**:
-   - Subscribes to BLE notifications on characteristic `0xFFE1` upon connection.
-   - Periodically queries live telemetry via 5-byte Opcode `0x0F` packet `[0xFF, 0xFF, 0x02, 0x0F, 0x11]` every 5 seconds during idle periods (also acting as connection keep-alive).
-   - Extracts live battery percentage (`payload[1]`, 0–100%), speaker volume (`payload[2]`), and auto-stand status.
-   - Dynamically renders `[K1: XX%]` badge on the E-Paper header across all modes when connected.
+2. **24×24 Pixel-Art Monochromatic Bitmaps (`esp32_master_icons.h`)**:
+   - **Mode 1 Actions**: Walk Forward, Walk Backward, Turn Left, Turn Right, Punch, Pushups, Wave Hand.
+   - **Mode 2 Remote Control**: Steering Wheel (`ICON_GEAR_DRIVE`), Lateral Arrows (`ICON_GEAR_STRAFE`), Action Starburst Badge (`ICON_STUNT_BURST`).
+   - **Mode 3 Joint Anatomy**: Head, Left Arm, Right Arm, Left Leg, Right Leg body group silhouettes.
+   - **Mode Selector Menu**: Coding Blocks, Gamepad RC, and Articulated Humanoid badges.
 
 ### 3.3 Scalable Multi-Mode Switcher & Remote Control (RC) Mode
 
@@ -117,7 +116,7 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
 
 1. **Two-Level Anatomical Navigation Hierarchy**:
    - **Level 1 (Body Group Select)**: Knob 1 scrolls through 5 calibrated body groups: `HEAD` (1 servo), `LEFT ARM` (3 servos), `RIGHT ARM` (3 servos), `LEFT LEG` (5 servos), and `RIGHT LEG` (5 servos).
-   - **Level 2 (Joint Articulation)**: Press **Green Button (`SW3`)** or **Knob 1 Click** to enter Level 2 for the active joint. Knob 1 switches between joints in the group; Knob 2 rotates and articulates the active joint angle in real-time.
+   - **Level 2 (Joint Articulation)**: Press **Green Button (`SW3`)** or **Knob 1 Click** to enter Level 2 for the active joint. Knob 1 switches between joints in the group; Knob 2 rotates and articulates the active joint angle in real-time with responsive fixed **$\pm 5^\circ$ steps per knob detent**.
    - **Back Navigation**: Press **Red Button (`SW5`)** to back out from Level 2 to Level 1.
 2. **Live Real-time Angle Streaming**:
    - Streams 30-byte Opcode `0xE8` (`jointMove`, speed 25) non-blocking packets with an adaptive ~45ms rate limiter.
