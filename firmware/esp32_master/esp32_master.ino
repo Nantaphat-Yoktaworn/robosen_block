@@ -2601,18 +2601,27 @@ void drawActionMenuToBuffer(bool invertMiddle = false) {
   if (actIdx < 0 || actIdx >= TOTAL_ACTIONS) actIdx = 0;
   RobosenAction act = ACTIONS[actIdx];
 
-  // 48x48 Action Bitmap (centered in left half: x=58, y=48)
-  drawBitmap2x(58, 48, getActionIcon(actIdx), 24, 24, midFg);
+  // 48x48 Action Bitmap (centered in left half of visible window: x = 92 - 24 = 68, y = 48)
+  drawBitmap2x(68, 48, getActionIcon(actIdx), 24, 24, midFg);
 
-  // Big Parameter Number (centered in right half: x=140, y=80)
+  // Big Parameter Number (dynamically centered in right half of visible window: center = 197)
+  char numStr[16];
+  if (strcmp(act.paramUnit, "Deg°") == 0) {
+    snprintf(numStr, sizeof(numStr), "%d°", act.paramVal);
+  } else {
+    snprintf(numStr, sizeof(numStr), "%d", act.paramVal);
+  }
+
   display.setTextColor(midFg);
   display.setFont(&FreeSansBold18pt7b);
-  display.setCursor(140, 80);
-  if (strcmp(act.paramUnit, "Deg°") == 0) {
-    display.printf("%d°", act.paramVal);
-  } else {
-    display.printf("%d", act.paramVal);
-  }
+
+  int16_t bx, by;
+  uint16_t bw, bh;
+  display.getTextBounds(numStr, 0, 0, &bx, &by, &bw, &bh);
+
+  int16_t textX = 197 - (bw / 2) - bx;
+  display.setCursor(textX, 80);
+  display.print(numStr);
 }
 
 void drawPairingMenuToBuffer() {
