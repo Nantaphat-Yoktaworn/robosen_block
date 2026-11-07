@@ -35,6 +35,7 @@ The Master Block firmware serves as the tangible programming and interactive con
    - Instant emergency halt capability via Red Stop Button.
 6. **E-Paper Display (SPI, GPIO 4, 5, 6, 7, 21, 38)**:
    - Displays real-time action icons, parameter values, docked block status, joint slider gauges, battery meter, and 4-input UI hints with fast partial refresh on Core 0.
+   - For an in-depth breakdown of the custom 280ms overdrive LUT, dual-core FreeRTOS architecture, and hybrid settle pass, see [`docs/EINK_DISPLAY_ARCHITECTURE.md`](file:///Users/nnnn/Projects/robosen_block/docs/EINK_DISPLAY_ARCHITECTURE.md).
 7. **BLE Client Gateway**:
    - Scans and connects to the Robosen K1 robot (Service `0xFFE0`, Characteristic `0xFFE1`), translating block sequences into Robosen motor/animation opcodes and streaming Opcode `0xE8` joint move packets.
 
