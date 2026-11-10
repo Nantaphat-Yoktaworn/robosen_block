@@ -1,41 +1,52 @@
 # Robosen K1 Master Block Firmware
 
 > **Target MCU:** ESP32-S3 (Espressif ESP32-S3-DevKitC-1-N8R8 / N16R8)  
-> **Source File:** [`esp32_master.ino`](file:///C:/Users/nnnn/Projects/robosen_block/firmware/esp32_master/esp32_master.ino)  
+> **Source File:** [`esp32_master.ino`](file:///home/nnnn/projects/robosen_block/firmware/esp32_master/esp32_master.ino)  
 > **Framework:** Arduino ESP32 Core 3.x / ESP-IDF  
 > **Display:** 2.13" SPI E-Paper (DEPG0213BN / SSD1680, 122×250, GxEPD2)  
 > **Wireless:** BLE 4.2 / 5.0 Client (Robosen K1 Humanoid Robot GATT Protocol)  
-> **Status:** Fully Functional Prototype #01 — Updated & Verified with Carrier PCB Configuration (4 UI Inputs: 2 Encoders + 2 Buttons, 3 Operational Modes)
+> **Status:** Fully Functional Prototype #01 — Updated with Dynamic Port-Driven Mode 1 & Strict Port Locking (4 UI Inputs: 2 Encoders + 2 Buttons, 3 Operational Modes)
 
 ---
 
 ## 1. System Overview
 
 The Master Block firmware serves as the tangible programming and interactive control hub for the Robosen K1 humanoid robot:
-1. **Interactive 4-Input Control Surface with Unified Navigation**:
-   - **Direct Mode Cycling**: **Knob 1 Click (`SW1` - GPIO 10)** directly cycles through all modes sequentially with zero hold latency:
-     $$\text{Mode 1 (Block Coding)} \longrightarrow \text{Mode 2 (RC Mode)} \longrightarrow \text{Mode 3 (Joint Control)} \longrightarrow \text{Mode 1}$$
-   - **Universal Confirm / Go**: **Green Start Button (`SW3` - GPIO 14)** in Mode 1 flashes configuration into the docked block (if docked) or executes the physical block chain sequence (if undocked). In Mode 2/3 when disconnected, initiates background BLE reconnection.
-   - **Universal Back / Halt**: **Red Stop Button (`SW5` - GPIO 2)** universally halts motion, dismisses docked configuration, or cleanly disconnects BLE session (3s hold).
-   - **Knob 1 (Encoder SW1)**: Cycles through actions (Mode 1), steers robot turning (Mode 2), or scrolls joints (Mode 3). Single-click cycles modes directly.
-   - **Knob 2 (Encoder SW2)**: Fine parameter adjust (Mode 1), stunt selection & execution (Mode 2), or live real-time joint degree articulation (Mode 3).
+1. **Interactive 4-Input Control Surface & Hardware-Driven Mode Locking**:
+   - **Dynamic Port-Driven Mode 1 (`STATE_ACTION_MENU`)**:
+     - Mode 1 is **only active** when an Action Block is connected to the Config Port (`Serial1`, GPIO 17/18) **OR** an Action Block chain is connected to the Run Port (`ChainSerial`, GPIO 15/16).
+     - Whenever any block is connected to either port, the Master Block automatically transitions to and **strictly locks into Mode 1** (Knob 1 click will not cycle away until all blocks are removed from both ports).
+     - When **no blocks** are connected to either port, Mode 1 is completely hidden: the system boots/switches to **Mode 2 (`STATE_REMOTE_CONTROL`)**, and **Knob 1 Click (`SW1` - GPIO 10)** cycles strictly between **Mode 2 (RC Mode) $\longleftrightarrow$ Mode 3 (Joint Control)**.
+   - **Mode 1 Sub-Modes (Config Mode Priority vs. Run Mode)**:
+     - **Sub-Mode 1A — Configuration Menu UI** (`isBlockDocked == true` on Config Port, regardless of Run Port):
+       - Displays the **Configuration Menu UI** only (48×48 Action Icon + Big Parameter Value).
+       - **Auto-loads** the docked block's stored Action ID & Parameter onto the screen immediately upon connection.
+       - **Knob 1 Twist**: Select Action. **Knob 2 Twist**: Adjust Parameter. **Knob 2 Click**: Reset Parameter to min.
+       - **Green Start Button (`SW3`)**: Flashes the selected Action & Parameter (`0xCF`) into the docked block's EEPROM.
+       - **Red Stop Button (`SW5`)**: Reverts unsaved Knob 1/2 edits back to the block's currently stored configuration.
+       - Running a chain is blocked while any block remains docked on the Config Port.
+     - **Sub-Mode 1B — Run Mode UI** (`isBlockDocked == false` on Config Port **AND** `isRunChainConnected == true` on Run Port):
+       - Displays the **Run Mode UI**: 48×48 Blocks Icon (`ICON_MODE_BLOCKS` at $x=68, y=48$), vertical divider at $x=145$, and Big Bold **Total Connected Block Count** centered at $x=197, y=80$.
+       - **Knobs 1 & 2 are disabled** in Run Mode so parameters cannot be edited without a block on the Config Port.
+       - **Green Start Button (`SW3`)**: Executes the connected physical block chain (`executeRunChain()`).
+       - **Red Stop Button (`SW5`)**: Triggers an immediate emergency locomotion stop (`0x0C`).
 2. **3 Operational Modes**:
-   - **Mode 1 (`STATE_ACTION_MENU`)**: Tangible Block Coding & Flash Config Dock.
-   - **Mode 2 (`STATE_REMOTE_CONTROL`)**: Live Handheld RC Steering, 3-Gear Drive, and 10-Stunt Catalog.
+   - **Mode 1 (`STATE_ACTION_MENU`)**: Hardware-Triggered Block Configuration Menu (`J1`) & Chain Run Mode (`J2`).
+   - **Mode 2 (`STATE_REMOTE_CONTROL`)**: Live Handheld RC Steering, 3-Gear Drive, and 10-Stunt Catalog (Default boot mode when no blocks are attached).
    - **Mode 3 (`STATE_JOINT_CONTROL`)**: Live Real-time Joint Articulation across 5 Anatomical Groups and 17 Servos.
 3. **Battery Voltage Monitor (BATSENSE - GPIO 1 / ADC1_CH0)**:
    - Reads precision 1:1 voltage divider with 100nF filter, calculating live Li-ion battery voltage and percentage.
    - Renders battery gauge icon and percentage on the E-Paper status header.
 4. **Config Dock (UART1, GPIO 17/18)**:
-   - Detects when a smart action block (CH32V003) is docked onto the 4-pin magnetic dock.
-   - Reads the block token, verifies connection, and writes configuration commands (`0xCF`).
+   - Continuously polls (non-blocking 0ms state machine every 350ms) across all modes to detect when a smart action block (CH32V003) is docked onto the 4-pin magnetic dock (`J1`).
+   - Auto-loads the block's stored token/parameter and writes configuration commands (`0xCF`).
 5. **Run Chain Bus (UART2, GPIO 15/16)**:
-   - Initiates Phase 1 Discovery (`0xAA`) down the physical block chain to sequence and read all snapped-in blocks.
+   - Continuously polls (non-blocking 0ms state machine every 800ms) using Phase 1 Discovery (`0xAA`) to detect when a physical block chain + Smart End Block (`0xEE`) is attached to the Run Port (`J2`).
    - Broadcasts Phase 2 Step Execution (`0xBB`) while streaming BLE commands to the robot.
    - Instant emergency halt capability via Red Stop Button.
 6. **E-Paper Display (SPI, GPIO 4, 5, 6, 7, 21, 38)**:
-   - Displays real-time action icons, parameter values, docked block status, joint slider gauges, battery meter, and 4-input UI hints with fast partial refresh on Core 0.
-   - For an in-depth breakdown of the custom 280ms overdrive LUT, dual-core FreeRTOS architecture, and hybrid settle pass, see [`docs/EINK_DISPLAY_ARCHITECTURE.md`](file:///Users/nnnn/Projects/robosen_block/docs/EINK_DISPLAY_ARCHITECTURE.md).
+   - Displays real-time action icons, parameter values, connected chain block count, joint angles, and dual battery meters with fast partial refresh on Core 0.
+   - For an in-depth breakdown of the custom 280ms overdrive LUT, dual-core FreeRTOS architecture, and hybrid settle pass, see [`docs/EINK_DISPLAY_ARCHITECTURE.md`](file:///home/nnnn/projects/robosen_block/docs/EINK_DISPLAY_ARCHITECTURE.md).
 7. **BLE Client Gateway**:
    - Scans and connects to the Robosen K1 robot (Service `0xFFE0`, Characteristic `0xFFE1`), translating block sequences into Robosen motor/animation opcodes and streaming Opcode `0xE8` joint move packets.
 
@@ -76,11 +87,12 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
 1. **Emergency Stop & Run Abort**:
    - Polled inside `abortableDelay()` during all turn, walk, and animation sequences.
    - Pressing `BTN_STOP` at any time instantly terminates motion execution, broadcasts an abort packet `[0xBB, 0x00, ...]` to turn off all instruction block LEDs, sends a Locomotion Stop (`0xFF, 0xFF, 0x02, 0x0C, 0x0E`) to lock robot posture, and shows emergency halt on the E-Paper display.
-2. **Cancel & Back Navigation**:
-   - In `STATE_ACTION_MENU`, dismisses active docked block configuration without writing to flash.
-   - In `STATE_BLE_PAIRING_MENU` and `STATE_BLE_SCANNING`, cancels device selection and returns safely to the action menu.
+2. **Cancel / Revert & Back Navigation**:
+   - In `STATE_ACTION_MENU` (Config Mode, when a block is docked on Config Port), reverts unsaved Knob 1/2 edits back to the block's stored configuration.
+   - In `STATE_ACTION_MENU` (Run Mode, when no block is on Config Port), triggers an immediate emergency locomotion stop (`0x0C`).
+   - In `STATE_BLE_PAIRING_MENU` and `STATE_BLE_SCANNING`, cancels device selection and returns safely to the active operational mode (Mode 1 if any block is connected, or Mode 2 if no blocks are connected).
 3. **Clean Disconnect**:
-   - Long-pressing `BTN_STOP` for 3 seconds cleanly disconnects the active BLE session.
+   - Long-pressing `BTN_STOP` for 3 seconds cleanly disconnects the active BLE session (synchronized via `bleMutex`).
 
 ### 3.2 Calibrated Bezel Viewport & Minimal UI (210×122 Visible Area)
 
@@ -96,21 +108,22 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
    - **Right Battery Cells**: Compact dual battery indicators ($20\times 10\text{ px}$ cell outline with $2\times 6\text{ px}$ terminal tip) for Robot Cell `[R]` ($x=126$) and Master Block Cell `[M]` ($x=188$), fitting comfortably inside the right margin ($x \le 245$).
 
 3. **Centered Mode Content (Inside X=[40..249])**:
-   - **Mode 1 (Action Select)**: 48×48 action icon centered in left zone ($x=58$), Big Bold Parameter Number centered in right zone ($x=140$).
-   - **Mode 2 (Remote Control)**: Steering Wheel icon at $x=54$, vertical divider at $x=116$, 48×48 Stunt Icon at $x=126$, Stunt Number `#01`..`#10` at $x=186$.
-   - **Mode 3 (Joint Control)**: 48×48 Anatomy Icon at $x=48$, Joint Name and Degree Offset at $x=106$, Full-width Slider Gauge spanning $x=46..242$ (196px width).
+   - **Mode 1A — Config Mode (`isBlockDocked == true`)**: 48×48 Action Icon centered in left zone ($x=68, y=48$), Big Bold Parameter Number centered in right zone ($x=197, y=80$).
+   - **Mode 1B — Run Mode (`isBlockDocked == false && isRunChainConnected == true`)**: 48×48 Blocks Icon (`ICON_MODE_BLOCKS`) centered in left zone ($x=68, y=48$), vertical divider at $x=145$, Big Bold **Total Block Count** centered in right zone ($x=197, y=80$).
+   - **Mode 2 (Remote Control)**: 48×48 Arcade Joystick Icon at $x=68, y=48$, vertical divider at $x=145$, 48×48 Active Stunt Icon at $x=173, y=48$.
+   - **Mode 3 (Joint Control)**: 48×48 Anatomy Limb Icon at $x=68, y=38$, Joint Index `#1`..`#17` at $x=80, y=108$, vertical divider at $x=145$, Big Bold Degree Offset centered at $x=197, y=80$.
    - **Fast Partial Window**: Middle updates target `displayWindow(40, 24, 210, 96)` without touching the header.
 
-### 3.3 Direct Single-Click Mode Cycling & Remote Control (RC) Mode
+### 3.3 Dynamic Port-Driven Mode Locking & Remote Control (RC) Mode
 
-1. **Direct Single-Click Mode Cycling (Zero Freezing / 0ms Latency)**:
-   - Single-clicking **Knob 1 Switch (`SW1`, `GPIO 10`)** from any mode immediately transitions to the next mode in the cycle with 0ms latency:
-     $$\text{Mode 1 (Block Coding)} \longrightarrow \text{Mode 2 (RC Mode)} \longrightarrow \text{Mode 3 (Joint Control)} \longrightarrow \text{Mode 1}$$
+1. **Dynamic Port-Driven Mode 1 & 2-Mode Cycling (Zero Freezing / 0ms Latency)**:
+   - When an Action Block is docked on the Config Port (`J1`) or a chain is connected on the Run Port (`J2`), the Master Block automatically enters and locks into **Mode 1 (`STATE_ACTION_MENU`)**.
+   - When no blocks are connected to either port, Mode 1 is hidden and single-clicking **Knob 1 Switch (`SW1`, `GPIO 10`)** toggles directly between **Mode 2 (RC Mode) $\longleftrightarrow$ Mode 3 (Joint Control)** with 0ms latency.
    - **Zero-Timeout Non-Blocking USB CDC**: `Serial.setTxTimeoutMs(0)` eliminates the 2-second hardware transmit stall that occurred when USB serial ring buffers filled up without an active host monitor.
    - **Zero Redundant BLE Stop Packets**: Mode transitions from Mode 1 or Mode 3 dispatch 0 BLE packets. Leaving Mode 2 only dispatches a locomotion stop if the robot was actively walking forward/backward (`currentRcMotion != RC_MOTION_IDLE`).
    - All mode transitions use the fast 280ms symmetric E-Ink LUT (`LUT_FAST_280MS`) for crisp visual updates without blocking inputs.
    - Distinct WS2812 RGB LED color blips confirm mode transitions:
-     - Emerald Green: Mode 1 (Block Coding)
+     - Emerald Green: Mode 1 (Block Coding — Config / Run Mode)
      - Vivid Teal: Mode 2 (Remote Control)
      - Cyan / Purple: Mode 3 (Joint Control)
 
@@ -123,7 +136,7 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
    - **Knob 2 Twist**: Scroll through full 10-stunt catalog (`Left/Right Punch`, `Kick`, `Wave`, `Celebrate`, `Kung Fu`, `Push-ups`, `Squats`, `Handstand`, `Dance`).
    - **Knob 2 Short Click**: Instantly fires selected stunt (1 repetition) with non-blocking BLE dispatch.
    - **WS2812 RGB LED Telemetry**: Instant 0ms status feedback (Soft Teal = RC Idle, Vivid Green = Walk Fwd, Amber = Walk Rev, Electric Blue = Steer, Magenta = Stunt, Red = Stop).
-   - **Port Isolation**: Config Dock polling is paused during RC Mode for maximum loop responsiveness and battery conservation.
+   - **Continuous Non-Blocking Port Detection**: Both Config Port (`pollConfigDock`) and Run Port (`pollRunChainPort`) use 0ms non-blocking state machines so hot-plugging a block in Mode 2 or Mode 3 immediately switches to Mode 1 without introducing any loop latency.
 
 ### 3.4 Streamlined Flat 17-Joint Controller (`STATE_JOINT_CONTROL`)
 
