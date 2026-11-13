@@ -52,9 +52,62 @@ const int PIN_EPD_CS    = 7;   // 🟡 Yellow Wire (Chip Select)
 const int PIN_EPD_SCL   = 21;  // 🟢 Green Wire (SPI SCK / Clock)
 const int PIN_EPD_SDA   = 38;  // ⚪ White Wire (SPI MOSI / DIN)
 
-// Production verified driver for DEPG0213BN panel
-GxEPD2_BW<GxEPD2_213_BN, GxEPD2_213_BN::HEIGHT> display(
-  GxEPD2_213_BN(PIN_EPD_CS, PIN_EPD_DC, PIN_EPD_RES, PIN_EPD_BUSY)
+// Production verified driver subclass for DEPG0213BN panel with bounded BUSY timeout,
+// pull-down protection against floating BUSY wires, and safe LUT injection.
+class RobosenEPD2_213_BN : public GxEPD2_213_BN {
+public:
+  RobosenEPD2_213_BN(int16_t cs, int16_t dc, int16_t rst, int16_t busy)
+    : GxEPD2_213_BN(cs, dc, rst, busy) {
+    // Cap each _waitWhileBusy call to 900ms instead of GxEPD2's default 10,000,000us (10s)
+    // so a stuck/disconnected BUSY wire never stalls boot for 20s or freezes Core 0.
+    _busy_timeout = 900000;
+  }
+
+  void configureBusyPin(bool bypassToTimed) {
+    if (bypassToTimed) {
+      _busy = -1;
+    } else {
+      _busy = PIN_EPD_BUSY;
+      pinMode(PIN_EPD_BUSY, INPUT);
+    }
+  }
+
+  // Returns true if GPIO 4 (BUSY) is floating (open wire: PD=0, PU=1) or stuck HIGH (PD=1, PU=1).
+  // A healthy connected SSD1680 actively drives BUSY LOW when idle (PD=0, PU=0).
+  bool detectFaultyBusyPin() {
+    pinMode(PIN_EPD_BUSY, INPUT_PULLDOWN);
+    delayMicroseconds(150);
+    int pd = digitalRead(PIN_EPD_BUSY);
+    pinMode(PIN_EPD_BUSY, INPUT_PULLUP);
+    delayMicroseconds(150);
+    int pu = digitalRead(PIN_EPD_BUSY);
+    pinMode(PIN_EPD_BUSY, INPUT_PULLDOWN);
+    return (pd != LOW || pu != LOW);
+  }
+
+  bool isBusyBypassed() const {
+    return (_busy < 0);
+  }
+
+  void applyCustomLut(const uint8_t* lutProgmem) {
+    if (!_init_display_done) {
+      writeScreenBuffer(0xFF); // Ensure _InitDisplay() (0x12 SWRESET) runs BEFORE loading LUT
+    }
+    if (!_power_is_on) {
+      _writeCommand(0x22);
+      _writeData(0xf8);
+      _writeCommand(0x20);
+      _waitWhileBusy("_PowerOn", power_on_time);
+      _power_is_on = true;
+    }
+    _writeCommand(0x32);
+    _writeDataPGM(lutProgmem, 153);
+    _using_partial_mode = true; // Prevent _Update_Part() from overwriting 0x32 with lut_partial
+  }
+};
+
+GxEPD2_BW<RobosenEPD2_213_BN, RobosenEPD2_213_BN::HEIGHT> display(
+  RobosenEPD2_213_BN(PIN_EPD_CS, PIN_EPD_DC, PIN_EPD_RES, PIN_EPD_BUSY)
 );
 
 // --- 2.13" E-PAPER DISPLAY VISIBLE VIEWPORT DEFINITIONS (CALIBRATED FOR 3D BEZEL) ---
@@ -513,6 +566,10 @@ void sendHeartbeatPingNonBlocking();
 void robotNotifyCallback(BLERemoteCharacteristic* pChar, uint8_t* pData, size_t length, bool isNotify);
 
 // E-Ink Display Functions (DEPG0213BN / SSD1680)
+void epdBusyYieldCallback(const void* param);
+void printEInkAndPowerDiagnostics();
+void loadCustomEInkLut(bool fastMode);
+void drawActionMenuToBuffer(bool invertMiddle = false);
 void updateEInkActionMenu();
 void updateEInkPairingMenu();
 void updateEInkModeSelectMenu();
@@ -1277,41 +1334,48 @@ void pollRunChainPort() {
 // ==============================================================================
 // 6. HARDWARE SETUP
 // ==============================================================================
+void printEInkAndPowerDiagnostics() {
+  uint32_t rawMv = analogReadMilliVolts(PIN_BATSENSE);
+  float vbat = (rawMv * 2.0f) / 1000.0f;
+  int batPct = calculateBatteryPercent(vbat);
+
+  pinMode(PIN_EPD_BUSY, INPUT_PULLDOWN);
+  delayMicroseconds(100);
+  int busyPullDown = digitalRead(PIN_EPD_BUSY);
+
+  pinMode(PIN_EPD_BUSY, INPUT_PULLUP);
+  delayMicroseconds(100);
+  int busyPullUp = digitalRead(PIN_EPD_BUSY);
+
+  // Restore pull-down so floating wire never reads HIGH
+  pinMode(PIN_EPD_BUSY, INPUT_PULLDOWN);
+  int resState = digitalRead(PIN_EPD_RES);
+
+  const char* busyDiag = "ACTIVE LOW (READY - HEALTHY)";
+  if (busyPullDown == LOW && busyPullUp == HIGH) {
+    busyDiag = "FLOATING / OPEN WIRE (Gray GPIO 4 disconnected!)";
+  } else if (busyPullDown == HIGH && busyPullUp == HIGH) {
+    busyDiag = "STUCK HIGH (SSD1680 busy/locked or shorted high!)";
+  }
+
+  Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
+  Serial.println("║              [HARDWARE & E-INK DIAGNOSTIC TELEMETRY]                   ║");
+  Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
+  Serial.printf("║  • Master Battery (GPIO 1) : %1.2f V (%3d%%) [Raw ADC: %4u mV]          ║\n", vbat, batPct, rawMv);
+  Serial.printf("║  • EPD BUSY Pin   (GPIO 4) : PD=%d, PU=%d -> %-27s ║\n", busyPullDown, busyPullUp, busyDiag);
+  Serial.printf("║  • EPD RES Pin    (GPIO 5) : %d (%-38s) ║\n", resState, resState ? "HIGH - Normal Run" : "LOW - Held in Reset!");
+  Serial.printf("║  • EPD Mode                : %-42s║\n",
+                display.epd2.isBusyBypassed() ? "TIMED FALLBACK (BUSY Bypassed)" : "HARDWARE BUSY (900ms Max Cap)");
+  Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+}
+
 void setup() {
+  // Immediate visual power-on cue on RGB LED (<50ms from switch flip)
+  setStatusLED(30, 15, 0);
+
   Serial.begin(115200);
   Serial.setTxTimeoutMs(0); // Non-blocking USB CDC: 0ms timeout prevents loop freeze when USB CDC buffer fills
-  delay(1500);
-
-  // Initialize Config Dock UART (Serial1 on Pins 18 RX, 17 TX @ 115200)
-  pinMode(PIN_CFG_RX, INPUT_PULLUP);
-  Serial1.begin(115200, SERIAL_8N1, PIN_CFG_RX, PIN_CFG_TX);
-
-  // Initialize Run Chain UART (ChainSerial on Pins 16 RX, 15 TX @ 115200)
-  pinMode(PIN_CHAIN_RX, INPUT_PULLUP);
-  ChainSerial.begin(115200, SERIAL_8N1, PIN_CHAIN_RX, PIN_CHAIN_TX);
-
-  // Initialize 2.13" E-Ink Display (DEPG0213BN / SSD1680) at 8MHz SPI with 0 serial diag overhead
-  Serial.println("[SYSTEM] Initializing 2.13\" E-Ink display (SPI SCL=21, SDA=38)...");
-  SPI.begin(PIN_EPD_SCL, -1, PIN_EPD_SDA, -1);
-  display.epd2.selectSPI(SPI, SPISettings(8000000, MSBFIRST, SPI_MODE0));
-
-  // Perform clean hardware reset pulse on SSD1680 display controller
-  pinMode(PIN_EPD_RES, OUTPUT);
-  digitalWrite(PIN_EPD_RES, HIGH);
-  delay(15);
-  digitalWrite(PIN_EPD_RES, LOW);
-  delay(25);
-  digitalWrite(PIN_EPD_RES, HIGH);
-  delay(60);
-
-  // Pass 0 for serial_diag_bitrate so GxEPD2 never stalls UART TX
-  display.init(0, false, 10, false);
-  display.setRotation(1); // 250 width x 122 height (Landscape)
-  display.setFullWindow();
-  display.epd2.writeScreenBufferAgain(0x00); // Preload Previous (0x26) & Current (0x24) as Black
-  display.epd2.writeScreenBuffer(0xFF);      // Set Current (0x24) to White
-  display.epd2.refresh(true);                // Drive entire panel Black -> White in 727ms
-  display.epd2.writeScreenBufferAgain(0xFF); // Sync Previous (0x26) & Current (0x24) as White
+  delay(300);               // Brief 300ms rail stabilization (reduced from 1500ms for fast boot)
 
   // Configure Internal Pull-Up Resistors for all 4 UI inputs (2 Encoders + 2 Buttons)
   pinMode(PIN_K1_CLK, INPUT_PULLUP);
@@ -1334,13 +1398,60 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(PIN_K2_CLK), isrK2, CHANGE);
   attachInterrupt(digitalPinToInterrupt(PIN_K2_DT),  isrK2, CHANGE);
 
-  // Load Saved Robot Binding from NVS Flash
+  // Initialize Config Dock UART (Serial1 on Pins 18 RX, 17 TX @ 115200)
+  pinMode(PIN_CFG_RX, INPUT_PULLUP);
+  Serial1.begin(115200, SERIAL_8N1, PIN_CFG_RX, PIN_CFG_TX);
+
+  // Initialize Run Chain UART (ChainSerial on Pins 16 RX, 15 TX @ 115200)
+  pinMode(PIN_CHAIN_RX, INPUT_PULLUP);
+  ChainSerial.begin(115200, SERIAL_8N1, PIN_CHAIN_RX, PIN_CHAIN_TX);
+
+  // Initialize 2.13" E-Ink Display (DEPG0213BN / SSD1680) at 4MHz SPI (matching verified test sketches)
+  Serial.println("[SYSTEM] Initializing 2.13\" E-Ink display (SPI SCL=21, SDA=38 @ 4MHz)...");
+  SPI.begin(PIN_EPD_SCL, -1, PIN_EPD_SDA, -1);
+  display.epd2.selectSPI(SPI, SPISettings(4000000, MSBFIRST, SPI_MODE0));
+
+  // Perform clean hardware reset pulse on SSD1680 display controller
+  pinMode(PIN_EPD_RES, OUTPUT);
+  digitalWrite(PIN_EPD_RES, HIGH);
+  delay(15);
+  digitalWrite(PIN_EPD_RES, LOW);
+  delay(25);
+  digitalWrite(PIN_EPD_RES, HIGH);
+  delay(60);
+
+  // Pass 0 for serial_diag_bitrate so GxEPD2 never stalls UART TX
+  display.init(0, false, 10, false);
+  // Re-assert custom SPI pins @ 4MHz after display.init()
+  SPI.begin(PIN_EPD_SCL, -1, PIN_EPD_SDA, -1);
+  display.epd2.selectSPI(SPI, SPISettings(4000000, MSBFIRST, SPI_MODE0));
+  display.setRotation(1); // 250 width x 122 height (Landscape)
+  display.setFullWindow();
+  display.epd2.setBusyCallback(epdBusyYieldCallback);
+
+  // Check if BUSY pin is floating (open wire) or stuck HIGH while idle after reset;
+  // if so, automatically switch to Timed Fallback Mode (_busy = -1) so screen refreshes still work!
+  bool busyFaultyAtBoot = display.epd2.detectFaultyBusyPin();
+  display.epd2.configureBusyPin(busyFaultyAtBoot);
+  printEInkAndPowerDiagnostics();
+
+  // Load Saved Robot Binding from NVS Flash & set initial RGB LED immediately (<200ms from boot)
   preferences.begin("robosen_cfg", false);
   pairedMAC = preferences.getString("paired_mac", "");
   if (pairedMAC == "" || pairedMAC == "None (Unpaired)") {
     pairedMAC = preferences.getString("last_paired_mac", "None (Unpaired)");
   }
   pairedName = preferences.getString("paired_name", "Robosen Robot");
+  updateStatusLED();
+
+  // Perform clean initial dual-buffer sync on Core 1 before starting BLE RF activity
+  // (Since _busy is bypassed if floating or capped to 900ms, this never hangs boot!)
+  epdWaitStartMs = millis();
+  display.epd2.writeScreenBufferAgain(0x00); // Preload Previous (0x26) & Current (0x24) as Black
+  display.epd2.writeScreenBuffer(0xFF);      // Set Current (0x24) to White
+  loadCustomEInkLut(false);                  // PowerOn (0xF8) + load 30-frame symmetric LUT
+  display.epd2.refresh(true);                // Drive entire panel Black -> White (~750ms)
+  display.epd2.writeScreenBufferAgain(0xFF); // Sync Previous (0x26) & Current (0x24) as White
 
   // Initialize BLE Stack
   BLEDevice::init("Robosen_Master_Block");
@@ -1408,7 +1519,7 @@ void loop() {
   // --- 1.1 REMOTE CONTROL ENGINE (NON-BLOCKING LOCOMOTION & STEERING MOMENTUM) ---
   updateRemoteControlEngine();
 
-  // Serial Monitor Interactive Test ('t' = Ping Config Dock, 'r' = Run Chain)
+  // Serial Monitor Interactive Test ('t' = Ping Config Dock, 'r' = Run Chain, 'f' = Reinit E-Ink, 'd' = Diagnostics)
   if (Serial.available() > 0) {
     char c = Serial.read();
     if (c == 't' || c == 'T') {
@@ -1426,6 +1537,8 @@ void loop() {
     } else if (c == 'f' || c == 'F') {
       Serial.println("\n[E-INK TEST] Queuing hardware reset + Dual-Buffer E-Ink Sync Refresh on Core 0...");
       einkForceReinit = true;
+    } else if (c == 'd' || c == 'D') {
+      printEInkAndPowerDiagnostics();
     }
   }
 
@@ -2780,30 +2893,13 @@ const uint8_t LUT_FAST_280MS[153] PROGMEM = {
 
 void loadCustomEInkLut(bool fastMode) {
   const uint8_t* lut = fastMode ? LUT_FAST_280MS : LUT_STD_727MS;
-  SPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE0));
-  digitalWrite(PIN_EPD_DC, LOW);
-  digitalWrite(PIN_EPD_CS, LOW);
-  SPI.transfer(0x32);
-  digitalWrite(PIN_EPD_CS, HIGH);
-  digitalWrite(PIN_EPD_DC, HIGH);
-  digitalWrite(PIN_EPD_CS, LOW);
-  for (uint16_t i = 0; i < 153; i++) {
-    SPI.transfer(pgm_read_byte(&lut[i]));
-  }
-  digitalWrite(PIN_EPD_CS, HIGH);
-  SPI.endTransaction();
+  display.epd2.applyCustomLut(lut);
 }
 
-// Non-blocking FreeRTOS yield + 1.2s watchdog guard during GxEPD2 _waitWhileBusy
+// Non-blocking FreeRTOS yield during GxEPD2 _waitWhileBusy
+// (Bounded to 900ms max by RobosenEPD2_213_BN::_busy_timeout; never aborts refresh mid-transaction)
 void epdBusyYieldCallback(const void* param) {
   vTaskDelay(pdMS_TO_TICKS(2));
-  if (millis() - epdWaitStartMs > 1200) {
-    // Force SSD1680 out of stuck BUSY state immediately instead of stalling 10s
-    digitalWrite(PIN_EPD_RES, LOW);
-    delayMicroseconds(200);
-    digitalWrite(PIN_EPD_RES, HIGH);
-    einkForceReinit = true;
-  }
 }
 
 void drawBitmap2x(int16_t x, int16_t y, const uint8_t *bitmap, int16_t w, int16_t h, uint16_t color) {
@@ -2883,7 +2979,7 @@ void drawDualBatteryHeader(int16_t w) {
   display.printf("%d%%", masterPct);
 }
 
-void drawActionMenuToBuffer(bool invertMiddle = false) {
+void drawActionMenuToBuffer(bool invertMiddle) {
   display.setFullWindow();
   display.fillScreen(GxEPD_WHITE);
 
@@ -3220,24 +3316,30 @@ void einkDisplayTask(void* pvParameters) {
   while (true) {
     unsigned long now = millis();
 
-    // 1. Self-healing hardware reset & dual-buffer sync if requested or BUSY timed out
+    // 1. Self-healing hardware reset & dual-buffer sync if requested
     if (einkForceReinit) {
       einkForceReinit = false;
+      Serial.println("[E-INK] Starting hardware reset + OTP Full Refresh + Dual-Buffer Sync...");
       pinMode(PIN_EPD_RES, OUTPUT);
       digitalWrite(PIN_EPD_RES, HIGH); vTaskDelay(pdMS_TO_TICKS(15));
       digitalWrite(PIN_EPD_RES, LOW);  vTaskDelay(pdMS_TO_TICKS(25));
       digitalWrite(PIN_EPD_RES, HIGH); vTaskDelay(pdMS_TO_TICKS(60));
-      display.init(0, false, 10, false);
+      display.init(0, true, 10, false);
+      SPI.begin(PIN_EPD_SCL, -1, PIN_EPD_SDA, -1);
+      display.epd2.selectSPI(SPI, SPISettings(4000000, MSBFIRST, SPI_MODE0));
       display.setRotation(1);
       display.setFullWindow();
       display.epd2.setBusyCallback(epdBusyYieldCallback);
-      loadCustomEInkLut(false);
+      bool busyFaulty = display.epd2.detectFaultyBusyPin();
+      display.epd2.configureBusyPin(busyFaulty);
       epdWaitStartMs = millis();
-      display.epd2.writeScreenBufferAgain(0x00);
-      display.epd2.writeScreenBuffer(0xFF);
-      display.epd2.refresh(true);
+      // 1a. Execute Factory OTP Full Refresh (0x22, 0xF4, 0x20) to wake up charge pumps & clear panel
+      display.epd2.clearScreen(0xFF);
+      // 1b. Re-sync both buffers & load custom partial LUT; einkFullDirty renders active mode below
       display.epd2.writeScreenBufferAgain(0xFF);
+      loadCustomEInkLut(false);
       einkFullDirty = true;
+      Serial.println("[E-INK] Hardware reset + OTP Full Refresh completed!");
     }
 
     // 2. Immediate BLE Scanning Screen
