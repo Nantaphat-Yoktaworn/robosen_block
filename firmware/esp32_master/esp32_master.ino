@@ -654,11 +654,41 @@ void updateStatusLED() {
 // ==============================================================================
 // 4.1 BATTERY SENSE & SAFETY HALT IMPLEMENTATIONS
 // ==============================================================================
-float readBatteryVoltage() {
-  uint32_t rawMv = analogReadMilliVolts(PIN_BATSENSE);
+float smoothedBatteryVoltage = 0.0f;
+int lastDisplayedMasterPct = -1;
+unsigned long lastMasterBatCheckMs = 0;
+
+float sampleRawBatteryVoltage(uint32_t* outRawMv = nullptr) {
+  uint32_t sumMv = 0;
+  uint32_t maxMv = 0;
+  for (int i = 0; i < 8; i++) {
+    uint32_t mv = analogReadMilliVolts(PIN_BATSENSE);
+    sumMv += mv;
+    if (mv > maxMv) maxMv = mv;
+  }
+  uint32_t avgMv = sumMv / 8;
+  uint32_t effMv = (avgMv + maxMv) / 2;
+  if (outRawMv != nullptr) *outRawMv = effMv;
   // 1:1 precision voltage divider (R3=100k, R4=100k) => Vbat = Vadc * 2
-  float vbat = (rawMv * 2.0f) / 1000.0f;
-  return vbat;
+  return (effMv * 2.0f) / 1000.0f;
+}
+
+float readBatteryVoltage() {
+  float rawV = sampleRawBatteryVoltage();
+
+  if (smoothedBatteryVoltage <= 0.1f) {
+    smoothedBatteryVoltage = rawV;
+  } else if (rawV > smoothedBatteryVoltage + 0.04f) {
+    // Fast upward lock: immediately capture battery switch-on or recovery from a GPIO 1 contact dip
+    smoothedBatteryVoltage = rawV;
+  } else if (smoothedBatteryVoltage >= 3.50f && rawV < 3.40f) {
+    // Glitch rejection: an intermittent/floating GPIO 1 pin drops to ~1.5V-1.7V ADC (3.0V-3.4V).
+    // A real 18650 cell cannot drop from >=3.50V to <3.40V instantaneously; ignore floating-pin dropout.
+  } else {
+    // Normal gradual discharge smoothing (EMA)
+    smoothedBatteryVoltage = (smoothedBatteryVoltage * 0.85f) + (rawV * 0.15f);
+  }
+  return smoothedBatteryVoltage;
 }
 
 int calculateBatteryPercent(float vbat) {
@@ -1335,9 +1365,10 @@ void pollRunChainPort() {
 // 6. HARDWARE SETUP
 // ==============================================================================
 void printEInkAndPowerDiagnostics() {
-  uint32_t rawMv = analogReadMilliVolts(PIN_BATSENSE);
-  float vbat = (rawMv * 2.0f) / 1000.0f;
-  int batPct = calculateBatteryPercent(vbat);
+  uint32_t rawMv = 0;
+  float rawVbat = sampleRawBatteryVoltage(&rawMv);
+  float filtVbat = readBatteryVoltage();
+  int batPct = calculateBatteryPercent(filtVbat);
 
   pinMode(PIN_EPD_BUSY, INPUT_PULLDOWN);
   delayMicroseconds(100);
@@ -1347,8 +1378,8 @@ void printEInkAndPowerDiagnostics() {
   delayMicroseconds(100);
   int busyPullUp = digitalRead(PIN_EPD_BUSY);
 
-  // Restore pull-down so floating wire never reads HIGH
-  pinMode(PIN_EPD_BUSY, INPUT_PULLDOWN);
+  // Restore INPUT for healthy BUSY pin, or INPUT_PULLDOWN if bypassed
+  pinMode(PIN_EPD_BUSY, display.epd2.isBusyBypassed() ? INPUT_PULLDOWN : INPUT);
   int resState = digitalRead(PIN_EPD_RES);
 
   const char* busyDiag = "ACTIVE LOW (READY - HEALTHY)";
@@ -1361,7 +1392,7 @@ void printEInkAndPowerDiagnostics() {
   Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
   Serial.println("║              [HARDWARE & E-INK DIAGNOSTIC TELEMETRY]                   ║");
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
-  Serial.printf("║  • Master Battery (GPIO 1) : %1.2f V (%3d%%) [Raw ADC: %4u mV]          ║\n", vbat, batPct, rawMv);
+  Serial.printf("║  • Master Battery (GPIO 1) : %1.2f V (%3d%%) [Raw: %1.2fV / %4u mV]     ║\n", filtVbat, batPct, rawVbat, rawMv);
   Serial.printf("║  • EPD BUSY Pin   (GPIO 4) : PD=%d, PU=%d -> %-27s ║\n", busyPullDown, busyPullUp, busyDiag);
   Serial.printf("║  • EPD RES Pin    (GPIO 5) : %d (%-38s) ║\n", resState, resState ? "HIGH - Normal Run" : "LOW - Held in Reset!");
   Serial.printf("║  • EPD Mode                : %-42s║\n",
@@ -1975,6 +2006,20 @@ void loop() {
       // Every other cycle (6s) or if telemetry unread: send proven Opcode 0x0B Ping from main
       if ((heartbeatCounter % 2 == 0) || !hasRobotBattery) {
         sendHeartbeatPingNonBlocking();
+      }
+    }
+  }
+
+  // --- 8. PERIODIC MASTER BATTERY HEADER REFRESH (EVERY 3s WHEN IDLE) ---
+  if (now - lastMasterBatCheckMs >= 3000) {
+    lastMasterBatCheckMs = now;
+    int currentMasterPct = calculateBatteryPercent(readBatteryVoltage());
+    if (lastDisplayedMasterPct < 0) {
+      lastDisplayedMasterPct = currentMasterPct;
+    } else if (abs(currentMasterPct - lastDisplayedMasterPct) >= 4 && (now - lastUserActivity >= 1000)) {
+      lastDisplayedMasterPct = currentMasterPct;
+      if (currentState == STATE_ACTION_MENU || currentState == STATE_REMOTE_CONTROL || currentState == STATE_JOINT_CONTROL) {
+        requestEInkFullUpdate();
       }
     }
   }
@@ -2942,6 +2987,7 @@ void drawDualBatteryHeader(int16_t w) {
 
   float vbat = readBatteryVoltage();
   int masterPct = calculateBatteryPercent(vbat);
+  lastDisplayedMasterPct = masterPct;
 
   // --- Robot Battery Cell [R] (20x10 px outline + 2x6 terminal tip) ---
   int rx = 126;
