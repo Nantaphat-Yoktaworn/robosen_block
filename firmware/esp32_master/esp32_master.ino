@@ -93,6 +93,13 @@ public:
     if (!_init_display_done) {
       writeScreenBuffer(0xFF); // Ensure _InitDisplay() (0x12 SWRESET) runs BEFORE loading LUT
     }
+    if (!_power_is_on) {
+      _writeCommand(0x22);
+      _writeData(0xf8);
+      _writeCommand(0x20);
+      _waitWhileBusy("_PowerOn", power_on_time);
+      _power_is_on = true;
+    }
     _writeCommand(0x32);
     _writeDataPGM(lutProgmem, 153);
     _using_partial_mode = true; // Prevent _Update_Part() from overwriting 0x32 with lut_partial
@@ -518,6 +525,8 @@ void robotNotifyCallback(BLERemoteCharacteristic* pChar, uint8_t* pData, size_t 
 // E-Ink Display Functions (DEPG0213BN / SSD1680)
 void epdBusyYieldCallback(const void* param);
 void printEInkAndPowerDiagnostics();
+void loadCustomEInkLut(bool fastMode);
+void drawActionMenuToBuffer(bool invertMiddle = false);
 void updateEInkActionMenu();
 void updateEInkPairingMenu();
 void updateEInkModeSelectMenu();
@@ -1199,10 +1208,10 @@ void setup() {
   pinMode(PIN_CHAIN_RX, INPUT_PULLUP);
   ChainSerial.begin(115200, SERIAL_8N1, PIN_CHAIN_RX, PIN_CHAIN_TX);
 
-  // Initialize 2.13" E-Ink Display (DEPG0213BN / SSD1680) at 8MHz SPI with 0 serial diag overhead
-  Serial.println("[SYSTEM] Initializing 2.13\" E-Ink display (SPI SCL=21, SDA=38)...");
+  // Initialize 2.13" E-Ink Display (DEPG0213BN / SSD1680) at 4MHz SPI (matching verified test sketches)
+  Serial.println("[SYSTEM] Initializing 2.13\" E-Ink display (SPI SCL=21, SDA=38 @ 4MHz)...");
   SPI.begin(PIN_EPD_SCL, -1, PIN_EPD_SDA, -1);
-  display.epd2.selectSPI(SPI, SPISettings(8000000, MSBFIRST, SPI_MODE0));
+  display.epd2.selectSPI(SPI, SPISettings(4000000, MSBFIRST, SPI_MODE0));
 
   // Perform clean hardware reset pulse on SSD1680 display controller
   pinMode(PIN_EPD_RES, OUTPUT);
@@ -1215,9 +1224,9 @@ void setup() {
 
   // Pass 0 for serial_diag_bitrate so GxEPD2 never stalls UART TX
   display.init(0, false, 10, false);
-  // Re-assert custom SPI pins after display.init() (which calls SPI.begin() internally)
+  // Re-assert custom SPI pins @ 4MHz after display.init()
   SPI.begin(PIN_EPD_SCL, -1, PIN_EPD_SDA, -1);
-  display.epd2.selectSPI(SPI, SPISettings(8000000, MSBFIRST, SPI_MODE0));
+  display.epd2.selectSPI(SPI, SPISettings(4000000, MSBFIRST, SPI_MODE0));
   display.setRotation(1); // 250 width x 122 height (Landscape)
   display.setFullWindow();
   display.epd2.setBusyCallback(epdBusyYieldCallback);
@@ -1228,16 +1237,25 @@ void setup() {
   display.epd2.configureBusyPin(busyFaultyAtBoot);
   printEInkAndPowerDiagnostics();
 
-  // Queue initial dual-buffer clear & menu render asynchronously on Core 0 (zero boot blocking!)
-  einkForceReinit = true;
-
-  // Load Saved Robot Binding from NVS Flash
+  // Load Saved Robot Binding from NVS Flash & set initial RGB LED immediately (<200ms from boot)
   preferences.begin("robosen_cfg", false);
   pairedMAC = preferences.getString("paired_mac", "");
   if (pairedMAC == "" || pairedMAC == "None (Unpaired)") {
     pairedMAC = preferences.getString("last_paired_mac", "None (Unpaired)");
   }
   pairedName = preferences.getString("paired_name", "Robosen Robot");
+  updateStatusLED();
+
+  // Perform clean initial dual-buffer sync on Core 1 before starting BLE RF activity
+  // (Since _busy is bypassed if floating or capped to 900ms, this never hangs boot!)
+  epdWaitStartMs = millis();
+  display.epd2.writeScreenBufferAgain(0x00); // Preload Previous (0x26) & Current (0x24) as Black
+  display.epd2.writeScreenBuffer(0xFF);      // Set Current (0x24) to White
+  loadCustomEInkLut(false);                  // PowerOn (0xF8) + load 30-frame symmetric LUT
+  display.epd2.refresh(true);                // Drive entire panel Black -> White (~750ms)
+  display.epd2.writeScreenBufferAgain(0xFF); // Sync Previous (0x26) & Current (0x24) as White
+  drawActionMenuToBuffer(false);
+  display.display(true);
 
   // Initialize BLE Stack
   BLEDevice::init("Robosen_Master_Block");
@@ -2662,7 +2680,7 @@ void drawDualBatteryHeader(int16_t w) {
   display.printf("%d%%", masterPct);
 }
 
-void drawActionMenuToBuffer(bool invertMiddle = false) {
+void drawActionMenuToBuffer(bool invertMiddle) {
   display.setFullWindow();
   display.fillScreen(GxEPD_WHITE);
 
@@ -2993,25 +3011,29 @@ void einkDisplayTask(void* pvParameters) {
     // 1. Self-healing hardware reset & dual-buffer sync if requested
     if (einkForceReinit) {
       einkForceReinit = false;
+      Serial.println("[E-INK] Starting hardware reset + OTP Full Refresh + Dual-Buffer Sync...");
       pinMode(PIN_EPD_RES, OUTPUT);
       digitalWrite(PIN_EPD_RES, HIGH); vTaskDelay(pdMS_TO_TICKS(15));
       digitalWrite(PIN_EPD_RES, LOW);  vTaskDelay(pdMS_TO_TICKS(25));
       digitalWrite(PIN_EPD_RES, HIGH); vTaskDelay(pdMS_TO_TICKS(60));
-      display.init(0, false, 10, false);
+      display.init(0, true, 10, false);
       SPI.begin(PIN_EPD_SCL, -1, PIN_EPD_SDA, -1);
-      display.epd2.selectSPI(SPI, SPISettings(8000000, MSBFIRST, SPI_MODE0));
+      display.epd2.selectSPI(SPI, SPISettings(4000000, MSBFIRST, SPI_MODE0));
       display.setRotation(1);
       display.setFullWindow();
       display.epd2.setBusyCallback(epdBusyYieldCallback);
       bool busyFaulty = display.epd2.detectFaultyBusyPin();
       display.epd2.configureBusyPin(busyFaulty);
       epdWaitStartMs = millis();
-      display.epd2.writeScreenBufferAgain(0x00); // Runs _InitDisplay() first, then preloads Black
-      display.epd2.writeScreenBuffer(0xFF);      // Sets Current RAM (0x24) to White
-      loadCustomEInkLut(false);                  // Loads 30-frame symmetric LUT after _InitDisplay()
-      display.epd2.refresh(true);                // Drives entire panel Black -> White
-      display.epd2.writeScreenBufferAgain(0xFF); // Syncs Previous (0x26) & Current (0x24) as White
-      einkFullDirty = true;
+      // 1a. Execute Factory OTP Full Refresh (0x22, 0xF4, 0x20) to wake up charge pumps & clear panel
+      drawActionMenuToBuffer(false);
+      display.display(false);
+      // 1b. Re-sync both buffers & load custom partial LUT for fast subsequent updates
+      display.epd2.writeScreenBufferAgain(0xFF);
+      loadCustomEInkLut(false);
+      drawActionMenuToBuffer(false);
+      display.display(true);
+      Serial.println("[E-INK] Hardware reset + OTP Full Refresh completed!");
     }
 
     // 2. Immediate BLE Scanning Screen
