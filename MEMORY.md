@@ -917,4 +917,26 @@ The `assignments/` folder stores academic project coursework, literature reviews
   - Gerber Package: [`hardware/action_block/robosen_action_block_gerbers.zip`](hardware/action_block/robosen_action_block_gerbers.zip) (10 files: 7 gerber layers, 2 Excellon drills PTH/NPTH, 1 job file).
   - JLCPCB Settings: 2 Layers, $32.00 \times 32.00\text{ mm}$, $1.6\text{ mm}$ FR-4 thickness, $1\text{ oz}$ copper, Lead-Free HASL finish, Green solder mask, White silkscreen.
 
+---
+
+## 25. Master Block Prototype #2: Monolithic SMT PCBA Architecture & JLCPCB Design Specification
+
+- **Specification Date:** November 7, 2026
+- **Detailed Specification:** [`docs/specs/PROTOTYPE_02_SPEC.md`](docs/specs/PROTOTYPE_02_SPEC.md)
+- **Architecture Strategy:** **Monolithic Single-Board SMT PCBA (Zero Daughterboards)** with modular case-mount connectors and an analog XY thumbstick. Designed for single-order, top-side automated SMT assembly at JLCPCB.
+- **Key Hardware Innovations over Prototype #1:**
+  1. **Integrated ESP32-S3 Module:** Uses `ESP32-S3-WROOM-1-N16R8` (`C2913202`) directly on the PCB (16MB Flash, 8MB Octal PSRAM, pre-certified PCB antenna).
+  2. **Single USB-C Port for Charging & Flashing:** Native USB Serial/JTAG controller directly on GPIO 19 (`D-`) and GPIO 20 (`D+`) with USBLC6-2SC6 ESD protection (`C7519`) and dual 5.1k pull-downs on CC1/CC2. No external UART bridge IC required.
+  3. **Automatic Power-Path Management (Load Sharing):** AO3401A P-MOSFET (`C15127`) + SS14 Schottky diode (`C2480`). When USB-C is connected, 5V powers system and isolates battery; TP4056 (`C16581`) cleanly terminates at 100% full charge.
+  4. **Integrated Battery Protection & Switched Sensing:** Onboard DW01A (`C351410`) + FS8205A (`C32254`) BMS. Switched 1:1 divider (100k + 100k) to `GPIO 1` (`ADC1_CH0`) draws $0.00\ \mu\text{A}$ when the power switch is turned OFF.
+  5. **Integrated 3.3V Synchronous Buck-Boost:** TI TPS63020DSJR (`C15483`) + Sunlord 1.5µH 5.5A shielded inductor (`C408334`) delivers fixed 3.300V (up to 2A buck / 1.2A boost) across full battery range (3.0V – 4.2V), eliminating RF burst brownouts.
+  6. **Left Input:** Upgraded from rotary encoder to **Dual-Axis XY Analog Thumbstick** (`GPIO 8` VRx on `ADC1_CH7`, `GPIO 9` VRy on `ADC1_CH8`, `GPIO 10` Push Switch with 10k pull-up). Hybrid footprint supports either direct through-hole soldering or off-board JST-PH 5-pin case-lid cable mounting.
+  7. **Modular 3D-Case Interfacing:** Uses keyed JST-PH 2.0mm headers (+ parallel solder pads) for Power Switch (`J_SW`, 2-pin), Battery (`J_BAT`, 2-pin), Config Dock (`J_CFG`, 4-pin), and Run Chain Dock (`J_RUN`, 4-pin), allowing dock bays and switches to mount directly onto 3D-printed enclosure walls with zero mechanical strain on the PCB.
+  8. **Existing Firmware Parity:** 100% pinout parity with [`firmware/esp32_master/esp32_master.ino`](firmware/esp32_master/esp32_master.ino). Onboard WS2812B RGB LED on `GPIO 48` preserves all 8 status animations.
+- **JLCPCB Economic SMT Assembly Plan:**
+  - 100% SMT components placed on Top side.
+  - Estimated cost for 5 PCBs with 2 assembled: **~$39 – $46 USD** (setup $8 + stencil $1.50 + feeder fees ~$15–18 + components ~$12–15).
+  - Minimal hand work after delivery: Solder the 2 encoders/buttons, header sockets, and JST connectors.
+
+
 

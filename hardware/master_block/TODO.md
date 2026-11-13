@@ -112,3 +112,31 @@ With $R_3 = 100\text{ k}\Omega$ (1%) and $R_4 = 100\text{ k}\Omega$ (1%):
   - Standard UI convention: Symmetrical placement for intuitive physical interaction.
   - Can be placed side-by-side or stacked vertically near the rotary encoders / E-paper display.
   - Clear silkscreen labels on PCB: `CONFIRM / START` and `CANCEL / BACK`.
+
+---
+
+## 🚀 Prototype #2: Monolithic SMT PCBA Roadmap
+
+- [ ] **1. KiCad Project Setup for Prototype #2**
+  - [ ] Create dedicated KiCad project or directory for Prototype #2 (`hardware/master_block_proto2/`)
+  - [ ] Set up symbol and footprint libraries matching the verified JLCPCB BOM in [`docs/specs/PROTOTYPE_02_SPEC.md`](../../docs/specs/PROTOTYPE_02_SPEC.md)
+- [ ] **2. Schematic Capture**
+  - [ ] ESP32-S3-WROOM-1-N16R8 module with EN/BOOT buttons and bypass caps
+  - [ ] Single USB-C port with USBLC6-2SC6 ESD protection & CC 5.1k resistors
+  - [ ] TP4056 + DW01A + FS8205A charging & BMS protection circuit
+  - [ ] AO3401A P-MOSFET + SS14 Schottky automatic load sharing circuit
+  - [ ] TPS63020DSJR 3.3V synchronous buck-boost circuit with 1.5µH inductor
+  - [ ] Switched battery sensing divider to GPIO 1 (ADC1_CH0)
+  - [ ] Hybrid Left XY Thumbstick (onboard + JST-PH 5-pin) on GPIO 8, 9, 10
+  - [ ] Right EC11 Rotary Encoder on GPIO 11, 12, 13
+  - [ ] Start (GPIO 14) and Stop (GPIO 2) tactile buttons
+  - [ ] Onboard WS2812B RGB LED on GPIO 48
+  - [ ] 3D-Case JST-PH 2.0mm connectors for Power Switch, Battery, Config Dock, and Run Dock
+- [ ] **3. PCB Layout & Routing**
+  - [ ] Compact outline (< 90 × 55 mm) with corner M3 mounting holes
+  - [ ] Single-sided SMT placement (Top layer only) for minimal JLCPCB assembly cost
+  - [ ] Wide power traces for 3.3V and VBUS, solid continuous ground plane on bottom
+  - [ ] Antenna keepout zone for ESP32-S3 PCB antenna
+- [ ] **4. JLCPCB Production Packaging**
+  - [ ] Run DRC & ERC (0 errors)
+  - [ ] Generate Gerber package (.zip), BOM (.csv), and CPL (.csv)
