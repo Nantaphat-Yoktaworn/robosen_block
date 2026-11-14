@@ -11,6 +11,9 @@
 #include <Fonts/FreeSansBold9pt7b.h>
 #include <Fonts/FreeSansBold12pt7b.h>
 #include <Fonts/FreeSansBold18pt7b.h>
+#include <driver/gpio.h>
+#include <rom/gpio.h>
+#include <soc/gpio_sig_map.h>
 #include "esp32_master_icons.h"
 
 // ==============================================================================
@@ -36,8 +39,8 @@ const int PIN_STOP_BTN  = 2;   // 🔴 Red Tactile Button (Cancel / Emergency St
 const int PIN_BATSENSE  = 1;   // 🔋 Battery Voltage Divider Midpoint (100k / 100k + 100nF filter) (GPIO 1)
 
 // --- CONFIG DOCK (UART1) ---
-const int PIN_CFG_TX    = 17;  // 🔘 Gray Wire (Master TX -> Action Block RX / PD6)
-const int PIN_CFG_RX    = 18;  // 🟣 Purple Wire (Master RX <- Action Block TX / PD5)
+const int PIN_CFG_TX    = 17;  // 🟣 J1 Pin 4 / Pin 3 (Auto-directional UART1 TX)
+const int PIN_CFG_RX    = 18;  // 🔘 J1 Pin 3 / Pin 4 (Auto-directional UART1 RX)
 
 // --- RUN CHAIN BUS (UART2) ---
 const int PIN_CHAIN_TX  = 15;  // Master Run Chain Output -> Block 1 RX (PD6)
@@ -170,13 +173,48 @@ uint8_t dockedActionId = 0;
 uint8_t dockedParamVal = 0;
 unsigned long lastConfigPollTime = 0;
 unsigned long lastDockResponseTime = 0;
-const unsigned long CONFIG_POLL_INTERVAL_MS = 350;
+const unsigned long CONFIG_POLL_INTERVAL_MS = 250;
 const unsigned long CONFIG_TIMEOUT_MS = 1200;
 
-// Non-blocking UART1 (Config Port) RX parser state
-uint8_t cfgRxBuf[8];
+// Non-blocking UART1 (Config Port) RX parser & auto-direction state
+uint8_t cfgRxBuf[16];
 uint8_t cfgRxIdx = 0;
 unsigned long cfgRxLastByteMs = 0;
+int activeCfgTxPin = PIN_CFG_TX;
+int activeCfgRxPin = PIN_CFG_RX;
+bool cfgUartDirLocked = false;
+unsigned long lastDockUartReplyMs = 0;
+uint8_t cfgPollCycle = 0;
+
+void setConfigUartPins(int txPin, int rxPin) {
+  gpio_num_t txGpio = (gpio_num_t)txPin;
+  gpio_num_t rxGpio = (gpio_num_t)rxPin;
+
+  // Hold UART1 RX idle HIGH (via GPIO 0 pull-up) while reconfiguring pins so UART1 never sees a false start bit
+  esp_rom_gpio_connect_in_signal(0, U1RXD_IN_IDX, false);
+
+  // Disconnect previous TX pin from UART1 TX out signal before switching
+  esp_rom_gpio_connect_out_signal(activeCfgTxPin, SIG_GPIO_OUT_IDX, false, false);
+
+  // Configure new RX pin as Input with Pull-Up and let it settle HIGH before connecting U1RXD_IN_IDX
+  gpio_set_direction(rxGpio, GPIO_MODE_INPUT);
+  gpio_input_enable(rxGpio);
+  gpio_pulldown_dis(rxGpio);
+  gpio_pullup_en(rxGpio);
+
+  // Configure new TX pin as Output HIGH and connect to U1TXD_OUT_IDX
+  gpio_pullup_dis(txGpio);
+  gpio_pulldown_dis(txGpio);
+  gpio_set_level(txGpio, 1);
+  gpio_set_direction(txGpio, GPIO_MODE_OUTPUT);
+  esp_rom_gpio_connect_out_signal(txPin, U1TXD_OUT_IDX, false, false);
+
+  delayMicroseconds(15);
+  esp_rom_gpio_connect_in_signal(rxPin, U1RXD_IN_IDX, false);
+
+  activeCfgTxPin = txPin;
+  activeCfgRxPin = rxPin;
+}
 
 // Run Chain Port (UART2) Live Detection State (0xAA Loopback)
 bool isRunChainConnected = false;
@@ -268,8 +306,29 @@ void writeConfigToDockedBlock(uint8_t actionToken, uint8_t param) {
   uint8_t payload[3] = { 0x02, actionToken, param };
   uint8_t crc = calcCrc8(payload, 3);
   uint8_t packet[6] = { 0xCF, 0x02, actionToken, param, crc, 0x55 };
+
+  int savedTx = activeCfgTxPin;
+  int savedRx = activeCfgRxPin;
+
+  // Transmit on primary direction (savedTx -> savedRx)
+  setConfigUartPins(savedTx, savedRx);
   Serial1.write(packet, 6);
-  Serial.printf("\n[CONFIG DOCK] ⚡ Flashing Action 0x%02X (%s, %d %s) to docked block...\n", 
+  Serial1.flush();
+  delay(2);
+
+  // Also transmit on alternate pin (savedRx -> savedTx) so blocks docked with PD6 on either J1 Pin 3 or Pin 4 receive the write frame without reflashing
+  setConfigUartPins(savedRx, savedTx);
+  Serial1.write(packet, 6);
+  Serial1.flush();
+  delay(2);
+
+  // Restore active Config Port UART direction
+  setConfigUartPins(savedTx, savedRx);
+
+  dockedActionId = actionToken;
+  dockedParamVal = param;
+  lastDockResponseTime = millis();
+  Serial.printf("\n[CONFIG DOCK] ⚡ Flashing Action 0x%02X (%s, %d %s) to docked block (J1 GPIO 17/18)...\n", 
                 actionToken, getActionNameByToken(actionToken), param, getParamUnitByToken(actionToken));
 }
 
@@ -1145,6 +1204,99 @@ void enforcePortModeLock() {
   }
 }
 
+// Electrical presence probe for Config Dock (J1 Pin 3 = GPIO 18, J1 Pin 4 = GPIO 17):
+// Uses ESP-IDF low-level GPIO functions (bypassing Arduino periman so Serial1 is never deinitialized).
+// Discharges trace capacitance with internal pull-down for 30us, then switches to High-Z input for 50us:
+// - Empty J1 port stays at 0V (LOW) on both GPIO 18 and GPIO 17.
+// - Docked Action Block (PD6 internal pull-up, PD5 idle HIGH, or PD0 pull-up) pulls GPIO 18 or GPIO 17 to 3.3V (HIGH).
+bool probeConfigDockElectrical(int* outPd18 = nullptr, int* outHz18 = nullptr, int* outPd17 = nullptr, int* outHz17 = nullptr) {
+  int savedTx = activeCfgTxPin;
+  int savedRx = activeCfgRxPin;
+
+  // Hold UART1 RX idle HIGH while probing so pull-down pulses never trigger a false UART start bit
+  esp_rom_gpio_connect_in_signal(0, U1RXD_IN_IDX, false);
+  esp_rom_gpio_connect_out_signal(savedTx, SIG_GPIO_OUT_IDX, false, false);
+  for (gpio_num_t g : {GPIO_NUM_18, GPIO_NUM_17}) {
+    gpio_set_direction(g, GPIO_MODE_INPUT);
+    gpio_input_enable(g);
+    gpio_pullup_dis(g);
+  }
+
+  int hits18 = 0, hits17 = 0;
+  int lastPd18 = 0, lastHz18 = 0, lastPd17 = 0, lastHz17 = 0;
+  for (int sample = 0; sample < 3; sample++) {
+    gpio_pulldown_en(GPIO_NUM_18);
+    gpio_pulldown_en(GPIO_NUM_17);
+    delayMicroseconds(30);
+    int pd18 = gpio_get_level(GPIO_NUM_18);
+    int pd17 = gpio_get_level(GPIO_NUM_17);
+    gpio_pulldown_dis(GPIO_NUM_18);
+    gpio_pulldown_dis(GPIO_NUM_17);
+    delayMicroseconds(50);
+    int r18_1 = gpio_get_level(GPIO_NUM_18);
+    int r17_1 = gpio_get_level(GPIO_NUM_17);
+    delayMicroseconds(30);
+    int r18_2 = gpio_get_level(GPIO_NUM_18);
+    int r17_2 = gpio_get_level(GPIO_NUM_17);
+
+    int hz18 = (r18_1 == 1 && r18_2 == 1) ? 1 : 0;
+    int hz17 = (r17_1 == 1 && r17_2 == 1) ? 1 : 0;
+    lastPd18 = pd18; lastHz18 = hz18;
+    lastPd17 = pd17; lastHz17 = hz17;
+    if (pd18 == 1 || hz18 == 1) hits18++;
+    if (pd17 == 1 || hz17 == 1) hits17++;
+  }
+
+  // Restore active UART1 pin routing and discard any pull-down pulse glitch byte from RX FIFO
+  setConfigUartPins(savedTx, savedRx);
+  while (Serial1.available() > 0) {
+    Serial1.read();
+  }
+
+  if (outPd18) *outPd18 = lastPd18;
+  if (outHz18) *outHz18 = lastHz18;
+  if (outPd17) *outPd17 = lastPd17;
+  if (outHz17) *outHz17 = lastHz17;
+
+  return (hits18 == 3 || hits17 == 3);
+}
+
+static uint8_t cfgElectricalConsecHits = 0;
+static uint8_t cfgElectricalConsecMiss = 0;
+
+void handleDockedBlockConfirmed(uint8_t act, uint8_t par, bool hasValidConfig, const char* sourceTag) {
+  unsigned long now = millis();
+  bool newlyDocked = !isBlockDocked;
+  bool storedConfigChanged = hasValidConfig && (dockedActionId != act || dockedParamVal != par);
+
+  isBlockDocked = true;
+  lastDockResponseTime = now;
+  cfgElectricalConsecHits = 3;
+  cfgElectricalConsecMiss = 0;
+
+  if (hasValidConfig) {
+    dockedActionId = act;
+    dockedParamVal = par;
+    if (newlyDocked || storedConfigChanged) {
+      syncMenuToDockedBlock(act, par);
+    }
+  } else if (dockedActionId == 0) {
+    dockedActionId = ACTIONS[currentActionIndex].tokenID;
+    dockedParamVal = (uint8_t)ACTIONS[currentActionIndex].paramVal;
+  }
+
+  if (newlyDocked || storedConfigChanged) {
+    Serial.printf("\n[CONFIG DOCK] 🟢 Action Block detected (%s): Token 0x%02X (%s, %d %s)\n",
+                  sourceTag, dockedActionId, getActionNameByToken(dockedActionId),
+                  dockedParamVal, getParamUnitByToken(dockedActionId));
+    bool wasInMode1 = (currentState == STATE_ACTION_MENU);
+    enforcePortModeLock();
+    if (wasInMode1 && currentState == STATE_ACTION_MENU) {
+      renderActionMenu();
+    }
+  }
+}
+
 void pollConfigDock() {
   if (currentState == STATE_RUNNING ||
       currentState == STATE_BLE_SCANNING ||
@@ -1163,74 +1315,97 @@ void pollConfigDock() {
     cfgRxLastByteMs = now;
 
     if (cfgRxIdx == 0) {
-      if (b == 0xCF) {
+      if (b == 0xCF || b == 0xAA) {
         cfgRxBuf[cfgRxIdx++] = b;
       }
       continue;
     }
 
     cfgRxBuf[cfgRxIdx++] = b;
-    uint8_t cmd = cfgRxBuf[1];
+    uint8_t hdr = cfgRxBuf[0];
 
-    if (cmd == 0x81) {
-      // Query Response: [0xCF, 0x81, ActionID, ParamVal, CRC8, 0x55] (6 bytes)
-      if (cfgRxIdx >= 6) {
-        uint8_t act    = cfgRxBuf[2];
-        uint8_t par    = cfgRxBuf[3];
-        uint8_t rxCrc  = cfgRxBuf[4];
-        uint8_t footer = cfgRxBuf[5];
-        cfgRxIdx = 0;
+    if (hdr == 0xCF) {
+      uint8_t cmd = cfgRxBuf[1];
 
-        uint8_t checkPayload[3] = { 0x81, act, par };
-        uint8_t calcCrc = calcCrc8(checkPayload, 3);
-        if (calcCrc == rxCrc && footer == 0x55) {
-          bool newlyDocked = !isBlockDocked;
-          bool storedConfigChanged = (dockedActionId != act || dockedParamVal != par);
-          isBlockDocked = true;
-          dockedActionId = act;
-          dockedParamVal = par;
-          lastDockResponseTime = now;
+      if (cmd == 0x81) {
+        // Query Response: [0xCF, 0x81, ActionID, ParamVal, CRC8, 0x55] (6 bytes)
+        if (cfgRxIdx >= 6) {
+          uint8_t act    = cfgRxBuf[2];
+          uint8_t par    = cfgRxBuf[3];
+          uint8_t rxCrc  = cfgRxBuf[4];
+          uint8_t footer = cfgRxBuf[5];
+          cfgRxIdx = 0;
 
-          if (newlyDocked || storedConfigChanged) {
-            syncMenuToDockedBlock(act, par);
-            Serial.printf("\n[CONFIG DOCK] 🟢 Action Block detected: Token 0x%02X (%s, %d %s)\n",
-                          dockedActionId, getActionNameByToken(dockedActionId),
-                          dockedParamVal, getParamUnitByToken(dockedActionId));
-            bool wasInMode1 = (currentState == STATE_ACTION_MENU);
-            enforcePortModeLock();
-            if (wasInMode1 && currentState == STATE_ACTION_MENU) {
-              renderActionMenu();
-            }
+          uint8_t checkPayload[3] = { 0x81, act, par };
+          uint8_t calcCrc = calcCrc8(checkPayload, 3);
+          if (calcCrc == rxCrc && footer == 0x55) {
+            cfgUartDirLocked = true;
+            lastDockUartReplyMs = now;
+            handleDockedBlockConfirmed(act, par, true, "UART 0x81");
+          } else {
+            Serial.printf("\n[DOCK CRC ERROR] Act=0x%02X Par=%d CRC=0x%02X (calc=0x%02X) Footer=0x%02X\n",
+                          act, par, rxCrc, calcCrc, footer);
           }
-        } else {
-          Serial.printf("\n[DOCK CRC ERROR] Act=0x%02X Par=%d CRC=0x%02X (calc=0x%02X) Footer=0x%02X\n",
-                        act, par, rxCrc, calcCrc, footer);
         }
-      }
-    } else if (cmd == 0x06) {
-      // ACK Response: [0xCF, 0x06, CRC8, 0x55] (4 bytes)
-      if (cfgRxIdx >= 4) {
-        uint8_t rxCrc  = cfgRxBuf[2];
-        uint8_t footer = cfgRxBuf[3];
-        cfgRxIdx = 0;
-        uint8_t ackPayload[1] = { 0x06 };
-        if (calcCrc8(ackPayload, 1) == rxCrc && footer == 0x55) {
-          lastDockResponseTime = now;
-          Serial.println("\n[CONFIG DOCK] 💾 Flash Write Confirmed! (ACK 0x06 received from Block)");
-          triggerLedBlip(0, 180, 40);
-          // Immediately query block to refresh stored state
-          uint8_t queryPkt[4] = { 0xCF, 0x01, 0x07, 0x55 };
-          Serial1.write(queryPkt, 4);
-          lastConfigPollTime = now;
+      } else if (cmd == 0x06) {
+        // ACK Response: [0xCF, 0x06, CRC8, 0x55] (4 bytes)
+        if (cfgRxIdx >= 4) {
+          uint8_t rxCrc  = cfgRxBuf[2];
+          uint8_t footer = cfgRxBuf[3];
+          cfgRxIdx = 0;
+          uint8_t ackPayload[1] = { 0x06 };
+          if (calcCrc8(ackPayload, 1) == rxCrc && footer == 0x55) {
+            cfgUartDirLocked = true;
+            lastDockUartReplyMs = now;
+            Serial.println("\n[CONFIG DOCK] 💾 Flash Write Confirmed! (ACK 0x06 received from Block)");
+            triggerLedBlip(0, 180, 40);
+            handleDockedBlockConfirmed(dockedActionId, dockedParamVal, false, "UART ACK 0x06");
+            // Immediately query block to refresh stored state
+            uint8_t queryPkt[4] = { 0xCF, 0x01, 0x07, 0x55 };
+            Serial1.write(queryPkt, 4);
+            lastConfigPollTime = now;
+          }
         }
-      }
-    } else {
-      // Unrecognized command byte; restart frame if byte itself is 0xCF
-      if (b == 0xCF) {
-        cfgRxBuf[0] = 0xCF;
-        cfgRxIdx = 1;
+      } else if (cmd == 0x01) {
+        // 4-byte Loopback / Echo Response: [0xCF, 0x01, 0x07, 0x55] (4 bytes)
+        if (cfgRxIdx >= 4) {
+          uint8_t rxCrc  = cfgRxBuf[2];
+          uint8_t footer = cfgRxBuf[3];
+          cfgRxIdx = 0;
+          if (rxCrc == 0x07 && footer == 0x55) {
+            cfgUartDirLocked = true;
+            lastDockUartReplyMs = now;
+            handleDockedBlockConfirmed(dockedActionId, dockedParamVal, false, "UART Loopback 0x01");
+          }
+        }
       } else {
+        // Unrecognized command byte; restart frame if byte itself is 0xCF or 0xAA
+        if (b == 0xCF || b == 0xAA) {
+          cfgRxBuf[0] = b;
+          cfgRxIdx = 1;
+        } else {
+          cfgRxIdx = 0;
+        }
+      }
+    } else if (hdr == 0xAA) {
+      // Discovery Reply on Config Port: [0xAA, 0x02, 0x01, ActionID, ParamVal, CRC8, 0x55] (7 bytes)
+      if (cfgRxIdx == 3) {
+        if (cfgRxBuf[1] != 0x02 || cfgRxBuf[2] != 0x01) {
+          cfgRxIdx = 0;
+        }
+      } else if (cfgRxIdx >= 7) {
+        uint8_t act    = cfgRxBuf[3];
+        uint8_t par    = cfgRxBuf[4];
+        uint8_t rxCrc  = cfgRxBuf[5];
+        uint8_t footer = cfgRxBuf[6];
         cfgRxIdx = 0;
+
+        uint8_t checkPayload[4] = { 0x02, 0x01, act, par };
+        if (calcCrc8(checkPayload, 4) == rxCrc && footer == 0x55) {
+          cfgUartDirLocked = true;
+          lastDockUartReplyMs = now;
+          handleDockedBlockConfirmed(act, par, true, "UART 0xAA");
+        }
       }
     }
   }
@@ -1239,9 +1414,45 @@ void pollConfigDock() {
     cfgRxIdx = 0; // Reset partial frame on inter-byte timeout
   }
 
-  // 2. Timeout check: if no query response received within CONFIG_TIMEOUT_MS, mark block as undocked
+  // 2. Periodic non-blocking query ping + electrical presence detection (for un-reflashed Action Blocks)
+  if (now - lastConfigPollTime >= CONFIG_POLL_INTERVAL_MS) {
+    lastConfigPollTime = now;
+
+    bool elecPresent = probeConfigDockElectrical();
+    if (elecPresent) {
+      cfgElectricalConsecMiss = 0;
+      if (cfgElectricalConsecHits < 10) cfgElectricalConsecHits++;
+      if (cfgElectricalConsecHits >= 2) {
+        handleDockedBlockConfirmed(dockedActionId, dockedParamVal, false, "J1 Electrical Pull-Up");
+      }
+    } else {
+      cfgElectricalConsecHits = 0;
+      if (cfgElectricalConsecMiss < 10) cfgElectricalConsecMiss++;
+    }
+
+    // Auto-alternate UART1 TX/RX direction between (TX=17, RX=18) and (TX=18, RX=17) until UART reply locks direction
+    if (!cfgUartDirLocked || (now - lastDockUartReplyMs > 1000)) {
+      cfgUartDirLocked = false;
+      cfgPollCycle++;
+      if (cfgPollCycle & 1) {
+        setConfigUartPins(17, 18);
+      } else {
+        setConfigUartPins(18, 17);
+      }
+    }
+
+    uint8_t queryPkt[4] = { 0xCF, 0x01, 0x07, 0x55 };
+    Serial1.write(queryPkt, 4);
+    if (!cfgUartDirLocked && (cfgPollCycle & 2)) {
+      uint8_t seedPkt[5] = { 0xAA, 0x00, 0x00, 0x00, 0x55 };
+      Serial1.write(seedPkt, 5);
+    }
+  }
+
+  // 3. Timeout check: if no query response or electrical presence within CONFIG_TIMEOUT_MS, mark block as undocked
   if (isBlockDocked && (now - lastDockResponseTime > CONFIG_TIMEOUT_MS)) {
     isBlockDocked = false;
+    cfgUartDirLocked = false;
     dockedActionId = 0;
     dockedParamVal = 0;
     Serial.println("\n[CONFIG DOCK] ⚪ Action Block undocked / disconnected.");
@@ -1250,13 +1461,6 @@ void pollConfigDock() {
       // Still in Mode 1 because Run Chain is connected -> switch UI to Run Mode!
       renderActionMenu();
     }
-  }
-
-  // 3. Periodic non-blocking query ping
-  if (now - lastConfigPollTime >= CONFIG_POLL_INTERVAL_MS) {
-    lastConfigPollTime = now;
-    uint8_t queryPkt[4] = { 0xCF, 0x01, 0x07, 0x55 };
-    Serial1.write(queryPkt, 4);
   }
 }
 
@@ -1509,11 +1713,22 @@ void setup() {
   }
 
   // Initial port probe on boot: check if a block is already on Config Port or Run Port
+  if (probeConfigDockElectrical()) {
+    cfgElectricalConsecHits = 2;
+  }
   uint8_t initCfgPing[4] = { 0xCF, 0x01, 0x07, 0x55 };
+  setConfigUartPins(17, 18);
   Serial1.write(initCfgPing, 4);
   uint8_t initChainPing[5] = { 0xAA, 0x00, 0x00, 0x00, 0x55 };
   ChainSerial.write(initChainPing, 5);
-  delay(80);
+  delay(45);
+  pollConfigDock();
+  if (!isBlockDocked) {
+    setConfigUartPins(18, 17);
+    Serial1.write(initCfgPing, 4);
+    delay(45);
+  }
+  lastConfigPollTime = 0;
   pollConfigDock();
   pollRunChainPort();
 
@@ -1554,12 +1769,16 @@ void loop() {
   if (Serial.available() > 0) {
     char c = Serial.read();
     if (c == 't' || c == 'T') {
-      Serial.println("\n[DOCK TEST] 📡 Manual Ping [0xCF, 0x01, 0x07, 0x55] sent to GPIO 17...");
+      int pd18 = 0, hz18 = 0, pd17 = 0, hz17 = 0;
+      bool elec = probeConfigDockElectrical(&pd18, &hz18, &pd17, &hz17);
+      Serial.printf("\n[DOCK TEST] 🔌 Electrical J1 Probe: GPIO 18 (Pin 3) PD=%d HZ=%d | GPIO 17 (Pin 4) PD=%d HZ=%d -> %s (Docked=%d, TX=%d, RX=%d)\n",
+                    pd18, hz18, pd17, hz17, elec ? "BLOCK DETECTED" : "EMPTY",
+                    isBlockDocked ? 1 : 0, activeCfgTxPin, activeCfgRxPin);
       uint8_t qPkt[4] = { 0xCF, 0x01, 0x07, 0x55 };
       Serial1.write(qPkt, 4);
       Serial1.flush();
       delay(30);
-      Serial.printf("[DOCK TEST] Serial1 buffer has %d bytes waiting on GPIO 18\n", Serial1.available());
+      Serial.printf("[DOCK TEST] Serial1 buffer has %d bytes waiting on GPIO %d\n", Serial1.available(), activeCfgRxPin);
     } else if (c == 'r' || c == 'R') {
       Serial.println("\n[RUN CHAIN TEST] 🚀 Manual trigger executeRunChain()...");
       if (!executeRunChain()) {
@@ -1846,6 +2065,7 @@ void loop() {
                           act.name, act.paramVal, act.paramUnit);
             writeConfigToDockedBlock(act.tokenID, (uint8_t)act.paramVal);
             triggerLedBlip(0, 80, 40);
+            renderActionMenu();
           } else if (isRunChainConnected) {
             // RUN MODE: Config Port is empty and Run Port chain is connected -> Run Chain!
             Serial.println("\n[SYSTEM] Start button clicked in Run Mode: Initiating Run Chain (GPIO 15/16)...");
