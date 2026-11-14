@@ -160,7 +160,8 @@ RobosenAction ACTIONS[] = {
   {"04: Turn Right",     0x02, "",                      "Deg°",  90,  45,  180, 45, 0x04},
   {"05: Punch Left",     0x17, "ProAction/Left Punch",  "Reps",  1,   1,   3,   1,  0x10},
   {"06: Push-ups",       0x17, "ProAction/Push Ups",    "Reps",  1,   1,   3,   1,  0x14},
-  {"07: Wave Hand",      0x17, "ProAction/Say Hello",   "Reps",  1,   1,   3,   1,  0x18}
+  {"07: Wave Hand",      0x17, "ProAction/Say Hello",   "Reps",  1,   1,   3,   1,  0x18},
+  {"08: End Terminator", 0xEE, "",                      "Cap",   0,   0,   0,   0,  0xEE}
 };
 const int TOTAL_ACTIONS = sizeof(ACTIONS) / sizeof(ACTIONS[0]);
 int currentActionIndex = 0; // Default: Walk Forward
@@ -1521,6 +1522,14 @@ void pollRunChainPort() {
       uint8_t calcCrc = calcCrc8(checkBuf, 2 + len);
 
       if (calcCrc == rxCrc && footer == 0x55) {
+        // Strip any trailing 0xEE End Terminator entry if an un-reflashed Action Block was configured as 0xEE
+        while (count > 0 && chainRxPayloadBuf[(count - 1) * 2] == 0xEE) {
+          count--;
+          len -= 2;
+        }
+        if (count == 0) {
+          continue;
+        }
         bool newlyConnected = !isRunChainConnected;
         bool chainChanged = (detectedChainCount != (int)count ||
                              memcmp(detectedChainBuf, chainRxPayloadBuf, len) != 0);
@@ -2776,6 +2785,18 @@ bool executeRunChain() {
     return false;
   }
 
+  // Strip any trailing 0xEE End Terminator entry if an un-reflashed Action Block was configured as 0xEE
+  while (count > 0 && rxBuf[(count - 1) * 2] == 0xEE) {
+    count--;
+    len -= 2;
+  }
+  if (count == 0) {
+    Serial.println("║ ⚠️ Only End Terminator (0xEE) found in chain; no action steps to run. ║");
+    Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+    restorePostRunMode(false);
+    return false;
+  }
+
   // Sync live detected chain state
   isRunChainConnected = true;
   detectedChainCount = (int)count;
@@ -3275,7 +3296,9 @@ void drawActionMenuToBuffer(bool invertMiddle) {
     drawBitmap2x(68, 48, getActionIcon(actIdx), 24, 24, midFg);
 
     // Big Parameter Number (dynamically centered in right half of visible window: center = 197)
-    if (strcmp(act.paramUnit, "Deg°") == 0) {
+    if (act.tokenID == 0xEE || strcmp(act.paramUnit, "Cap") == 0) {
+      snprintf(numStr, sizeof(numStr), "END");
+    } else if (strcmp(act.paramUnit, "Deg°") == 0) {
       snprintf(numStr, sizeof(numStr), "%d°", act.paramVal);
     } else {
       snprintf(numStr, sizeof(numStr), "%d", act.paramVal);
