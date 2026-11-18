@@ -1,7 +1,7 @@
 # RobosenJS & Tangible Coding Block System: Master Project Memory
 
 > **System Overview:** Physical Tangible Coding Block System (ESP32-S3 Master & CH32V003 Slaves), Python BLE Control & Telemetry Suite, and Bluetooth Low Energy (BLE) Reverse Engineering for the **Robosen K1 / Interstellar Scout K1 Series** Humanoid Robot.  
-> **Last Updated:** October 5, 2026  
+> **Last Updated:** November 18, 2026  
 > **FCC ID:** `2ATNWK1` | **Live Verified Robot ID:** `K1-00457` (`3C:A5:51:94:97:70`) | **Firmware:** `VER:3.03L` (Build: `SH2022-07-23`)
 
 ---
@@ -406,7 +406,7 @@ Designed for screenless STEM learning, physical modular coding blocks snap toget
 
 5. **Pillar 5: Master Config Dock & Solid Action Blocks**
    - **Master UI Controls**: Knob 1 (Action Selector), Knob 2 (Parameter Adjuster), Large tactile Start button.
-   - **Non-Volatile Memory**: 192-byte flash on CH32V003 retains action settings indefinitely across power-downs.
+   - **Non-Volatile Memory**: `64-byte` Flash page (`0x08003FC0`, magic `0xA55A0002`) on `CH32V003F4P6` retains action settings indefinitely across power-downs.
    - **Smart End Block**: Active loopback with CRC-8 calculation and green ready indicator.
 
 ---
@@ -464,25 +464,27 @@ The `assignments/` folder stores academic project coursework, literature reviews
 3. **Repository State:** The repository [`https://github.com/Nantaphat-Yoktaworn/robosen_block.git`](https://github.com/Nantaphat-Yoktaworn/robosen_block.git) is strictly **PRIVATE**.
 
 ### 13.2 Consolidated Hardware & Protocol Decisions
-- **System Block Diagram:** Stored at `docs/diagrams/robosen_system_block_diagram.png` (`Robosen Block Diagram (1).png`).
+- **System Diagrams (`docs/diagrams/`):**
+  - System Block Diagram: `robosen_system_block_diagram.png` (Master Proto #1-1, `J1`/`J2`, Unified `32×32mm` blocks, BLE `0xFFE0/0xFFE1`, Host/SWIO tools).
+  - System & Software Architecture: `robosen_system_software_architecture.svg` (ESP32-S3 Dual-Core FreeRTOS, 3-Mode State Machine, CH32V003 FW, SWIO Programmers, Python BLE Suite & Node.js SDK).
+  - Protocol Flows: `robosen_config_data_flow.svg` (`0xCF` Config Dock) & `robosen_coding_data_flow.svg` (`0xAA`/`0xBB`/`0xFF` Run Chain).
+  - 3D PCB Renders (Proto #1-1): `pcb_3d_top.png` & `pcb_3d_bottom.png`.
 - **Master Block (ESP32-S3):**
-  - **Dual Interfaces:** (1) **Config Port (Dock)** to program 1 block via UART `0xCF`, (2) **Run Port (Chain)** to execute the multi-block sequence (`0xAA`/`0xBB`).
-  - **Run Port Pinout (Right):** Pin 1 = `V+ (3.3V)`, Pin 2 = `GND`, Pin 3 = `TX` (Downstream Seed `0xAA`), Pin 4 = `RX` (Return Program `0xAA` & Step Broadcast `0xBB`).
-  - **Config Port Pinout (Dock/Left):** Pin 1 = `V+ (3.3V)`, Pin 2 = `GND`, Pin 3 = `RX` (Reads `0x06` ACK), Pin 4 = `TX` (Writes `0xCF` Config).
-  - **User Interface:** High-contrast 1.54"/2.13" E-Ink display, Dual EC11 Incremental Rotary Encoders with detent clicks (Knob 1 = Action, Knob 2 = Parameter with bidirectional stepping & firmware bounds clamping), large tactile Start button.
-  - **Silent Classroom Feedback:** No buzzer; multi-state WS2812B RGB light choreography (cyan dock pulse, color morph, parameter flash count, emerald green save pulse, comet compilation wave, glowing green active step, rainbow victory sparkle).
-  - **Smart NVS BLE Pairing:** Stores last manually paired robot MAC in NVS. Direct instant boot in $<500\,\text{ms}$ with zero classroom crosstalk. Long-press (3s) opens E-Ink Teacher Pairing Menu sorted by RSSI proximity.
-- **Solid Action Blocks (WCH CH32V003):**
+  - **Dual Interfaces:** (1) **Config Port (`J1`)** to program 1 block via auto-directional `UART1` `0xCF` (`GPIO 17↔18`), (2) **Run Port (`J2`)** to execute multi-block sequences (`0xAA`/`0xBB`/`0xFF`).
+  - **Run Port Pinout (`J2`):** Pin 1 = `+3V3`, Pin 2 = `GND`, Pin 3 = `CHAIN_TX (GPIO 15)` (Downstream Seed `0xAA` AND Step/Complete `0xBB`), Pin 4 = `CHAIN_RX (GPIO 16)` (Looped `0xAA` Return Rail from End Block).
+  - **Config Port Pinout (`J1`):** Pin 1 = `+3V3`, Pin 2 = `GND`, Pin 3/4 = `GPIO 18 / GPIO 17` (Auto-alternating `TX/RX` accepting block `IN PD6/PD5` or `OUT PD0` SW UART; Green Start `SW3` `GPIO 14` saves, Red Stop `SW5` `GPIO 2` reverts).
+  - **User Interface:** High-contrast 2.13" E-Ink display (`210×122` bezel, `280ms` fast + `350ms` settle), Dual KY-040 encoders (`SW1 GPIO 8/9/10` locked in Mode 1, toggles Mode 2 ↔ Mode 3 when unplugged; `SW2 GPIO 11/12/13` param adjust & reset-to-min), Green Start `SW3` (`GPIO 14`) & Red Stop `SW5` (`GPIO 2`).
+  - **Silent Classroom Feedback:** No buzzer; multi-state WS2812B RGB light choreography (amber 50ms on `0xAA`, emerald green 400ms on `0xCF` save, bright green `(0,255,0)` active step, 3x rainbow sparkle on `0xBB 0xFF`).
+  - **Smart NVS BLE Pairing:** Stores last paired robot MAC in NVS namespace `robosen_cfg`. Auto-scans & reconnects on Core 0 (`bleReconnectTask` + `bleMutex`).
+- **Solid Action Blocks (WCH CH32V003F4P6):**
   - **Zero Moving Parts:** No buttons or potentiometers on individual blocks.
-  - **Ultra-Low BOM:** CH32V003 (SOP-8, ~$0.15) + WS2812B RGB LED + 4-pin magnetic pogo connector (~$0.25–$0.35 total BOM).
-  - **Non-Volatile Storage:** Action Token ID and Parameter stored inside internal 192-byte flash/EEPROM emulation; retains configuration indefinitely without battery power.
-  - **100% Planar Non-Overlapping Wiring:**
-    - Pin 1 (`V+ 3.3V`) $\rightarrow$ Top Rail straight pass-through $\rightarrow$ drops to `VDD` & `WS2812 VCC`.
-    - Pin 2 (`GND`) $\rightarrow$ Second Rail straight pass-through $\rightarrow$ connects to `GND` & `WS2812 GND`.
-    - Pin 3 (`UART In/Out`) $\rightarrow$ Upstream Pin 3 enters `PD6 (RX)`; `PD5 (TX)` exits to Downstream Pin 3.
-    - `PA2 (GPIO Data)` $\rightarrow$ drops directly down into `WS2812 DIN`.
-    - Pin 4 (`PASS_THRU / RX_BUS`) $\rightarrow$ Bottom Rail straight pass-through with zero line intersections.
-  - **Pin 4 Multidrop Electrical Safety:** High-impedance (Hi-Z) input during Run Mode. End Block `TX` is the sole active driver on Pin 4 during return; Action Blocks ignore `0xAA` frames and process `0xBB` execution frames.
+  - **Unified Hardware (`32×32mm` PCB):** TENSTAR `CH32V003F4P6` (`TSSOP-20`, ~$0.15; early BOM targeted `SOP-8`) + WS2812B RGB LED (`PA2`) + 3-pin `PROG` (`SWIO PD1`) + centered 4-pin `IN`/`OUT` magnetic pogo docks (`~$0.25–$0.35` BOM).
+  - **Non-Volatile Storage:** `[CFG_MAGIC, ActionID, ParamVal]` stored inside a `64-byte` Flash page at `0x08003FC0`; retains configuration indefinitely without battery power (Action ID `0xEE` switches block into Smart End Terminator).
+  - **Wiring & Bus Safety:**
+    - Pin 1 (`+3V3`) & Pin 2 (`GND`) straight pass-through powering MCU & WS2812B.
+    - Pin 3 (`UART In/Out`): Upstream enters `PD6 (RX)`, MCU forwards `0xAA`/`0xBB`/`0xFF` out via `PD5 (TX)` to Downstream Pin 3.
+    - `PA2 (GPIO Data)` $\rightarrow$ `WS2812 DIN`.
+    - Pin 4 (`RETURN_BUS`, `PD0`): Idle Hi-Z pass-through in Action Run mode; End Block `PD0` SW TX (or `PD5` in dedicated End FW) drives verified `0xAA` return frame back to Master `GPIO 16`; `handle_pd0_rx()` also enables `0xCF` Config R/W via `OUT` dock.
 
 ---
 
@@ -519,7 +521,7 @@ The `assignments/` folder stores academic project coursework, literature reviews
 - **Master UI Display:**
   - When docked: `║ Config Dock: DOCKED 🟢 [0x01] Walk Forward (1 Steps) ║`
   - When empty: `║ Config Dock: EMPTY ⚪ (No Action Block Connected) ║`
-- **Knob 1 Interaction:** When a block is docked, clicking Knob 1 burns the Master's selected action & parameter directly into that block.
+- **Knob / Button Interaction Note:** In early Sept 7 bring-up tests Knob 1 click burned Config; in production `esp32_master.ino`, **Green Start (`SW3`, `GPIO 14`)** confirms Config writes (`0xCF 0x02`), **Red Stop (`SW5`, `GPIO 2`)** reverts edits, and `Knob 1 SW` (`GPIO 10`) is locked in Mode 1.
 - **Hardware Verification (September 7, 2026):**
   - ✅ **Physical Silicon End-to-End Success:** Verified live detection of TENSTAR CH32V003 (`[0x10] Left Punch`), burning new action (`0x14: Push-ups, 1 Reps`), receiving flash write ACK `0x06`, and real-time Master UI update to `Config Dock: DOCKED 🟢 [0x14] Push-ups (1 Reps)`.
   - **Linker Script Bug Resolution:** Identified and resolved memory map collision in bare-metal toolchain where unpreprocessed `ch32fun.ld` assigned `sp = 0x20180000` (causing immediate HardFault on boot). Implemented automated preprocessor stage in `build.ps1` generating `ch32fun_003.ld` with valid 2KB SRAM boundaries (`0x20000000 - 0x20000800`).
@@ -555,10 +557,10 @@ The `assignments/` folder stores academic project coursework, literature reviews
      - Block 1 appends stored action `0x14` (Push-ups) and param `1`, increments count to 1, updates CRC-8.
      - Smart End Block validates cumulative CRC-8 and actively transmits sequence over Pin 4 return rail to Master `GPIO 16`.
      - Master logs: `🟢 Loopback Verified! Sequence Compiled: 1 Steps, CRC: 0xXX (VALID ✓)`.
-  2. **Phase 2: Real-Time Step Execution (`0xBB`):**
-     - Master broadcasts active step frame `[0xBB, ActiveStep=1, Total=1, CRC8, 0x55]`.
-     - Block 1 WS2812B illuminates in **Bright Pulsating Green (100% brightness)**.
-     - Master dispatches BLE motion packet to Robosen K1 robot over persistent BLE link.
+  2. **Phase 2: Real-Time Step Execution (`0xBB` on Pin 3 TX):**
+     - Master transmits `[0xBB, ActiveStep=1, Total=1, CRC8, 0x55]` over `GPIO 15` (`CHAIN_TX`) -> `PD6 -> PD5` daisy chain.
+     - Block 1 WS2812B illuminates in **Bright Green `(0, 255, 0)`**.
+     - Master dispatches BLE motion packet to Robosen K1 robot over persistent BLE link (abortable wait + `0x0C` Stop).
   3. **Phase 3: Mission Complete Celebration (`0xBB 0xFF`):**
      - Master broadcasts completion frame `[0xBB, ActiveStep=0xFF, Total=1, CRC8, 0x55]`.
      - Block 1, Smart End Block, and Master onboard WS2812B simultaneously trigger synchronized **Rainbow Victory Sparkle**!

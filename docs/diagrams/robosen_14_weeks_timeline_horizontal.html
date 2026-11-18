@@ -133,24 +133,27 @@
             border-bottom: 1px solid rgba(148, 163, 184, 0.2);
         }
         .week-badge {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 800;
-            padding: 3px 8px;
+            padding: 3px 7px;
             border-radius: 6px;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
             font-family: monospace;
+            white-space: nowrap;
         }
         .date-badge {
-            font-size: 11px;
+            font-size: 10.5px;
             color: #94A3B8;
             font-family: monospace;
+            white-space: nowrap;
         }
         .status-badge {
             font-size: 10px;
             font-weight: 800;
             padding: 2px 7px;
             border-radius: 12px;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
+            white-space: nowrap;
         }
         .star-pill {
             display: inline-block;
@@ -233,9 +236,8 @@
             </div>
         </div>
         <div class="legend-box">
-            <div class="legend-item"><div class="dot" style="background:#10B981;"></div><span style="color:#34D399;">DONE (เสร็จสิ้น): W1-W3</span></div>
-            <div class="legend-item"><div class="dot" style="background:#F59E0B;"></div><span style="color:#FCD34D;">IN PROGRESS (กำลังดำเนินการ): W4</span></div>
-            <div class="legend-item"><div class="dot" style="background:#38BDF8;"></div><span style="color:#7DD3FC;">SCHEDULED (ตามแผนงาน): W5-W14</span></div>
+            <div class="legend-item"><div class="dot" style="background:#10B981;"></div><span style="color:#34D399;">DONE (เสร็จสิ้น): W1-W13</span></div>
+            <div class="legend-item"><div class="dot" style="background:#F59E0B;"></div><span style="color:#FCD34D;">IN PROGRESS (กำลังดำเนินการ): W14</span></div>
             <div class="legend-item"><div class="dot" style="background:#EC4899;"></div><span style="color:#F472B6;">★ KEY MILESTONES (W7, W10, W12, W14)</span></div>
         </div>
     </header>
@@ -245,10 +247,8 @@
         <defs>
             <linearGradient id="spineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stop-color="#10B981" />
-                <stop offset="25%" stop-color="#10B981" />
-                <stop offset="30%" stop-color="#F59E0B" />
-                <stop offset="50%" stop-color="#38BDF8" />
-                <stop offset="85%" stop-color="#818CF8" />
+                <stop offset="88%" stop-color="#10B981" />
+                <stop offset="94%" stop-color="#F59E0B" />
                 <stop offset="100%" stop-color="#EC4899" />
             </linearGradient>
             <filter id="glowFilter" x="-20%" y="-20%" width="140%" height="140%">
@@ -291,91 +291,91 @@
         <text x="952" y="784" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W3</text>
         
         <!-- Branch Week 4 -->
-        <line x1="1318" y1="780" x2="1318" y2="845" stroke="#F59E0B" stroke-width="3" stroke-dasharray="none" />
-        <path d="M 1312 837 L 1318 845 L 1324 837" fill="none" stroke="#F59E0B" stroke-width="3" stroke-linecap="round" />
-        <circle cx="1318" cy="780" r="18" fill="rgba(245, 158, 11, 0.7)" opacity="0.35" />
-        <circle cx="1318" cy="780" r="11" fill="#0F172A" stroke="#F59E0B" stroke-width="4" />
-        <circle cx="1318" cy="780" r="4" fill="#F59E0B" />
+        <line x1="1318" y1="780" x2="1318" y2="845" stroke="#10B981" stroke-width="3" stroke-dasharray="none" />
+        <path d="M 1312 837 L 1318 845 L 1324 837" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" />
+        <circle cx="1318" cy="780" r="18" fill="rgba(16, 185, 129, 0.5)" opacity="0.35" />
+        <circle cx="1318" cy="780" r="11" fill="#0F172A" stroke="#10B981" stroke-width="4" />
+        <circle cx="1318" cy="780" r="4" fill="#10B981" />
         <text x="1318" y="762" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W4</text>
         
         <!-- Branch Week 5 -->
-        <line x1="1684" y1="780" x2="1684" y2="715" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" />
-        <path d="M 1678 723 L 1684 715 L 1690 723" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
-        <circle cx="1684" cy="780" r="18" fill="rgba(56, 189, 248, 0.4)" opacity="0.35" />
-        <circle cx="1684" cy="780" r="11" fill="#0F172A" stroke="#38BDF8" stroke-width="4" />
-        <circle cx="1684" cy="780" r="4" fill="#38BDF8" />
+        <line x1="1684" y1="780" x2="1684" y2="715" stroke="#10B981" stroke-width="3" stroke-dasharray="none" />
+        <path d="M 1678 723 L 1684 715 L 1690 723" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" />
+        <circle cx="1684" cy="780" r="18" fill="rgba(16, 185, 129, 0.5)" opacity="0.35" />
+        <circle cx="1684" cy="780" r="11" fill="#0F172A" stroke="#10B981" stroke-width="4" />
+        <circle cx="1684" cy="780" r="4" fill="#10B981" />
         <text x="1684" y="784" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W5</text>
         
         <!-- Branch Week 6 -->
-        <line x1="2050" y1="780" x2="2050" y2="845" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" />
-        <path d="M 2044 837 L 2050 845 L 2056 837" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
-        <circle cx="2050" cy="780" r="18" fill="rgba(56, 189, 248, 0.4)" opacity="0.35" />
-        <circle cx="2050" cy="780" r="11" fill="#0F172A" stroke="#38BDF8" stroke-width="4" />
-        <circle cx="2050" cy="780" r="4" fill="#38BDF8" />
+        <line x1="2050" y1="780" x2="2050" y2="845" stroke="#10B981" stroke-width="3" stroke-dasharray="none" />
+        <path d="M 2044 837 L 2050 845 L 2056 837" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" />
+        <circle cx="2050" cy="780" r="18" fill="rgba(16, 185, 129, 0.5)" opacity="0.35" />
+        <circle cx="2050" cy="780" r="11" fill="#0F172A" stroke="#10B981" stroke-width="4" />
+        <circle cx="2050" cy="780" r="4" fill="#10B981" />
         <text x="2050" y="762" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W6</text>
         
         <!-- Branch Week 7 -->
-        <line x1="2416" y1="780" x2="2416" y2="715" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" />
-        <path d="M 2410 723 L 2416 715 L 2422 723" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
-        <circle cx="2416" cy="780" r="18" fill="rgba(56, 189, 248, 0.4)" opacity="0.35" />
-        <circle cx="2416" cy="780" r="11" fill="#0F172A" stroke="#38BDF8" stroke-width="4" />
-        <circle cx="2416" cy="780" r="4" fill="#38BDF8" />
+        <line x1="2416" y1="780" x2="2416" y2="715" stroke="#10B981" stroke-width="3" stroke-dasharray="none" />
+        <path d="M 2410 723 L 2416 715 L 2422 723" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" />
+        <circle cx="2416" cy="780" r="18" fill="rgba(16, 185, 129, 0.5)" opacity="0.35" />
+        <circle cx="2416" cy="780" r="11" fill="#0F172A" stroke="#10B981" stroke-width="4" />
+        <circle cx="2416" cy="780" r="4" fill="#10B981" />
         <text x="2416" y="784" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W7</text>
         
         <!-- Branch Week 8 -->
-        <line x1="2782" y1="780" x2="2782" y2="845" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" />
-        <path d="M 2776 837 L 2782 845 L 2788 837" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
-        <circle cx="2782" cy="780" r="18" fill="rgba(56, 189, 248, 0.4)" opacity="0.35" />
-        <circle cx="2782" cy="780" r="11" fill="#0F172A" stroke="#38BDF8" stroke-width="4" />
-        <circle cx="2782" cy="780" r="4" fill="#38BDF8" />
+        <line x1="2782" y1="780" x2="2782" y2="845" stroke="#10B981" stroke-width="3" stroke-dasharray="none" />
+        <path d="M 2776 837 L 2782 845 L 2788 837" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" />
+        <circle cx="2782" cy="780" r="18" fill="rgba(16, 185, 129, 0.5)" opacity="0.35" />
+        <circle cx="2782" cy="780" r="11" fill="#0F172A" stroke="#10B981" stroke-width="4" />
+        <circle cx="2782" cy="780" r="4" fill="#10B981" />
         <text x="2782" y="762" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W8</text>
         
         <!-- Branch Week 9 -->
-        <line x1="3148" y1="780" x2="3148" y2="715" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" />
-        <path d="M 3142 723 L 3148 715 L 3154 723" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
-        <circle cx="3148" cy="780" r="18" fill="rgba(56, 189, 248, 0.4)" opacity="0.35" />
-        <circle cx="3148" cy="780" r="11" fill="#0F172A" stroke="#38BDF8" stroke-width="4" />
-        <circle cx="3148" cy="780" r="4" fill="#38BDF8" />
+        <line x1="3148" y1="780" x2="3148" y2="715" stroke="#10B981" stroke-width="3" stroke-dasharray="none" />
+        <path d="M 3142 723 L 3148 715 L 3154 723" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" />
+        <circle cx="3148" cy="780" r="18" fill="rgba(16, 185, 129, 0.5)" opacity="0.35" />
+        <circle cx="3148" cy="780" r="11" fill="#0F172A" stroke="#10B981" stroke-width="4" />
+        <circle cx="3148" cy="780" r="4" fill="#10B981" />
         <text x="3148" y="784" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W9</text>
         
         <!-- Branch Week 10 -->
-        <line x1="3514" y1="780" x2="3514" y2="845" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" />
-        <path d="M 3508 837 L 3514 845 L 3520 837" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
-        <circle cx="3514" cy="780" r="18" fill="rgba(56, 189, 248, 0.4)" opacity="0.35" />
-        <circle cx="3514" cy="780" r="11" fill="#0F172A" stroke="#38BDF8" stroke-width="4" />
-        <circle cx="3514" cy="780" r="4" fill="#38BDF8" />
+        <line x1="3514" y1="780" x2="3514" y2="845" stroke="#10B981" stroke-width="3" stroke-dasharray="none" />
+        <path d="M 3508 837 L 3514 845 L 3520 837" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" />
+        <circle cx="3514" cy="780" r="18" fill="rgba(16, 185, 129, 0.5)" opacity="0.35" />
+        <circle cx="3514" cy="780" r="11" fill="#0F172A" stroke="#10B981" stroke-width="4" />
+        <circle cx="3514" cy="780" r="4" fill="#10B981" />
         <text x="3514" y="762" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W10</text>
         
         <!-- Branch Week 11 -->
-        <line x1="3880" y1="780" x2="3880" y2="715" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" />
-        <path d="M 3874 723 L 3880 715 L 3886 723" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
-        <circle cx="3880" cy="780" r="18" fill="rgba(56, 189, 248, 0.4)" opacity="0.35" />
-        <circle cx="3880" cy="780" r="11" fill="#0F172A" stroke="#38BDF8" stroke-width="4" />
-        <circle cx="3880" cy="780" r="4" fill="#38BDF8" />
+        <line x1="3880" y1="780" x2="3880" y2="715" stroke="#10B981" stroke-width="3" stroke-dasharray="none" />
+        <path d="M 3874 723 L 3880 715 L 3886 723" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" />
+        <circle cx="3880" cy="780" r="18" fill="rgba(16, 185, 129, 0.5)" opacity="0.35" />
+        <circle cx="3880" cy="780" r="11" fill="#0F172A" stroke="#10B981" stroke-width="4" />
+        <circle cx="3880" cy="780" r="4" fill="#10B981" />
         <text x="3880" y="784" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W11</text>
         
         <!-- Branch Week 12 -->
-        <line x1="4246" y1="780" x2="4246" y2="845" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" />
-        <path d="M 4240 837 L 4246 845 L 4252 837" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
-        <circle cx="4246" cy="780" r="18" fill="rgba(56, 189, 248, 0.4)" opacity="0.35" />
-        <circle cx="4246" cy="780" r="11" fill="#0F172A" stroke="#38BDF8" stroke-width="4" />
-        <circle cx="4246" cy="780" r="4" fill="#38BDF8" />
+        <line x1="4246" y1="780" x2="4246" y2="845" stroke="#10B981" stroke-width="3" stroke-dasharray="none" />
+        <path d="M 4240 837 L 4246 845 L 4252 837" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" />
+        <circle cx="4246" cy="780" r="18" fill="rgba(16, 185, 129, 0.5)" opacity="0.35" />
+        <circle cx="4246" cy="780" r="11" fill="#0F172A" stroke="#10B981" stroke-width="4" />
+        <circle cx="4246" cy="780" r="4" fill="#10B981" />
         <text x="4246" y="762" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W12</text>
         
         <!-- Branch Week 13 -->
-        <line x1="4612" y1="780" x2="4612" y2="715" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" />
-        <path d="M 4606 723 L 4612 715 L 4618 723" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
-        <circle cx="4612" cy="780" r="18" fill="rgba(56, 189, 248, 0.4)" opacity="0.35" />
-        <circle cx="4612" cy="780" r="11" fill="#0F172A" stroke="#38BDF8" stroke-width="4" />
-        <circle cx="4612" cy="780" r="4" fill="#38BDF8" />
+        <line x1="4612" y1="780" x2="4612" y2="715" stroke="#10B981" stroke-width="3" stroke-dasharray="none" />
+        <path d="M 4606 723 L 4612 715 L 4618 723" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" />
+        <circle cx="4612" cy="780" r="18" fill="rgba(16, 185, 129, 0.5)" opacity="0.35" />
+        <circle cx="4612" cy="780" r="11" fill="#0F172A" stroke="#10B981" stroke-width="4" />
+        <circle cx="4612" cy="780" r="4" fill="#10B981" />
         <text x="4612" y="784" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W13</text>
         
         <!-- Branch Week 14 -->
-        <line x1="4978" y1="780" x2="4978" y2="845" stroke="#38BDF8" stroke-width="3" stroke-dasharray="6,4" />
-        <path d="M 4972 837 L 4978 845 L 4984 837" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" />
-        <circle cx="4978" cy="780" r="18" fill="rgba(56, 189, 248, 0.4)" opacity="0.35" />
-        <circle cx="4978" cy="780" r="11" fill="#0F172A" stroke="#38BDF8" stroke-width="4" />
-        <circle cx="4978" cy="780" r="4" fill="#38BDF8" />
+        <line x1="4978" y1="780" x2="4978" y2="845" stroke="#F59E0B" stroke-width="3" stroke-dasharray="none" />
+        <path d="M 4972 837 L 4978 845 L 4984 837" fill="none" stroke="#F59E0B" stroke-width="3" stroke-linecap="round" />
+        <circle cx="4978" cy="780" r="18" fill="rgba(245, 158, 11, 0.7)" opacity="0.35" />
+        <circle cx="4978" cy="780" r="11" fill="#0F172A" stroke="#F59E0B" stroke-width="4" />
+        <circle cx="4978" cy="780" r="4" fill="#F59E0B" />
         <text x="4978" y="762" text-anchor="middle" font-size="11" font-weight="800" fill="#E2E8F0" font-family="monospace">W14</text>
         
     </svg>
@@ -560,18 +560,18 @@
         </div>
         
         <!-- CARD W4 -->
-        <div class="week-card status-progress" style="left: 1150px; top: 845px; width: 336px; height: 475px; 2px solid #F59E0B;">
+        <div class="week-card status-done" style="left: 1150px; top: 845px; width: 336px; height: 475px; 1px solid rgba(16, 185, 129, 0.55);">
             <div class="card-head">
                 <div style="display: flex; align-items: center; gap: 6px;">
-                    <span class="week-badge" style="background:#92400E; color:#FCD34D;">WEEK 04</span>
+                    <span class="week-badge" style="background:#065F46; color:#34D399;">WEEK 04</span>
                     <span class="date-badge">06/09/2026 - 12/09/2026</span>
                 </div>
-                <span class="status-badge" style="background:#92400E; color:#FCD34D; border: 1px solid #F59E0B;">
-                    PROGRESS
+                <span class="status-badge" style="background:#065F46; color:#34D399; border: 1px solid #10B981;">
+                    DONE
                 </span>
             </div>
             
-            <div class="milestone-title">ผังวงจรไฟฟ้าครบชุด & โมเดล 3D</div>
+            <div class="milestone-title">ผังวงจรไฟฟ้า & โมเดล 3D</div>
             <div class="milestone-sub">Schematics Design & 3D Enclosure CAD</div>
             <div class="items-list">
                 
@@ -579,7 +579,7 @@
                 <span class="item-icon">⚡</span>
                 <div class="item-body">
                     <span class="item-tag">[HW]</span>
-                    <span class="item-text">ออกแบบวงจรไฟฟ้าครบ 3 ส่วน: Master Block, Action, End Block</span>
+                    <span class="item-text">ออกแบบวงจร 2 บอร์ด: Master Block & Unified Action/End PCB</span>
                 </div>
             </div>
             
@@ -619,14 +619,14 @@
         </div>
         
         <!-- CARD W5 -->
-        <div class="week-card status-scheduled" style="left: 1516px; top: 240px; width: 336px; height: 475px; 1px solid rgba(56, 189, 248, 0.35);">
+        <div class="week-card status-done" style="left: 1516px; top: 240px; width: 336px; height: 475px; 1px solid rgba(16, 185, 129, 0.55);">
             <div class="card-head">
                 <div style="display: flex; align-items: center; gap: 6px;">
-                    <span class="week-badge" style="background:#0F172A; color:#7DD3FC;">WEEK 05</span>
+                    <span class="week-badge" style="background:#065F46; color:#34D399;">WEEK 05</span>
                     <span class="date-badge">13/09/2026 - 19/09/2026</span>
                 </div>
-                <span class="status-badge" style="background:#0F172A; color:#7DD3FC; border: 1px solid #38BDF8;">
-                    SCHEDULED
+                <span class="status-badge" style="background:#065F46; color:#34D399; border: 1px solid #10B981;">
+                    DONE
                 </span>
             </div>
             
@@ -638,7 +638,7 @@
                 <span class="item-icon">⚡</span>
                 <div class="item-body">
                     <span class="item-tag">[HW]</span>
-                    <span class="item-text">ออกแบบลายวงจร PCB บล็อกทั้ง 3 แบบให้กะทัดรัดลงตัว</span>
+                    <span class="item-text">ออกแบบ PCB 2 บอร์ด (Master & Unified Action/End 32x32mm)</span>
                 </div>
             </div>
             
@@ -678,19 +678,19 @@
         </div>
         
         <!-- CARD W6 -->
-        <div class="week-card status-scheduled" style="left: 1882px; top: 845px; width: 336px; height: 475px; 1px solid rgba(56, 189, 248, 0.35);">
+        <div class="week-card status-done" style="left: 1882px; top: 845px; width: 336px; height: 475px; 1px solid rgba(16, 185, 129, 0.55);">
             <div class="card-head">
                 <div style="display: flex; align-items: center; gap: 6px;">
-                    <span class="week-badge" style="background:#0F172A; color:#7DD3FC;">WEEK 06</span>
+                    <span class="week-badge" style="background:#065F46; color:#34D399;">WEEK 06</span>
                     <span class="date-badge">20/09/2026 - 26/09/2026</span>
                 </div>
-                <span class="status-badge" style="background:#0F172A; color:#7DD3FC; border: 1px solid #38BDF8;">
-                    SCHEDULED
+                <span class="status-badge" style="background:#065F46; color:#34D399; border: 1px solid #10B981;">
+                    DONE
                 </span>
             </div>
             
-            <div class="milestone-title">สั่งผลิต PCB & กราฟิกหน้าจอแสดงผล</div>
-            <div class="milestone-sub">PCB Fabrication & OLED UI Graphics</div>
+            <div class="milestone-title">สั่งผลิต PCB & กราฟิกหน้าจอ E-Ink</div>
+            <div class="milestone-sub">PCB Fabrication & 2.13" E-Ink UI Graphics</div>
             <div class="items-list">
                 
             <div class="item-row">
@@ -713,7 +713,7 @@
                 <span class="item-icon">💻</span>
                 <div class="item-body">
                     <span class="item-tag">[FW]</span>
-                    <span class="item-text">พัฒนาระบบแสดงผล OLED: ไอคอนคำสั่งใหญ่ชัดเจน & แถบระดับค่า</span>
+                    <span class="item-text">พัฒนาระบบแสดงผล 2.13" E-Ink: ไอคอนคำสั่งใหญ่ชัดเจน & แถบระดับค่า</span>
                 </div>
             </div>
             
@@ -737,14 +737,14 @@
         </div>
         
         <!-- CARD W7 -->
-        <div class="week-card status-scheduled" style="left: 2248px; top: 240px; width: 336px; height: 475px; 2px solid #EC4899;">
+        <div class="week-card status-done" style="left: 2248px; top: 240px; width: 336px; height: 475px; 2px solid #EC4899;">
             <div class="card-head">
                 <div style="display: flex; align-items: center; gap: 6px;">
-                    <span class="week-badge" style="background:#0F172A; color:#7DD3FC;">WEEK 07</span>
+                    <span class="week-badge" style="background:#065F46; color:#34D399;">WEEK 07</span>
                     <span class="date-badge">27/09/2026 - 03/10/2026</span>
                 </div>
-                <span class="status-badge" style="background:#0F172A; color:#7DD3FC; border: 1px solid #38BDF8;">
-                    SCHEDULED
+                <span class="status-badge" style="background:#065F46; color:#34D399; border: 1px solid #10B981;">
+                    DONE
                 </span>
             </div>
             <span class="star-pill">★ KEY MILESTONE</span>
@@ -796,14 +796,14 @@
         </div>
         
         <!-- CARD W8 -->
-        <div class="week-card status-scheduled" style="left: 2614px; top: 845px; width: 336px; height: 475px; 1px solid rgba(56, 189, 248, 0.35);">
+        <div class="week-card status-done" style="left: 2614px; top: 845px; width: 336px; height: 475px; 1px solid rgba(16, 185, 129, 0.55);">
             <div class="card-head">
                 <div style="display: flex; align-items: center; gap: 6px;">
-                    <span class="week-badge" style="background:#0F172A; color:#7DD3FC;">WEEK 08</span>
+                    <span class="week-badge" style="background:#065F46; color:#34D399;">WEEK 08</span>
                     <span class="date-badge">04/10/2026 - 10/10/2026</span>
                 </div>
-                <span class="status-badge" style="background:#0F172A; color:#7DD3FC; border: 1px solid #38BDF8;">
-                    SCHEDULED
+                <span class="status-badge" style="background:#065F46; color:#34D399; border: 1px solid #10B981;">
+                    DONE
                 </span>
             </div>
             
@@ -815,7 +815,7 @@
                 <span class="item-icon">⚡</span>
                 <div class="item-body">
                     <span class="item-tag">[HW]</span>
-                    <span class="item-text">บัดกรี SMD/THT ชิ้นส่วนอิเล็กทรอนิกส์, พินสปริง, จอภาพ, สวิตช์</span>
+                    <span class="item-text">บัดกรี SMD/THT ชิ้นส่วนอิเล็กทรอนิกส์, พินสปริง, จอ E-Ink, สวิตช์</span>
                 </div>
             </div>
             
@@ -831,7 +831,7 @@
                 <span class="item-icon">💻</span>
                 <div class="item-body">
                     <span class="item-tag">[FW]</span>
-                    <span class="item-text">ติดตั้งโปรแกรมทดสอบลงบอร์ด Master: ตรวจสอบจอ OLED และลูกบิด</span>
+                    <span class="item-text">ติดตั้งโปรแกรมทดสอบลงบอร์ด Master: ตรวจสอบจอ E-Ink และลูกบิด</span>
                 </div>
             </div>
             
@@ -855,14 +855,14 @@
         </div>
         
         <!-- CARD W9 -->
-        <div class="week-card status-scheduled" style="left: 2980px; top: 240px; width: 336px; height: 475px; 1px solid rgba(56, 189, 248, 0.35);">
+        <div class="week-card status-done" style="left: 2980px; top: 240px; width: 336px; height: 475px; 1px solid rgba(16, 185, 129, 0.55);">
             <div class="card-head">
                 <div style="display: flex; align-items: center; gap: 6px;">
-                    <span class="week-badge" style="background:#0F172A; color:#7DD3FC;">WEEK 09</span>
+                    <span class="week-badge" style="background:#065F46; color:#34D399;">WEEK 09</span>
                     <span class="date-badge">11/10/2026 - 17/10/2026</span>
                 </div>
-                <span class="status-badge" style="background:#0F172A; color:#7DD3FC; border: 1px solid #38BDF8;">
-                    SCHEDULED
+                <span class="status-badge" style="background:#065F46; color:#34D399; border: 1px solid #10B981;">
+                    DONE
                 </span>
             </div>
             
@@ -890,7 +890,7 @@
                 <span class="item-icon">💻</span>
                 <div class="item-body">
                     <span class="item-tag">[FW]</span>
-                    <span class="item-text">แฟลชโปรแกรมลง 4 Action Blocks & ทดสอบตั้งค่าผ่านแท่น Dock</span>
+                    <span class="item-text">แฟลชโปรแกรมลง Action/End Blocks & ทดสอบตั้งค่าผ่านแท่น Dock</span>
                 </div>
             </div>
             
@@ -914,14 +914,14 @@
         </div>
         
         <!-- CARD W10 -->
-        <div class="week-card status-scheduled" style="left: 3346px; top: 845px; width: 336px; height: 475px; 2px solid #EC4899;">
+        <div class="week-card status-done" style="left: 3346px; top: 845px; width: 336px; height: 475px; 2px solid #EC4899;">
             <div class="card-head">
                 <div style="display: flex; align-items: center; gap: 6px;">
-                    <span class="week-badge" style="background:#0F172A; color:#7DD3FC;">WEEK 10</span>
+                    <span class="week-badge" style="background:#065F46; color:#34D399;">WEEK 10</span>
                     <span class="date-badge">18/10/2026 - 24/10/2026</span>
                 </div>
-                <span class="status-badge" style="background:#0F172A; color:#7DD3FC; border: 1px solid #38BDF8;">
-                    SCHEDULED
+                <span class="status-badge" style="background:#065F46; color:#34D399; border: 1px solid #10B981;">
+                    DONE
                 </span>
             </div>
             <span class="star-pill">★ KEY MILESTONE</span>
@@ -973,14 +973,14 @@
         </div>
         
         <!-- CARD W11 -->
-        <div class="week-card status-scheduled" style="left: 3712px; top: 240px; width: 336px; height: 475px; 1px solid rgba(56, 189, 248, 0.35);">
+        <div class="week-card status-done" style="left: 3712px; top: 240px; width: 336px; height: 475px; 1px solid rgba(16, 185, 129, 0.55);">
             <div class="card-head">
                 <div style="display: flex; align-items: center; gap: 6px;">
-                    <span class="week-badge" style="background:#0F172A; color:#7DD3FC;">WEEK 11</span>
+                    <span class="week-badge" style="background:#065F46; color:#34D399;">WEEK 11</span>
                     <span class="date-badge">25/10/2026 - 31/10/2026</span>
                 </div>
-                <span class="status-badge" style="background:#0F172A; color:#7DD3FC; border: 1px solid #38BDF8;">
-                    SCHEDULED
+                <span class="status-badge" style="background:#065F46; color:#34D399; border: 1px solid #10B981;">
+                    DONE
                 </span>
             </div>
             
@@ -1032,14 +1032,14 @@
         </div>
         
         <!-- CARD W12 -->
-        <div class="week-card status-scheduled" style="left: 4078px; top: 845px; width: 336px; height: 475px; 2px solid #EC4899;">
+        <div class="week-card status-done" style="left: 4078px; top: 845px; width: 336px; height: 475px; 2px solid #EC4899;">
             <div class="card-head">
                 <div style="display: flex; align-items: center; gap: 6px;">
-                    <span class="week-badge" style="background:#0F172A; color:#7DD3FC;">WEEK 12</span>
+                    <span class="week-badge" style="background:#065F46; color:#34D399;">WEEK 12</span>
                     <span class="date-badge">01/11/2026 - 07/11/2026</span>
                 </div>
-                <span class="status-badge" style="background:#0F172A; color:#7DD3FC; border: 1px solid #38BDF8;">
-                    SCHEDULED
+                <span class="status-badge" style="background:#065F46; color:#34D399; border: 1px solid #10B981;">
+                    DONE
                 </span>
             </div>
             <span class="star-pill">★ KEY MILESTONE</span>
@@ -1091,14 +1091,14 @@
         </div>
         
         <!-- CARD W13 -->
-        <div class="week-card status-scheduled" style="left: 4444px; top: 240px; width: 336px; height: 475px; 1px solid rgba(56, 189, 248, 0.35);">
+        <div class="week-card status-done" style="left: 4444px; top: 240px; width: 336px; height: 475px; 1px solid rgba(16, 185, 129, 0.55);">
             <div class="card-head">
                 <div style="display: flex; align-items: center; gap: 6px;">
-                    <span class="week-badge" style="background:#0F172A; color:#7DD3FC;">WEEK 13</span>
+                    <span class="week-badge" style="background:#065F46; color:#34D399;">WEEK 13</span>
                     <span class="date-badge">08/11/2026 - 14/11/2026</span>
                 </div>
-                <span class="status-badge" style="background:#0F172A; color:#7DD3FC; border: 1px solid #38BDF8;">
-                    SCHEDULED
+                <span class="status-badge" style="background:#065F46; color:#34D399; border: 1px solid #10B981;">
+                    DONE
                 </span>
             </div>
             
@@ -1150,14 +1150,14 @@
         </div>
         
         <!-- CARD W14 -->
-        <div class="week-card status-scheduled" style="left: 4810px; top: 845px; width: 336px; height: 475px; 2px solid #EC4899;">
+        <div class="week-card status-progress" style="left: 4810px; top: 845px; width: 336px; height: 475px; 2px solid #EC4899;">
             <div class="card-head">
                 <div style="display: flex; align-items: center; gap: 6px;">
-                    <span class="week-badge" style="background:#0F172A; color:#7DD3FC;">WEEK 14</span>
+                    <span class="week-badge" style="background:#92400E; color:#FCD34D;">WEEK 14</span>
                     <span class="date-badge">15/11/2026 - 21/11/2026</span>
                 </div>
-                <span class="status-badge" style="background:#0F172A; color:#7DD3FC; border: 1px solid #38BDF8;">
-                    SCHEDULED
+                <span class="status-badge" style="background:#92400E; color:#FCD34D; border: 1px solid #F59E0B;">
+                    PROGRESS
                 </span>
             </div>
             <span class="star-pill">★ KEY MILESTONE</span>
@@ -1185,7 +1185,7 @@
                 <span class="item-icon">💻</span>
                 <div class="item-body">
                     <span class="item-tag">[FW]</span>
-                    <span class="item-text">จัดเก็บซอร์สโค้ดและโครงสร้างเวอร์ชันสมบูรณ์ (Release v1.0.0)</span>
+                    <span class="item-text">อัปเดต PD0 Config RX, ESP32/Uno SWIO & จัดเก็บซอร์สโค้ด Release v1.0</span>
                 </div>
             </div>
             

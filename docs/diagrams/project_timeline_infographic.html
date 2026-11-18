@@ -120,7 +120,7 @@
             left: 50%;
             width: 4px;
             transform: translateX(-50%);
-            background: linear-gradient(to bottom, #10B981 0%, #10B981 25%, #F59E0B 32%, #38BDF8 60%, #818CF8 100%);
+            background: linear-gradient(to bottom, #10B981 0%, #10B981 88%, #F59E0B 95%, #EC4899 100%);
             border-radius: 2px;
             box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
         }
@@ -390,9 +390,8 @@
         <p class="subtitle">Single-line Spine with Weekly Deliverable Branches (โฟกัสตัวงานและผลลัพธ์ของแต่ละสัปดาห์ ไม่ระบุชื่อบุคคลตามแผนงาน 14 สัปดาห์)</p>
         <div class="controls">
             <button class="filter-btn active" onclick="filterTimeline('all')">ทั้งหมด (All 14 Weeks)</button>
-            <button class="filter-btn" onclick="filterTimeline('done')">✅ เสร็จสิ้นแล้ว (W1 - W3)</button>
-            <button class="filter-btn" onclick="filterTimeline('progress')">⚡ กำลังดำเนินการ (W4)</button>
-            <button class="filter-btn" onclick="filterTimeline('scheduled')">📅 แผนงานถัดไป (W5 - W14)</button>
+            <button class="filter-btn" onclick="filterTimeline('done')">✅ เสร็จสิ้นแล้ว (W1 - W13)</button>
+            <button class="filter-btn" onclick="filterTimeline('progress')">⚡ กำลังดำเนินการ (W14)</button>
             <button class="filter-btn" onclick="window.print()">🖨️ พิมพ์ / บันทึก PDF</button>
         </div>
     </header>
@@ -583,7 +582,7 @@
         </div>
         
         <!-- WEEK 4 -->
-        <div class="timeline-item right status-progress " data-status="progress">
+        <div class="timeline-item right status-done " data-status="done">
             <div class="timeline-node"></div>
             <div class="timeline-branch"></div>
             <div class="timeline-card">
@@ -593,7 +592,7 @@
                         <span class="date-badge">📅 06/09/2026 - 12/09/2026</span>
                         
                     </div>
-                    <span class="status-tag progress">กำลังดำเนินการ (IN PROGRESS)</span>
+                    <span class="status-tag done">เสร็จสิ้น (DONE)</span>
                 </div>
                 <div class="milestone-title">ออกแบบแผนผังวงจรไฟฟ้าครบชุด & ขึ้นโมเดลสามมิติตัวบล็อกคำสั่ง</div>
                 <div class="milestone-en">Complete Electrical Schematics & 3D Enclosure CAD Modeling</div>
@@ -603,7 +602,7 @@
                     <span class="deliverable-icon">⚡</span>
                     <div>
                         <span class="deliverable-cat">[ฮาร์ดแวร์ & วงจร]</span>
-                        <span>ออกแบบวงจรไฟฟ้าครบ 3 ส่วน: Master Block, Action Block และ End Block</span>
+                        <span>ออกแบบวงจรไฟฟ้าครบ 2 บอร์ด: Master Block และ Unified Action/End Block (Pin 15 PD0)</span>
                     </div>
                 </li>
             
@@ -644,7 +643,7 @@
         </div>
         
         <!-- WEEK 5 -->
-        <div class="timeline-item left status-scheduled " data-status="scheduled">
+        <div class="timeline-item left status-done " data-status="done">
             <div class="timeline-node"></div>
             <div class="timeline-branch"></div>
             <div class="timeline-card">
@@ -654,7 +653,7 @@
                         <span class="date-badge">📅 13/09/2026 - 19/09/2026</span>
                         
                     </div>
-                    <span class="status-tag scheduled">ตามแผนงาน (SCHEDULED)</span>
+                    <span class="status-tag done">เสร็จสิ้น (DONE)</span>
                 </div>
                 <div class="milestone-title">ออกแบบแผ่นวงจรพิมพ์ (PCB), พัฒนาโปรแกรมประจำบล็อก & พิมพ์ชิ้นงานสามมิติทดสอบ</div>
                 <div class="milestone-en">PCB Routing, Action Block Firmware & 3D Test Print Fit Checks</div>
@@ -664,7 +663,7 @@
                     <span class="deliverable-icon">⚡</span>
                     <div>
                         <span class="deliverable-cat">[ฮาร์ดแวร์ & วงจร]</span>
-                        <span>ออกแบบลายวงจรแผ่น PCB ให้มีขนาดกะทัดรัดและลงตัวกับโครงสร้างบล็อกทั้ง 3 รูปแบบ</span>
+                        <span>ออกแบบลายวงจรแผ่น PCB 2 บอร์ดให้กะทัดรัด: Master Block & Unified Action/End (32x32mm)</span>
                     </div>
                 </li>
             
@@ -705,7 +704,7 @@
         </div>
         
         <!-- WEEK 6 -->
-        <div class="timeline-item right status-scheduled " data-status="scheduled">
+        <div class="timeline-item right status-done " data-status="done">
             <div class="timeline-node"></div>
             <div class="timeline-branch"></div>
             <div class="timeline-card">
@@ -715,10 +714,10 @@
                         <span class="date-badge">📅 20/09/2026 - 26/09/2026</span>
                         
                     </div>
-                    <span class="status-tag scheduled">ตามแผนงาน (SCHEDULED)</span>
+                    <span class="status-tag done">เสร็จสิ้น (DONE)</span>
                 </div>
-                <div class="milestone-title">สั่งผลิตแผ่นวงจรและจัดซื้ออุปกรณ์ & พัฒนากราฟิกหน้าจอแสดงผล</div>
-                <div class="milestone-en">PCB Manufacturing Dispatch, Parts Procurement & OLED UI Graphics</div>
+                <div class="milestone-title">สั่งผลิตแผ่นวงจรและจัดซื้ออุปกรณ์ & พัฒนากราฟิกหน้าจอ E-Ink</div>
+                <div class="milestone-en">PCB Manufacturing Dispatch, Parts Procurement & 2.13" E-Ink UI Graphics</div>
                 <ul class="deliverables-list">
                     
                 <li class="deliverable-item">
@@ -741,7 +740,7 @@
                     <span class="deliverable-icon">💻</span>
                     <div>
                         <span class="deliverable-cat">[เฟิร์มแวร์ & โปรโตคอล]</span>
-                        <span>พัฒนาระบบแสดงผล OLED: ไอคอนคำสั่งขนาดใหญ่ชัดเจน, ขีดแถบพารามิเตอร์ & สัญญาณบลูทูธ</span>
+                        <span>พัฒนาระบบแสดงผล 2.13" E-Ink (SSD1680): ไอคอนคำสั่งขนาดใหญ่, แถบพารามิเตอร์ & สถานะ BLE</span>
                     </div>
                 </li>
             
@@ -766,7 +765,7 @@
         </div>
         
         <!-- WEEK 7 -->
-        <div class="timeline-item left status-scheduled is-milestone" data-status="scheduled">
+        <div class="timeline-item left status-done is-milestone" data-status="done">
             <div class="timeline-node"></div>
             <div class="timeline-branch"></div>
             <div class="timeline-card">
@@ -776,7 +775,7 @@
                         <span class="date-badge">📅 27/09/2026 - 03/10/2026</span>
                         <span style="background:#EC4899; color:#fff; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px; margin-left:6px;">STAR MILESTONE 🌟</span>
                     </div>
-                    <span class="status-tag scheduled">ตามแผนงาน (SCHEDULED)</span>
+                    <span class="status-tag done">เสร็จสิ้น (DONE)</span>
                 </div>
                 <div class="milestone-title">🎯 ประเมินผลกลางภาค (Midterm), สั่งพิมพ์เคสบล็อกชุดจริง & เตรียมอุปกรณ์ประกอบ</div>
                 <div class="milestone-en">Midterm Progress Evaluation, Production 3D Cases & Assembly Preparation</div>
@@ -827,7 +826,7 @@
         </div>
         
         <!-- WEEK 8 -->
-        <div class="timeline-item right status-scheduled " data-status="scheduled">
+        <div class="timeline-item right status-done " data-status="done">
             <div class="timeline-node"></div>
             <div class="timeline-branch"></div>
             <div class="timeline-card">
@@ -837,7 +836,7 @@
                         <span class="date-badge">📅 04/10/2026 - 10/10/2026</span>
                         
                     </div>
-                    <span class="status-tag scheduled">ตามแผนงาน (SCHEDULED)</span>
+                    <span class="status-tag done">เสร็จสิ้น (DONE)</span>
                 </div>
                 <div class="milestone-title">ประกอบและบัดกรีแผ่นวงจร & ทดสอบความปลอดภัยระบบจ่ายไฟ</div>
                 <div class="milestone-en">PCB Assembly & Soldering, Power Safety & Bring-up Verification</div>
@@ -847,7 +846,7 @@
                     <span class="deliverable-icon">⚡</span>
                     <div>
                         <span class="deliverable-cat">[ฮาร์ดแวร์ & วงจร]</span>
-                        <span>ประกอบบัดกรีชิ้นส่วนอิเล็กทรอนิกส์, ขั้วสัมผัสเชื่อมต่อ, ปุ่มปรับค่า & หน้าจอแสดงผล</span>
+                        <span>ประกอบบัดกรีชิ้นส่วนอิเล็กทรอนิกส์, ขั้วสัมผัสเชื่อมต่อ, ปุ่มปรับค่า & หน้าจอ E-Ink</span>
                     </div>
                 </li>
             
@@ -863,7 +862,7 @@
                     <span class="deliverable-icon">💻</span>
                     <div>
                         <span class="deliverable-cat">[เฟิร์มแวร์ & โปรโตคอล]</span>
-                        <span>ติดตั้งโปรแกรมทดสอบลงบล็อกหลัก: ตรวจสอบการทำงานของจอแสดงผลและปุ่มหมุนปรับค่า</span>
+                        <span>ติดตั้งโปรแกรมทดสอบลงบล็อกหลัก: ตรวจสอบการทำงานของจอ E-Ink และปุ่มหมุนปรับค่า</span>
                     </div>
                 </li>
             
@@ -888,7 +887,7 @@
         </div>
         
         <!-- WEEK 9 -->
-        <div class="timeline-item left status-scheduled " data-status="scheduled">
+        <div class="timeline-item left status-done " data-status="done">
             <div class="timeline-node"></div>
             <div class="timeline-branch"></div>
             <div class="timeline-card">
@@ -898,7 +897,7 @@
                         <span class="date-badge">📅 11/10/2026 - 17/10/2026</span>
                         
                     </div>
-                    <span class="status-tag scheduled">ตามแผนงาน (SCHEDULED)</span>
+                    <span class="status-tag done">เสร็จสิ้น (DONE)</span>
                 </div>
                 <div class="milestone-title">ติดตั้งโปรแกรมลงบอร์ดจริง, ทดสอบแท่นตั้งค่าบล็อก & ตรวจสอบการสื่อสารข้อมูล</div>
                 <div class="milestone-en">Firmware Flashing, Configuration Dock Integration & Signal Integrity</div>
@@ -924,7 +923,7 @@
                     <span class="deliverable-icon">💻</span>
                     <div>
                         <span class="deliverable-cat">[เฟิร์มแวร์ & โปรโตคอล]</span>
-                        <span>ติดตั้งโปรแกรมลง Action Block ทั้ง 4 ชิ้น & ทดสอบตั้งค่าพารามิเตอร์ผ่าน Dock พร้อมไฟตอบรับ</span>
+                        <span>ติดตั้งโปรแกรมลง Action & End Blocks พร้อมทดสอบตั้งค่าผ่าน Dock และไฟตอบรับ</span>
                     </div>
                 </li>
             
@@ -949,7 +948,7 @@
         </div>
         
         <!-- WEEK 10 -->
-        <div class="timeline-item right status-scheduled is-milestone" data-status="scheduled">
+        <div class="timeline-item right status-done is-milestone" data-status="done">
             <div class="timeline-node"></div>
             <div class="timeline-branch"></div>
             <div class="timeline-card">
@@ -959,7 +958,7 @@
                         <span class="date-badge">📅 18/10/2026 - 24/10/2026</span>
                         <span style="background:#EC4899; color:#fff; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px; margin-left:6px;">STAR MILESTONE 🌟</span>
                     </div>
-                    <span class="status-tag scheduled">ตามแผนงาน (SCHEDULED)</span>
+                    <span class="status-tag done">เสร็จสิ้น (DONE)</span>
                 </div>
                 <div class="milestone-title">🤖 ประกอบตัวบล็อกสมบูรณ์ครบชุด & ทดสอบการทำงานร่วมกับหุ่นยนต์ครบวงจร</div>
                 <div class="milestone-en">Full 5-Block Integration & End-to-End Execution with K1 Robot</div>
@@ -1010,7 +1009,7 @@
         </div>
         
         <!-- WEEK 11 -->
-        <div class="timeline-item left status-scheduled " data-status="scheduled">
+        <div class="timeline-item left status-done " data-status="done">
             <div class="timeline-node"></div>
             <div class="timeline-branch"></div>
             <div class="timeline-card">
@@ -1020,7 +1019,7 @@
                         <span class="date-badge">📅 25/10/2026 - 31/10/2026</span>
                         
                     </div>
-                    <span class="status-tag scheduled">ตามแผนงาน (SCHEDULED)</span>
+                    <span class="status-tag done">เสร็จสิ้น (DONE)</span>
                 </div>
                 <div class="milestone-title">ทดสอบความแข็งแรงทนทาน, ระบบหยุดทำงานฉุกเฉิน & ซ้อมใหญ่การทำงาน</div>
                 <div class="milestone-en">Drop Durability Testing, Emergency Disconnect Failsafe & Rehearsal</div>
@@ -1071,7 +1070,7 @@
         </div>
         
         <!-- WEEK 12 -->
-        <div class="timeline-item right status-scheduled is-milestone" data-status="scheduled">
+        <div class="timeline-item right status-done is-milestone" data-status="done">
             <div class="timeline-node"></div>
             <div class="timeline-branch"></div>
             <div class="timeline-card">
@@ -1081,7 +1080,7 @@
                         <span class="date-badge">📅 01/11/2026 - 07/11/2026</span>
                         <span style="background:#EC4899; color:#fff; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px; margin-left:6px;">STAR MILESTONE 🌟</span>
                     </div>
-                    <span class="status-tag scheduled">ตามแผนงาน (SCHEDULED)</span>
+                    <span class="status-tag done">เสร็จสิ้น (DONE)</span>
                 </div>
                 <div class="milestone-title">🌟 ทดสอบการใช้งานระบบบล็อกจริงกับผู้ใช้ในวันหยุดสุดสัปดาห์ (Usability Pilot)</div>
                 <div class="milestone-en">Weekend Field Pilot & Usability Testing with Real Users</div>
@@ -1132,7 +1131,7 @@
         </div>
         
         <!-- WEEK 13 -->
-        <div class="timeline-item left status-scheduled " data-status="scheduled">
+        <div class="timeline-item left status-done " data-status="done">
             <div class="timeline-node"></div>
             <div class="timeline-branch"></div>
             <div class="timeline-card">
@@ -1142,9 +1141,9 @@
                         <span class="date-badge">📅 08/11/2026 - 14/11/2026</span>
                         
                     </div>
-                    <span class="status-tag scheduled">ตามแผนงาน (SCHEDULED)</span>
+                    <span class="status-tag done">เสร็จสิ้น (DONE)</span>
                 </div>
-                <div class="milestone-title">ปรับปรุงตามผลตอบรับของผู้ใช้, ปรับแต่งหน้าจอแสดงผลและระบบ & ทดสอบความเสถียร</div>
+                <div class="milestone-title">ปรับปรุงตามผลตอบรับของผู้ใช้, ปรับแต่งหน้าจอ E-Ink และระบบ & ทดสอบความเสถียร</div>
                 <div class="milestone-en">Post-Pilot Feedback Refinements, UI/Firmware Polish & Endurance Testing</div>
                 <ul class="deliverables-list">
                     
@@ -1168,7 +1167,7 @@
                     <span class="deliverable-icon">💻</span>
                     <div>
                         <span class="deliverable-cat">[เฟิร์มแวร์ & โปรโตคอล]</span>
-                        <span>ปรับแต่งโปรแกรม: ปรับความลื่นไหลของการหมุนค่า, เพิ่มความคมชัดของไอคอน & จังหวะไฟหายใจ</span>
+                        <span>ปรับแต่งโปรแกรม: เพิ่มเมนู End Terminator (0xEE), Auto-Direction J1 & จูนความลื่นไหลลูกบิด</span>
                     </div>
                 </li>
             
@@ -1193,7 +1192,7 @@
         </div>
         
         <!-- WEEK 14 -->
-        <div class="timeline-item right status-scheduled is-milestone" data-status="scheduled">
+        <div class="timeline-item right status-progress is-milestone" data-status="progress">
             <div class="timeline-node"></div>
             <div class="timeline-branch"></div>
             <div class="timeline-card">
@@ -1203,7 +1202,7 @@
                         <span class="date-badge">📅 15/11/2026 - 21/11/2026</span>
                         <span style="background:#EC4899; color:#fff; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px; margin-left:6px;">STAR MILESTONE 🌟</span>
                     </div>
-                    <span class="status-tag scheduled">ตามแผนงาน (SCHEDULED)</span>
+                    <span class="status-tag progress">กำลังดำเนินการ (IN PROGRESS)</span>
                 </div>
                 <div class="milestone-title">🏆 ประกอบชุดบล็อกฉบับสมบูรณ์, ถ่ายวิดีโอสาธิต, จัดทำรายงานวิชาการ & สอบป้องกันโครงงาน</div>
                 <div class="milestone-en">Final Assembly, Demonstration Video, Technical Report & Final Project Defense</div>
@@ -1229,7 +1228,7 @@
                     <span class="deliverable-icon">💻</span>
                     <div>
                         <span class="deliverable-cat">[เฟิร์มแวร์ & โปรโตคอล]</span>
-                        <span>จัดเก็บซอร์สโค้ดและโครงสร้างโปรเจกต์เวอร์ชันสมบูรณ์ (Release v1.0.0) พร้อมเอกสารกำกับ</span>
+                        <span>อัปเดต PD0 0xCF Config RX, ESP32/Uno SWIO & จัดเก็บซอร์สโค้ด Release v1.0.0 พร้อมเอกสาร</span>
                     </div>
                 </li>
             

@@ -61,13 +61,13 @@ weeks_data = [
         "week": 4,
         "week_label": "WEEK 04",
         "dates": "06/09 - 12/09/2026",
-        "milestone": "ผังวงจรไฟฟ้าครบชุด & โมเดล 3D",
+        "milestone": "ผังวงจรไฟฟ้า & โมเดล 3D",
         "milestone_en": "Schematics Design & 3D Enclosure CAD",
-        "status": "IN PROGRESS (กำลังทำ)",
-        "status_code": "progress",
+        "status": "DONE (เสร็จสิ้น)",
+        "status_code": "done",
         "is_star": False,
         "items": [
-            "[HW] ออกแบบวงจร Master, Action, End Block",
+            "[HW] ออกแบบวงจร 2 บอร์ด: Master + Unified Action/End",
             "[3D] ออกแบบ 3D แม่เหล็กกันกลับขั้ว & ท่อนำแสง LED",
             "[FW] ทดสอบเชื่อมต่อส่งคำสั่ง BLE หุ่นยนต์จริงบนบอร์ด",
             "[UX] ออกแบบกราฟิกตัวบล็อก/หน้าจอ: ไอคอนอ่านง่าย",
@@ -80,11 +80,11 @@ weeks_data = [
         "dates": "13/09 - 19/09/2026",
         "milestone": "ออกแบบแผ่น PCB & พิมพ์ 3D ทดสอบ",
         "milestone_en": "PCB Layout & 3D Prototype Fit Check",
-        "status": "SCHEDULED (ตามแผน)",
-        "status_code": "scheduled",
+        "status": "DONE (เสร็จสิ้น)",
+        "status_code": "done",
         "is_star": False,
         "items": [
-            "[HW] ออกแบบลายวงจร PCB บล็อกทั้ง 3 แบบให้กะทัดรัด",
+            "[HW] ออกแบบ PCB 2 บอร์ด (Master & Action/End 32x32mm)",
             "[3D] พิมพ์ 3D เคสทดสอบ: ตรวจความกระชับ & แสงไฟ",
             "[FW] เฟิร์มแวร์ Action Block: บันทึกค่าคำสั่งลง Flash",
             "[UX] ออกแบบสัญลักษณ์ระบุทิศทาง & สเกลปุ่มหมุน",
@@ -95,15 +95,15 @@ weeks_data = [
         "week": 6,
         "week_label": "WEEK 06",
         "dates": "20/09 - 26/09/2026",
-        "milestone": "สั่งผลิต PCB & กราฟิกหน้าจอแสดงผล",
-        "milestone_en": "PCB Fabrication & OLED UI Graphics",
-        "status": "SCHEDULED (ตามแผน)",
-        "status_code": "scheduled",
+        "milestone": "สั่งผลิต PCB & กราฟิกหน้าจอ E-Ink",
+        "milestone_en": "PCB Fabrication & 2.13\" E-Ink UI Graphics",
+        "status": "DONE (เสร็จสิ้น)",
+        "status_code": "done",
         "is_star": False,
         "items": [
             "[HW] ตรวจแบบวงจร & ส่งสั่งผลิต PCB พร้อมซื้อชิ้นส่วน",
             "[3D] ซื้อแม่เหล็ก N52 แรงสูง, พินสปริง Pogo, แบตเตอรี่",
-            "[FW] ระบบแสดงผล OLED: ไอคอนคำสั่ง & แถบระดับค่า",
+            "[FW] ระบบแสดงผล 2.13\" E-Ink: ไอคอนคำสั่ง & แถบระดับค่า",
             "[UX] ผลิตตัวอย่างสติกเกอร์สัญลักษณ์คำสั่งกันรอย",
             "[QA] สเตรสเทสประมวลผลคำสั่งต่อเนื่อง 100 รอบ"
         ]
@@ -114,8 +114,8 @@ weeks_data = [
         "dates": "27/09 - 03/10/2026",
         "milestone": "🎯 ประเมินผลกลางภาค (Midterm)",
         "milestone_en": "Midterm Progress Review & Evaluation",
-        "status": "SCHEDULED (ตามแผน)",
-        "status_code": "scheduled",
+        "status": "DONE (เสร็จสิ้น)",
+        "status_code": "done",
         "is_star": True,
         "items": [
             "[HW] เตรียมห้องแล็บและเครื่องมือประกอบชิ้นส่วน",
@@ -131,13 +131,13 @@ weeks_data = [
         "dates": "04/10 - 10/10/2026",
         "milestone": "ประกอบ บัดกรี & ระบบจ่ายไฟ",
         "milestone_en": "PCB Assembly & Power Rail Qualification",
-        "status": "SCHEDULED (ตามแผน)",
-        "status_code": "scheduled",
+        "status": "DONE (เสร็จสิ้น)",
+        "status_code": "done",
         "is_star": False,
         "items": [
-            "[HW] บัดกรี SMD/THT อุปกรณ์, พิน, สวิตช์, จอภาพ",
+            "[HW] บัดกรี SMD/THT อุปกรณ์, พิน, สวิตช์, จอ E-Ink",
             "[3D] ขัดผิวเคส 3D เรียบเนียน & Dry-fit แผงวงจรลงเคส",
-            "[FW] โปรแกรมทดสอบ Master: ตรวจสอบจอ & ลูกบิดหมุน",
+            "[FW] โปรแกรมทดสอบ Master: ตรวจสอบจอ E-Ink & ลูกบิดหมุน",
             "[UX] ติดสติกเกอร์สัญลักษณ์เคลือบผิวพิเศษบนเคสจริง",
             "[QA] ทดสอบระบบไฟ: แรงดันไฟเลี้ยง & ตัดชาร์จสมบูรณ์"
         ]
@@ -148,13 +148,13 @@ weeks_data = [
         "dates": "11/10 - 17/10/2026",
         "milestone": "แฟลชบอร์ดจริง & แท่น Dock",
         "milestone_en": "Firmware Bring-up & Config Dock Test",
-        "status": "SCHEDULED (ตามแผน)",
-        "status_code": "scheduled",
+        "status": "DONE (เสร็จสิ้น)",
+        "status_code": "done",
         "is_star": False,
         "items": [
             "[HW] ตรวจสอบความต่อเนื่องลายวงจร & ความเรียบพิน Pogo",
             "[3D] ติดตั้งแม่เหล็กเข้าเคสตามแนวขั้วแน่นหนา",
-            "[FW] แฟลช 4 Action Blocks & ทดสอบตั้งค่าผ่าน Dock",
+            "[FW] แฟลช Action/End Blocks & ทดสอบตั้งค่าผ่าน Dock",
             "[UX] จัดทำแบบประเมินความสะดวกการใช้งาน (Usability)",
             "[QA] ตรวจวัดสัญญาณ Scope พร้อมทดสอบขยับโยกบล็อก"
         ]
@@ -165,8 +165,8 @@ weeks_data = [
         "dates": "18/10 - 24/10/2026",
         "milestone": "🤖 ประกอบครบ 5 บล็อก & สั่งหุ่นยนต์",
         "milestone_en": "5-Block Integration & K1 Live Run",
-        "status": "SCHEDULED (ตามแผน)",
-        "status_code": "scheduled",
+        "status": "DONE (เสร็จสิ้น)",
+        "status_code": "done",
         "is_star": True,
         "items": [
             "[HW] ติดตั้งแบตเตอรี่ & สวิตช์ปิด-เปิด Master Block",
@@ -182,8 +182,8 @@ weeks_data = [
         "dates": "25/10 - 31/10/2026",
         "milestone": "Drop Test, E-Stop & ซ้อมใหญ่",
         "milestone_en": "Durability Test, Emergency E-Stop & Prep",
-        "status": "SCHEDULED (ตามแผน)",
-        "status_code": "scheduled",
+        "status": "DONE (เสร็จสิ้น)",
+        "status_code": "done",
         "is_star": False,
         "items": [
             "[HW] ตรวจวัดความร้อนต่อเนื่อง & ไฟเลี้ยงรางยาวสุด",
@@ -199,8 +199,8 @@ weeks_data = [
         "dates": "01/11 - 07/11/2026",
         "milestone": "🌟 ทดสอบกับผู้ใช้จริง (Pilot Test)",
         "milestone_en": "Weekend Field Pilot & User Experience",
-        "status": "SCHEDULED (ตามแผน)",
-        "status_code": "scheduled",
+        "status": "DONE (เสร็จสิ้น)",
+        "status_code": "done",
         "is_star": True,
         "items": [
             "[HW] ดูแลฮาร์ดแวร์: ติดตามแบตเตอรี่ & อะไหล่สำรอง",
@@ -216,13 +216,13 @@ weeks_data = [
         "dates": "08/11 - 14/11/2026",
         "milestone": "ปรับปรุงตามฟีดแบ็ก & จูนระบบ",
         "milestone_en": "Feedback Refinement & System Polish",
-        "status": "SCHEDULED (ตามแผน)",
-        "status_code": "scheduled",
+        "status": "DONE (เสร็จสิ้น)",
+        "status_code": "done",
         "is_star": False,
         "items": [
             "[HW] ตรวจสภาพจุดต่อหลังงานหนัก & ประหยัดพลังงาน",
             "[3D] ปรับปรุงเคส: ลายกันลื่นลูกบิด & มุมต่อประกบ",
-            "[FW] จูนลูกบิดให้นิ่ง & คอนทราสต์ไอคอนจอ OLED",
+            "[FW] จูนลูกบิดให้นิ่ง & คอนทราสต์ไอคอนจอ E-Ink",
             "[UX] วิเคราะห์ผล: คำนวณ SUS Score & กราฟสรุป",
             "[QA] รันคำสั่งผสมผสานต่อเนื่อง 50+ รอบเสถียร 100%"
         ]
@@ -233,13 +233,13 @@ weeks_data = [
         "dates": "15/11 - 21/11/2026",
         "milestone": "🏆 ส่งมอบสมบูรณ์ & สอบป้องกันโครงงาน",
         "milestone_en": "Final Release, Demo Reel & Project Defense",
-        "status": "SCHEDULED (ตามแผน)",
-        "status_code": "scheduled",
+        "status": "IN PROGRESS (กำลังทำ)",
+        "status_code": "progress",
         "is_star": True,
         "items": [
             "[HW] รวมเอกสารวิศวกรรม: Schematic, PCB, BOM",
             "[3D] ทำความสะอาดเคส & บรรจุกล่องจัดแสดง",
-            "[FW] แท็กซอร์สโค้ดสมบูรณ์ (Release v1.0.0)",
+            "[FW] อัปเดต PD0 0xCF RX & ESP32/Uno SWIO (v1.0)",
             "[UX] เล่มรายงานวิชาการฉบับสมบูรณ์ & สไลด์นำเสนอ",
             "🏆 【สอบป้องกันโครงงาน】: วิดีโอสาธิต & สาธิตสด"
         ]
@@ -281,7 +281,7 @@ def create_pptx():
     legend_box = slide.shapes.add_textbox(Inches(30), Inches(0.5), Inches(17), Inches(1.2))
     ltf = legend_box.text_frame
     lp = ltf.paragraphs[0]
-    lp.text = "🟢 DONE (W1-W3)   |   🟠 IN PROGRESS (W4)   |   🔵 SCHEDULED (W5-W14)   |   ★ KEY MILESTONES (W7, W10, W12, W14)"
+    lp.text = "🟢 DONE (W1-W13)   |   🟠 IN PROGRESS (W14)   |   ★ KEY MILESTONES (W7, W10, W12, W14)"
     lp.font.size = Pt(13)
     lp.font.bold = True
     lp.font.color.rgb = RGBColor(226, 232, 240)
@@ -428,8 +428,10 @@ def create_pptx():
     fp.font.color.rgb = RGBColor(100, 116, 139)
 
     # Save presentation
-    os.makedirs("C:/Users/nnnn/Projects/robosen_block/docs/diagrams", exist_ok=True)
-    pptx_path = "C:/Users/nnnn/Projects/robosen_block/docs/diagrams/robosen_14_weeks_timeline_whiteboard.pptx"
+    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    diagrams_dir = os.path.join(repo_root, "docs", "diagrams")
+    os.makedirs(diagrams_dir, exist_ok=True)
+    pptx_path = os.path.join(diagrams_dir, "robosen_14_weeks_timeline_whiteboard.pptx")
     prs.save(pptx_path)
     print(f"Successfully generated Canva-ready PPTX at: {pptx_path}")
 

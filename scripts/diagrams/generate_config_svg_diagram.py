@@ -1,13 +1,10 @@
 import os
 
-svg_content = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1620 1380" width="100%" height="100%" style="background-color: #F8F9FA; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+svg_content = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1440" width="100%" height="100%" style="background-color: #F8F9FA; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
   <defs>
-    <!-- Shadow Filter -->
     <filter id="shadow" x="-10%" y="-10%" width="125%" height="125%">
       <feDropShadow dx="2" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.08" />
     </filter>
-    
-    <!-- Arrowhead Markers -->
     <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2D3436" />
     </marker>
@@ -23,238 +20,283 @@ svg_content = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1620 1380"
   </defs>
 
   <!-- Title Header Bar -->
-  <rect x="40" y="30" width="1540" height="80" rx="16" fill="#FFFFFF" stroke="#DFE6E9" stroke-width="1.5" filter="url(#shadow)" />
-  <text x="70" y="78" font-size="24" font-weight="800" fill="#2D3436">Robosen Tangible Coding Block System</text>
-  <text x="560" y="78" font-size="18" font-weight="500" fill="#636E72">|  Config Dock: End-to-End Data Flow &amp; Flash Programming Protocol</text>
-  
-  <rect x="1370" y="50" width="180" height="40" rx="20" fill="#0984E3" />
-  <text x="1460" y="76" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">0xCF Protocol</text>
+  <rect x="40" y="25" width="1600" height="80" rx="16" fill="#FFFFFF" stroke="#DFE6E9" stroke-width="1.5" filter="url(#shadow)" />
+  <text x="70" y="64" font-size="23" font-weight="800" fill="#2D3436">Robosen Tangible Coding Block System — Config Dock Programming Flow</text>
+  <text x="70" y="89" font-size="14" font-weight="500" fill="#636E72">Verified against firmware/esp32_master/esp32_master.ino, ch32v003_action_block/main.c &amp; ch32v003_end_block/main.c</text>
 
-  <!-- ==================== COLUMN 1: DOCKING & UI SELECTION ==================== -->
-  
-  <!-- 1. START (Gold/Yellow) -->
+  <rect x="1395" y="45" width="215" height="40" rx="20" fill="#6C5CE7" />
+  <text x="1502" y="70" font-size="13.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">0xCF / 0x01 / 0x02 / 0x06</text>
+
+  <!-- Column Headers -->
+  <rect x="60" y="118" width="380" height="26" rx="8" fill="#EEF2FF" stroke="#C7D2FE" stroke-width="1" />
+  <text x="250" y="136" font-size="12" font-weight="800" fill="#4338CA" text-anchor="middle">PHASE 1: J1 AUTO-DETECT, READ-SYNC &amp; UI PREVIEW</text>
+
+  <rect x="605" y="118" width="430" height="26" rx="8" fill="#E0F2FE" stroke="#BAE6FD" stroke-width="1" />
+  <text x="820" y="136" font-size="12" font-weight="800" fill="#0369A1" text-anchor="middle">PHASE 2: 0xCF PACKET TX &amp; BLOCK FLASH WRITE</text>
+
+  <rect x="1195" y="118" width="390" height="26" rx="8" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1" />
+  <text x="1390" y="136" font-size="12" font-weight="800" fill="#047857" text-anchor="middle">PHASE 3: ACK VALIDATION &amp; HARDWARE SYNC</text>
+
+  <!-- ==================== COLUMN 1: J1 AUTO-DETECT & LOCAL MASTER UI ==================== -->
+
+  <!-- 1. START -->
   <g id="node-start" filter="url(#shadow)">
-    <rect x="70" y="160" width="320" height="85" rx="20" fill="#FFD32A" stroke="#2D3436" stroke-width="2.5" />
-    <text x="230" y="198" font-size="18" font-weight="800" fill="#2D3436" text-anchor="middle">START CONFIGURATION</text>
-    <text x="230" y="224" font-size="13" font-weight="600" fill="#2D3436" text-anchor="middle">Child Docks Single Action Block into Master Left Port</text>
+    <rect x="70" y="156" width="360" height="96" rx="20" fill="#FFD32A" stroke="#2D3436" stroke-width="2.5" />
+    <text x="250" y="185" font-size="16.5" font-weight="800" fill="#2D3436" text-anchor="middle">BLOCK DOCKED ON J1 (MODE 1A)</text>
+    <text x="250" y="209" font-size="12" font-weight="600" fill="#2D3436" text-anchor="middle">pollConfigDock() @ 250ms probes GPIO 17/18 pull-up</text>
+    <text x="250" y="229" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">Port Mode Lock forces Mode 1A (CONFIG) while docked</text>
   </g>
 
-  <!-- Path Start -> Knob 1 -->
-  <path d="M 230 245 L 230 290" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
+  <path d="M 250 252 L 250 286" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
 
-  <!-- 2. Rotary Knob 1: Action Selection (Lavender) -->
+  <!-- 2. Read-Sync -->
+  <g id="node-read-sync" filter="url(#shadow)">
+    <rect x="60" y="286" width="380" height="118" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
+    <text x="250" y="313" font-size="12.5" font-weight="800" fill="#2D3436" text-anchor="middle">MASTER -&gt; J1 DOCK (UART1 @ 115200)</text>
+    <text x="250" y="337" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">Orientation Probe &amp; Read-Sync (0xCF 0x01)</text>
+    <text x="250" y="359" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">Auto-alternates TX/RX: (17-&gt;18) or (18-&gt;17)</text>
+    <text x="250" y="378" font-size="11.5" font-weight="700" fill="#1E293B" text-anchor="middle">Tx [0xCF, 0x01, 0x07, 0x55] (+ 0xAA fallback)</text>
+    <text x="250" y="396" font-size="11" font-weight="500" fill="#2D3436" text-anchor="middle">Rx [0xCF, 0x81, ActID, Param, CRC, 0x55] -&gt; Syncs UI</text>
+  </g>
+
+  <path d="M 250 404 L 250 436" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
+
+  <!-- 3. Knob 1 Selection -->
   <g id="node-knob1" filter="url(#shadow)">
-    <rect x="60" y="290" width="340" height="105" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
-    <text x="230" y="322" font-size="13" font-weight="800" fill="#2D3436" text-anchor="middle">ROTARY KNOB 1 (KY-040)</text>
-    <text x="230" y="347" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">Select Action Type</text>
-    <text x="230" y="370" font-size="12" font-weight="600" fill="#2D3436" text-anchor="middle">GPIO 8/9: Walk, Turn, Punch, Kung Fu, Celebrate</text>
-    <text x="230" y="387" font-size="11" font-weight="500" fill="#2D3436" text-anchor="middle">Hardware Quadrature Encoder Interrupts</text>
+    <rect x="60" y="436" width="380" height="112" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
+    <text x="250" y="463" font-size="12.5" font-weight="800" fill="#2D3436" text-anchor="middle">KY-040 KNOB 1 (GPIO 8/9; SW GPIO 10 LOCKED)</text>
+    <text x="250" y="487" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">Select Action Token (ACTIONS[8])</text>
+    <text x="250" y="510" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">0x01 Walk Fwd | 0x02 Back | 0x03 Turn L | 0x04 Turn R</text>
+    <text x="250" y="530" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">0x10 Punch L | 0x14 Push-ups | 0x18 Wave | 0xEE End</text>
   </g>
 
-  <!-- Path Knob 1 -> Knob 2 -->
-  <path d="M 230 395 L 230 435" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
+  <path d="M 250 548 L 250 582" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
 
-  <!-- 3. Rotary Knob 2: Parameter Adjustment (Lavender) -->
+  <!-- 4. Knob 2 Selection -->
   <g id="node-knob2" filter="url(#shadow)">
-    <rect x="60" y="435" width="340" height="105" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
-    <text x="230" y="467" font-size="13" font-weight="800" fill="#2D3436" text-anchor="middle">ROTARY KNOB 2 (KY-040)</text>
-    <text x="230" y="492" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">Adjust Action Parameter</text>
-    <text x="230" y="515" font-size="12" font-weight="600" fill="#2D3436" text-anchor="middle">GPIO 11/12: Steps (1-10), Angle (45°-180°), Style</text>
-    <text x="230" y="532" font-size="11" font-weight="500" fill="#2D3436" text-anchor="middle">Real-time parameter bounds clipping</text>
+    <rect x="60" y="582" width="380" height="118" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
+    <text x="250" y="609" font-size="12.5" font-weight="800" fill="#2D3436" text-anchor="middle">KY-040 KNOB 2 (GPIO 11/12/13) &amp; STOP (SW5)</text>
+    <text x="250" y="633" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">Adjust Parameter / Reset / Revert</text>
+    <text x="250" y="655" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">Steps 1-5 (Walk) | Deg 45-180 step 45 (Turn)</text>
+    <text x="250" y="673" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">Reps 1-3 (Stunts) | Cap 0 (End Terminator 0xEE)</text>
+    <text x="250" y="691" font-size="11" font-weight="700" fill="#1E293B" text-anchor="middle">Knob2 SW (GPIO 13): paramMin | SW5 (GPIO 2): revert</text>
   </g>
 
-  <!-- Path Knob 2 -> E-Ink Preview -->
-  <path d="M 230 540 L 230 580" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
+  <path d="M 250 700 L 250 732" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
 
-  <!-- 4. Master E-Ink Display Live Preview (Lavender) -->
+  <!-- 5. E-Ink Preview -->
   <g id="node-eink-preview" filter="url(#shadow)">
-    <rect x="60" y="580" width="340" height="105" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
-    <text x="230" y="612" font-size="13" font-weight="800" fill="#2D3436" text-anchor="middle">MASTER BLOCK (2.13" E-INK DISPLAY)</text>
-    <text x="230" y="637" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">Real-Time Visual Preview</text>
-    <text x="230" y="660" font-size="12" font-weight="600" fill="#2D3436" text-anchor="middle">Renders Action Name, Large Icon &amp; Param Value</text>
-    <text x="230" y="677" font-size="11" font-weight="500" fill="#2D3436" text-anchor="middle">Partial screen refresh (SSD1680 &lt; 300ms)</text>
+    <rect x="60" y="732" width="380" height="118" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
+    <text x="250" y="759" font-size="12.5" font-weight="800" fill="#2D3436" text-anchor="middle">CORE 0 DISPLAY TASK (2.13" E-Ink SPI @ 4MHz)</text>
+    <text x="250" y="783" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">Render Icon + Param in 210x122 Bezel</text>
+    <text x="250" y="805" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">Fast partial LUT_FAST_280MS on window (40,24,210,96)</text>
+    <text x="250" y="823" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">+ 350ms settle pass (LUT_STD_727MS) for crisp edges</text>
+    <text x="250" y="841" font-size="11" font-weight="500" fill="#2D3436" text-anchor="middle">Shows current Icon, Parameter &amp; Config dock state</text>
   </g>
 
-  <!-- Path E-Ink Preview -> Confirm Press -->
-  <path d="M 230 685 L 230 725" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
+  <path d="M 250 850 L 250 882" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
 
-  <!-- 5. Knob Switch Confirmation (Lavender) -->
+  <!-- 6. Green Start Confirmation -->
   <g id="node-confirm" filter="url(#shadow)">
-    <rect x="60" y="725" width="340" height="100" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
-    <text x="230" y="757" font-size="13" font-weight="800" fill="#2D3436" text-anchor="middle">KNOB CONFIRM BUTTON (SW)</text>
-    <text x="230" y="782" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">Child Presses Knob to Program</text>
-    <text x="230" y="805" font-size="12" font-weight="600" fill="#2D3436" text-anchor="middle">GPIO 10/13: Triggers Flash Write Event</text>
+    <rect x="70" y="882" width="360" height="96" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
+    <text x="250" y="909" font-size="12.5" font-weight="800" fill="#2D3436" text-anchor="middle">GREEN START BUTTON (SW3 / GPIO 14)</text>
+    <text x="250" y="933" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">Confirm &amp; Write to Docked Block</text>
+    <text x="250" y="955" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">Calls writeConfigToDockedBlock(actionToken, param)</text>
   </g>
 
-  <!-- Path Confirm Press -> Assemble Packet (Column 2) -->
-  <path d="M 230 825 L 230 870 L 560 870 L 560 207 L 620 207" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
-  <rect x="415" y="855" width="75" height="24" rx="6" fill="#FFFFFF" stroke="#2D3436" stroke-width="1.5" />
-  <text x="452" y="872" font-size="12" font-weight="800" fill="#2D3436" text-anchor="middle">WRITE BTN</text>
+  <!-- Col 1 -> Col 2 Connector (Routing strictly at x=505, well left of Col 2 error path x=565) -->
+  <path d="M 430 930 L 505 930 L 505 209 L 605 209" fill="none" stroke="#0984E3" stroke-width="2.5" marker-end="url(#arrow-blue)" />
+  <rect x="436" y="918" width="90" height="24" rx="6" fill="#FFFFFF" stroke="#0984E3" stroke-width="1.5" />
+  <text x="481" y="934" font-size="11.5" font-weight="800" fill="#0984E3" text-anchor="middle">SAVE (SW3)</text>
 
+  <!-- ==================== COLUMN 2: 0xCF PACKET TX & FLASH WRITE ==================== -->
 
-  <!-- ==================== COLUMN 2: PROTOCOL TRANSMISSION & FLASH WRITE ==================== -->
-
-  <!-- 6. Master Builds 0xCF Frame (Lavender) -->
+  <!-- 7. Build Frame -->
   <g id="node-build-frame" filter="url(#shadow)">
-    <rect x="620" y="160" width="360" height="105" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
-    <text x="800" y="190" font-size="13" font-weight="800" fill="#2D3436" text-anchor="middle">MASTER BLOCK (ESP32-S3)</text>
-    <text x="800" y="215" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">Assemble Configuration Frame</text>
-    <text x="800" y="238" font-size="12" font-weight="600" fill="#2D3436" text-anchor="middle">[0xCF, Len=0x02, ActionID, ParamVal, CRC8, 0x55]</text>
-    <text x="800" y="254" font-size="11" font-weight="500" fill="#2D3436" text-anchor="middle">Calculates cumulative CRC-8 checksum</text>
+    <rect x="605" y="156" width="430" height="106" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
+    <text x="820" y="183" font-size="12.5" font-weight="800" fill="#2D3436" text-anchor="middle">MASTER BLOCK (ESP32-S3)</text>
+    <text x="820" y="207" font-size="15.5" font-weight="700" fill="#2D3436" text-anchor="middle">Build 6-Byte 0xCF Write Packet</text>
+    <text x="820" y="231" font-size="12" font-weight="700" fill="#1E293B" text-anchor="middle">[0xCF, Cmd=0x02, ActionID, ParamVal, CRC8, 0x55]</text>
+    <text x="820" y="249" font-size="11.5" font-weight="500" fill="#2D3436" text-anchor="middle">CRC-8 (Poly 0x07) computed over [0x02, ActionID, ParamVal]</text>
   </g>
 
-  <!-- Path Build Frame -> Transmit over Pin 4 -->
-  <path d="M 800 265 L 800 305" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
+  <path d="M 820 262 L 820 296" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
 
-  <!-- 7. Transmit Frame over Pin 4 (Lavender) -->
+  <!-- 8. Dual-Direction TX -->
   <g id="node-transmit" filter="url(#shadow)">
-    <rect x="620" y="305" width="360" height="105" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
-    <text x="800" y="335" font-size="13" font-weight="800" fill="#2D3436" text-anchor="middle">PIN 4 DOCK BUS (CFG_TX)</text>
-    <text x="800" y="360" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">Transmit Frame to Docked Block</text>
-    <text x="800" y="383" font-size="12" font-weight="600" fill="#2D3436" text-anchor="middle">Master CFG_TX (GPIO 18) ➔ Block PD6 RX</text>
-    <text x="800" y="401" font-size="11" font-weight="500" fill="#2D3436" text-anchor="middle">Point-to-point dedicated config UART channel</text>
+    <rect x="605" y="296" width="430" height="114" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
+    <text x="820" y="323" font-size="12.5" font-weight="800" fill="#2D3436" text-anchor="middle">MASTER -&gt; J1 CONFIG DOCK (GPIO 17 &lt;-&gt; 18)</text>
+    <text x="820" y="347" font-size="15.5" font-weight="700" fill="#2D3436" text-anchor="middle">Auto-Directional Dual-Orientation Write TX</text>
+    <text x="820" y="370" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">Tx in (savedTx-&gt;savedRx) then (savedRx-&gt;savedTx) over J1</text>
+    <text x="820" y="390" font-size="11.5" font-weight="500" fill="#2D3436" text-anchor="middle">Reaches block on IN Pin 3 (PD6 UART1) OR OUT Pin 4 (PD0 SW)</text>
   </g>
 
-  <!-- Path Transmit -> Action Block CRC Check -->
-  <path d="M 800 410 L 800 450" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
+  <path d="M 820 410 L 820 446" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
 
-  <!-- 8. Action Block CRC Validation Check (Diamond - Sky Blue) -->
-  <g id="node-block-crc" filter="url(#shadow)">
-    <polygon points="800,450 915,525 800,600 685,525" fill="#74B9FF" stroke="#2D3436" stroke-width="2.5" />
-    <text x="800" y="510" font-size="11" font-weight="800" fill="#2D3436" text-anchor="middle">CH32V003 MCU</text>
-    <text x="800" y="530" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">CRC-8</text>
-    <text x="800" y="550" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">Valid?</text>
+  <!-- 9. Block Check CRC & Footer -->
+  <g id="node-block-verify" filter="url(#shadow)">
+    <polygon points="820,446 955,526 820,606 685,526" fill="#74B9FF" stroke="#2D3436" stroke-width="2.5" />
+    <text x="820" y="505" font-size="11" font-weight="800" fill="#2D3436" text-anchor="middle">CH32V003 (PD6 / PD0)</text>
+    <text x="820" y="527" font-size="14" font-weight="700" fill="#2D3436" text-anchor="middle">Frame, Len &amp;</text>
+    <text x="820" y="547" font-size="14" font-weight="700" fill="#2D3436" text-anchor="middle">CRC-8 OK?</text>
   </g>
 
-  <!-- Path CRC Check? FAIL (Error State) -->
-  <path d="M 685 525 L 590 525 L 590 690 L 620 690" fill="none" stroke="#D63031" stroke-width="2" marker-end="url(#arrow-red)" />
-  <rect x="600" y="595" width="55" height="24" rx="6" fill="#FFFFFF" stroke="#D63031" stroke-width="1.5" />
-  <text x="627" y="612" font-size="12" font-weight="800" fill="#D63031" text-anchor="middle">FAIL</text>
+  <!-- VALID -> Flash Write -->
+  <path d="M 820 606 L 820 660" fill="none" stroke="#00B894" stroke-width="2.5" marker-end="url(#arrow-green)" />
+  <rect x="786" y="618" width="68" height="24" rx="6" fill="#FFFFFF" stroke="#00B894" stroke-width="1.5" />
+  <text x="820" y="634" font-size="11.5" font-weight="800" fill="#00B894" text-anchor="middle">VALID</text>
 
-  <!-- Config Error Node (Soft Pink) -->
-  <g id="node-cfg-error" filter="url(#shadow)">
-    <rect x="620" y="650" width="360" height="95" rx="16" fill="#FF7675" stroke="#2D3436" stroke-width="2.5" />
-    <text x="800" y="680" font-size="13" font-weight="800" fill="#2D3436" text-anchor="middle">ACTION BLOCK (CH32V003)</text>
-    <text x="800" y="705" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">CRC Mismatch / Flash Aborted</text>
-    <text x="800" y="728" font-size="12" font-weight="600" fill="#2D3436" text-anchor="middle">Flashes Double Red &amp; Sends NAK [0x15] on Pin 3</text>
-  </g>
-
-  <!-- Path CRC Check? PASS -> Flash Write -->
-  <path d="M 800 600 L 800 780" fill="none" stroke="#00B894" stroke-width="2.5" marker-end="url(#arrow-green)" />
-  <rect x="810" y="625" width="60" height="24" rx="6" fill="#FFFFFF" stroke="#00B894" stroke-width="1.5" />
-  <text x="840" y="642" font-size="12" font-weight="800" fill="#00B894" text-anchor="middle">VALID</text>
-
-  <!-- 9. Flash Write Execution (Lavender) -->
+  <!-- 10. Flash Write -->
   <g id="node-flash-write" filter="url(#shadow)">
-    <rect x="620" y="780" width="360" height="115" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
-    <text x="800" y="810" font-size="13" font-weight="800" fill="#2D3436" text-anchor="middle">ACTION BLOCK (CH32V003)</text>
-    <text x="800" y="835" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">Write to Non-Volatile Flash Memory</text>
-    <text x="800" y="858" font-size="12" font-weight="600" fill="#2D3436" text-anchor="middle">1. Unlocks Fast-Flash Controller (192B User Space)</text>
-    <text x="800" y="876" font-size="12" font-weight="600" fill="#2D3436" text-anchor="middle">2. Writes [ActionID, ParamVal] &amp; locks Flash</text>
+    <rect x="605" y="660" width="430" height="118" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
+    <text x="820" y="687" font-size="12.5" font-weight="800" fill="#2D3436" text-anchor="middle">CH32V003 NVMEM FLASH (Action &amp; End FW)</text>
+    <text x="820" y="711" font-size="15.5" font-weight="700" fill="#2D3436" text-anchor="middle">Persist Config to 0x08003FC0 (64B Page)</text>
+    <text x="820" y="734" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">Erases 64-byte page, fast-programs CFG_MAGIC (0xA55A0002)</text>
+    <text x="820" y="754" font-size="11.5" font-weight="500" fill="#2D3436" text-anchor="middle">Stores non-volatile g_action_id &amp; g_param_val</text>
   </g>
 
-  <!-- Path Flash Write -> LED Pulse (Column 2 to Column 3) -->
-  <path d="M 800 895 L 800 940" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
+  <path d="M 820 778 L 820 812" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
 
-  <!-- 10. Visual LED Confirmation (Emerald Green Highlight) -->
+  <!-- 11. Emerald Green LED Feedback -->
   <g id="node-led-ack" filter="url(#shadow)">
-    <rect x="620" y="940" width="360" height="105" rx="16" fill="#55E6C1" stroke="#2D3436" stroke-width="2.5" />
-    <text x="800" y="970" font-size="13" font-weight="800" fill="#2D3436" text-anchor="middle">ACTION BLOCK (WS2812B RGB LED)</text>
-    <text x="800" y="995" font-size="15" font-weight="700" fill="#00B894" text-anchor="middle">✨ Flash Emerald Green (Saved!)</text>
-    <text x="800" y="1018" font-size="12" font-weight="600" fill="#2D3436" text-anchor="middle">Flashes 300ms Green, then sets Mode Color</text>
-    <text x="800" y="1035" font-size="11" font-weight="500" fill="#2D3436" text-anchor="middle">(Blue = Locomotion, Red = Combat, etc.)</text>
+    <rect x="605" y="812" width="430" height="110" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
+    <text x="820" y="839" font-size="12.5" font-weight="800" fill="#2D3436" text-anchor="middle">CH32V003 WS2812B (PA2)</text>
+    <text x="820" y="863" font-size="15.5" font-weight="700" fill="#2D3436" text-anchor="middle">Emerald Green Flash (400ms)</text>
+    <text x="820" y="886" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">Drives ws2812_set(0, 255, 40) for 400ms</text>
+    <text x="820" y="905" font-size="11.5" font-weight="500" fill="#2D3436" text-anchor="middle">Block is ready for 0xAA / 0xBB chain runs immediately</text>
   </g>
 
-  <!-- Path LED Pulse -> Send ACK Frame (Column 3) -->
-  <path d="M 980 992 L 1150 992 L 1150 207 L 1210 207" fill="none" stroke="#00B894" stroke-width="2.5" marker-end="url(#arrow-green)" />
-  <rect x="1040" y="975" width="75" height="24" rx="6" fill="#FFFFFF" stroke="#00B894" stroke-width="1.5" />
-  <text x="1077" y="992" font-size="12" font-weight="800" fill="#00B894" text-anchor="middle">SUCCESS</text>
+  <path d="M 820 922 L 820 956" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
 
-
-  <!-- ==================== COLUMN 3: ACKNOWLEDGMENT & COMPLETION ==================== -->
-
-  <!-- 11. Action Block Sends ACK Frame (Lavender) -->
+  <!-- 12. 4-Byte ACK Transmission -->
   <g id="node-send-ack" filter="url(#shadow)">
-    <rect x="1210" y="160" width="350" height="105" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
-    <text x="1385" y="190" font-size="13" font-weight="800" fill="#2D3436" text-anchor="middle">ACTION BLOCK (CH32V003)</text>
-    <text x="1385" y="215" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">Send ACK Frame over Pin 3</text>
-    <text x="1385" y="238" font-size="12" font-weight="600" fill="#2D3436" text-anchor="middle">Pin 3 TX (PD5): [0xCF, Len=0x01, ACK=0x06, CRC, 0x55]</text>
-    <text x="1385" y="254" font-size="11" font-weight="500" fill="#2D3436" text-anchor="middle">Transmits hardware success verification</text>
+    <rect x="605" y="956" width="430" height="114" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
+    <text x="820" y="983" font-size="12.5" font-weight="800" fill="#2D3436" text-anchor="middle">CH32V003 -&gt; MASTER (PD5 / PD0 -&gt; J1)</text>
+    <text x="820" y="1007" font-size="15.5" font-weight="700" fill="#2D3436" text-anchor="middle">Transmit 4-Byte 0xCF ACK Frame</text>
+    <text x="820" y="1030" font-size="12" font-weight="700" fill="#1E293B" text-anchor="middle">Tx [0xCF, 0x06, CRC8({0x06})=0x12, 0x55] @ 115200</text>
+    <text x="820" y="1049" font-size="11.5" font-weight="500" fill="#2D3436" text-anchor="middle">Sent via PD5 (USART1 TX) or PD0 (SW TX) to match J1 dock</text>
   </g>
 
-  <!-- Path Send ACK -> Master ACK Check -->
-  <path d="M 1385 265 L 1385 305" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
+  <!-- INVALID -> Silent Drop (No crossings: runs at x=565 strictly between x=505 and x=605, y in [526..1200]) -->
+  <path d="M 685 526 L 565 526 L 565 1200 L 605 1200" fill="none" stroke="#D63031" stroke-width="2" marker-end="url(#arrow-red)" />
+  <rect x="572" y="514" width="76" height="24" rx="6" fill="#FFFFFF" stroke="#D63031" stroke-width="1.5" />
+  <text x="610" y="530" font-size="11.5" font-weight="800" fill="#D63031" text-anchor="middle">INVALID</text>
 
-  <!-- 12. Master ACK Verification Check (Diamond - Sky Blue) -->
-  <g id="node-master-ack" filter="url(#shadow)">
-    <polygon points="1385,305 1495,380 1385,455 1275,380" fill="#74B9FF" stroke="#2D3436" stroke-width="2.5" />
-    <text x="1385" y="365" font-size="11" font-weight="800" fill="#2D3436" text-anchor="middle">MASTER CFG_RX</text>
-    <text x="1385" y="385" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">ACK == 0x06</text>
-    <text x="1385" y="405" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">(Verified)?</text>
+  <!-- 13. Silent Drop Error Node -->
+  <g id="node-cfg-drop" filter="url(#shadow)">
+    <rect x="605" y="1145" width="430" height="110" rx="16" fill="#FF7675" stroke="#2D3436" stroke-width="2.5" />
+    <text x="820" y="1172" font-size="12.5" font-weight="800" fill="#2D3436" text-anchor="middle">CH32V003 CONFIG RECEIVER (PD6 / PD0)</text>
+    <text x="820" y="1196" font-size="15.5" font-weight="700" fill="#2D3436" text-anchor="middle">Silent Drop (No NAK / No Red LED Flash)</text>
+    <text x="820" y="1219" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">Bad CRC-8, wrong length or missing 0x55 footer discarded</text>
+    <text x="820" y="1238" font-size="11.5" font-weight="500" fill="#2D3436" text-anchor="middle">Existing 0x08003FC0 flash stays intact; no ACK transmitted</text>
   </g>
 
-  <!-- Path Master ACK Check? NO (Timeout / NAK) -->
-  <path d="M 1275 380 L 1190 380 L 1190 535 L 1210 535" fill="none" stroke="#D63031" stroke-width="2" marker-end="url(#arrow-red)" />
-  <rect x="1195" y="445" width="55" height="24" rx="6" fill="#FFFFFF" stroke="#D63031" stroke-width="1.5" />
-  <text x="1222" y="462" font-size="12" font-weight="800" fill="#D63031" text-anchor="middle">RETRY</text>
+  <!-- Col 2 -> Col 3 Connector -->
+  <path d="M 1035 1013 L 1115 1013 L 1115 236 L 1260 236" fill="none" stroke="#0984E3" stroke-width="2.5" marker-end="url(#arrow-blue)" />
 
-  <!-- Master Retry Node (Soft Pink) -->
-  <g id="node-master-retry" filter="url(#shadow)">
-    <rect x="1210" y="500" width="350" height="95" rx="16" fill="#FF7675" stroke="#2D3436" stroke-width="2.5" />
-    <text x="1385" y="530" font-size="13" font-weight="800" fill="#2D3436" text-anchor="middle">MASTER BLOCK (ESP32-S3)</text>
-    <text x="1385" y="555" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">ACK Timeout / NAK Retry</text>
-    <text x="1385" y="578" font-size="12" font-weight="600" fill="#2D3436" text-anchor="middle">Retries 3x or displays 'Dock Contact Error ⚠️'</text>
+  <!-- ==================== COLUMN 3: ACK VALIDATION & HARDWARE SYNC ==================== -->
+
+  <!-- 14. Master Receives ACK? -->
+  <g id="node-ack-check" filter="url(#shadow)">
+    <polygon points="1390,156 1520,236 1390,316 1260,236" fill="#74B9FF" stroke="#2D3436" stroke-width="2.5" />
+    <text x="1390" y="215" font-size="11" font-weight="800" fill="#2D3436" text-anchor="middle">MASTER (UART1 RX)</text>
+    <text x="1390" y="237" font-size="14" font-weight="700" fill="#2D3436" text-anchor="middle">4-Byte 0x06</text>
+    <text x="1390" y="257" font-size="14" font-weight="700" fill="#2D3436" text-anchor="middle">ACK Received?</text>
   </g>
 
-  <!-- Path Master ACK Check? YES -> E-Ink Success Screen -->
-  <path d="M 1385 455 L 1385 620" fill="none" stroke="#00B894" stroke-width="2.5" marker-end="url(#arrow-green)" />
-  <rect x="1395" y="475" width="60" height="24" rx="6" fill="#FFFFFF" stroke="#00B894" stroke-width="1.5" />
-  <text x="1425" y="492" font-size="12" font-weight="800" fill="#00B894" text-anchor="middle">PASS</text>
+  <!-- VALID ACK -> Verify & LED -->
+  <path d="M 1390 316 L 1390 368" fill="none" stroke="#00B894" stroke-width="2.5" marker-end="url(#arrow-green)" />
+  <rect x="1356" y="328" width="68" height="24" rx="6" fill="#FFFFFF" stroke="#00B894" stroke-width="1.5" />
+  <text x="1390" y="344" font-size="11.5" font-weight="800" fill="#00B894" text-anchor="middle">VALID</text>
 
-  <!-- 13. Master E-Ink Success Banner (Lavender) -->
+  <!-- 15. Verify Readback & Green RGB -->
+  <g id="node-verify-read" filter="url(#shadow)">
+    <rect x="1195" y="368" width="390" height="126" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
+    <text x="1390" y="395" font-size="12.5" font-weight="800" fill="#2D3436" text-anchor="middle">MASTER VERIFY &amp; RGB (esp32_master.ino)</text>
+    <text x="1390" y="419" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">Green Pulse + 0xCF 0x01 Readback</text>
+    <text x="1390" y="441" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">1. Blips Master RGB (GPIO 48) Green (0, 180, 40)</text>
+    <text x="1390" y="460" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">2. Sends [0xCF, 0x01, 0x07, 0x55] to read back Flash</text>
+    <text x="1390" y="479" font-size="11.5" font-weight="500" fill="#2D3436" text-anchor="middle">3. Syncs dockedActionId &amp; dockedParamVal in RAM</text>
+  </g>
+
+  <path d="M 1390 494 L 1390 532" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
+
+  <!-- 16. E-Ink Success Confirmation -->
   <g id="node-eink-success" filter="url(#shadow)">
-    <rect x="1210" y="620" width="350" height="105" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
-    <text x="1385" y="650" font-size="13" font-weight="800" fill="#2D3436" text-anchor="middle">MASTER BLOCK (2.13" E-INK DISPLAY)</text>
-    <text x="1385" y="675" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">Display Confirmation Banner</text>
-    <text x="1385" y="698" font-size="13" font-weight="700" fill="#00B894" text-anchor="middle">E-Ink Screen: 'BLOCK PROGRAMMED! ✅'</text>
-    <text x="1385" y="716" font-size="11" font-weight="500" fill="#2D3436" text-anchor="middle">Shows updated battery &amp; ready state</text>
+    <rect x="1195" y="532" width="390" height="112" rx="16" fill="#55E6C1" stroke="#2D3436" stroke-width="2.5" />
+    <text x="1390" y="559" font-size="12.5" font-weight="800" fill="#2D3436" text-anchor="middle">CORE 0 E-INK DISPLAY (2.13" 210x122)</text>
+    <text x="1390" y="583" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">Config Synced UI Refresh</text>
+    <text x="1390" y="606" font-size="11.5" font-weight="600" fill="#1E293B" text-anchor="middle">Redraws E-Ink showing stored Action Icon + Param</text>
+    <text x="1390" y="625" font-size="11.5" font-weight="500" fill="#2D3436" text-anchor="middle">280ms fast partial pass + 350ms settle pass</text>
   </g>
 
-  <!-- Path E-Ink Success -> Ready for Run Chain -->
-  <path d="M 1385 725 L 1385 770" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
+  <path d="M 1390 644 L 1390 684" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
 
-  <!-- 14. END (Gold/Yellow) -->
+  <!-- 17. Terminal Ready for Chain -->
   <g id="node-end" filter="url(#shadow)">
-    <rect x="1235" y="770" width="300" height="95" rx="20" fill="#FFD32A" stroke="#2D3436" stroke-width="2.5" />
-    <text x="1385" y="808" font-size="18" font-weight="800" fill="#2D3436" text-anchor="middle">READY FOR RUN CHAIN</text>
-    <text x="1385" y="834" font-size="13" font-weight="600" fill="#2D3436" text-anchor="middle">Child Snaps Block into Master Run Port</text>
-    <text x="1385" y="852" font-size="11" font-weight="500" fill="#2D3436" text-anchor="middle">Block is now fully configured &amp; persistent</text>
+    <rect x="1220" y="684" width="340" height="98" rx="20" fill="#FFD32A" stroke="#2D3436" stroke-width="2.5" />
+    <text x="1390" y="718" font-size="16.5" font-weight="800" fill="#2D3436" text-anchor="middle">BLOCK PROGRAMMED!</text>
+    <text x="1390" y="741" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">Undock from J1 (1200ms timeout clears Mode 1A)</text>
+    <text x="1390" y="761" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">Snap into J2 Chain for Run Execution (Mode 1B)</text>
+  </g>
+
+  <!-- NO ACK / UNDOCK -> Timeout Node -->
+  <path d="M 1520 236 L 1622 236 L 1622 930 L 1585 930" fill="none" stroke="#D63031" stroke-width="2" marker-end="url(#arrow-red)" />
+  <rect x="1526" y="224" width="76" height="24" rx="6" fill="#FFFFFF" stroke="#D63031" stroke-width="1.5" />
+  <text x="1564" y="240" font-size="11.5" font-weight="800" fill="#D63031" text-anchor="middle">NO ACK</text>
+
+  <!-- 18. Master Timeout / Undock Handler -->
+  <g id="node-master-timeout" filter="url(#shadow)">
+    <rect x="1195" y="860" width="390" height="140" rx="16" fill="#FF7675" stroke="#2D3436" stroke-width="2.5" />
+    <text x="1390" y="887" font-size="12.5" font-weight="800" fill="#2D3436" text-anchor="middle">MASTER CONFIG DOCK MANAGER</text>
+    <text x="1390" y="911" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">Write Failed / Undock Timeout (1200ms)</text>
+    <text x="1390" y="934" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">1. Write returns false if neither TX direction yields 0x06</text>
+    <text x="1390" y="953" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">2. pollConfigDock() @ 250ms re-probes J1 electrical pins</text>
+    <text x="1390" y="972" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">3. If absent &gt; 1200ms: exits Mode 1A -&gt; Mode 1B or Mode 2</text>
+  </g>
+
+  <!-- Reference Summary Box in lower right to balance layout cleanly -->
+  <g id="node-protocol-ref" filter="url(#shadow)">
+    <rect x="1195" y="1050" width="390" height="205" rx="16" fill="#FFFFFF" stroke="#DFE6E9" stroke-width="2" />
+    <text x="1390" y="1078" font-size="13" font-weight="800" fill="#4338CA" text-anchor="middle">0xCF WIRE PROTOCOL QUICK REFERENCE</text>
+    <line x1="1215" y1="1090" x2="1565" y2="1090" stroke="#DFE6E9" stroke-width="1.5" />
+    <text x="1215" y="1114" font-size="11.5" font-weight="700" fill="#2D3436">• Query Config (4B):</text>
+    <text x="1350" y="1114" font-size="11.5" font-weight="600" fill="#0369A1">[0xCF, 0x01, CRC=0x07, 0x55]</text>
+    <text x="1215" y="1138" font-size="11.5" font-weight="700" fill="#2D3436">• Query Reply (6B):</text>
+    <text x="1350" y="1138" font-size="11.5" font-weight="600" fill="#0369A1">[0xCF, 0x81, Act, Par, CRC, 0x55]</text>
+    <text x="1215" y="1162" font-size="11.5" font-weight="700" fill="#2D3436">• Write Config (6B):</text>
+    <text x="1350" y="1162" font-size="11.5" font-weight="600" fill="#0369A1">[0xCF, 0x02, Act, Par, CRC, 0x55]</text>
+    <text x="1215" y="1186" font-size="11.5" font-weight="700" fill="#2D3436">• Write ACK (4B):</text>
+    <text x="1350" y="1186" font-size="11.5" font-weight="600" fill="#047857">[0xCF, 0x06, CRC=0x12, 0x55]</text>
+    <text x="1215" y="1214" font-size="11" font-weight="500" fill="#636E72">• Both IN (PD6 UART1) &amp; OUT (PD0 bit-bang) accept 0xCF.</text>
+    <text x="1215" y="1234" font-size="11" font-weight="500" fill="#636E72">• Action ID 0xEE configures unified PCB as Smart End Block.</text>
   </g>
 
   <!-- Footer Legend Bar -->
-  <g transform="translate(40, 1280)">
-    <rect x="0" y="0" width="1540" height="60" rx="12" fill="#FFFFFF" stroke="#DFE6E9" stroke-width="1.5" />
-    <text x="30" y="35" font-size="14" font-weight="700" fill="#2D3436">LEGEND:</text>
-    
-    <rect x="110" y="20" width="20" height="20" rx="6" fill="#FFD32A" stroke="#2D3436" stroke-width="1.5" />
-    <text x="140" y="35" font-size="13" font-weight="600" fill="#636E72">Terminal (Start / End)</text>
-    
-    <rect x="330" y="20" width="20" height="20" rx="6" fill="#A29BFE" stroke="#2D3436" stroke-width="1.5" />
-    <text x="360" y="35" font-size="13" font-weight="600" fill="#636E72">Process &amp; Hardware Action</text>
-    
-    <polygon points="590,20 600,30 590,40 580,30" fill="#74B9FF" stroke="#2D3436" stroke-width="1.5" />
-    <text x="610" y="35" font-size="13" font-weight="600" fill="#636E72">Conditional Logic / Checksum</text>
+  <g transform="translate(40, 1345)">
+    <rect x="0" y="0" width="1600" height="65" rx="12" fill="#FFFFFF" stroke="#DFE6E9" stroke-width="1.5" />
+    <text x="30" y="38" font-size="14" font-weight="700" fill="#2D3436">LEGEND:</text>
 
-    <rect x="860" y="20" width="20" height="20" rx="6" fill="#FF7675" stroke="#2D3436" stroke-width="1.5" />
-    <text x="890" y="35" font-size="13" font-weight="600" fill="#636E72">Fault / Error Branch</text>
-    
-    <rect x="1080" y="20" width="20" height="20" rx="6" fill="#55E6C1" stroke="#2D3436" stroke-width="1.5" />
-    <text x="1110" y="35" font-size="13" font-weight="600" fill="#636E72">Hardware Flash / Success LED</text>
+    <rect x="115" y="23" width="20" height="20" rx="6" fill="#FFD32A" stroke="#2D3436" stroke-width="1.5" />
+    <text x="145" y="38" font-size="13" font-weight="600" fill="#636E72">Terminal (Dock / Ready)</text>
+
+    <rect x="345" y="23" width="20" height="20" rx="6" fill="#A29BFE" stroke="#2D3436" stroke-width="1.5" />
+    <text x="375" y="38" font-size="13" font-weight="600" fill="#636E72">Master UI / Block Hardware Action</text>
+
+    <polygon points="645,23 655,33 645,43 635,33" fill="#74B9FF" stroke="#2D3436" stroke-width="1.5" />
+    <text x="665" y="38" font-size="13" font-weight="600" fill="#636E72">Conditional Check / CRC-8</text>
+
+    <rect x="895" y="23" width="20" height="20" rx="6" fill="#FF7675" stroke="#2D3436" stroke-width="1.5" />
+    <text x="925" y="38" font-size="13" font-weight="600" fill="#636E72">Silent Drop / Timeout Fault</text>
+
+    <rect x="1155" y="23" width="20" height="20" rx="6" fill="#55E6C1" stroke="#2D3436" stroke-width="1.5" />
+    <text x="1185" y="38" font-size="13" font-weight="600" fill="#636E72">E-Ink Confirmation Complete</text>
   </g>
-</svg>'''
+</svg>
+'''
 
-base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-out_dir = os.path.join(base_dir, 'docs', 'diagrams')
+repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+out_dir = os.path.join(repo_root, 'docs', 'diagrams')
 os.makedirs(out_dir, exist_ok=True)
 out_path = os.path.join(out_dir, 'robosen_config_data_flow.svg')
 with open(out_path, 'w', encoding='utf-8') as f:

@@ -98,7 +98,7 @@ Transmitted downstream from Master Run Port; each block appends its stored flash
 ```
 
 #### 3. Phase 2: Live Step Execution Broadcast Frame (`Header = 0xBB`)
-Broadcast across Pin 4 during robot movement to trigger live step LEDs:
+Transmitted along Pin 3 (`CHAIN_TX` $\to$ `PD6` $\to$ `PD5`) during robot movement to trigger live step LEDs:
 ```text
 +-------------+-------------+-------------+--------+-------------+
 | HEADER      | ACTIVE STEP | TOTAL STEPS | CRC-8  | FOOTER      |
@@ -123,14 +123,13 @@ The Master ESP32-S3 coordinates robot actions and feeds execution states back to
 ┌──────────────────────┴────────────────────────────────────────────────┐
 │ FOR EACH COMMAND (Step Index = 1 to N):                                │
 │                                                                       │
-│  1. Broadcast Step State: Send [0xBB, StepIndex, N, CRC] on Pin 4     │
-│     -> Target physical block turns bright pulsating green             │
+│  1. Broadcast Step State: Send [0xBB, StepIndex, N, CRC] on Pin 3     │
+│     -> Forwarded PD6 -> PD5; target block turns bright green (0,255,0)│
 │                                                                       │
 │  2. Dispatch Robosen BLE Command:                                     │
-│     - If Action (0x17): Send BLE frame, listen on 0xFFE1 for progress │
-│       Wait asynchronously until Progress Byte === 100% (0x64)         │
-│     - If Locomotion (0x01-0x08): Start precision hardware step timer  │
-│       When timer expires, send Stop frame (0x0C)                      │
+│     - If Action (0x17): Send BLE frame & wait via abortableDelay()    │
+│       (Duration lookup 2.5s–55s; Python daemon also parses 0x64 ACK)  │
+│     - If Locomotion (0x01-0x08): Start abortable timer, then 0x0C Stop│
 │                                                                       │
 │  3. Stabilization Buffer: 300-500ms posture stabilization             │
 └──────────────────────┬────────────────────────────────────────────────┘
@@ -171,24 +170,20 @@ To prevent noisy distractions in classrooms with multiple student groups, all so
 
 ## 6. Pillar 5: Simplified Solid Action Blocks & Memory
 
-### 6.1 Action Block Hardware Architecture
+### 6.1 Action Block Hardware Architecture (Updated for Production `TSSOP-20`)
 - **Solid Shell Design**: Sealed 3D/injection-molded block with no holes or mechanical cutouts for dials/buttons.
-- **Non-Volatile Storage**: The CH32V003's built-in 192-byte data flash stores:
-  - `Action Token ID` (1 Byte)
-  - `Parameter Value` (1 Byte)
-  - `CRC-8 Checksum` (1 Byte)
+- **Non-Volatile Storage**: Production builds (`CH32V003F4P6 TSSOP-20`, evolved from early SOP-8 BOM baseline) use a `64-byte` Flash page at `0x08003FC0` storing `[CFG_MAGIC, ActionID, ParamVal]` permanently across power cycles.
 - **Zero Configuration Loss**: Blocks can be powered down, stored in a toy box for months, and instantly retain their programmed action when snapped together.
 
-### 6.2 CH32V003 Microcontroller Pinout (SOP-8 Package)
+### 6.2 Early SOP-8 Concept vs. Production `CH32V003F4P6` (`TSSOP-20`) Pinout
 
 ```text
-                  CH32V003 (SOP-8 Package)
-                        +-------------+
-        (V+ 3.3V)    ---| 1 VDD 8 GND |----  (GND)
-         (Unused)    ---| 2 PA1 7 PC4 |----  (Unused / Test Pad)
-    (WS2812B LED)    ---| 3 PA2 6 PD6 |----  (UART RX - Pin 3 In)
-    (SWIO / NRST)    ---| 4 PD1 5 PD5 |----  (UART TX - Pin 3 Out)
-                        +-------------+
+   Early Concept (SOP-8)               Production Unified PCB (CH32V003F4P6 TSSOP-20)
+        +---------+                       - PD6 (UART1 RX_IN, J1/J2 Pin 3)
+ VDD ---| 1     8 |--- GND                - PD5 (UART1 TX_OUT, J1/J2 Pin 3)
+ PA1 ---| 2     7 |--- PC4                - PD0 (RETURN_BUS / SW 0xCF RX / End TX)
+ PA2 ---| 3     6 |--- PD6 (RX)           - PA2 (WS2812B LED DIN)
+ PD1 ---| 4     5 |--- PD5 (TX)           - PD1 (SWIO PROG), PD4/PC0 (Heartbeat LED)
 ```
 
 ---
@@ -197,10 +192,10 @@ To prevent noisy distractions in classrooms with multiple student groups, all so
 
 | Phase | Milestone | Focus Areas | Deliverables | Status |
 | :---: | :--- | :--- | :--- | :---: |
-| **Phase 1** | **ESP32-S3 Master Firmware & E-Ink GUI** | Dual UART handlers (Config Dock + Run Chain), E-Ink partial refresh UI, BLE queue engine | Complete ESP32-S3 Arduino/IDF firmware | In Progress |
-| **Phase 2** | **CH32V003 Unified Action Block Firmware** | Config Port UART flash writer (`0xCF`), Phase 1 flash reader (`0xAA`), Phase 2 LED tracker (`0xBB`) | C/C++ RISC-V firmware (`firmware/ch32v003_action_block`) | ✅ **Verified on Hardware** |
-| **Phase 3** | **Light Language Choreography** | Emerald green success pulse, active glowing green step tracking, rainbow victory sparkle | WS2812B animation state machine | ✅ **Verified on Hardware** |
-| **Phase 4** | **Solid Enclosure & PCB Layout** | 4-pin magnetic PCB for Master & Action blocks, solid drop-proof shells | KiCad PCB design + 3D CAD (.STL/.STEP) | Planned |
+| **Phase 1** | **ESP32-S3 Master Firmware & E-Ink GUI** | Dual UART handlers (`J1` Config Dock + `J2` Run Chain), E-Ink partial refresh UI, BLE queue engine | Complete ESP32-S3 Arduino firmware (`esp32_master.ino`) | ✅ **Verified on Hardware** |
+| **Phase 2** | **CH32V003 Unified Action Block Firmware** | Config Port UART flash writer (`0xCF`), Phase 1 flash reader (`0xAA`), Phase 2 LED tracker (`0xBB`) | C RISC-V firmware (`firmware/ch32v003_action_block`) | ✅ **Verified on Hardware** |
+| **Phase 3** | **Light Language Choreography** | Emerald green success pulse, active green step tracking, rainbow victory sparkle | WS2812B animation state machine | ✅ **Verified on Hardware** |
+| **Phase 4** | **Solid Enclosure & PCB Layout** | 4-pin magnetic PCB for Master (`115.5×62mm` Proto #1-1) & Unified Action/End (`32×32mm`), solid shells | KiCad PCB projects + 3D CAD | ✅ **Routed / Active Production** |
 
 
 

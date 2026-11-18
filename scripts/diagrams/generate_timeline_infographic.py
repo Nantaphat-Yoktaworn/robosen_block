@@ -1,5 +1,10 @@
+import html
 import os
 import json
+
+
+def esc(val):
+    return html.escape(str(val), quote=False)
 
 # Data definition for the 14-week timeline without personal assignments
 weeks_data = [
@@ -60,11 +65,11 @@ weeks_data = [
         "dates": "06/09/2026 - 12/09/2026",
         "milestone": "ออกแบบแผนผังวงจรไฟฟ้าครบชุด & ขึ้นโมเดลสามมิติตัวบล็อกคำสั่ง",
         "milestone_en": "Complete Electrical Schematics & 3D Enclosure CAD Modeling",
-        "status": "กำลังดำเนินการ (IN PROGRESS)",
-        "status_code": "progress",
+        "status": "เสร็จสิ้น (DONE)",
+        "status_code": "done",
         "is_star": False,
         "summary": [
-            {"cat": "ฮาร์ดแวร์ & วงจร", "icon": "⚡", "text": "ออกแบบวงจรไฟฟ้าครบ 3 ส่วน: Master Block, Action Block และ End Block"},
+            {"cat": "ฮาร์ดแวร์ & วงจร", "icon": "⚡", "text": "ออกแบบวงจรไฟฟ้าครบ 2 บอร์ด: Master Block และ Unified Action/End Block (Pin 15 PD0)"},
             {"cat": "โครงสร้าง & 3D", "icon": "🧊", "text": "ออกแบบโมเดล 3D: แม่เหล็กป้องกันต่อกลับด้าน, ท่อนำแสงไฟแสดงผล & เคสบล็อกหลัก"},
             {"cat": "เฟิร์มแวร์ & โปรโตคอล", "icon": "💻", "text": "ทดสอบเชื่อมต่อบล็อกทดลองบนเบรดบอร์ดเข้ากับหุ่นยนต์จริง เพื่อยืนยันการส่งคำสั่งไร้สายผ่าน BLE"},
             {"cat": "การออกแบบ & สรีรศาสตร์", "icon": "🎨", "text": "ออกแบบกราฟิกบนตัวบล็อกและหน้าจอ: ไอคอนคำสั่งอ่านง่าย, แถบสีแบ่งหมวด & ลูกศรทิศทาง"},
@@ -77,11 +82,11 @@ weeks_data = [
         "dates": "13/09/2026 - 19/09/2026",
         "milestone": "ออกแบบแผ่นวงจรพิมพ์ (PCB), พัฒนาโปรแกรมประจำบล็อก & พิมพ์ชิ้นงานสามมิติทดสอบ",
         "milestone_en": "PCB Routing, Action Block Firmware & 3D Test Print Fit Checks",
-        "status": "ตามแผนงาน (SCHEDULED)",
-        "status_code": "scheduled",
+        "status": "เสร็จสิ้น (DONE)",
+        "status_code": "done",
         "is_star": False,
         "summary": [
-            {"cat": "ฮาร์ดแวร์ & วงจร", "icon": "⚡", "text": "ออกแบบลายวงจรแผ่น PCB ให้มีขนาดกะทัดรัดและลงตัวกับโครงสร้างบล็อกทั้ง 3 รูปแบบ"},
+            {"cat": "ฮาร์ดแวร์ & วงจร", "icon": "⚡", "text": "ออกแบบลายวงจรแผ่น PCB 2 บอร์ดให้กะทัดรัด: Master Block & Unified Action/End (32x32mm)"},
             {"cat": "โครงสร้าง & 3D", "icon": "🧊", "text": "พิมพ์ชิ้นงาน 3D ทดสอบ: ตรวจสอบความกระชับของชิ้นส่วน, แรงดูดแม่เหล็ก & การมองเห็นแสงไฟ"},
             {"cat": "เฟิร์มแวร์ & โปรโตคอล", "icon": "💻", "text": "พัฒนาโปรแกรมประจำ Action Block: บันทึกค่าลงหน่วยความจำ, ควบคุมไฟสถานะ & ประมวลผล"},
             {"cat": "การออกแบบ & สรีรศาสตร์", "icon": "🎨", "text": "ออกแบบสัญลักษณ์บนบล็อก: เครื่องหมายจุดต่อ, สเกลรอบปุ่มหมุน & สัญลักษณ์ปิดท้าย"},
@@ -92,15 +97,15 @@ weeks_data = [
         "week": 6,
         "week_label": "WEEK 06",
         "dates": "20/09/2026 - 26/09/2026",
-        "milestone": "สั่งผลิตแผ่นวงจรและจัดซื้ออุปกรณ์ & พัฒนากราฟิกหน้าจอแสดงผล",
-        "milestone_en": "PCB Manufacturing Dispatch, Parts Procurement & OLED UI Graphics",
-        "status": "ตามแผนงาน (SCHEDULED)",
-        "status_code": "scheduled",
+        "milestone": "สั่งผลิตแผ่นวงจรและจัดซื้ออุปกรณ์ & พัฒนากราฟิกหน้าจอ E-Ink",
+        "milestone_en": "PCB Manufacturing Dispatch, Parts Procurement & 2.13\" E-Ink UI Graphics",
+        "status": "เสร็จสิ้น (DONE)",
+        "status_code": "done",
         "is_star": False,
         "summary": [
             {"cat": "ฮาร์ดแวร์ & วงจร", "icon": "⚡", "text": "ตรวจสอบความถูกต้องของแบบวงจร & ส่งสั่งผลิตแผ่นวงจรพิมพ์ (PCB) และสั่งซื้อชิ้นส่วน"},
             {"cat": "โครงสร้าง & 3D", "icon": "🧊", "text": "จัดซื้อชิ้นส่วนโครงสร้าง: แม่เหล็กแรงสูง N52, ขั้วพินสปริง (Pogo), ปุ่มหมุน, สวิตช์ & แบตเตอรี่"},
-            {"cat": "เฟิร์มแวร์ & โปรโตคอล", "icon": "💻", "text": "พัฒนาระบบแสดงผล OLED: ไอคอนคำสั่งขนาดใหญ่ชัดเจน, ขีดแถบพารามิเตอร์ & สัญญาณบลูทูธ"},
+            {"cat": "เฟิร์มแวร์ & โปรโตคอล", "icon": "💻", "text": "พัฒนาระบบแสดงผล 2.13\" E-Ink (SSD1680): ไอคอนคำสั่งขนาดใหญ่, แถบพารามิเตอร์ & สถานะ BLE"},
             {"cat": "การออกแบบ & สรีรศาสตร์", "icon": "🎨", "text": "ผลิตตัวอย่างสติกเกอร์สัญลักษณ์: ตรวจสอบความคมชัด ความทนทานต่อการขูดขีด & แสงไฟ"},
             {"cat": "การทดสอบ & QA", "icon": "🛡️", "text": "ทดสอบความเสถียรของหน่วยประมวลผล: รันประมวลผลคำสั่งต่อเนื่องกว่า 100 รอบโดยไม่สะดุด"}
         ]
@@ -111,8 +116,8 @@ weeks_data = [
         "dates": "27/09/2026 - 03/10/2026",
         "milestone": "🎯 ประเมินผลกลางภาค (Midterm), สั่งพิมพ์เคสบล็อกชุดจริง & เตรียมอุปกรณ์ประกอบ",
         "milestone_en": "Midterm Progress Evaluation, Production 3D Cases & Assembly Preparation",
-        "status": "ตามแผนงาน (SCHEDULED)",
-        "status_code": "scheduled",
+        "status": "เสร็จสิ้น (DONE)",
+        "status_code": "done",
         "is_star": True,
         "summary": [
             {"cat": "ฮาร์ดแวร์ & วงจร", "icon": "⚡", "text": "จัดเตรียมเครื่องมือ อุปกรณ์บัดกรี และโต๊ะปฏิบัติการสำหรับประกอบบอร์ดอิเล็กทรอนิกส์"},
@@ -128,13 +133,13 @@ weeks_data = [
         "dates": "04/10/2026 - 10/10/2026",
         "milestone": "ประกอบและบัดกรีแผ่นวงจร & ทดสอบความปลอดภัยระบบจ่ายไฟ",
         "milestone_en": "PCB Assembly & Soldering, Power Safety & Bring-up Verification",
-        "status": "ตามแผนงาน (SCHEDULED)",
-        "status_code": "scheduled",
+        "status": "เสร็จสิ้น (DONE)",
+        "status_code": "done",
         "is_star": False,
         "summary": [
-            {"cat": "ฮาร์ดแวร์ & วงจร", "icon": "⚡", "text": "ประกอบบัดกรีชิ้นส่วนอิเล็กทรอนิกส์, ขั้วสัมผัสเชื่อมต่อ, ปุ่มปรับค่า & หน้าจอแสดงผล"},
+            {"cat": "ฮาร์ดแวร์ & วงจร", "icon": "⚡", "text": "ประกอบบัดกรีชิ้นส่วนอิเล็กทรอนิกส์, ขั้วสัมผัสเชื่อมต่อ, ปุ่มปรับค่า & หน้าจอ E-Ink"},
             {"cat": "โครงสร้าง & 3D", "icon": "🧊", "text": "ขัดเก็บผิวสัมผัสเคส 3D ให้เรียบเนียน & ทดลองติดตั้งแผงวงจรจริงลงในตัวบล็อก (Dry Fit)"},
-            {"cat": "เฟิร์มแวร์ & โปรโตคอล", "icon": "💻", "text": "ติดตั้งโปรแกรมทดสอบลงบล็อกหลัก: ตรวจสอบการทำงานของจอแสดงผลและปุ่มหมุนปรับค่า"},
+            {"cat": "เฟิร์มแวร์ & โปรโตคอล", "icon": "💻", "text": "ติดตั้งโปรแกรมทดสอบลงบล็อกหลัก: ตรวจสอบการทำงานของจอ E-Ink และปุ่มหมุนปรับค่า"},
             {"cat": "การออกแบบ & สรีรศาสตร์", "icon": "🎨", "text": "จัดทำสติกเกอร์สัญลักษณ์คำสั่งเคลือบผิวทนทานพิเศษ พร้อมติดตั้งลงบนเคสบล็อกจริง"},
             {"cat": "การทดสอบ & QA", "icon": "🛡️", "text": "ทดสอบความปลอดภัยทางไฟฟ้า: วัดแรงดันไฟเลี้ยง, ระบบชาร์จตัดไฟ & กระแสไฟสแตนด์บาย"}
         ]
@@ -145,13 +150,13 @@ weeks_data = [
         "dates": "11/10/2026 - 17/10/2026",
         "milestone": "ติดตั้งโปรแกรมลงบอร์ดจริง, ทดสอบแท่นตั้งค่าบล็อก & ตรวจสอบการสื่อสารข้อมูล",
         "milestone_en": "Firmware Flashing, Configuration Dock Integration & Signal Integrity",
-        "status": "ตามแผนงาน (SCHEDULED)",
-        "status_code": "scheduled",
+        "status": "เสร็จสิ้น (DONE)",
+        "status_code": "done",
         "is_star": False,
         "summary": [
             {"cat": "ฮาร์ดแวร์ & วงจร", "icon": "⚡", "text": "ตรวจสอบความสมบูรณ์ของลายวงจร & วัดระดับความเรียบเสมอกันของขั้วพินสปริงหน้าสัมผัส"},
             {"cat": "โครงสร้าง & 3D", "icon": "🧊", "text": "ติดตั้งแม่เหล็กเข้ากับเคสบล็อกตามแนวขั้วที่กำหนด ดูดประกบแน่นหนาและต่อถูกด้านเสมอ"},
-            {"cat": "เฟิร์มแวร์ & โปรโตคอล", "icon": "💻", "text": "ติดตั้งโปรแกรมลง Action Block ทั้ง 4 ชิ้น & ทดสอบตั้งค่าพารามิเตอร์ผ่าน Dock พร้อมไฟตอบรับ"},
+            {"cat": "เฟิร์มแวร์ & โปรโตคอล", "icon": "💻", "text": "ติดตั้งโปรแกรมลง Action & End Blocks พร้อมทดสอบตั้งค่าผ่าน Dock และไฟตอบรับ"},
             {"cat": "การออกแบบ & สรีรศาสตร์", "icon": "🎨", "text": "จัดทำแบบประเมินความสะดวกการใช้งาน: แรงดูดแม่เหล็ก, ความง่ายในการต่อ & การเข้าใจไฟสถานะ"},
             {"cat": "การทดสอบ & QA", "icon": "🛡️", "text": "ตรวจวัดสัญญาณข้อมูลด้วย Oscilloscope พร้อมทดสอบการขยับ/โยกบล็อกขณะส่งข้อมูล"}
         ]
@@ -162,8 +167,8 @@ weeks_data = [
         "dates": "18/10/2026 - 24/10/2026",
         "milestone": "🤖 ประกอบตัวบล็อกสมบูรณ์ครบชุด & ทดสอบการทำงานร่วมกับหุ่นยนต์ครบวงจร",
         "milestone_en": "Full 5-Block Integration & End-to-End Execution with K1 Robot",
-        "status": "ตามแผนงาน (SCHEDULED)",
-        "status_code": "scheduled",
+        "status": "เสร็จสิ้น (DONE)",
+        "status_code": "done",
         "is_star": True,
         "summary": [
             {"cat": "ฮาร์ดแวร์ & วงจร", "icon": "⚡", "text": "ติดตั้งชุดแบตเตอรี่และสวิตช์เปิด-ปิดเข้ากับ Master Block พร้อมระบบป้องกันไฟ"},
@@ -179,8 +184,8 @@ weeks_data = [
         "dates": "25/10/2026 - 31/10/2026",
         "milestone": "ทดสอบความแข็งแรงทนทาน, ระบบหยุดทำงานฉุกเฉิน & ซ้อมใหญ่การทำงาน",
         "milestone_en": "Drop Durability Testing, Emergency Disconnect Failsafe & Rehearsal",
-        "status": "ตามแผนงาน (SCHEDULED)",
-        "status_code": "scheduled",
+        "status": "เสร็จสิ้น (DONE)",
+        "status_code": "done",
         "is_star": False,
         "summary": [
             {"cat": "ฮาร์ดแวร์ & วงจร", "icon": "⚡", "text": "ตรวจวัดอุณหภูมิความร้อนขณะใช้งานต่อเนื่อง & วัดแรงดันไฟเลี้ยงเมื่อต่อบล็อกยาวสูงสุด"},
@@ -196,8 +201,8 @@ weeks_data = [
         "dates": "01/11/2026 - 07/11/2026",
         "milestone": "🌟 ทดสอบการใช้งานระบบบล็อกจริงกับผู้ใช้ในวันหยุดสุดสัปดาห์ (Usability Pilot)",
         "milestone_en": "Weekend Field Pilot & Usability Testing with Real Users",
-        "status": "ตามแผนงาน (SCHEDULED)",
-        "status_code": "scheduled",
+        "status": "เสร็จสิ้น (DONE)",
+        "status_code": "done",
         "is_star": True,
         "summary": [
             {"cat": "ฮาร์ดแวร์ & วงจร", "icon": "⚡", "text": "ดูแลฮาร์ดแวร์ระหว่างการทดสอบ: ติดตามระดับแบตเตอรี่, ตรวจหน้าสัมผัสขั้วบล็อก & อุปกรณ์สำรอง"},
@@ -211,15 +216,15 @@ weeks_data = [
         "week": 13,
         "week_label": "WEEK 13",
         "dates": "08/11/2026 - 14/11/2026",
-        "milestone": "ปรับปรุงตามผลตอบรับของผู้ใช้, ปรับแต่งหน้าจอแสดงผลและระบบ & ทดสอบความเสถียร",
+        "milestone": "ปรับปรุงตามผลตอบรับของผู้ใช้, ปรับแต่งหน้าจอ E-Ink และระบบ & ทดสอบความเสถียร",
         "milestone_en": "Post-Pilot Feedback Refinements, UI/Firmware Polish & Endurance Testing",
-        "status": "ตามแผนงาน (SCHEDULED)",
-        "status_code": "scheduled",
+        "status": "เสร็จสิ้น (DONE)",
+        "status_code": "done",
         "is_star": False,
         "summary": [
             {"cat": "ฮาร์ดแวร์ & วงจร", "icon": "⚡", "text": "ตรวจสอบสภาพจุดเชื่อมต่อและแบตเตอรี่หลังผ่านการทดสอบหนัก & ปรับปรุงโหมดประหยัดพลังงาน"},
             {"cat": "โครงสร้าง & 3D", "icon": "🧊", "text": "ปรับปรุงเคสตามฟีดแบ็ก: เพิ่มลายกันลื่นที่ลูกบิดหมุน & ปรับมุมลาดเอียงให้ต่อบล็อกได้ง่ายยิ่งขึ้น"},
-            {"cat": "เฟิร์มแวร์ & โปรโตคอล", "icon": "💻", "text": "ปรับแต่งโปรแกรม: ปรับความลื่นไหลของการหมุนค่า, เพิ่มความคมชัดของไอคอน & จังหวะไฟหายใจ"},
+            {"cat": "เฟิร์มแวร์ & โปรโตคอล", "icon": "💻", "text": "ปรับแต่งโปรแกรม: เพิ่มเมนู End Terminator (0xEE), Auto-Direction J1 & จูนความลื่นไหลลูกบิด"},
             {"cat": "การออกแบบ & สรีรศาสตร์", "icon": "🎨", "text": "วิเคราะห์ผลตอบรับจากผู้ใช้: สรุปคะแนนความสะดวกในการจับถือ, ความเข้าใจคำสั่ง & กราฟสรุป"},
             {"cat": "การทดสอบ & QA", "icon": "🛡️", "text": "ทดสอบการทำงานซ้ำแบบผสมผสานต่อเนื่องกว่า 50 รอบ ยืนยันระบบทำงานเสถียรสูงสุดโดยไม่สะดุด"}
         ]
@@ -230,13 +235,13 @@ weeks_data = [
         "dates": "15/11/2026 - 21/11/2026",
         "milestone": "🏆 ประกอบชุดบล็อกฉบับสมบูรณ์, ถ่ายวิดีโอสาธิต, จัดทำรายงานวิชาการ & สอบป้องกันโครงงาน",
         "milestone_en": "Final Assembly, Demonstration Video, Technical Report & Final Project Defense",
-        "status": "ตามแผนงาน (SCHEDULED)",
-        "status_code": "scheduled",
+        "status": "กำลังดำเนินการ (IN PROGRESS)",
+        "status_code": "progress",
         "is_star": True,
         "summary": [
             {"cat": "ฮาร์ดแวร์ & วงจร", "icon": "⚡", "text": "รวบรวมเอกสารวิศวกรรมฮาร์ดแวร์ฉบับสมบูรณ์: ผังวงจร (Schematic), แบบ PCB, BOM & ผลการทดสอบ"},
             {"cat": "โครงสร้าง & 3D", "icon": "🧊", "text": "ตรวจสอบความเรียบร้อยขั้นสุดท้าย: ทำความสะอาดเคส, ติดสติกเกอร์สัญลักษณ์ & บรรจุลงกล่องจัดแสดง"},
-            {"cat": "เฟิร์มแวร์ & โปรโตคอล", "icon": "💻", "text": "จัดเก็บซอร์สโค้ดและโครงสร้างโปรเจกต์เวอร์ชันสมบูรณ์ (Release v1.0.0) พร้อมเอกสารกำกับ"},
+            {"cat": "เฟิร์มแวร์ & โปรโตคอล", "icon": "💻", "text": "อัปเดต PD0 0xCF Config RX, ESP32/Uno SWIO & จัดเก็บซอร์สโค้ด Release v1.0.0 พร้อมเอกสาร"},
             {"cat": "การออกแบบ & สรีรศาสตร์", "icon": "🎨", "text": "จัดทำเล่มรายงานวิชาการฉบับสมบูรณ์: สรุปผลการออกแบบสรีรศาสตร์, รายงานผลการทดสอบ & สไลด์"},
             {"cat": "หมุดหมายสำคัญ", "icon": "🏆", "text": "【สอบป้องกันโครงงาน】: ถ่ายทำวิดีโอสาธิตผลิตภัณฑ์ & สมาชิกทุกคนร่วมสาธิตสดในการสอบป้องกันโครงงาน"}
         ]
@@ -246,9 +251,9 @@ weeks_data = [
 def generate_svg():
     # Width and height calculations
     width = 1700
-    top_offset = 260
-    card_height = 255
-    y_step = 275
+    top_offset = 385
+    card_height = 282
+    y_step = 298
     height = top_offset + (14 * y_step) + 160
     center_x = 850
 
@@ -284,20 +289,22 @@ def generate_svg():
     }
 
     svg_lines = [
-        f'<svg xmlns="http://www.w3.org/200svg" viewBox="0 0 {width} {height}" width="100%" height="100%" style="background-color: #0B1120; font-family: system-ui, -apple-system, \'Segoe UI\', Roboto, Helvetica, Arial, sans-serif;">',
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="100%" height="100%" style="background-color: #0B1120; font-family: system-ui, -apple-system, \'Segoe UI\', Roboto, Helvetica, Arial, sans-serif;">',
         '  <defs>',
         '    <linearGradient id="trunkGrad" x1="0%" y1="0%" x2="0%" y2="100%">',
         '      <stop offset="0%" stop-color="#10B981" />',
-        '      <stop offset="25%" stop-color="#10B981" />',
-        '      <stop offset="30%" stop-color="#F59E0B" />',
-        '      <stop offset="45%" stop-color="#38BDF8" />',
-        '      <stop offset="100%" stop-color="#818CF8" />',
+        '      <stop offset="88%" stop-color="#10B981" />',
+        '      <stop offset="94%" stop-color="#F59E0B" />',
+        '      <stop offset="100%" stop-color="#EC4899" />',
         '    </linearGradient>',
         '    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">',
         '      <stop offset="0%" stop-color="#06B6D4" />',
         '      <stop offset="50%" stop-color="#3B82F6" />',
         '      <stop offset="100%" stop-color="#8B5CF6" />',
         '    </linearGradient>',
+        '    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">',
+        '      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1E293B" stroke-width="0.75" stroke-opacity="0.4"/>',
+        '    </pattern>',
         '    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">',
         '      <feGaussianBlur stdDeviation="4" result="blur" />',
         '      <feComposite in="SourceGraphic" in2="blur" operator="over" />',
@@ -307,10 +314,8 @@ def generate_svg():
         '    </filter>',
         '  </defs>',
         '',
-        '  <!-- Background Grid Pattern -->',
-        '  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">',
-        '    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1E293B" stroke-width="0.75" stroke-opacity="0.4"/>',
-        '  </pattern>',
+        '  <!-- Solid Dark Canvas & Grid Pattern -->',
+        f'  <rect width="{width}" height="{height}" fill="#0B1120" />',
         f'  <rect width="{width}" height="{height}" fill="url(#grid)" />',
         '',
         '  <!-- HEADER SECTION -->',
@@ -320,13 +325,11 @@ def generate_svg():
         f'    <text x="{center_x}" y="110" text-anchor="middle" font-size="16" fill="#94A3B8">แผนภาพสรุปความก้าวหน้าและเป้าหมายประจำสัปดาห์ (Focusing on Project Deliverables &amp; Milestones)</text>',
         '',
         '    <!-- Status Legend -->',
-        f'    <g transform="translate({center_x - 320}, 140)">',
+        f'    <g transform="translate({center_x - 245}, 140)">',
         '      <circle cx="0" cy="0" r="7" fill="#10B981" />',
-        '      <text x="14" y="4" font-size="13" font-weight="600" fill="#34D399">เสร็จสิ้น (DONE): W1-W3</text>',
-        '      <circle cx="210" cy="0" r="7" fill="#F59E0B" />',
-        '      <text x="224" y="4" font-size="13" font-weight="600" fill="#FCD34D">กำลังดำเนินการ (IN PROGRESS): W4</text>',
-        '      <circle cx="470" cy="0" r="7" fill="#38BDF8" />',
-        '      <text x="484" y="4" font-size="13" font-weight="600" fill="#7DD3FC">ตามแผนงาน (SCHEDULED): W5-W14</text>',
+        '      <text x="14" y="4" font-size="13" font-weight="600" fill="#34D399">เสร็จสิ้น (DONE): W1-W13</text>',
+        '      <circle cx="230" cy="0" r="7" fill="#F59E0B" />',
+        '      <text x="244" y="4" font-size="13" font-weight="600" fill="#FCD34D">กำลังดำเนินการ (IN PROGRESS): W14</text>',
         '    </g>',
         '  </g>',
         '',
@@ -374,10 +377,10 @@ def generate_svg():
         for itm in w["summary"]:
             items_html += f'''
             <div style="display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 12.5px; line-height: 1.35; color: #E2E8F0;">
-                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">{itm["icon"]}</span>
+                <span style="font-size: 14px; flex-shrink: 0; margin-top: 1px;">{esc(itm["icon"])}</span>
                 <div>
-                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[{itm["cat"]}]</strong>
-                    <span> {itm["text"]}</span>
+                    <strong style="color: #94A3B8; font-size: 11.5px; text-transform: uppercase;">[{esc(itm["cat"])}]</strong>
+                    <span> {esc(itm["text"])}</span>
                 </div>
             </div>
             '''
@@ -400,14 +403,14 @@ def generate_svg():
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(148, 163, 184, 0.2);">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span style="background: {cfg['badge_bg']}; color: {cfg['badge_text']}; font-weight: 800; font-size: 12px; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;">
-                        {w['week_label']}
+                        {esc(w['week_label'])}
                     </span>
-                    <span style="font-size: 12px; color: #94A3B8; font-family: monospace;">📅 {w['dates']}</span>
+                    <span style="font-size: 12px; color: #94A3B8; font-family: monospace;">📅 {esc(w['dates'])}</span>
                     {star_badge}
                 </div>
                 <div>
                     <span style="background: {cfg['badge_bg']}; color: {cfg['badge_text']}; border: 1px solid {cfg['border']}; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 12px;">
-                        {cfg['label']}
+                        {esc(cfg['label'])}
                     </span>
                 </div>
             </div>
@@ -415,10 +418,10 @@ def generate_svg():
             <!-- Milestone Title -->
             <div style="margin-bottom: 8px;">
                 <div style="font-size: 14px; font-weight: 700; color: #38BDF8; line-height: 1.3;">
-                    {w['milestone']}
+                    {esc(w['milestone'])}
                 </div>
                 <div style="font-size: 11px; color: #64748B; font-style: italic;">
-                    {w['milestone_en']}
+                    {esc(w['milestone_en'])}
                 </div>
             </div>
 
@@ -429,7 +432,7 @@ def generate_svg():
         </div>
         '''
 
-        svg_lines.append(f'    <foreignObject x="{card_x}" y="{y_node - (card_h // 2)}" width="{card_w}" height="{card_h}" filter="url(#cardShadow)">')
+        svg_lines.append(f'    <foreignObject x="{card_x}" y="{y_node - (card_h // 2)}" width="{card_w}" height="{card_h}">')
         svg_lines.append(fo_html)
         svg_lines.append('    </foreignObject>')
         svg_lines.append('  </g>\n')
@@ -571,7 +574,7 @@ def generate_html():
             left: 50%;
             width: 4px;
             transform: translateX(-50%);
-            background: linear-gradient(to bottom, #10B981 0%, #10B981 25%, #F59E0B 32%, #38BDF8 60%, #818CF8 100%);
+            background: linear-gradient(to bottom, #10B981 0%, #10B981 88%, #F59E0B 95%, #EC4899 100%);
             border-radius: 2px;
             box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
         }}
@@ -841,9 +844,8 @@ def generate_html():
         <p class="subtitle">Single-line Spine with Weekly Deliverable Branches (โฟกัสตัวงานและผลลัพธ์ของแต่ละสัปดาห์ ไม่ระบุชื่อบุคคลตามแผนงาน 14 สัปดาห์)</p>
         <div class="controls">
             <button class="filter-btn active" onclick="filterTimeline('all')">ทั้งหมด (All 14 Weeks)</button>
-            <button class="filter-btn" onclick="filterTimeline('done')">✅ เสร็จสิ้นแล้ว (W1 - W3)</button>
-            <button class="filter-btn" onclick="filterTimeline('progress')">⚡ กำลังดำเนินการ (W4)</button>
-            <button class="filter-btn" onclick="filterTimeline('scheduled')">📅 แผนงานถัดไป (W5 - W14)</button>
+            <button class="filter-btn" onclick="filterTimeline('done')">✅ เสร็จสิ้นแล้ว (W1 - W13)</button>
+            <button class="filter-btn" onclick="filterTimeline('progress')">⚡ กำลังดำเนินการ (W14)</button>
             <button class="filter-btn" onclick="window.print()">🖨️ พิมพ์ / บันทึก PDF</button>
         </div>
     </header>
@@ -947,38 +949,38 @@ def generate_markdown_timeline():
         "    W2_NODE --> W3_NODE((W3)):::done",
         "    W3_NODE --> W3_CARD[\"<b>Week 3</b> (30/08 - 05/09)<br/><b>โปรแกรมควบคุมหลัก & สรุป BOM</b><br/>• Master Auto-BLE Scan<br/>• Rotary Debounce & Clamping<br/>• แผนภาพโฟลว์ระบบสมบูรณ์\"]:::done",
         "",
-        "    W3_NODE --> W4_NODE((W4)):::progress",
-        "    W4_NODE --> W4_CARD[\"<b>Week 4</b> (06/09 - 12/09)<br/><b>ผังวงจรไฟฟ้า & โมเดล 3D</b><br/>• วงจร Master, Action, End<br/>• 3D Polarized Keying & Light Pipe<br/>• ทดสอบสั่งงานหุ่นยนต์จริง BLE\"]:::progress",
+        "    W3_NODE --> W4_NODE((W4)):::done",
+        "    W4_NODE --> W4_CARD[\"<b>Week 4</b> (06/09 - 12/09)<br/><b>ผังวงจรไฟฟ้า & โมเดล 3D</b><br/>• วงจร Master & Unified Action/End<br/>• 3D Polarized Keying & Light Pipe<br/>• ทดสอบสั่งงานหุ่นยนต์จริง BLE\"]:::done",
         "",
-        "    W4_NODE --> W5_NODE((W5)):::scheduled",
-        "    W5_NODE --> W5_CARD[\"<b>Week 5</b> (13/09 - 19/09)<br/><b>แผ่นวงจรพิมพ์ PCB & ชิ้นงานทดสอบ</b><br/>• PCB Layout ทั้ง 3 บล็อก<br/>• Action Block Flash Firmware<br/>• พิมพ์ 3D เคสทดสอบความกระชับ\"]:::scheduled",
+        "    W4_NODE --> W5_NODE((W5)):::done",
+        "    W5_NODE --> W5_CARD[\"<b>Week 5</b> (13/09 - 19/09)<br/><b>แผ่นวงจรพิมพ์ PCB & ชิ้นงานทดสอบ</b><br/>• PCB 2 บอร์ด (Master + 32x32mm)<br/>• Action Block Flash Firmware<br/>• พิมพ์ 3D เคสทดสอบความกระชับ\"]:::done",
         "",
-        "    W5_NODE --> W6_NODE((W6)):::scheduled",
-        "    W6_NODE --> W6_CARD[\"<b>Week 6</b> (20/09 - 26/09)<br/><b>สั่งผลิต PCB & กราฟิก OLED</b><br/>• ส่งผลิต PCB & ซื้อแม่เหล็ก N52/Pogo<br/>• กราฟิกไอคอนขนาดใหญ่บนจอ OLED<br/>• สเตรสเทสโปรเซสเซอร์ 100 รอบ\"]:::scheduled",
+        "    W5_NODE --> W6_NODE((W6)):::done",
+        "    W6_NODE --> W6_CARD[\"<b>Week 6</b> (20/09 - 26/09)<br/><b>สั่งผลิต PCB & กราฟิก E-Ink</b><br/>• ส่งผลิต PCB & ซื้อแม่เหล็ก N52/Pogo<br/>• กราฟิกไอคอนขนาดใหญ่บนจอ E-Ink<br/>• สเตรสเทสโปรเซสเซอร์ 100 รอบ\"]:::done",
         "",
-        "    W6_NODE --> W7_NODE((W7 🎯)):::star",
-        "    W7_NODE --> W7_CARD[\"<b>Week 7</b> (27/09 - 03/10) ⭐<br/><b>ประเมินผลกลางภาค (Midterm)</b><br/>• พิมพ์เคส 3D ชุดจริง 5 บล็อก<br/>• รวม State Machine UI & Dock<br/>• สอบและนำเสนอประเมินผลกลางภาค\"]:::star",
+        "    W6_NODE --> W7_NODE((W7 🎯)):::done",
+        "    W7_NODE --> W7_CARD[\"<b>Week 7</b> (27/09 - 03/10) ⭐<br/><b>ประเมินผลกลางภาค (Midterm)</b><br/>• พิมพ์เคส 3D ชุดจริง 5 บล็อก<br/>• รวม State Machine UI & Dock<br/>• สอบและนำเสนอประเมินผลกลางภาค\"]:::done",
         "",
-        "    W7_NODE --> W8_NODE((W8)):::scheduled",
-        "    W8_NODE --> W8_CARD[\"<b>Week 8</b> (04/10 - 10/10)<br/><b>ประกอบ บัดกรี & ระบบไฟ</b><br/>• SMT/THT Soldering ครบชิ้นส่วน<br/>• ขัดผิวเคส & Dry-fit แผงวงจร<br/>• ทดสอบความปลอดภัยระบบจ่ายไฟ\"]:::scheduled",
+        "    W7_NODE --> W8_NODE((W8)):::done",
+        "    W8_NODE --> W8_CARD[\"<b>Week 8</b> (04/10 - 10/10)<br/><b>ประกอบ บัดกรี & ระบบไฟ</b><br/>• SMT/THT Soldering ครบชิ้นส่วน<br/>• ขัดผิวเคส & Dry-fit แผงวงจร<br/>• ทดสอบความปลอดภัยระบบจ่ายไฟ\"]:::done",
         "",
-        "    W8_NODE --> W9_NODE((W9)):::scheduled",
-        "    W9_NODE --> W9_CARD[\"<b>Week 9</b> (11/10 - 17/10)<br/><b>แฟลชบอร์ดจริง & แท่นตั้งค่า Dock</b><br/>• แฟลชเฟิร์มแวร์ลง 4 บล็อกคำสั่ง<br/>• ทดสอบแท่นตั้งค่า Dock + LED ACK<br/>• ตรวจวัด Signal Integrity ด้วย Scope\"]:::scheduled",
+        "    W8_NODE --> W9_NODE((W9)):::done",
+        "    W9_NODE --> W9_CARD[\"<b>Week 9</b> (11/10 - 17/10)<br/><b>แฟลชบอร์ดจริง & แท่นตั้งค่า Dock</b><br/>• แฟลชเฟิร์มแวร์ลง Action/End Blocks<br/>• ทดสอบแท่นตั้งค่า Dock + LED ACK<br/>• ตรวจวัด Signal Integrity ด้วย Scope\"]:::done",
         "",
-        "    W9_NODE --> W10_NODE((W10 🤖)):::star",
-        "    W10_NODE --> W10_CARD[\"<b>Week 10</b> (18/10 - 24/10) ⭐<br/><b>ประกอบ 5 บล็อก & สั่งหุ่นยนต์ครบวงจร</b><br/>• ติดตั้งแบตเตอรี่ & สวิตช์ปิด-เปิด<br/>• ประกอบเสร็จสมบูรณ์ทั้ง 5 บล็อก<br/>• ทดสอบ Dock->Chain->Run สั่ง K1 สำเร็จ\"]:::star",
+        "    W9_NODE --> W10_NODE((W10 🤖)):::done",
+        "    W10_NODE --> W10_CARD[\"<b>Week 10</b> (18/10 - 24/10) ⭐<br/><b>ประกอบ 5 บล็อก & สั่งหุ่นยนต์ครบวงจร</b><br/>• ติดตั้งแบตเตอรี่ & สวิตช์ปิด-เปิด<br/>• ประกอบเสร็จสมบูรณ์ทั้ง 5 บล็อก<br/>• ทดสอบ Dock->Chain->Run สั่ง K1 สำเร็จ\"]:::done",
         "",
-        "    W10_NODE --> W11_NODE((W11)):::scheduled",
-        "    W11_NODE --> W11_CARD[\"<b>Week 11</b> (25/10 - 31/10)<br/><b>Drop Test, E-Stop & ซ้อมใหญ่</b><br/>• ทดสอบตกกระแทก Drop Test 1 ม.<br/>• E-Stop ปลดบล็อกแล้วหุ่นหยุดทันที<br/>• ซักซ้อมขั้นตอนทดสอบภาคสนาม\"]:::scheduled",
+        "    W10_NODE --> W11_NODE((W11)):::done",
+        "    W11_NODE --> W11_CARD[\"<b>Week 11</b> (25/10 - 31/10)<br/><b>Drop Test, E-Stop & ซ้อมใหญ่</b><br/>• ทดสอบตกกระแทก Drop Test 1 ม.<br/>• E-Stop ปลดบล็อกแล้วหุ่นหยุดทันที<br/>• ซักซ้อมขั้นตอนทดสอบภาคสนาม\"]:::done",
         "",
-        "    W11_NODE --> W12_NODE((W12 🌟)):::star",
-        "    W12_NODE --> W12_CARD[\"<b>Week 12</b> (01/11 - 07/11) 🌟<br/><b>ทดสอบกับผู้ใช้จริง (Usability Pilot)</b><br/>• จัดกิจกรรมให้เด็กลองต่อบล็อกอิสระ<br/>• เก็บสถิติเวลา ความเข้าใจ & ความพึงพอใจ<br/>• ติดตาม telemetry & สัญญาณ BLE สด\"]:::star",
+        "    W11_NODE --> W12_NODE((W12 🌟)):::done",
+        "    W12_NODE --> W12_CARD[\"<b>Week 12</b> (01/11 - 07/11) 🌟<br/><b>ทดสอบกับผู้ใช้จริง (Usability Pilot)</b><br/>• จัดกิจกรรมให้เด็กลองต่อบล็อกอิสระ<br/>• เก็บสถิติเวลา ความเข้าใจ & ความพึงพอใจ<br/>• ติดตาม telemetry & สัญญาณ BLE สด\"]:::done",
         "",
-        "    W12_NODE --> W13_NODE((W13)):::scheduled",
-        "    W13_NODE --> W13_CARD[\"<b>Week 13</b> (08/11 - 14/11)<br/><b>ปรับปรุงตามฟีดแบ็ก & ความเสถียร</b><br/>• เพิ่มลายกันลื่นลูกบิด & มุมต่อเคส<br/>• จูนความลื่นไหลลูกบิด & คอนทราสต์ไอคอน<br/>• รันผสมผสาน 50+ รอบไร้ความผิดพลาด\"]:::scheduled",
+        "    W12_NODE --> W13_NODE((W13)):::done",
+        "    W13_NODE --> W13_CARD[\"<b>Week 13</b> (08/11 - 14/11)<br/><b>ปรับปรุงตามฟีดแบ็ก & ความเสถียร</b><br/>• เพิ่มลายกันลื่นลูกบิด & มุมต่อเคส<br/>• เพิ่มเมนู 0xEE & Auto-Direction J1<br/>• รันผสมผสาน 50+ รอบไร้ความผิดพลาด\"]:::done",
         "",
-        "    W13_NODE --> W14_NODE((W14 🏆)):::star",
-        "    W14_NODE --> W14_CARD[\"<b>Week 14</b> (15/11 - 21/11) 🏆<br/><b>ส่งมอบสมบูรณ์, วิดีโอ & สอบป้องกัน</b><br/>• Release v1.0.0 Code & Hardware Pack<br/>• ถ่ายทำวิดีโอสาธิตผลิตภัณฑ์ครบวงจร<br/>• สาธิตสดและสอบป้องกันโครงงานปริญญานิพนธ์\"]:::star",
+        "    W13_NODE --> W14_NODE((W14 🏆)):::progress",
+        "    W14_NODE --> W14_CARD[\"<b>Week 14</b> (15/11 - 21/11) 🏆<br/><b>ส่งมอบสมบูรณ์, วิดีโอ & สอบป้องกัน</b><br/>• PD0 0xCF RX & ESP32/Uno SWIO Update<br/>• ถ่ายทำวิดีโอสาธิตผลิตภัณฑ์ครบวงจร<br/>• สาธิตสดและสอบป้องกันโครงงานปริญญานิพนธ์\"]:::progress",
         "",
         "    W14_NODE --> FINISH([🏁 Project Completion & Defense: 21/11/2026]):::spine",
         "```",
@@ -1001,9 +1003,9 @@ def generate_markdown_timeline():
         "---",
         "",
         "## 3. Dedicated Deliverable Assets",
-        "- **Vector Infographic (SVG)**: [`docs/diagrams/project_timeline_infographic.svg`](file:///C:/Users/nnnn/Projects/robosen_block/docs/diagrams/project_timeline_infographic.svg)",
-        "- **Interactive Web Infographic (HTML)**: [`docs/diagrams/project_timeline_infographic.html`](file:///C:/Users/nnnn/Projects/robosen_block/docs/diagrams/project_timeline_infographic.html)",
-        "- **Project Plan Document (Markdown)**: [`plans/TIMELINE_INFOGRAPHIC.md`](file:///C:/Users/nnnn/Projects/robosen_block/plans/TIMELINE_INFOGRAPHIC.md)"
+        "- **Vector Infographic (SVG)**: [`docs/diagrams/project_timeline_infographic.svg`](../diagrams/project_timeline_infographic.svg)",
+        "- **Interactive Web Infographic (HTML)**: [`docs/diagrams/project_timeline_infographic.html`](../diagrams/project_timeline_infographic.html)",
+        "- **Project Plan Document (Markdown)**: [`docs/plans/TIMELINE_INFOGRAPHIC.md`](TIMELINE_INFOGRAPHIC.md)"
     ])
 
     return "\n".join(md)

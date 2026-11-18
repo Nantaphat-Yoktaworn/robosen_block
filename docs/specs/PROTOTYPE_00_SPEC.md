@@ -265,7 +265,7 @@ Master -> Docked Block:  [ 0xCF, 0x02, ACTION_ID, PARAM_VAL, CRC8, 0x55 ]
 Docked Block -> Master:  [ 0xCF, 0x06, CRC8, 0x55 ] (ACK: Configuration Written to Flash)
 ```
 
-* **Action Block Memory Operation:** The CH32V003 writes the received `[ACTION_ID, PARAM_VAL]` into its internal **192-byte non-volatile Data Flash**.
+* **Action Block Memory Operation:** The CH32V003 writes `[CFG_MAGIC, ACTION_ID, PARAM_VAL]` into its internal **`64-byte` Flash page at `0x08003FC0`**.
 * **LED Feedback:** Block LED flashes an **Emerald Green Success Pulse** to confirm the setting is saved permanently.
 
 ---
@@ -302,33 +302,33 @@ sequenceDiagram
     EndBlock->>Master: Return Verified Packet over Pin 4 (Return RX Rail)
     Master->>Master: Validates CRC-8 & Queues Execution Plan
 
-    Note over Master,Robot: PHASE 2: REAL-TIME EXECUTION & VISUAL STEP TRACKING
-    Master-->>B1: Broadcast [0xBB, ActiveStep=1, TotalSteps=3, CRC, 0x55] (Pin 4 Bus)
-    Note over B1: MyIndex(1) == ActiveStep(1) -> GLOWS BRIGHT PULSING GREEN!
+    Note over Master,Robot: PHASE 2: REAL-TIME EXECUTION & VISUAL STEP TRACKING (0xBB on Pin 3 TX)
+    Master->>B1: [0xBB, ActiveStep=1, TotalSteps=3, CRC, 0x55] (Pin 3 CHAIN_TX)
+    Note over B1: g_my_index(1) == ActiveStep(1) -> GLOWS BRIGHT GREEN (0,255,0)!
     Master->>Robot: Send BLE Walk Forward (Opcode 0x01)
-    Robot->>Master: Locomotion completes -> Master sends Stop (0x0C)
+    Note over Master,Robot: Abortable wait -> Master sends Stop (0x0C)
 
-    Master-->>B2: Broadcast [0xBB, ActiveStep=2, TotalSteps=3, CRC, 0x55] (Pin 4 Bus)
+    Master->>B1: [0xBB, ActiveStep=2, TotalSteps=3, CRC, 0x55] (Pin 3 -> PD6/PD5)
     Note over B1: Reverts to Action Color (Blue)
-    Note over B2: MyIndex(2) == ActiveStep(2) -> GLOWS BRIGHT PULSING GREEN!
+    Note over B2: g_my_index(2) == ActiveStep(2) -> GLOWS BRIGHT GREEN (0,255,0)!
     Master->>Robot: Send BLE Turn Right 90° (Opcode 0x02)
-    Robot->>Master: Locomotion completes -> Master sends Stop (0x0C)
+    Note over Master,Robot: Abortable wait -> Master sends Stop (0x0C)
 
-    Master-->>B3: Broadcast [0xBB, ActiveStep=3, TotalSteps=3, CRC, 0x55] (Pin 4 Bus)
+    Master->>B1: [0xBB, ActiveStep=3, TotalSteps=3, CRC, 0x55] (Pin 3 -> PD6/PD5)
     Note over B2: Reverts to Action Color (Cyan)
-    Note over B3: MyIndex(3) == ActiveStep(3) -> GLOWS BRIGHT PULSING GREEN!
+    Note over B3: g_my_index(3) == ActiveStep(3) -> GLOWS BRIGHT GREEN (0,255,0)!
     Master->>Robot: Send BLE "ProAction/Left Punch" (Opcode 0x17)
-    Robot->>Master: Streams progress bytes until 100% ACK (0x64)
+    Note over Master,Robot: Duration-timed abortable wait (or Python daemon 0x64 ACK)
 
     Note over Master,EndBlock: PROGRAM COMPLETE
-    Master-->>EndBlock: Broadcast [0xBB, ActiveStep=0xFF] (Rainbow Sparkle across all blocks!)
+    Master->>B1: [0xBB, ActiveStep=0xFF, TotalSteps=3, CRC, 0x55] (Rainbow Sparkle!)
 ```
 
 #### Phase 2: Real-Time Execution & WS2812B Step Tracking (`0xBB`)
-* During execution, the Master broadcasts `[0xBB, ACTIVE_STEP, TOTAL_STEPS, CRC8, 0x55]` across the Pin 4 Bus.
+* During execution, the Master sends `[0xBB, ACTIVE_STEP, TOTAL_STEPS, CRC8, 0x55]` downstream across the Pin 3 daisy chain (`CHAIN_TX` $\to$ `PD6` $\to$ `PD5`).
 * **Block Behavior:**
-  * If `MyIndex == ACTIVE_STEP`: The block's WS2812B LED turns **Bright Pulsating Green (100% brightness)** to show children exactly what the robot is thinking and doing!
-  * All other blocks remain dim (20% brightness) in their configured Action Mode color.
+  * If `g_my_index == ACTIVE_STEP`: The block's WS2812B LED turns **Bright Green `(0, 255, 0)`** to show children exactly what step is running!
+  * All other blocks remain in their configured Action Mode idle color.
   * When the program finishes (`ACTIVE_STEP = 0xFF`), all blocks trigger a synchronized **Rainbow Sparkle Victory Celebration**.
 
 ---
@@ -345,7 +345,7 @@ To avoid disruptive classroom audio noise, all sound buzzers are eliminated in f
 | **Config Saved (Flash Write)** | Single green flash | **Emerald Green "Success Pulse"** | Shows "SAVED ✓" badge | *"Saved to block flash memory permanently"* |
 | **Start Press (Phase 1)** | Bright white pulse | **"Data Comet Wave":** Fast light pulse sweeps Block 1 $\to$ 2 $\to$ 3 $\to$ End | Shows "RUNNING..." status | *"Program compiled & verified via CRC-8"* |
 | **Active Execution (Phase 2)**| Solid green | **Bright pulsating green (100%)** on active step; others dim (20%) | Displays active step index and timer | *"Robot is currently executing this block"* |
-| **Program Finished** | Rainbow ripple | **Synchronized Rainbow Sparkle** across all blocks | Displays "MISSION COMPLETE 🎉" | *"Algorithm completed successfully!"* |
+| **Program Finished** | Rainbow ripple | **Synchronized Rainbow Sparkle** across all blocks | Displays `"ALL STEPS DONE! [OK]"` | *"Algorithm completed successfully!"* |
 | **Error / Broken Chain** | Double red flash | Double red flash on disconnected block | Displays "ERROR: Check Chain ⚠️" | *"Check magnetic pogo contact"* |
 
 ---

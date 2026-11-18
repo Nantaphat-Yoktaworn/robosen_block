@@ -75,8 +75,8 @@ The Master Block serves as the central control unit, battery power supply, block
 Every action block is an ultra-durable, solid plastic module with **zero moving parts** (no potentiometers or push-buttons on individual blocks):
 
 - **Onboard Components**:
-  1. **Microcontroller**: Ultra-low-cost **WCH CH32V003** (32-bit RISC-V in SOP-8 package, ~$0.15).
-  2. **Memory**: Uses CH32V003 internal Non-Volatile Flash / EEPROM emulation (192 bytes) to store its assigned Action Token ID and Parameter Byte permanently across power cycles.
+  1. **Microcontroller**: Ultra-low-cost **WCH CH32V003F4P6** (32-bit RISC-V `TSSOP-20`, ~$0.15; initial concept evaluated SOP-8).
+  2. **Memory**: Uses CH32V003 internal Non-Volatile Flash (`64-byte` page at `0x08003FC0`, magic `0xA55A0002`) to store its assigned Action Token ID and Parameter Byte permanently across power cycles.
   3. **Visual Feedback**: Top-mounted **WS2812B RGB LED** displaying action mode colors, parameter flash previews, and bright pulsating green during execution.
   4. **Upstream 4-Pin Pogo Connector (Pin In)**: Receives `V+ (3.3V)`, `GND`, upstream `UART TX`, and passes through `Return RX`.
   5. **Downstream 4-Pin Pogo Connector (Pin Out)**: Transmits `V+ (3.3V)`, `GND`, downstream `UART TX`, and passes through `Return RX`.
@@ -102,64 +102,69 @@ Both the **Config Port** and the **Run Port** (as well as all Action Blocks) sha
 
 ![Robosen Block System Diagram](docs/diagrams/robosen_system_block_diagram.png)
 
+![Robosen System & Software Architecture](docs/diagrams/robosen_system_software_architecture.svg)
 
-| Pin # | Signal Name | Type | Purpose in Config Port (Dock) | Purpose in Run Chain |
+
+| Pin # | Signal Name | Type | Purpose in Config Port (`J1`) | Purpose in Run Chain (`J2`) |
 | :---: | :--- | :---: | :--- | :--- |
 | **Pin 1** | **`V+` (3.3V)** | Power | Powers single docked block | Regulated 3.3V power rail for entire chain |
 | **Pin 2** | **`GND`** | Power | System ground | Common system ground reference |
-| **Pin 3** | **`UART DATA`** | Bidirectional Point-to-Point | Master reads ACK from Block (`CFG_RX`) | Cascading downstream line (Master $\to$ B1 $\to$ B2 $\dots \to$ End) |
-| **Pin 4** | **`PASS_THRU / RX_BUS`**| Bidirectional Bus | Master writes Config Command (`CFG_TX`) | Continuous return rail (End $\to$ Master) & Live Step Broadcast Bus |
+| **Pin 3** | **`UART DATA`** | Bidirectional / Point-to-Point | Auto-directional `UART1` (`GPIO 17↔18`) with `PD6/PD5` or `PD0` | Cascading downstream line (`0xAA` discovery AND `0xBB` step/`0xFF` end) |
+| **Pin 4** | **`RETURN_BUS`** | Return / Auto-Dir | Accepts `0xCF` SW UART (`PD0`) on reversed/OUT docking | Continuous loopback return rail (`0xAA` from Smart End Block $\to$ Master `GPIO 16`) |
 
-### 3.1 Shared Pin 4 (Pass-Through / RX) Multidrop Electrical Safety
-- **High-Impedance (Hi-Z) Listeners:** During Run Mode, the End Block `TX` is the **only active output driver** on Pin 4. The Action Blocks and Master Block operate as High-Z inputs, drawing zero current ($\approx 1\,\mu\text{A}$) and causing no signal degradation or bus contention.
-- **Protocol Header Filtering:** Frames starting with `0xAA` (Return data) are parsed exclusively by the Master and ignored by Action Blocks. Frames starting with `0xBB` (Active step execution) are processed by Action Blocks to illuminate the active step LED in pulsing green.
-- **Pull-Up Resistor:** A single $10\,\text{k}\Omega$ pull-up resistor on the Master Block holds Pin 4 at clean logic HIGH during idle periods.
+### 3.1 Shared Pin 4 (`RETURN_BUS`) Multidrop Electrical Safety
+- **High-Impedance (Hi-Z) Pass-Through:** During Run Mode, upstream Action Blocks keep `PD0` in high-impedance input (`Hi-Z`); only the Smart End Block (`0xEE` / `PD0=LOW`) actively drives the verified `0xAA` return packet onto Pin 4 back to Master `GPIO 16`.
+- **Forward `0xBB` Telemetry Propagation:** Live execution frames (`0xBB`, Active Step `1..N`, `0x00` abort, `0xFF` complete) travel downstream along Pin 3 (`CHAIN_TX GPIO 15` $\to$ `PD6 RX` $\to$ `PD5 TX`), lighting the block whose `g_my_index == active_step` bright green `(0, 255, 0)`.
+- **Pull-Up Resistors:** $10\,\text{k}\Omega$ pull-ups (`R1`, `R2`) on Master `J2` hold idle UART lines HIGH and enable `pollRunChainPort()` presence detection.
 
 ---
 
 ## 4. Multi-Phase Communication Protocol
 
-Serial communications operate at 9600 / 115200 baud with binary framing protected by **CRC-8** (Polynomial: $x^8 + x^2 + x + 1$, `0x07`).
+Serial communications operate at `115200` baud with binary framing protected by **CRC-8** (Polynomial: $x^8 + x^2 + x + 1$, `0x07`).
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant Master as Master Block (ESP32-S3)
-    participant Docked as Action Block (At Config Port)
+    participant Docked as Action/End Block (At J1 Dock)
     participant B1 as Run Chain: Block 1
     participant B2 as Run Chain: Block 2
-    participant EndBlock as End Terminator
+    participant EndBlock as Smart End Block (0xEE)
     participant Robot as Robosen K1 Robot
 
-    Note over Master,Docked: CONFIGURATION MODE (At Master Config Port)
-    Master->>Docked: Send Write Config [0xCF, 0x02, ActionID, Param, CRC, 0x55]
-    Note over Docked: Saves [ActionID, Param] to Internal Flash/EEPROM
-    Docked-->>Master: Send ACK [0xCF, 0x06, CRC, 0x55]
-    Note over Master,Docked: Block LED Pulses Emerald Green (Saved!)
+    Note over Master,Docked: CONFIGURATION MODE 1A (At J1 Auto-Directional Port)
+    Master->>Docked: Query [0xCF, 0x01, 0x07, 0x55] -> Syncs E-Ink UI
+    Master->>Docked: Green Start (SW3): [0xCF, 0x02, ActionID, Param, CRC, 0x55]
+    Note over Docked: Saves [ActionID, Param] to 64B Flash Page 0x08003FC0
+    Docked-->>Master: Send 4B ACK [0xCF, 0x06, CRC=0x12, 0x55]
+    Note over Master,Docked: Block LED Pulses Emerald Green (400ms)!
 
-    Note over Master,EndBlock: PHASE 1: DISCOVERY & COMPILATION (At Run Port)
-    Master->>B1: Frame [0xAA, Len=0, Count=0, CRC] (Pin 3 TX)
-    Note over B1: Sets Index=1, appends stored Flash [Token 0x01, Param 3], Count=1
-    B1->>B2: Frame [0xAA, Len=2, Count=1, 0x01, 0x03, CRC]
-    Note over B2: Sets Index=2, appends stored Flash [Token 0x10, Param 1], Count=2
-    B2->>EndBlock: Frame [0xAA, Len=4, Count=2, 0x01, 0x03, 0x10, 0x01, CRC]
-    EndBlock->>Master: Return Verified Program Frame over Pin 4 (Return RX Rail)
+    Note over Master,EndBlock: PHASE 1: DISCOVERY & COMPILATION (At J2 Run Port)
+    Master->>B1: Frame [0xAA, 0x00, 0x00, 0x00, 0x55] (Pin 3 CHAIN_TX)
+    Note over B1: Index=1, appends Flash [Token 0x01, Param 3], Count=1
+    B1->>B2: Frame [0xAA, Len=2, Count=1, 0x01, 0x03, CRC, 0x55] (Pin 3)
+    Note over B2: Index=2, appends Flash [Token 0x10, Param 1], Count=2
+    B2->>EndBlock: Frame [0xAA, Len=4, Count=2, 0x01, 0x03, 0x10, 0x01, CRC, 0x55]
+    EndBlock->>Master: Return Verified Frame over Pin 4 (RETURN_BUS -> GPIO 16)
     Master->>Master: Validates CRC-8 Checksum & Queues Sequence
 
-    Note over Master,Robot: PHASE 2: REAL-TIME EXECUTION & VISUAL STEP TRACKING
-    Master-->>B1: Broadcast [0xBB, ActiveStep=1, CRC] (Pin 4 RX_BUS)
-    Note over B1: MyIndex(1) == ActiveStep(1) -> GLOWS BRIGHT PULSING GREEN!
+    Note over Master,Robot: PHASE 2: REAL-TIME EXECUTION & STEP TRACKING (0xBB on Pin 3 TX)
+    Master->>B1: Frame [0xBB, ActiveStep=1, TotalSteps=2, CRC, 0x55] (Pin 3 CHAIN_TX)
+    B1->>B2: Forwards 0xBB Downstream on PD5 (Pin 3 OUT)
+    Note over B1: g_my_index(1) == ActiveStep(1) -> GLOWS BRIGHT GREEN (0,255,0)!
     Master->>Robot: Send BLE Walk Command (Opcode 0x01)
-    Robot->>Master: Locomotion completes -> Master sends Stop (0x0C)
+    Note over Master,Robot: Abortable Wait -> Master Sends Stop (0x0C) + Settle
     
-    Master-->>B2: Broadcast [0xBB, ActiveStep=2, CRC] (Pin 4 RX_BUS)
-    Note over B1: Reverts to Mode Color (Blue)
-    Note over B2: MyIndex(2) == ActiveStep(2) -> GLOWS BRIGHT PULSING GREEN!
+    Master->>B1: Frame [0xBB, ActiveStep=2, TotalSteps=2, CRC, 0x55] (Pin 3 CHAIN_TX)
+    B1->>B2: Forwards 0xBB Downstream on PD5 (Pin 3 OUT)
+    Note over B1: Reverts to Idle Action Color (Blue)
+    Note over B2: g_my_index(2) == ActiveStep(2) -> GLOWS BRIGHT GREEN (0,255,0)!
     Master->>Robot: Send BLE Action "ProAction/Left Punch" (Opcode 0x17)
-    Robot->>Master: Robot streams progress -> reaches 100% ACK (0x64)
+    Note over Master,Robot: Duration-timed Abortable Wait (SW5 GPIO 2 -> Stop 0x0C)
 
-    Note over Master,EndBlock: PROGRAM COMPLETE
-    Master-->>EndBlock: Broadcast [0xBB, 0xFF] (All Block LEDs sparkle rainbow victory)
+    Note over Master,EndBlock: PHASE 3: PROGRAM COMPLETE
+    Master->>B1: Frame [0xBB, 0xFF, TotalSteps=2, CRC, 0x55] (Pin 3 CHAIN_TX; Rainbow Sparkle)
 ```
 
 ---
@@ -191,7 +196,7 @@ Transmitted downstream from the Master Run Port through the connected chain:
 ---
 
 ### 4.3 Phase 2: Live Step Execution Broadcast (`Header = 0xBB`)
-Broadcast across Pin 4 during robot movement to coordinate active LED illumination:
+Transmitted along the Pin 3 daisy chain (`CHAIN_TX` $\to$ `PD6` $\to$ `PD5`) during robot movement to coordinate active LED illumination:
 ```text
 +-------------+-------------+-------------+--------+-------------+
 | HEADER      | ACTIVE STEP | TOTAL STEPS | CRC-8  | FOOTER      |

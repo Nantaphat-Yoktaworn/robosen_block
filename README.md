@@ -57,51 +57,58 @@ This project creates a **tangible, screenless, modular physical block programmin
 ### 3. Run Mode: End-to-End Execution & Protocol Data Flow
 ![Robosen Coding & Protocol Data Flow](docs/diagrams/robosen_coding_data_flow.svg)
 
+### 4. Firmware & Host Software Stack Architecture
+![Robosen System & Software Architecture](docs/diagrams/robosen_system_software_architecture.svg)
+
 The system operates across three interconnected layers:
-1. **Physical Modular Block Bus (4-Pin Magnetic Interface):** Master Block (ESP32-S3 with E-Ink & Config Dock) $\longleftrightarrow$ Solid Smart Blocks (WCH CH32V003 RISC-V) $\longleftrightarrow$ Smart End Block.
-2. **Master Embedded & Control Gateway:** Master ESP32-S3 coordinates discovery frames (`0xAA`), CRC-8 validation, step broadcasts (`0xBB`), and non-blocking BLE command dispatch.
-3. **Hardware Gateway & Robot Layer (Python BLE Daemon & Robosen K1):** Persistent BLE connection to Robosen K1 with dynamic 100% action completion ACK resolution.
+1. **Physical Modular Block Bus (4-Pin Magnetic Interface):** Master Block (ESP32-S3 with E-Ink & Config Dock) $\longleftrightarrow$ Unified CH32V003 RISC-V Action/End Blocks.
+2. **Master Embedded & Control Gateway:** Master ESP32-S3 (Core 1 Mode FSM/Engines + Core 0 E-Ink/BLE tasks) coordinates discovery frames (`0xAA`), CRC-8 validation, step broadcasts (`0xBB` on Pin 3), and abortable BLE command dispatch.
+3. **Host BLE Suite & Robot Layer (`k1_ble_daemon.py`, RobosenJS, & Robosen K1):** Standalone ESP32-S3 BLE or optional PC/macOS Python/Node.js direct BLE control (Python daemon also supports `0x64` 100% progress ACK & `0xE9` joint readback).
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant Master as Master Block (ESP32-S3)
-    participant Docked as Action Block (At Config Dock)
+    participant Docked as Action/End Block (At J1 Dock)
     participant B1 as Smart Block 1 (Walk 3 Steps)
     participant B2 as Smart Block 2 (Punch Left)
-    participant EndBlock as Smart End Terminator
+    participant EndBlock as Smart End Block (0xEE)
     participant Robot as Robosen K1 Humanoid Robot
 
-    Note over Master,Docked: CONFIGURATION MODE (At Master Config Dock)
-    Master->>Docked: Send Write Config [0xCF, 0x02, ActionID, Param, CRC, 0x55]
-    Note over Docked: Saves [ActionID, Param] to Internal Flash Memory
-    Docked-->>Master: Send ACK [0xCF, 0x06, CRC, 0x55]
-    Note over Master,Docked: Block LED Pulses Emerald Green (Saved!)
+    Note over Master,Docked: CONFIGURATION MODE 1A (At J1 Auto-Directional Dock)
+    Master->>Docked: Query [0xCF, 0x01, 0x07, 0x55] -> Syncs E-Ink UI
+    Master->>Docked: Click Green Start (SW3): [0xCF, 0x02, ActionID, Param, CRC, 0x55]
+    Note over Docked: Saves [ActionID, Param] to 64B Flash Page 0x08003FC0
+    Docked-->>Master: Send 4B ACK [0xCF, 0x06, CRC=0x12, 0x55]
+    Note over Master,Docked: Block LED Flashes Emerald Green (400ms)!
 
-    Note over Master,EndBlock: PHASE 1: DISCOVERY & COMPILATION (Press Start Button)
-    Master->>B1: Frame [0xAA, Len=0, Count=0, CRC] (Pin 3 TX)
-    Note over B1: Sets Index=1, appends Flash Token 0x01 (Walk) + Param=3, Count=1
-    B1->>B2: Frame [0xAA, Len=2, Count=1, 0x01, 0x03, CRC]
-    Note over B2: Sets Index=2, appends Flash Token 0x10 (Punch) + Param=1, Count=2
-    B2->>EndBlock: Frame [0xAA, Len=4, Count=2, 0x01, 0x03, 0x10, 0x01, CRC]
-    EndBlock->>Master: Return Verified Program Frame over Pin 4 (Return RX Rail)
+    Note over Master,EndBlock: PHASE 1: DISCOVERY & COMPILATION (Press Green Start SW3 in Mode 1B)
+    Master->>B1: Frame [0xAA, 0x00, 0x00, 0x00, 0x55] (Pin 3 CHAIN_TX)
+    Note over B1: Index=1, appends Flash Token 0x01 (Walk) + Param=3, Count=1
+    B1->>B2: Frame [0xAA, Len=2, Count=1, 0x01, 0x03, CRC, 0x55] (Pin 3)
+    Note over B2: Index=2, appends Flash Token 0x10 (Punch) + Param=1, Count=2
+    B2->>EndBlock: Frame [0xAA, Len=4, Count=2, 0x01, 0x03, 0x10, 0x01, CRC, 0x55]
+    EndBlock->>Master: Loop Verified 0xAA Frame via Pin 4 (RETURN_BUS -> GPIO 16)
     Master->>Master: Validates CRC-8 Checksum & Queues Sequence
 
-    Note over Master,Robot: PHASE 2: REAL-TIME EXECUTION & VISUAL STEP TRACKING
-    Master-->>B1: Broadcast [0xBB, ActiveStep=1, TotalSteps=2, CRC] (Pin 4 RX_BUS)
-    Note over B1: MyIndex(1) == ActiveStep(1) -> GLOWS BRIGHT PULSING GREEN!
+    Note over Master,Robot: PHASE 2: REAL-TIME EXECUTION & STEP TRACKING (0xBB on Pin 3 TX)
+    Master->>B1: Frame [0xBB, ActiveStep=1, TotalSteps=2, CRC, 0x55] (Pin 3 CHAIN_TX)
+    B1->>B2: Forwards 0xBB Downstream on PD5 (Pin 3 OUT)
+    Note over B1: g_my_index(1) == ActiveStep(1) -> GLOWS BRIGHT GREEN (0,255,0)!
     Master->>Robot: Send BLE Walk Command (Opcode 0x01)
-    Robot->>Master: Locomotion completes -> Master sends Stop (0x0C)
+    Note over Master,Robot: Abortable Wait -> Master Sends Stop (0x0C) + Settle
     
-    Master-->>B2: Broadcast [0xBB, ActiveStep=2, TotalSteps=2, CRC] (Pin 4 RX_BUS)
-    Note over B1: Reverts to Mode Color (Blue)
-    Note over B2: MyIndex(2) == ActiveStep(2) -> GLOWS BRIGHT PULSING GREEN!
+    Master->>B1: Frame [0xBB, ActiveStep=2, TotalSteps=2, CRC, 0x55] (Pin 3 CHAIN_TX)
+    B1->>B2: Forwards 0xBB Downstream on PD5 (Pin 3 OUT)
+    Note over B1: Reverts to Idle Action Color (Blue)
+    Note over B2: g_my_index(2) == ActiveStep(2) -> GLOWS BRIGHT GREEN (0,255,0)!
     Master->>Robot: Send BLE Action "ProAction/Left Punch" (Opcode 0x17)
-    Robot->>Master: Robot streams progress -> reaches 100% ACK (0x64)
+    Note over Master,Robot: Duration-timed Abortable Wait (SW5 GPIO 2 -> Stop 0x0C)
 
-    Note over Master,Robot: SEQUENCE EXECUTION COMPLETED
-    Master->>Master: E-Ink Display: 'MISSION COMPLETE 🎉'
-    Robot->>Robot: Stabilizes into Safe Stand Posture & Idles
+    Note over Master,Robot: PHASE 3: COMPLETION CELEBRATION (0xBB 0xFF)
+    Master->>B1: Frame [0xBB, ActiveStep=0xFF, TotalSteps=2, CRC, 0x55] (Pin 3 CHAIN_TX)
+    Master->>Master: 3x Rainbow Sparkle & E-Ink "ALL STEPS DONE! [OK]"
+    Robot->>Robot: Holds Safe Standing Posture & Idles
 ```
 
 ---
@@ -113,8 +120,8 @@ To achieve native physical order auto-discovery, hot-plug resilience, and real-t
 ### Standardized 4-Pin Pogo Connector Pinout
 * **Pin 1 (`V+`):** Regulated 3.3V power rail supplied by Master Block.
 * **Pin 2 (`GND`):** Common system ground.
-* **Pin 3 (`UART TX_DOWN`):** Downstream point-to-point serial line (Master $\to$ Block 1 $\to$ Block 2 $\dots \to$ End).
-* **Pin 4 (`UART RX_BUS`):** Continuous return rail & real-time step broadcast bus.
+* **Pin 3 (`UART TX_DOWN`):** Downstream daisy-chain line (carries `0xAA` discovery waves AND `0xBB` active-step / `0xFF` completion broadcasts from Master $\to$ B1 $\to$ B2 $\dots \to$ End).
+* **Pin 4 (`RETURN_BUS`):** Continuous loopback return rail (End Block actively drives verified `0xAA` payload back to Master `GPIO 16`; Action Blocks keep `PD0` Hi-Z during Run mode, while accepting `0xCF` Config I/O when docked at `J1`).
 
 ### Binary Frame Structures
 All serial transmissions use binary frames protected by **CRC-8** (Polynomial: $x^8 + x^2 + x + 1$, `0x07`):
@@ -257,23 +264,23 @@ Complete hardware specifications are detailed in [`docs/specs/PHYSICAL_BLOCK_SYS
 | **GND Common Rail** | `GND` | ⚫ **Black** | Common Ground Bus | ✅ Verified |
 | **Battery Sense (ADC)** | `GPIO 1` | — | ADC1_CH0 1:1 Divider (100k/100k + 100nF) | ✅ Hardware Implemented |
 | **Stop / Cancel Button**| `GPIO 2` | 🔴 **Red** | Red Tactile Button (`SW5`): Emergency Stop / Cancel / Back | ✅ Hardware Implemented |
-| **Start / Run Button** | `GPIO 14` | 🟢/🟠 **Green/Orange**| Green Tactile Button (`SW3`): Confirm / Start / Next | ✅ Verified |
+| **Start / Run Button** | `GPIO 14` | 🟢/🟠 **Green/Orange**| Green Tactile Button (`SW3`): Save Config (`0xCF 0x02`) / Start Chain / Teacher Scan | ✅ Verified |
 | **Knob 1 CLK** | `GPIO 8` | 🟡 **Yellow** | Action Selection Direction A | ✅ Verified |
 | **Knob 1 DT** | `GPIO 9` | 🟢 **Green** | Action Selection Direction B | ✅ Verified |
-| **Knob 1 SW** | `GPIO 10` | 🔵 **Blue** | Action Select Confirmation | ✅ Verified |
+| **Knob 1 SW** | `GPIO 10` | 🔵 **Blue** | Cycles Mode 2 ↔ Mode 3 (locked in Mode 1 when `J1`/`J2` active) | ✅ Verified |
 | **Knob 2 CLK** | `GPIO 11` | ⚪ **White** | Parameter Adjust Clock (CW = +) | ✅ Verified |
 | **Knob 2 DT** | `GPIO 12` | 🟤 **Brown** | Parameter Adjust Data | ✅ Verified |
-| **Knob 2 SW** | `GPIO 13` | 🔘 **Gray** | Parameter Reset / BLE Save | ✅ Verified |
+| **Knob 2 SW** | `GPIO 13` | 🔘 **Gray** | Resets parameter to `paramMin` (Config) / Mode action trigger | ✅ Verified |
 | **Onboard Status RGB** | `GPIO 48` | *Internal* | 🟢 Ready \| 🔵 Scan \| 🟡 TX | ✅ Verified |
-| **Config Dock UART** | `GPIO 17, 18` | 🔘 Gray / 🟣 Purple | Write Action (`0xCF`) & Read ACK | ✅ Verified |
-| **Run Chain Bus UART**| `GPIO 15, 16` | 🟢 Green / ⚪ White | Phase 1 Discovery (`0xAA`) & Run (`0xBB`)| ✅ Verified |
-| **E-Ink Display (SPI)** | `GPIO 4,5,6,7,21,38`| — | 2.13" DEPG0213BN SSD1680 (746ms Partial, Zero-Flicker Boot) | ✅ Verified |
+| **Config Dock UART** | `GPIO 17, 18` | 🔘 Gray / 🟣 Purple | Auto-directional `Serial1` (`17↔18`): Read (`0x01`) & Write (`0x02`) over `J1` | ✅ Verified |
+| **Run Chain Bus UART**| `GPIO 15, 16` | 🟢 Green / ⚪ White | `GPIO 15` TX (`0xAA`/`0xBB`/`0xFF`); `GPIO 16` RX (`0xAA` loopback return) | ✅ Verified |
+| **E-Ink Display (SPI)** | `GPIO 4,5,6,7,21,38`| — | 2.13" DEPG0213BN SSD1680 (`210×122` bezel, `280ms` fast LUT + `350ms` settle) | ✅ Verified |
 
 ### 2. Block Hardware Specifications
 - **Master Block MCU:** ESP32-S3 (Dual-Core Xtensa LX7, Native Bluetooth BLE 5.0, SPI for E-Ink, and Dual UARTs for Config Dock & Run Chain).
 - **Master UI & Display:** 2.13" E-Ink E-Paper display (DEPG0213BN / SSD1680, $71 \times 30\text{ mm}$ outline) + Dual Rotary Dials (Action & Parameter) + Dual Tactile Buttons (Green Start/Confirm & Red Stop/Cancel) + Battery Sense Monitor.
 - **Visual Feedback (No Buzzer):** Master & Block WS2812B RGB LEDs with rich light choreography (emerald green flash ACK, data comet compilation wave, live step glowing green, rainbow victory sparkle).
-- **Solid Modular Block MCUs (Unified Slave PCB):** Ultra-low-cost WCH CH32V003 (32-bit RISC-V, ~$0.15) with internal non-volatile flash parameter storage. **Action Blocks and Smart End Blocks share the exact same physical carrier PCB** ([`hardware/action_block/`](file:///Users/nnnn/Projects/robosen_block/hardware/action_block/)); End Block mode (`0xEE`) is configured via firmware on MCU Pin 15 (`PD0`), eliminating separate PCB fabrication or manual jumpers. Zero potentiometers or buttons on individual blocks!
+- **Solid Modular Block MCUs (Unified Slave PCB):** Ultra-low-cost WCH CH32V003F4P6 (`TSSOP-20`, ~$0.15) storing `[CFG_MAGIC, ActionID, ParamVal]` in a non-volatile `64B` Flash page (`0x08003FC0`). **Action Blocks and Smart End Blocks share the exact same physical `32×32mm` carrier PCB** ([`hardware/action_block/`](file:///Users/nnnn/Projects/robosen_block/hardware/action_block/)); End Block mode (`0xEE`) is configured either via the Config Dock (`0xEE` in `ACTIONS[8]`) or grounded `PD0` (MCU Pin 15), eliminating separate PCB fabrication or manual jumpers. Zero potentiometers or buttons on individual blocks!
 - **Power & Charging:** Single 18650 3.7V Li-ion cell with onboard TP4056 USB-C charging, BMS protection, and TPS63020 3.3V synchronous buck-boost regulator.
 - **Physical Connector:** Standardized 4-pin polarized magnetic pogo connector with reverse-polarity protection and RC debouncing filters.
 
@@ -297,6 +304,7 @@ Complete hardware specifications are detailed in [`docs/specs/PHYSICAL_BLOCK_SYS
 
 | Document | Description |
 | :--- | :--- |
+| [`docs/diagrams/robosen_system_software_architecture.svg`](file:///Users/nnnn/Projects/robosen_block/docs/diagrams/robosen_system_software_architecture.svg) | End-to-end Dual-Core ESP32-S3, CH32V003, SWIO tools, Python BLE & Node.js SDK architecture |
 | [`PROJECT_SUMMARY.md`](file:///Users/nnnn/Projects/robosen_block/PROJECT_SUMMARY.md) | Comprehensive executive project summary, mission, and comparison matrix |
 | [`MEMORY.md`](file:///Users/nnnn/Projects/robosen_block/MEMORY.md) | Master technical knowledge base, verified hardware diagnostics, and opcode catalog |
 | [`docs/specs/PHYSICAL_BLOCK_SYSTEM_SPEC.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/PHYSICAL_BLOCK_SYSTEM_SPEC.md) | Hardware, electrical, connector pinout, and 2-phase protocol specifications |

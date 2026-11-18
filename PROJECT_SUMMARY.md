@@ -38,7 +38,7 @@ This project creates a **tangible, screenless, modular programming system**. Chi
 1. **Linear Sequence & Order of Execution:**  
    Children learn that computers/robots follow instructions strictly in order from left to right. Swapping the position of the *Walk* and *Punch* blocks changes what the robot does.
 2. **Parameters & Modifiers (Master Block Rotary Dials & E-Ink):**  
-   Children discover that actions have properties. Turning the physical dial on the Master dock updates the E-Ink display and flashes the block memory to set *how many steps* to walk (1 to 10), *what angle* to turn (45° to 180°), or *how many seconds* to wait.
+   Children discover that actions have properties. Turning the physical dial on the Master dock updates the 2.13" E-Ink display (`210×122` bezel) and clicking the **Green Start Button (`SW3`, `GPIO 14`)** flashes the block memory to set *how many steps* to walk (1 to 5), *what angle* to turn (`45°` to `180°` in `45°` steps), *repetitions* (1 to 3), or *End Terminator* (`0xEE`).
 3. **Real-Time Cause-and-Effect (Active Step Tracking):**  
    As the robot performs each action, the corresponding physical block **glows bright pulsating green**. The child can look at the glowing block, look at the robot moving, and instantly map the block to the physical motion.
 4. **Debugging & Algorithmic Thinking:**  
@@ -51,6 +51,8 @@ This project creates a **tangible, screenless, modular programming system**. Chi
 ## 2. System Architecture & Physical Hardware Components
 
 ![Robosen Block System Diagram](docs/diagrams/robosen_system_block_diagram.png)
+
+![Robosen System & Software Architecture](docs/diagrams/robosen_system_software_architecture.svg)
 
 
 The system is composed of four primary hardware elements:
@@ -69,10 +71,10 @@ The system is composed of four primary hardware elements:
 │     • Visual Feedback: Master RGB Status LED with expressive light choreography (No noisy buzzer!)    │
 │                                                                                                        │
 │  2. SOLID SMART ACTION BLOCKS (The Modular Code Blocks)                                                │
-│     • Microcontroller: Ultra-low-cost WCH CH32V003 (32-bit RISC-V, ~$0.15 in SOP-8 package)            │
+│     • Microcontroller: Ultra-low-cost WCH CH32V003F4P6 (32-bit RISC-V, ~$0.15 in TSSOP-20 breakout)    │
 │     • Solid Shell Design: ZERO buttons or knobs on individual blocks (drop-proof, indestructible)      │
-│     • Internal Wiring: 100% Planar (non-overlapping) PCB traces routing 3.3V, GND, UART, & LED data    │
-│     • Memory: Stored Action Token ID & Parameter inside 192-byte internal non-volatile flash           │
+│     • Internal Wiring: 32×32mm unified PCB routing +3V3, GND, RX/TX (Pin 3) & RETURN_BUS (Pin 4)      │
+│     • Memory: Stored [CFG_MAGIC, ActionID, Param] in a 64-byte Flash page at 0x08003FC0                │
 │     • Visual Feedback: Addressable WS2812B RGB LED (indicates action color & glowing green execution)  │
 │                                                                                                        │
 │  3. END TERMINATOR BLOCK (The End of Code Marker)                                                      │
@@ -93,8 +95,8 @@ All blocks connect using child-friendly, polarized magnetic pogo pins:
 | :---: | :--- | :---: | :--- | :--- |
 | **Pin 1** | **`V+` (3.3V)** | Power | Powers single docked block | Regulated 3.3V power supplied by Master Block |
 | **Pin 2** | **`GND`** | Power | System ground | Common system ground reference |
-| **Pin 3** | **`UART DATA`** | Bidirectional Point-to-Point | Master reads ACK from Block (`CFG_RX`) | Cascading downstream line (Master $\to$ B1 $\to$ B2 $\dots \to$ End) |
-| **Pin 4** | **`PASS_THRU / RX_BUS`**| Bidirectional Bus | Master writes Config Command (`CFG_TX`) | Continuous return rail for compiled program & active step broadcast bus |
+| **Pin 3** | **`UART DATA`** | Bidirectional / Point-to-Point | Auto-directional UART1 (`17↔18`) with Block `PD6/PD5` or `PD0` | Downstream daisy-chain (`0xAA` discovery AND `0xBB` live steps / `0xFF` end) |
+| **Pin 4** | **`RETURN_BUS`** | Return / Auto-Dir | Accepts `0xCF` SW UART (`PD0`) on reversed/OUT docking | Continuous loopback return rail (`0xAA` from Smart End Block $\to$ Master `GPIO 16`) |
 
 ---
 
@@ -104,41 +106,43 @@ All blocks connect using child-friendly, polarized magnetic pogo pins:
 sequenceDiagram
     autonumber
     participant Master as Master Block (ESP32-S3)
-    participant Docked as Action Block (At Config Dock)
+    participant Docked as Action/End Block (At J1 Dock)
     participant B1 as Block 1 (Walk 3 Steps)
     participant B2 as Block 2 (Punch Left)
-    participant EndBlock as End Block (Loopback)
+    participant EndBlock as End Block (0xEE Loopback)
     participant Robot as Robosen K1 Robot
 
-    Note over Master,Docked: CONFIGURATION MODE (At Master Config Dock)
-    Master->>Docked: Send Write Config [0xCF, 0x02, ActionID, Param, CRC, 0x55]
-    Note over Docked: Saves [ActionID, Param] to Internal Flash Memory
-    Docked-->>Master: Send ACK [0xCF, 0x06, CRC, 0x55]
-    Note over Master,Docked: Block LED Pulses Emerald Green (Saved!)
+    Note over Master,Docked: CONFIGURATION MODE 1A (At J1 Auto-Directional Dock)
+    Master->>Docked: Write via Green Start (SW3): [0xCF, 0x02, ActionID, Param, CRC, 0x55]
+    Note over Docked: Saves [ActionID, Param] to 64B Flash Page 0x08003FC0
+    Docked-->>Master: Send 4B ACK [0xCF, 0x06, CRC=0x12, 0x55]
+    Note over Master,Docked: Block LED Pulses Emerald Green (400ms)!
 
-    Note over Master,EndBlock: PHASE 1: DISCOVERY & COMPILATION (Press Green Start Button)
-    Master->>B1: Frame [0xAA, Len=0, Count=0, CRC] (Pin 3 TX)
-    Note over B1: Sets Index=1, appends Flash Token 0x01 (Walk) + Param=3, Count=1
-    B1->>B2: Frame [0xAA, Len=2, Count=1, 0x01, 0x03, CRC]
-    Note over B2: Sets Index=2, appends Flash Token 0x10 (Punch) + Param=1, Count=2
-    B2->>EndBlock: Frame [0xAA, Len=4, Count=2, 0x01, 0x03, 0x10, 0x01, CRC]
-    EndBlock->>Master: Return Program Frame over Pin 4 (Return RX Rail)
+    Note over Master,EndBlock: PHASE 1: DISCOVERY & COMPILATION (Press Green Start SW3 in Mode 1B)
+    Master->>B1: Frame [0xAA, 0x00, 0x00, 0x00, 0x55] (Pin 3 CHAIN_TX)
+    Note over B1: Index=1, appends Flash Token 0x01 (Walk) + Param=3, Count=1
+    B1->>B2: Frame [0xAA, Len=2, Count=1, 0x01, 0x03, CRC, 0x55] (Pin 3)
+    Note over B2: Index=2, appends Flash Token 0x10 (Punch) + Param=1, Count=2
+    B2->>EndBlock: Frame [0xAA, Len=4, Count=2, 0x01, 0x03, 0x10, 0x01, CRC, 0x55]
+    EndBlock->>Master: Return Verified Program Frame over Pin 4 (RETURN_BUS -> GPIO 16)
     Master->>Master: Validates CRC-8 Checksum & Queues Sequence
 
-    Note over Master,Robot: PHASE 2: REAL-TIME EXECUTION & VISUAL STEP TRACKING
-    Master-->>B1: Broadcast [0xBB, ActiveStep=1, CRC] (Pin 4 RX_BUS)
-    Note over B1: MyIndex(1) == ActiveStep(1) -> GLOWS BRIGHT PULSING GREEN!
+    Note over Master,Robot: PHASE 2: REAL-TIME EXECUTION & STEP TRACKING (0xBB on Pin 3 TX)
+    Master->>B1: Frame [0xBB, ActiveStep=1, TotalSteps=2, CRC, 0x55] (Pin 3 CHAIN_TX)
+    B1->>B2: Forwards 0xBB Downstream on PD5 (Pin 3 OUT)
+    Note over B1: g_my_index(1) == ActiveStep(1) -> GLOWS BRIGHT GREEN (0,255,0)!
     Master->>Robot: Send BLE Walk Command (Opcode 0x01)
-    Robot->>Master: Robot completes locomotion steps
+    Note over Master,Robot: Abortable Wait -> Master Sends Stop (0x0C) + Settle
     
-    Master-->>B2: Broadcast [0xBB, ActiveStep=2, CRC] (Pin 4 RX_BUS)
-    Note over B1: Reverts to Mode Color (Blue)
-    Note over B2: MyIndex(2) == ActiveStep(2) -> GLOWS BRIGHT PULSING GREEN!
+    Master->>B1: Frame [0xBB, ActiveStep=2, TotalSteps=2, CRC, 0x55] (Pin 3 CHAIN_TX)
+    B1->>B2: Forwards 0xBB Downstream on PD5 (Pin 3 OUT)
+    Note over B1: Reverts to Idle Action Color (Blue)
+    Note over B2: g_my_index(2) == ActiveStep(2) -> GLOWS BRIGHT GREEN (0,255,0)!
     Master->>Robot: Send BLE Action "ProAction/Left Punch" (Opcode 0x17)
-    Robot->>Master: Robot streams progress -> reaches 100% ACK (0x64)
+    Note over Master,Robot: Duration-timed Abortable Wait (SW5 GPIO 2 -> Stop 0x0C)
 
-    Note over Master,EndBlock: PROGRAM COMPLETE
-    Master-->>EndBlock: Broadcast [0xBB, 0xFF] (All Block LEDs sparkle rainbow victory!)
+    Note over Master,EndBlock: PHASE 3: PROGRAM COMPLETE
+    Master->>B1: Frame [0xBB, 0xFF, TotalSteps=2, CRC, 0x55] (Pin 3 CHAIN_TX; Rainbow Sparkle!)
 ```
 
 ---
@@ -164,7 +168,7 @@ The project is currently in an **active hardware prototyping, protocol verificat
    - Automated testing scripts validating token sequences, loopback timing, and error handling.
 
 4. **Hardware & Electrical Architecture Specifications:**
-   - Completed detailed hardware documentation ([`docs/specs/PHYSICAL_BLOCK_SYSTEM_SPEC.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/PHYSICAL_BLOCK_SYSTEM_SPEC.md)) defining 4-pin pogo pinout, power consumption, CH32V003 SOP-8 pinouts, and CRC-8 algorithms.
+   - Completed detailed hardware documentation ([`docs/specs/PHYSICAL_BLOCK_SYSTEM_SPEC.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/PHYSICAL_BLOCK_SYSTEM_SPEC.md)) defining 4-pin pogo pinout, power consumption, CH32V003F4P6 TSSOP-20 pinouts, and CRC-8 algorithms.
 
 
 ---
@@ -243,8 +247,8 @@ The project is currently in an **active hardware prototyping, protocol verificat
 - **Archive Location of Original CAD**: [`archive/prototype_1_0_retired/master_block/`](file:///Users/nnnn/Projects/robosen_block/archive/prototype_1_0_retired/master_block/).
 - **Reference Document**: [`docs/specs/PROTOTYPE_01_SPEC.md`](file:///Users/nnnn/Projects/robosen_block/docs/specs/PROTOTYPE_01_SPEC.md).
 
-### Prototype #1-1: Master Block PCB Respin (October 2026) 📐 PLANNED FOR FUTURE RE-ORDER
-- **Architecture**: Engineering change order (ECO) respin of Master Block carrier PCB in [`hardware/master_block/`](file:///Users/nnnn/Projects/robosen_block/hardware/master_block/) prepared as the design for the next fabrication run.
+### Prototype #1-1: Master Block PCB Respin (October 2026) ✅ ACTIVE PRODUCTION DESIGN
+- **Architecture**: Active rerouted Master Block carrier PCB in [`hardware/master_block/`](file:///Users/nnnn/Projects/robosen_block/hardware/master_block/) (3D previews in `docs/diagrams/pcb_3d_top.png` and `docs/diagrams/pcb_3d_bottom.png`).
 - **ESP32-S3 Footprint Correction**: `ESP32-S3-DevKitC-1-Socket` pin row separation widened by 1 pitch unit (+100 mil) to exact **$25.40\text{ mm}$ ($1.000\text{ in}$)** standard.
 - **Routing & DRC**: 100% rerouted (**0 unconnected items, 0 copper clearance errors**), 469 tracks, 20 vias, solid GND planes, full M3 mounting hole standoff clearance ($\ge 3.68\text{ mm}$).
 - **Production Package**: Gerbers verified and zipped at [`hardware/master_block/robosen_master_block_gerbers.zip`](file:///Users/nnnn/Projects/robosen_block/hardware/master_block/robosen_master_block_gerbers.zip) ready for re-order.
