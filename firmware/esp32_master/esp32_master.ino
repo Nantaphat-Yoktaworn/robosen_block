@@ -121,6 +121,17 @@ GxEPD2_BW<RobosenEPD2_213_BN, RobosenEPD2_213_BN::HEIGHT> display(
 #define SCREEN_VISIBLE_WIDTH   210
 #define SCREEN_VISIBLE_HEIGHT  122
 
+// --- DEBOUNCED PUSH BUTTON STATE (START / STOP DUAL-COMBO SUPPORT) ---
+struct DebouncedButtonState {
+  int lastRaw = HIGH;
+  unsigned long lastDebounceMs = 0;
+  bool pressed = false;
+  unsigned long pressStartMs = 0;
+  bool heldLong = false;
+  // Suppresses single-button hold/release after a dual-button combo until released.
+  bool suppressUntilRelease = false;
+};
+
 // --- ONBOARD WS2812 RGB STATUS LED ---
 #ifndef RGB_BUILTIN
   #define RGB_BUILTIN 48       // ESP32-S3 DevKitC-1 onboard RGB
@@ -1814,6 +1825,30 @@ void setup() {
 // ==============================================================================
 // 7. MAIN EVENT LOOP
 // ==============================================================================
+// Debounces an active-LOW tactile button and reports press/release edge events.
+void pollDebouncedButton(int pin, unsigned long now, DebouncedButtonState& btn,
+                         bool& justPressed, bool& justReleased) {
+  justPressed = false;
+  justReleased = false;
+  int raw = digitalRead(pin);
+  if (raw != btn.lastRaw) {
+    btn.lastDebounceMs = now;
+    btn.lastRaw = raw;
+  }
+  if (now - btn.lastDebounceMs > 25) {
+    if (raw == LOW && !btn.pressed) {
+      btn.pressed = true;
+      btn.pressStartMs = now;
+      btn.heldLong = false;
+      btn.suppressUntilRelease = false;
+      justPressed = true;
+    } else if (raw == HIGH && btn.pressed) {
+      btn.pressed = false;
+      justReleased = true;
+    }
+  }
+}
+
 void loop() {
   unsigned long now = millis();
 
@@ -2098,197 +2133,202 @@ void loop() {
     }
   }
 
-  // --- 5. MASTER START / CONFIRM BUTTON (SW3 - GPIO 14: 3s HOLD FOR PAIRING) ---
-  int startRaw = digitalRead(PIN_START_BTN);
-  static int lastStartRaw = HIGH;
-  static unsigned long lastStartDebounce = 0;
-  static bool startBtnPressed = false;
-  static unsigned long startPressStart = 0;
-  static bool startBtnHeld3s = false;
+  // --- 5. MASTER START & STOP BUTTON DEBOUNCE + DUAL-HOLD BLE PAIRING ---
+  static DebouncedButtonState startBtn;
+  static DebouncedButtonState stopBtn;
+  bool startJustPressed = false;
+  bool startJustReleased = false;
+  bool stopJustPressed = false;
+  bool stopJustReleased = false;
+  pollDebouncedButton(PIN_START_BTN, now, startBtn, startJustPressed, startJustReleased);
+  pollDebouncedButton(PIN_STOP_BTN,  now, stopBtn,  stopJustPressed,  stopJustReleased);
 
-  if (startRaw != lastStartRaw) {
-    lastStartDebounce = now;
-    lastStartRaw = startRaw;
+  if (startJustPressed || startBtn.pressed || startJustReleased ||
+      stopJustPressed || stopBtn.pressed || stopJustReleased) {
+    lastUserActivity = now;
   }
 
-  if (now - lastStartDebounce > 25) {
-    if (startRaw == LOW && !startBtnPressed) {
-      startBtnPressed = true;
-      startPressStart = now;
-      startBtnHeld3s = false;
-      lastUserActivity = now;
-      triggerLedBlip(0, 100, 0); // Green
-      if (currentState != STATE_REMOTE_CONTROL) {
-        Serial.println("\n[BUTTON] Start button pressed... (Hold 3s to switch robot)");
+  // --- 5A. DUAL-BUTTON HOLD (RED + GREEN FOR 2s): OPEN BLE PAIRING FROM ANY MODE ---
+  static bool dualPairHoldActive = false;
+  static unsigned long dualPairPressStart = 0;
+  static bool dualPairTriggered = false;
+  bool inOperationalMode = (currentState == STATE_ACTION_MENU ||
+                            currentState == STATE_REMOTE_CONTROL ||
+                            currentState == STATE_JOINT_CONTROL);
+
+  if (inOperationalMode && startBtn.pressed && stopBtn.pressed) {
+    if (!dualPairHoldActive) {
+      dualPairHoldActive = true;
+      dualPairPressStart = now;
+      dualPairTriggered = false;
+      startBtn.suppressUntilRelease = true;
+      stopBtn.suppressUntilRelease = true;
+      triggerLedBlip(0, 40, 100);
+      Serial.println("\n[BUTTON] Red + Green held together... (Hold 2s to open BLE Pairing Menu)");
+    } else if (!dualPairTriggered && (now - dualPairPressStart >= 2000)) {
+      dualPairTriggered = true;
+      startBtn.heldLong = true;
+      stopBtn.heldLong = true;
+      Serial.println("\n[SYSTEM] 🎯 2-Second Red + Green Hold Confirmed! Opening Teacher Pairing Menu...");
+      if (currentState == STATE_REMOTE_CONTROL) {
+        stopRcMotionImmediate();
       }
-    } else if (startRaw == LOW && startBtnPressed) {
-      lastUserActivity = now;
-      if (!startBtnHeld3s && (now - startPressStart >= 3000)) {
-        if (currentState == STATE_ACTION_MENU || currentState == STATE_JOINT_CONTROL) {
-          startBtnHeld3s = true;
-          Serial.println("\n[SYSTEM] 🎯 3-Second Hold Confirmed! Opening Teacher Pairing Menu...");
-          runBleScan();
+      runBleScan();
+    }
+  } else {
+    dualPairHoldActive = false;
+    dualPairTriggered = false;
+  }
+
+  // --- 5B. MASTER START / CONFIRM BUTTON (SW3 - GPIO 14: 3s HOLD FOR PAIRING IN MODE 1/3) ---
+  if (startJustPressed && !startBtn.suppressUntilRelease) {
+    triggerLedBlip(0, 100, 0); // Green
+    if (currentState != STATE_REMOTE_CONTROL) {
+      Serial.println("\n[BUTTON] Start button pressed... (Hold 3s to switch robot)");
+    }
+  } else if (startBtn.pressed && !startBtn.suppressUntilRelease) {
+    if (!startBtn.heldLong && (now - startBtn.pressStartMs >= 3000)) {
+      if (currentState == STATE_ACTION_MENU || currentState == STATE_JOINT_CONTROL) {
+        startBtn.heldLong = true;
+        Serial.println("\n[SYSTEM] 🎯 3-Second Hold Confirmed! Opening Teacher Pairing Menu...");
+        runBleScan();
+      }
+    }
+  } else if (startJustReleased) {
+    unsigned long heldDuration = now - startBtn.pressStartMs;
+    if (!startBtn.heldLong && !startBtn.suppressUntilRelease && heldDuration >= 20 && heldDuration < 3000) {
+      if (currentState == STATE_ACTION_MENU) {
+        if (isBlockDocked) {
+          // CONFIG MODE: Only flash docked block on Config Port; running chain is blocked while docked!
+          RobosenAction& act = ACTIONS[currentActionIndex];
+          Serial.printf("\n>>> [CONFIG DOCK] Flashing '%s' (%d %s) into docked Action Block via Green Button... <<<\n",
+                        act.name, act.paramVal, act.paramUnit);
+          writeConfigToDockedBlock(act.tokenID, (uint8_t)act.paramVal);
+          triggerLedBlip(0, 80, 40);
+          renderActionMenu();
+        } else if (isRunChainConnected) {
+          // RUN MODE: Config Port is empty and Run Port chain is connected -> Run Chain!
+          Serial.println("\n[SYSTEM] Start button clicked in Run Mode: Initiating Run Chain (GPIO 15/16)...");
+          if (!executeRunChain()) {
+            Serial.println("\n[SYSTEM] ⚠️ Chain execution aborted: No valid return packet received from return rail!");
+            setStatusLED(50, 0, 0);
+            delay(500);
+            updateStatusLED();
+            setUiEventFeedback("START: NO CHAIN BLOCKS!");
+          }
         }
-      }
-    } else if (startRaw == HIGH && startBtnPressed) {
-      startBtnPressed = false;
-      lastUserActivity = now;
-      unsigned long heldDuration = now - startPressStart;
-      if (!startBtnHeld3s && heldDuration >= 20 && heldDuration < 3000) {
-        if (currentState == STATE_ACTION_MENU) {
-          if (isBlockDocked) {
-            // CONFIG MODE: Only flash docked block on Config Port; running chain is blocked while docked!
-            RobosenAction& act = ACTIONS[currentActionIndex];
-            Serial.printf("\n>>> [CONFIG DOCK] Flashing '%s' (%d %s) into docked Action Block via Green Button... <<<\n",
-                          act.name, act.paramVal, act.paramUnit);
-            writeConfigToDockedBlock(act.tokenID, (uint8_t)act.paramVal);
-            triggerLedBlip(0, 80, 40);
-            renderActionMenu();
-          } else if (isRunChainConnected) {
-            // RUN MODE: Config Port is empty and Run Port chain is connected -> Run Chain!
-            Serial.println("\n[SYSTEM] Start button clicked in Run Mode: Initiating Run Chain (GPIO 15/16)...");
-            if (!executeRunChain()) {
-              Serial.println("\n[SYSTEM] ⚠️ Chain execution aborted: No valid return packet received from return rail!");
-              setStatusLED(50, 0, 0);
-              delay(500);
-              updateStatusLED();
-              setUiEventFeedback("START: NO CHAIN BLOCKS!");
-            }
-          }
-        } else if (currentState == STATE_REMOTE_CONTROL) {
-          if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
-            Serial.println("[BLE STATUS] ⚡ Green Start clicked while disconnected in RC Mode: Triggering background reconnect...");
-            requestBgReconnect = true;
-            setUiEventFeedback("CONNECTING...");
-          }
-        } else if (currentState == STATE_JOINT_CONTROL) {
-          if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
-            Serial.println("[BLE STATUS] ⚡ Green Start clicked while disconnected in Joint Mode: Triggering background reconnect...");
-            requestBgReconnect = true;
-            setUiEventFeedback("CONNECTING...");
-          } else {
-            sendJointFrameNonBlocking(25);
-            triggerLedBlip(0, 80, 40);
-            const JointDef& j = ALL_JOINTS[currentJointIndex];
-            Serial.printf("\n[GREEN CONFIRM] Confirmed angle for %s (ID %d: %d deg)\n",
-                          j.name, j.servoId, currentServoPositions[j.servoId]);
-            updateStatusLED();
-            requestEInkCenterUpdate();
-          }
-        } else if (currentState == STATE_BLE_PAIRING_MENU) {
-          if (bleDeviceCount > 0) {
-            pairedMAC  = bleList[currentBleIndex].address;
-            pairedName = bleList[currentBleIndex].name;
-            preferences.putString("paired_mac", pairedMAC);
-            preferences.putString("paired_name", pairedName);
-            Serial.printf("\n[BLE STATUS] 🟢 Confirmed robot via Start Button: %s (%s)\n", pairedName.c_str(), pairedMAC.c_str());
-          }
-          if (hasAnyBlockConnected()) {
-            currentState = STATE_ACTION_MENU;
-            renderActionMenu();
-          } else {
-            currentState = STATE_REMOTE_CONTROL;
-            renderRemoteControlMenu();
-          }
-          if (pairedMAC != "None (Unpaired)" && !isConnected) {
-            requestBgReconnect = true;
-          } else {
-            updateStatusLED();
-          }
+      } else if (currentState == STATE_REMOTE_CONTROL) {
+        if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
+          Serial.println("[BLE STATUS] ⚡ Green Start clicked while disconnected in RC Mode: Triggering background reconnect...");
+          requestBgReconnect = true;
+          setUiEventFeedback("CONNECTING...");
+        }
+      } else if (currentState == STATE_JOINT_CONTROL) {
+        if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
+          Serial.println("[BLE STATUS] ⚡ Green Start clicked while disconnected in Joint Mode: Triggering background reconnect...");
+          requestBgReconnect = true;
+          setUiEventFeedback("CONNECTING...");
+        } else {
+          sendJointFrameNonBlocking(25);
+          triggerLedBlip(0, 80, 40);
+          const JointDef& j = ALL_JOINTS[currentJointIndex];
+          Serial.printf("\n[GREEN CONFIRM] Confirmed angle for %s (ID %d: %d deg)\n",
+                        j.name, j.servoId, currentServoPositions[j.servoId]);
+          updateStatusLED();
+          requestEInkCenterUpdate();
+        }
+      } else if (currentState == STATE_BLE_PAIRING_MENU) {
+        if (bleDeviceCount > 0) {
+          pairedMAC  = bleList[currentBleIndex].address;
+          pairedName = bleList[currentBleIndex].name;
+          preferences.putString("paired_mac", pairedMAC);
+          preferences.putString("paired_name", pairedName);
+          Serial.printf("\n[BLE STATUS] 🟢 Confirmed robot via Start Button: %s (%s)\n", pairedName.c_str(), pairedMAC.c_str());
+        }
+        if (hasAnyBlockConnected()) {
+          currentState = STATE_ACTION_MENU;
+          renderActionMenu();
+        } else {
+          currentState = STATE_REMOTE_CONTROL;
+          renderRemoteControlMenu();
+        }
+        if (pairedMAC != "None (Unpaired)" && !isConnected) {
+          requestBgReconnect = true;
+        } else {
+          updateStatusLED();
         }
       }
     }
   }
 
   // --- 6. MASTER STOP / CANCEL BUTTON (SW5 - GPIO 2: 3s HOLD FOR DISCONNECT) ---
-  int stopRaw = digitalRead(PIN_STOP_BTN);
-  static int lastStopRaw = HIGH;
-  static unsigned long lastStopDebounce = 0;
-  static bool stopBtnPressed = false;
-  static unsigned long stopPressStart = 0;
-  static bool stopBtnHeld3s = false;
-
-  if (stopRaw != lastStopRaw) {
-    lastStopDebounce = now;
-    lastStopRaw = stopRaw;
-  }
-
-  if (now - lastStopDebounce > 25) {
-    if (stopRaw == LOW && !stopBtnPressed) {
-      stopBtnPressed = true;
-      stopPressStart = now;
-      stopBtnHeld3s = false;
-      lastUserActivity = now;
-      triggerLedBlip(100, 0, 0); // Red
-      if (currentState != STATE_REMOTE_CONTROL) {
-        Serial.println("\n[BUTTON] Red Stop/Cancel button pressed... (Hold 3s to disconnect BLE)");
-      }
-    } else if (stopRaw == LOW && stopBtnPressed) {
-      lastUserActivity = now;
-      if (currentState != STATE_REMOTE_CONTROL) {
-        if (!stopBtnHeld3s && (now - stopPressStart >= 3000)) {
-          stopBtnHeld3s = true;
-          Serial.println("\n[SYSTEM] 🎯 3-Second Stop Hold Confirmed! Disconnecting BLE session...");
-          if (bleMutex != nullptr && xSemaphoreTake(bleMutex, pdMS_TO_TICKS(100)) == pdTRUE) {
-            if (pClient != nullptr && pClient->isConnected()) {
-              pClient->disconnect();
-            }
-            xSemaphoreGive(bleMutex);
+  if (stopJustPressed && !stopBtn.suppressUntilRelease) {
+    triggerLedBlip(100, 0, 0); // Red
+    if (currentState != STATE_REMOTE_CONTROL) {
+      Serial.println("\n[BUTTON] Red Stop/Cancel button pressed... (Hold 3s to disconnect BLE)");
+    }
+  } else if (stopBtn.pressed && !stopBtn.suppressUntilRelease) {
+    if (currentState != STATE_REMOTE_CONTROL) {
+      if (!stopBtn.heldLong && (now - stopBtn.pressStartMs >= 3000)) {
+        stopBtn.heldLong = true;
+        Serial.println("\n[SYSTEM] 🎯 3-Second Stop Hold Confirmed! Disconnecting BLE session...");
+        if (bleMutex != nullptr && xSemaphoreTake(bleMutex, pdMS_TO_TICKS(100)) == pdTRUE) {
+          if (pClient != nullptr && pClient->isConnected()) {
+            pClient->disconnect();
           }
-          isConnected = false;
-          pRemoteChar = nullptr;
-          hasRobotBattery = false;
-          robotBatteryPercent = -1;
-          setStatusLED(60, 0, 0);
-          delay(300);
-          updateStatusLED();
+          xSemaphoreGive(bleMutex);
         }
+        isConnected = false;
+        pRemoteChar = nullptr;
+        hasRobotBattery = false;
+        robotBatteryPercent = -1;
+        setStatusLED(60, 0, 0);
+        delay(300);
+        updateStatusLED();
       }
-    } else if (stopRaw == HIGH && stopBtnPressed) {
-      stopBtnPressed = false;
-      lastUserActivity = now;
-      unsigned long heldDuration = now - stopPressStart;
-      if (!stopBtnHeld3s && heldDuration >= 20 && heldDuration < 3000) {
-        if (currentState == STATE_ACTION_MENU) {
-          if (isBlockDocked) {
-            // Revert unsaved Knob 1/2 edits back to the docked block's stored configuration
-            syncMenuToDockedBlock(dockedActionId, dockedParamVal);
-            Serial.printf("\n[REVERT] Reverted Config UI to docked block's stored config: 0x%02X (%s, %d %s)\n",
-                          dockedActionId, getActionNameByToken(dockedActionId),
-                          dockedParamVal, getParamUnitByToken(dockedActionId));
-            requestEInkCenterUpdate();
-          } else {
-            Serial.println("\n[EMERGENCY STOP] Red Stop button pressed: Sending locomotion stop to lock posture!");
-            sendLocomotionStop();
-            setStatusLED(80, 0, 0);
-            delay(200);
-            updateStatusLED();
-            setUiEventFeedback("STOP: EMERGENCY HALT!");
-          }
-        } else if (currentState == STATE_REMOTE_CONTROL) {
-          if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
-            Serial.println("[BLE STATUS] ⚡ Red button clicked while disconnected in RC Mode: Triggering background reconnect...");
-            requestBgReconnect = true;
-            setUiEventFeedback("CONNECTING...");
-          }
-        } else if (currentState == STATE_JOINT_CONTROL) {
-          Serial.println("\n[EMERGENCY STOP] Red Stop button pressed in Joint Mode: Sending locomotion stop!");
+    }
+  } else if (stopJustReleased) {
+    unsigned long heldDuration = now - stopBtn.pressStartMs;
+    if (!stopBtn.heldLong && !stopBtn.suppressUntilRelease && heldDuration >= 20 && heldDuration < 3000) {
+      if (currentState == STATE_ACTION_MENU) {
+        if (isBlockDocked) {
+          // Revert unsaved Knob 1/2 edits back to the docked block's stored configuration
+          syncMenuToDockedBlock(dockedActionId, dockedParamVal);
+          Serial.printf("\n[REVERT] Reverted Config UI to docked block's stored config: 0x%02X (%s, %d %s)\n",
+                        dockedActionId, getActionNameByToken(dockedActionId),
+                        dockedParamVal, getParamUnitByToken(dockedActionId));
+          requestEInkCenterUpdate();
+        } else {
+          Serial.println("\n[EMERGENCY STOP] Red Stop button pressed: Sending locomotion stop to lock posture!");
           sendLocomotionStop();
           setStatusLED(80, 0, 0);
-          delay(100);
+          delay(200);
           updateStatusLED();
-          setUiEventFeedback("JOINT: EMERGENCY STOP");
-        } else if (currentState == STATE_BLE_PAIRING_MENU || currentState == STATE_BLE_SCANNING) {
-          Serial.println("\n[CANCEL] Cancelled pairing/scan, returning to active operational mode.");
-          if (hasAnyBlockConnected()) {
-            currentState = STATE_ACTION_MENU;
-            renderActionMenu();
-          } else {
-            currentState = STATE_REMOTE_CONTROL;
-            renderRemoteControlMenu();
-          }
-          updateStatusLED();
+          setUiEventFeedback("STOP: EMERGENCY HALT!");
         }
+      } else if (currentState == STATE_REMOTE_CONTROL) {
+        if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
+          Serial.println("[BLE STATUS] ⚡ Red button clicked while disconnected in RC Mode: Triggering background reconnect...");
+          requestBgReconnect = true;
+          setUiEventFeedback("CONNECTING...");
+        }
+      } else if (currentState == STATE_JOINT_CONTROL) {
+        Serial.println("\n[EMERGENCY STOP] Red Stop button pressed in Joint Mode: Sending locomotion stop!");
+        sendLocomotionStop();
+        setStatusLED(80, 0, 0);
+        delay(100);
+        updateStatusLED();
+        setUiEventFeedback("JOINT: EMERGENCY STOP");
+      } else if (currentState == STATE_BLE_PAIRING_MENU || currentState == STATE_BLE_SCANNING) {
+        Serial.println("\n[CANCEL] Cancelled pairing/scan, returning to active operational mode.");
+        if (hasAnyBlockConnected()) {
+          currentState = STATE_ACTION_MENU;
+          renderActionMenu();
+        } else {
+          currentState = STATE_REMOTE_CONTROL;
+          renderRemoteControlMenu();
+        }
+        updateStatusLED();
       }
     }
   }
