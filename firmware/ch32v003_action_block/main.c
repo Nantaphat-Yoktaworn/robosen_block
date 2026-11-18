@@ -225,36 +225,68 @@ static inline void uart_tx(uint8_t b) {
     USART1->DATAR = b;
 }
 
-static inline void uart_bit_delay() {
-    // 208 clock cycles at 24MHz for 115200 baud bit period (8.68 us)
-    asm volatile (
-        "li t0, 50\n"
-        "1: addi t0, t0, -1\n"
-        "bnez t0, 1b\n"
-        ::: "t0"
-    );
-}
+#define PD0_BIT_TICKS      (FUNCONF_SYSTEM_CORE_CLOCK / 115200UL)
+#define PD0_HALF_BIT_TICKS (PD0_BIT_TICKS / 2U)
 
 void uart_tx_pd0(uint8_t b) {
     __disable_irq();
+    uint32_t t0 = SysTick->CNT;
     // Start bit: LOW
     GPIOD->BCR = (1 << 0);
-    uart_bit_delay();
+    while ((uint32_t)(SysTick->CNT - t0) < PD0_BIT_TICKS);
 
     // 8 Data bits (LSB first)
-    for (int i = 0; i < 8; i++) {
-        if (b & (1 << i)) {
+    for (uint8_t i = 0; i < 8; i++) {
+        if (b & (1U << i)) {
             GPIOD->BSHR = (1 << 0);
         } else {
             GPIOD->BCR = (1 << 0);
         }
-        uart_bit_delay();
+        uint32_t next_edge = (uint32_t)(i + 2U) * PD0_BIT_TICKS;
+        while ((uint32_t)(SysTick->CNT - t0) < next_edge);
     }
 
     // Stop bit: HIGH
     GPIOD->BSHR = (1 << 0);
-    uart_bit_delay();
+    while ((uint32_t)(SysTick->CNT - t0) < (10U * PD0_BIT_TICKS));
     __enable_irq();
+}
+
+static inline void pd0_set_idle() {
+    funPinMode(PD0, GPIO_CFGLR_IN_PUPD);
+    funDigitalWrite(PD0, FUN_HIGH);
+}
+
+static bool pd0_rx_byte_at_start(uint32_t t0, uint8_t *out) {
+    while ((uint32_t)(SysTick->CNT - t0) < PD0_HALF_BIT_TICKS);
+    if (GPIOD->INDR & (1 << 0)) {
+        return false; // Glitch on start bit
+    }
+    uint8_t val = 0;
+    for (uint8_t i = 0; i < 8; i++) {
+        uint32_t target = PD0_HALF_BIT_TICKS + (uint32_t)(i + 1U) * PD0_BIT_TICKS;
+        while ((uint32_t)(SysTick->CNT - t0) < target);
+        if (GPIOD->INDR & (1 << 0)) {
+            val |= (1U << i);
+        }
+    }
+    while ((uint32_t)(SysTick->CNT - t0) < (PD0_HALF_BIT_TICKS + 9U * PD0_BIT_TICKS - 32U));
+    if (!(GPIOD->INDR & (1 << 0))) {
+        return false; // Missing stop bit
+    }
+    *out = val;
+    return true;
+}
+
+static bool pd0_rx_next_byte(uint8_t *out, uint32_t timeout_ticks) {
+    uint32_t wait_start = SysTick->CNT;
+    while (GPIOD->INDR & (1 << 0)) {
+        if ((uint32_t)(SysTick->CNT - wait_start) >= timeout_ticks) {
+            return false;
+        }
+    }
+    uint32_t t0 = SysTick->CNT;
+    return pd0_rx_byte_at_start(t0, out);
 }
 
 static inline bool uart_rx_available() {
@@ -278,28 +310,120 @@ bool uart_rx_timeout(uint8_t *b, uint32_t timeout_us) {
 // ==============================================================================
 // 5. MAIN SYSTEM LOOP & PROTOCOL HANDLERS
 // ==============================================================================
+static void handle_cf_query(uint8_t cmd, uint8_t rx_crc, uint8_t footer) {
+    uint8_t q_payload[1] = { cmd };
+    uint8_t exp_crc = crc8(q_payload, 1);
+    if (exp_crc == rx_crc && footer == 0x55) {
+        uint8_t resp_payload[3] = { 0x81, g_action_id, g_param_val };
+        uint8_t resp_crc = crc8(resp_payload, 3);
+        uart_tx(0xCF);
+        uart_tx(0x81);
+        uart_tx(g_action_id);
+        uart_tx(g_param_val);
+        uart_tx(resp_crc);
+        uart_tx(0x55);
+    }
+}
+
+static void handle_cf_write(uint8_t cmd, uint8_t act, uint8_t par, uint8_t rx_crc, uint8_t footer) {
+    uint8_t payload[3] = { cmd, act, par };
+    uint8_t calc_crc = crc8(payload, 3);
+
+    if (calc_crc == rx_crc && footer == 0x55) {
+        save_config(act, par);
+        pd0_set_idle();
+
+        // Send ACK: [ 0xCF, 0x06, CRC8, 0x55 ]
+        uint8_t ack_payload[1] = { 0x06 };
+        uint8_t ack_crc = crc8(ack_payload, 1);
+        uart_tx(0xCF);
+        uart_tx(0x06);
+        uart_tx(ack_crc);
+        uart_tx(0x55);
+
+        // Visual confirmation: Emerald Green Success Pulse
+        ws2812_set(0, 255, 40);
+        Delay_Ms(400);
+        set_action_idle_color();
+    }
+}
+
+static void handle_pd0_rx() {
+    uint32_t t0 = SysTick->CNT;
+    __disable_irq();
+    uint8_t header = 0;
+    bool ok = pd0_rx_byte_at_start(t0, &header);
+    if (!ok || header != 0xCF) {
+        __enable_irq();
+        if (ok && header == 0xAA) {
+            // Wait for end of 0xAA return-bus frame (line continuously HIGH > ~140us)
+            uint32_t idle_since = SysTick->CNT;
+            while (!uart_rx_available()) {
+                if (!(GPIOD->INDR & (1 << 0))) {
+                    idle_since = SysTick->CNT;
+                } else if ((uint32_t)(SysTick->CNT - idle_since) >= (PD0_BIT_TICKS * 16U)) {
+                    break;
+                }
+            }
+        }
+        return;
+    }
+
+    uint8_t cmd = 0;
+    if (!pd0_rx_next_byte(&cmd, PD0_BIT_TICKS * 40U)) {
+        __enable_irq();
+        return;
+    }
+
+    if (cmd == 0x01 || cmd == 0x00) {
+        uint8_t rx_crc = 0, footer = 0;
+        bool got = pd0_rx_next_byte(&rx_crc, PD0_BIT_TICKS * 40U) &&
+                   pd0_rx_next_byte(&footer, PD0_BIT_TICKS * 40U);
+        __enable_irq();
+        if (got) {
+            funDigitalWrite(PD4, FUN_HIGH);
+            handle_cf_query(cmd, rx_crc, footer);
+            funDigitalWrite(PD4, FUN_LOW);
+        }
+    } else if (cmd == 0x02) {
+        uint8_t act = 0, par = 0, rx_crc = 0, footer = 0;
+        bool got = pd0_rx_next_byte(&act, PD0_BIT_TICKS * 40U) &&
+                   pd0_rx_next_byte(&par, PD0_BIT_TICKS * 40U) &&
+                   pd0_rx_next_byte(&rx_crc, PD0_BIT_TICKS * 40U) &&
+                   pd0_rx_next_byte(&footer, PD0_BIT_TICKS * 40U);
+        __enable_irq();
+        if (got) {
+            funDigitalWrite(PD4, FUN_HIGH);
+            handle_cf_write(cmd, act, par, rx_crc, footer);
+            funDigitalWrite(PD4, FUN_LOW);
+        }
+    } else {
+        __enable_irq();
+    }
+}
+
 int main() {
     SystemInit();
     funGpioInitAll();
 
-    // Enable RCC for GPIOA, GPIOD
-    RCC->APB2PCENR |= RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOD;
+    // Enable RCC for GPIOA, GPIOC, GPIOD
+    RCC->APB2PCENR |= RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD;
 
     // Setup PA2 for WS2812B
     funPinMode(PA2, GPIO_CFGLR_OUT_10Mhz_PP);
 
+    // Setup PD4 & PC0 for Activity Indicator
+    funPinMode(PD4, GPIO_CFGLR_OUT_10Mhz_PP);
+    funPinMode(PC0, GPIO_CFGLR_OUT_10Mhz_PP);
+    funDigitalWrite(PD4, FUN_LOW);
+    funDigitalWrite(PC0, FUN_LOW);
+
     // Load saved configuration from flash
     load_config();
 
-    // Setup PD0 for /RETURN_BUS:
-    // If configured as Smart End Block (0xEE): active TX driver (idle HIGH)
-    // If configured as Action Block: high-impedance floating input (passive pass-through)
-    if (g_action_id == 0xEE) {
-        funPinMode(PD0, GPIO_CFGLR_OUT_10Mhz_PP);
-        funDigitalWrite(PD0, FUN_HIGH);
-    } else {
-        funPinMode(PD0, GPIO_CFGLR_IN_FLOAT);
-    }
+    // Keep PD0 high-impedance input with pull-up at idle so OUT Config Dock (GPIO17->PD0)
+    // never contends even when configured as 0xEE; 0xAA loopback temporarily drives PD0 PP.
+    pd0_set_idle();
 
     // Init UART at 115200
     uart_init();
@@ -312,6 +436,7 @@ int main() {
     uint8_t rx_buf[64];
     uint32_t last_heartbeat = SysTick->CNT;
     uint8_t hb_phase = 0;
+    bool prev_pd0 = true;
 
     while (1) {
         // Non-blocking 500ms Heartbeat:
@@ -325,7 +450,15 @@ int main() {
             funDigitalWrite(PC0, (hb_phase & 1) ? FUN_HIGH : FUN_LOW);
         }
 
-        if (!uart_rx_available()) continue;
+        if (!uart_rx_available()) {
+            bool cur_pd0 = (GPIOD->INDR & (1 << 0)) != 0;
+            if (prev_pd0 && !cur_pd0) {
+                handle_pd0_rx();
+                cur_pd0 = (GPIOD->INDR & (1 << 0)) != 0;
+            }
+            prev_pd0 = cur_pd0;
+            continue;
+        }
 
         uint8_t header = uart_rx_byte();
 
@@ -348,18 +481,7 @@ int main() {
             if (cmd == 0x01 || cmd == 0x00) {
                 uint8_t rx_crc = 0, footer = 0;
                 if (uart_rx_timeout(&rx_crc, 10000) && uart_rx_timeout(&footer, 10000)) {
-                    uint8_t q_payload[1] = { cmd };
-                    uint8_t exp_crc = crc8(q_payload, 1);
-                    if (exp_crc == rx_crc && footer == 0x55) {
-                        uint8_t resp_payload[3] = { 0x81, g_action_id, g_param_val };
-                        uint8_t resp_crc = crc8(resp_payload, 3);
-                        uart_tx(0xCF);
-                        uart_tx(0x81);
-                        uart_tx(g_action_id);
-                        uart_tx(g_param_val);
-                        uart_tx(resp_crc);
-                        uart_tx(0x55);
-                    }
+                    handle_cf_query(cmd, rx_crc, footer);
                 }
             }
             // Subcommand 0x02: Write New Configuration to Non-Volatile Flash
@@ -369,34 +491,7 @@ int main() {
                     uart_rx_timeout(&par, 10000) &&
                     uart_rx_timeout(&rx_crc, 10000) &&
                     uart_rx_timeout(&footer, 10000)) {
-                    
-                    uint8_t payload[3] = { cmd, act, par };
-                    uint8_t calc_crc = crc8(payload, 3);
-
-                    if (calc_crc == rx_crc && footer == 0x55) {
-                        save_config(act, par);
-
-                        // Reconfigure PD0 according to updated role
-                        if (g_action_id == 0xEE) {
-                            funPinMode(PD0, GPIO_CFGLR_OUT_10Mhz_PP);
-                            funDigitalWrite(PD0, FUN_HIGH);
-                        } else {
-                            funPinMode(PD0, GPIO_CFGLR_IN_FLOAT);
-                        }
-
-                        // Send ACK: [ 0xCF, 0x06, CRC8, 0x55 ]
-                        uint8_t ack_payload[1] = { 0x06 };
-                        uint8_t ack_crc = crc8(ack_payload, 1);
-                        uart_tx(0xCF);
-                        uart_tx(0x06);
-                        uart_tx(ack_crc);
-                        uart_tx(0x55);
-
-                        // Visual confirmation: Emerald Green Success Pulse
-                        ws2812_set(0, 255, 40);
-                        Delay_Ms(400);
-                        set_action_idle_color();
-                    }
+                    handle_cf_write(cmd, act, par, rx_crc, footer);
                 }
             }
             funDigitalWrite(PD4, FUN_LOW);
@@ -462,7 +557,11 @@ int main() {
                         set_action_idle_color();
                     } else {
                         // SMART END BLOCK BEHAVIOR:
-                        // Loop packet back onto Pin 4 return rail (via PD0 active driver & PD5)
+                        // Loop packet back onto Pin 4 return rail (temporarily drive PD0 PP, then release to idle)
+                        funPinMode(PD0, GPIO_CFGLR_OUT_10Mhz_PP);
+                        funDigitalWrite(PD0, FUN_HIGH);
+                        Delay_Us(20);
+
                         uart_tx(0xAA);
                         uart_tx_pd0(0xAA);
                         uart_tx(len);
@@ -477,6 +576,8 @@ int main() {
                         uart_tx_pd0(rx_crc);
                         uart_tx(0x55);
                         uart_tx_pd0(0x55);
+
+                        pd0_set_idle();
 
                         // Glow emerald green to signal valid termination
                         ws2812_set(0, 240, 30);
