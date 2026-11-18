@@ -10,6 +10,23 @@ constexpr uint32_t kSwioMask = 1UL << SWIO_PIN;
 // both use Xtensa LX7, so this preserves the upstream t1coeff=10 instruction
 // loop rather than guessing a cycle-count conversion.
 constexpr int kUpstreamT1Coeff = 10;
+#if defined(CONFIG_IDF_TARGET_ESP32)
+// Classic ESP32 (LX6): memw adds ~100ns around APB writes, so keep 1-bit short (~200ns),
+// 0-bit wide (~1.5us), idle (~500ns), and read-sample at ~220ns after release.
+constexpr int kOneLowDelay = 4;
+constexpr int kZeroLowDelay = 60;
+constexpr int kWriteIdleDelay = 20;
+constexpr int kReadTriggerDelay = 4;
+constexpr int kReadSampleDelay = 7;
+constexpr int kReadPostHighDelay = 12;
+#else
+constexpr int kOneLowDelay = kUpstreamT1Coeff;
+constexpr int kZeroLowDelay = kUpstreamT1Coeff * 4;
+constexpr int kWriteIdleDelay = kUpstreamT1Coeff;
+constexpr int kReadTriggerDelay = kUpstreamT1Coeff;
+constexpr int kReadSampleDelay = kUpstreamT1Coeff * 2;
+constexpr int kReadPostHighDelay = kUpstreamT1Coeff / 2;
+#endif
 constexpr uint32_t kReadTimeoutSamples = 1000;
 
 static inline void IRAM_ATTR upstreamPrecDelay(int delay) {
@@ -58,38 +75,47 @@ uint32_t swioMeasureUpstreamT1Cycles() {
 void IRAM_ATTR swioDriveLow() {
   REG_WRITE(GPIO_OUT_W1TC_REG, kSwioMask);
   REG_WRITE(GPIO_ENABLE_W1TS_REG, kSwioMask);
+#if defined(CONFIG_IDF_TARGET_ESP32)
+  __asm__ __volatile__("memw");
+#endif
 }
 
 void IRAM_ATTR swioDriveHigh() {
   REG_WRITE(GPIO_OUT_W1TS_REG, kSwioMask);
   REG_WRITE(GPIO_ENABLE_W1TS_REG, kSwioMask);
+#if defined(CONFIG_IDF_TARGET_ESP32)
+  __asm__ __volatile__("memw");
+#endif
 }
 
 void IRAM_ATTR swioRelease() {
   REG_WRITE(GPIO_ENABLE_W1TC_REG, kSwioMask);
+#if defined(CONFIG_IDF_TARGET_ESP32)
+  __asm__ __volatile__("memw");
+#endif
 }
 
 void IRAM_ATTR swioWriteBit(bool value) {
   swioDriveLow();
-  upstreamPrecDelay(value ? kUpstreamT1Coeff : kUpstreamT1Coeff * 4);
+  upstreamPrecDelay(value ? kOneLowDelay : kZeroLowDelay);
   swioDriveHigh();
-  upstreamPrecDelay(kUpstreamT1Coeff);
+  upstreamPrecDelay(kWriteIdleDelay);
 }
 
 SwioBitResult IRAM_ATTR swioReadBit() {
   // Port of upstream ReadBitSWIO(): low trigger; release while preloading the
-  // output latch high; sample after 2*t1; then restore driven-high state.
+  // output latch high; sample after kReadSampleDelay; then restore driven-high state.
   swioDriveLow();
-  upstreamPrecDelay(kUpstreamT1Coeff);
+  upstreamPrecDelay(kReadTriggerDelay);
   swioRelease();
   REG_WRITE(GPIO_OUT_W1TS_REG, kSwioMask);
-  upstreamPrecDelay(kUpstreamT1Coeff * 2);
+  upstreamPrecDelay(kReadSampleDelay);
 
   const bool sampledHigh = swioLineHigh();
   for (uint32_t i = 0; i < kReadTimeoutSamples; ++i) {
     if (swioLineHigh()) {
       swioDriveHigh();
-      upstreamPrecDelay(kUpstreamT1Coeff / 2);
+      upstreamPrecDelay(kReadPostHighDelay);
       return sampledHigh ? SwioBitResult::One : SwioBitResult::Zero;
     }
   }

@@ -81,7 +81,11 @@ DmiResult dmiWriteReg32(uint8_t address, uint32_t value) {
   portENTER_CRITICAL(&g_swioMux);
   writeFrame(address, value);
   portEXIT_CRITICAL(&g_swioMux);
+#if defined(CONFIG_IDF_TARGET_ESP32)
+  delayMicroseconds(20);
+#else
   delayMicroseconds(8);
+#endif
   return DmiResult::Ok;
 }
 
@@ -92,7 +96,11 @@ DmiResult dmiReadReg32(uint8_t address, uint32_t& value) {
   portENTER_CRITICAL(&g_swioMux);
   const DmiResult result = readFrame(address, value);
   portEXIT_CRITICAL(&g_swioMux);
+#if defined(CONFIG_IDF_TARGET_ESP32)
+  delayMicroseconds(20);
+#else
   delayMicroseconds(8);
+#endif
   return result;
 }
 

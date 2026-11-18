@@ -2,8 +2,13 @@
 
 #include <Arduino.h>
 
-// GPIO10 is connected to CH32V003 SWIO.  A physical 3.3 V pull-up is required.
+// Classic ESP32 wires GPIO6-11 to internal SPI flash, so use GPIO18 there;
+// ESP32-S2/S3 keep GPIO10. A physical 3.3 V pull-up is required on SWIO.
+#if defined(CONFIG_IDF_TARGET_ESP32)
+constexpr uint8_t SWIO_PIN = 18;
+#else
 constexpr uint8_t SWIO_PIN = 10;
+#endif
 
 enum class SwioBitResult : uint8_t {
   Zero,
