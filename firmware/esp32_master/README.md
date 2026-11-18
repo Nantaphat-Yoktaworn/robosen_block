@@ -5,7 +5,7 @@
 > **Framework:** Arduino ESP32 Core 3.x / ESP-IDF  
 > **Display:** 2.13" SPI E-Paper (DEPG0213BN / SSD1680, 122×250, GxEPD2)  
 > **Wireless:** BLE 4.2 / 5.0 Client (Robosen K1 Humanoid Robot GATT Protocol)  
-> **Status:** Fully Functional Prototype #01 — Updated with Dynamic Port-Driven Mode 1 & Strict Port Locking (4 UI Inputs: 2 Encoders + 2 Buttons, 3 Operational Modes)
+> **Status:** Compiled & Build-Verified (**UNTESTED ON REAL MASTER BLOCK YET** — Pending Hardware Test of Latest Multi-Core, UART Contention, Run-Chain Retry & E-Ink Degree Ring Fixes)
 
 ---
 
@@ -172,4 +172,5 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
 - [x] Verified Joint Control Mode (`STATE_JOINT_CONTROL`) with flat 17-servo sequence, Opcode `0xE8` streaming, slider gauge, and zero/standing resets.
 - [x] Verified background Core 0 BLE reconnection eliminating UI stalls and freezes.
 - [x] Verified Robosen K1 live battery percentage monitoring via Opcode `0x0F` notifications and E-Paper header badge.
-- [x] Successfully compiled using Arduino CLI for `esp32:esp32:esp32s3` and flashed to hardware (Zero warnings/errors).
+- [x] Successfully compiled using Arduino CLI for `esp32:esp32:esp32s3` and `esp32:esp32:esp32s3:CDCOnBoot=cdc` (Zero warnings/errors).
+- [ ] **Pending Real Hardware Test**: Flash and test latest audit fixes on physical Master Block & CH32V003 blocks (*Untested on real block yet*).

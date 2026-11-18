@@ -228,7 +228,7 @@ svg_content = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1040"
     <rect x="1288" y="320" width="334" height="156" rx="10" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.5" />
     <text x="1455" y="341" font-size="12" font-weight="800" fill="#1E293B" text-anchor="middle">Hardware Motion &amp; Opcodes</text>
     <text x="1302" y="363" font-size="11" font-weight="600" fill="#334155">• Walk / Turn: 0x01 / 0x05 / 0x08 / 0x02 / 0x07 / 0x03</text>
-    <text x="1302" y="383" font-size="11" font-weight="600" fill="#334155">• Predefined Stunts: Opcode 0x17 (IDs 0x01..0x19)</text>
+    <text x="1302" y="383" font-size="11" font-weight="600" fill="#334155">• Predefined Stunts: Opcode 0x17 (10 Stunt Strings)</text>
     <text x="1302" y="403" font-size="11" font-weight="600" fill="#334155">• Emergency Stop: 0x0C ([FF FF 02 0C 0E])</text>
     <text x="1302" y="423" font-size="11" font-weight="600" fill="#334155">• 17-Joint Direct Servo Angles (ALL_JOINTS)</text>
     <text x="1302" y="443" font-size="11" font-weight="600" fill="#334155">• Joint Angle Read/Move (0xE9/0xE8) &amp; Lock Ctrl</text>
@@ -237,7 +237,7 @@ svg_content = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1040"
     <rect x="1288" y="490" width="334" height="98" rx="10" fill="#FEF3C7" stroke="#F59E0B" stroke-width="1.5" />
     <text x="1455" y="511" font-size="12" font-weight="800" fill="#92400E" text-anchor="middle">ESP32-S3 Direct Robot Modes</text>
     <text x="1302" y="532" font-size="11" font-weight="600" fill="#78350F">• Mode 1B: Tangible Physical Block Chain Runner</text>
-    <text x="1302" y="551" font-size="11" font-weight="600" fill="#78350F">• Mode 2: Dual-Knob Real-Time Remote Control</text>
+    <text x="1302" y="551" font-size="11" font-weight="600" fill="#78350F">• Mode 2: Dual-Pedal RC Drive &amp; 10-Stunt Control</text>
     <text x="1302" y="570" font-size="11" font-weight="600" fill="#78350F">• Mode 3: Individual 17-Joint Servo Adjuster</text>
   </g>
 

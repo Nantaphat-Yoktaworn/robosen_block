@@ -65,9 +65,9 @@ svg_content = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1440"
   <g id="node-knob1" filter="url(#shadow)">
     <rect x="60" y="436" width="380" height="112" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
     <text x="250" y="463" font-size="12.5" font-weight="800" fill="#2D3436" text-anchor="middle">KY-040 KNOB 1 (GPIO 8/9; SW GPIO 10 LOCKED)</text>
-    <text x="250" y="487" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">Select Action Token (ACTIONS[8])</text>
-    <text x="250" y="510" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">0x01 Walk Fwd | 0x02 Back | 0x03 Turn L | 0x04 Turn R</text>
-    <text x="250" y="530" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">0x10 Punch L | 0x14 Push-ups | 0x18 Wave | 0xEE End</text>
+    <text x="250" y="487" font-size="15" font-weight="700" fill="#2D3436" text-anchor="middle">Select Action Token (ACTIONS[17])</text>
+    <text x="250" y="510" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">Walk/Side: 0x01,0x02,0x07,0x08 | Turn: 0x03,0x04</text>
+    <text x="250" y="530" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">Stunts: 0x10..0x19 (10 Stunts) | 0xEE End Block</text>
   </g>
 
   <path d="M 250 548 L 250 582" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
@@ -127,8 +127,8 @@ svg_content = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1440"
     <rect x="605" y="296" width="430" height="114" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
     <text x="820" y="323" font-size="12.5" font-weight="800" fill="#2D3436" text-anchor="middle">MASTER -&gt; J1 CONFIG DOCK (GPIO 17 &lt;-&gt; 18)</text>
     <text x="820" y="347" font-size="15.5" font-weight="700" fill="#2D3436" text-anchor="middle">Auto-Directional Dual-Orientation Write TX</text>
-    <text x="820" y="370" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">Tx in (savedTx-&gt;savedRx) then (savedRx-&gt;savedTx) over J1</text>
-    <text x="820" y="390" font-size="11.5" font-weight="500" fill="#2D3436" text-anchor="middle">Reaches block on IN Pin 3 (PD6 UART1) OR OUT Pin 4 (PD0 SW)</text>
+    <text x="820" y="370" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">Tx (savedTx-&gt;savedRx); retry flipped after 15ms if unlocked</text>
+    <text x="820" y="390" font-size="11.5" font-weight="500" fill="#2D3436" text-anchor="middle">Avoids flash contention (~3.5ms); reaches PD6 (IN) or PD0 (OUT)</text>
   </g>
 
   <path d="M 820 410 L 820 446" fill="none" stroke="#2D3436" stroke-width="2.5" marker-end="url(#arrow)" />
@@ -161,8 +161,8 @@ svg_content = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1440"
   <g id="node-led-ack" filter="url(#shadow)">
     <rect x="605" y="812" width="430" height="110" rx="16" fill="#A29BFE" stroke="#2D3436" stroke-width="2.5" />
     <text x="820" y="839" font-size="12.5" font-weight="800" fill="#2D3436" text-anchor="middle">CH32V003 WS2812B (PA2)</text>
-    <text x="820" y="863" font-size="15.5" font-weight="700" fill="#2D3436" text-anchor="middle">Emerald Green Flash (400ms)</text>
-    <text x="820" y="886" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">Drives ws2812_set(0, 255, 40) for 400ms</text>
+    <text x="820" y="863" font-size="15.5" font-weight="700" fill="#2D3436" text-anchor="middle">Emerald Green Flash (Non-Blocking)</text>
+    <text x="820" y="886" font-size="11.5" font-weight="600" fill="#2D3436" text-anchor="middle">SysTick timer drives ws2812_set(0, 255, 40) (400ms / 300ms)</text>
     <text x="820" y="905" font-size="11.5" font-weight="500" fill="#2D3436" text-anchor="middle">Block is ready for 0xAA / 0xBB chain runs immediately</text>
   </g>
 
