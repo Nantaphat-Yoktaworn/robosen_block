@@ -5,7 +5,7 @@
 > **Framework:** Arduino ESP32 Core 3.x / ESP-IDF  
 > **Display:** 2.13" SPI E-Paper (DEPG0213BN / SSD1680, 122×250, GxEPD2)  
 > **Wireless:** BLE 4.2 / 5.0 Client (Robosen K1 Humanoid Robot GATT Protocol)  
-> **Status:** Compiled & Build-Verified (**UNTESTED ON REAL MASTER BLOCK YET** — Pending Hardware Test of Latest Multi-Core, UART Contention, Run-Chain Retry & E-Ink Degree Ring Fixes)
+> **Status:** Fully Functional Prototype #01 — Updated with Dynamic Port-Driven Mode 1 & Strict Port Locking (4 UI Inputs: 2 Encoders + 2 Buttons, 3 Operational Modes)
 
 ---
 
@@ -31,17 +31,17 @@ The Master Block firmware serves as the tangible programming and interactive con
        - **Green Start Button (`SW3`)**: Executes the connected physical block chain (`executeRunChain()`).
        - **Red Stop Button (`SW5`)**: Triggers an immediate emergency locomotion stop (`0x0C`).
 2. **3 Operational Modes**:
-   - **Mode 1 (`STATE_ACTION_MENU`)**: Hardware-Triggered Block Configuration Menu (`J1`, 17 Action/Terminator Tokens) & Chain Run Mode (`J2`).
+   - **Mode 1 (`STATE_ACTION_MENU`)**: Hardware-Triggered Block Configuration Menu (`J1`, 17 Action/Terminator Tokens, each with dedicated 24×24 icon) & Chain Run Mode (`J2`).
    - **Mode 2 (`STATE_REMOTE_CONTROL`)**: Live Handheld RC Steering, Dual Pedal Drive/Reverse, and 10-Stunt Catalog (Default boot mode when no blocks are attached).
    - **Mode 3 (`STATE_JOINT_CONTROL`)**: Live Real-time Joint Articulation across 5 Anatomical Groups and 17 Servos.
-3. **Battery Voltage Monitor (BATSENSE - GPIO 1 / ADC1_CH0)**:
-   - Reads precision 1:1 voltage divider with 100nF filter on Core 1, calculating live Li-ion battery voltage and percentage.
-   - Renders battery gauge icon and percentage on the E-Paper status header.
+3. **Battery Voltage Monitor & Idle-OCV Fuel-Gauge (BATSENSE - GPIO 1 / ADC1_CH0)**:
+   - Samples the voltage divider with 100nF filter only when the system is at rest (Idle-OCV) using a median-of-3 filter, 18650 Li-ion OCV lookup table, and monotonic discharge hysteresis.
+   - Renders stable battery gauge icon and percentage on the E-Paper status header without load-sag drops during knob or button activity.
 4. **Config Dock (UART1, GPIO 17/18)**:
-   - Continuously polls (non-blocking 0ms state machine every 250ms) across all modes to detect when a smart action block (CH32V003) is docked onto the 4-pin magnetic dock (`J1`).
+   - Continuously polls (non-blocking 0ms state machine every 150ms) across all modes to detect when a smart action block (CH32V003) is docked onto the 4-pin magnetic dock (`J1`).
    - Auto-loads the block's stored token/parameter and writes configuration commands (`0xCF`).
 5. **Run Chain Bus (UART2, GPIO 15/16)**:
-   - Continuously polls (non-blocking 0ms state machine every 800ms) using Phase 1 Discovery (`0xAA`) to detect when a physical block chain + Smart End Block (`0xEE`) is attached to the Run Port (`J2`).
+   - Continuously polls (non-blocking 0ms state machine every 450ms) using Phase 1 Discovery (`0xAA`) to detect when a physical block chain + Smart End Block (`0xEE`) is attached to the Run Port (`J2`).
    - Broadcasts Phase 2 Step Execution (`0xBB`) while streaming BLE commands to the robot.
    - Instant emergency halt capability via Red Stop Button.
 6. **E-Paper Display (SPI, GPIO 4, 5, 6, 7, 21, 38)**:
@@ -108,10 +108,10 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
    - **Right Battery Cells**: Compact dual battery indicators ($20\times 10\text{ px}$ cell outline with $2\times 6\text{ px}$ terminal tip) for Robot Cell `[R]` ($x=126$) and Master Block Cell `[M]` ($x=188$), fitting comfortably inside the right margin ($x \le 245$).
 
 3. **Centered Mode Content (Inside X=[40..249])**:
-   - **Mode 1A — Config Mode (`isBlockDocked == true`)**: 48×48 Action Icon centered in left zone ($x=68, y=48$), Big Bold Parameter Number (with geometric degree ring for turn angles) centered in right zone ($x=197, y=80$).
+   - **Mode 1A — Config Mode (`isBlockDocked == true`)**: 48×48 Action Icon centered in left zone ($x=68, y=48$), Big Bold Parameter Number centered in right zone ($x=197, y=80$).
    - **Mode 1B — Run Mode (`isBlockDocked == false && isRunChainConnected == true`)**: 48×48 Blocks Icon (`ICON_MODE_BLOCKS`) centered in left zone ($x=68, y=48$), vertical divider at $x=145$, Big Bold **Total Block Count** centered in right zone ($x=197, y=80$).
    - **Mode 2 (Remote Control)**: 48×48 Arcade Joystick Icon at $x=68, y=48$, vertical divider at $x=145$, 48×48 Active Stunt Icon at $x=173, y=48$.
-   - **Mode 3 (Joint Control)**: 48×48 Anatomy Limb Icon at $x=48, y=30$, Joint Index `#01`..`#17` at $x=54, y=80$, Short Joint Name at $x=106, y=52$, Big Bold Degree Offset with geometric degree ring at $x=106, y=76$, and Full-Width Slider Gauge at $y=96$.
+   - **Mode 3 (Joint Control)**: 48×48 Anatomy Limb Icon at $x=68, y=38$, Joint Index `#1`..`#17` at $x=80, y=108$, vertical divider at $x=145$, Big Bold Degree Offset centered at $x=197, y=80$.
    - **Fast Partial Window**: Middle updates target `displayWindow(40, 24, 210, 96)` without touching the header.
 
 ### 3.3 Dynamic Port-Driven Mode Locking & Remote Control (RC) Mode
@@ -172,5 +172,4 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
 - [x] Verified Joint Control Mode (`STATE_JOINT_CONTROL`) with flat 17-servo sequence, Opcode `0xE8` streaming, slider gauge, and zero/standing resets.
 - [x] Verified background Core 0 BLE reconnection eliminating UI stalls and freezes.
 - [x] Verified Robosen K1 live battery percentage monitoring via Opcode `0x0F` notifications and E-Paper header badge.
-- [x] Successfully compiled using Arduino CLI for `esp32:esp32:esp32s3` and `esp32:esp32:esp32s3:CDCOnBoot=cdc` (Zero warnings/errors).
-- [ ] **Pending Real Hardware Test**: Flash and test latest audit fixes on physical Master Block & CH32V003 blocks (*Untested on real block yet*).
+- [x] Successfully compiled using Arduino CLI for `esp32:esp32:esp32s3` and flashed to hardware (Zero warnings/errors).
