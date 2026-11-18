@@ -1451,7 +1451,8 @@ void pollConfigDock() {
   }
 
   // 3. Timeout check: if no query response or electrical presence within CONFIG_TIMEOUT_MS, mark block as undocked
-  if (isBlockDocked && (now - lastDockResponseTime > CONFIG_TIMEOUT_MS)) {
+  now = millis();
+  if (isBlockDocked && ((long)(now - lastDockResponseTime) > (long)CONFIG_TIMEOUT_MS)) {
     isBlockDocked = false;
     cfgUartDirLocked = false;
     dockedActionId = 0;
@@ -1556,7 +1557,8 @@ void pollRunChainPort() {
   }
 
   // 2. Timeout check: if no valid chain loopback received within CHAIN_TIMEOUT_MS, mark disconnected
-  if (isRunChainConnected && (now - lastChainResponseTime > CHAIN_TIMEOUT_MS)) {
+  now = millis();
+  if (isRunChainConnected && ((long)(now - lastChainResponseTime) > (long)CHAIN_TIMEOUT_MS)) {
     isRunChainConnected = false;
     detectedChainCount = 0;
     Serial.println("\n[RUN PORT] ⚪ Action Block Chain disconnected.");
