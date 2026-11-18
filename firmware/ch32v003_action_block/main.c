@@ -310,6 +310,18 @@ bool uart_rx_timeout(uint8_t *b, uint32_t timeout_us) {
 // ==============================================================================
 // 5. MAIN SYSTEM LOOP & PROTOCOL HANDLERS
 // ==============================================================================
+// Non-blocking WS2812 LED pulse timer state
+static bool g_led_pulse_active = false;
+static uint32_t g_led_pulse_start = 0;
+static uint32_t g_led_pulse_ticks = 0;
+
+static inline void start_led_pulse(uint8_t r, uint8_t g, uint8_t b, uint32_t duration_ms) {
+    ws2812_set(r, g, b);
+    g_led_pulse_start = SysTick->CNT;
+    g_led_pulse_ticks = Ticks_from_Ms(duration_ms);
+    g_led_pulse_active = true;
+}
+
 static void handle_cf_query(uint8_t cmd, uint8_t rx_crc, uint8_t footer) {
     uint8_t q_payload[1] = { cmd };
     uint8_t exp_crc = crc8(q_payload, 1);
@@ -341,10 +353,8 @@ static void handle_cf_write(uint8_t cmd, uint8_t act, uint8_t par, uint8_t rx_cr
         uart_tx(ack_crc);
         uart_tx(0x55);
 
-        // Visual confirmation: Emerald Green Success Pulse
-        ws2812_set(0, 255, 40);
-        Delay_Ms(400);
-        set_action_idle_color();
+        // Visual confirmation: Non-blocking 400ms Emerald Green Success Pulse
+        start_led_pulse(0, 255, 40, 400);
     }
 }
 
@@ -439,10 +449,14 @@ int main() {
     bool prev_pd0 = true;
 
     while (1) {
-        // Non-blocking 500ms Heartbeat:
+        // Non-blocking 500ms Heartbeat & LED pulse expiration check:
         // Toggles onboard LED (PD4 / PC0) as a visual liveness indicator.
         // UART TX remains completely silent until queried by Master or relaying Run Chain frames.
         uint32_t now = SysTick->CNT;
+        if (g_led_pulse_active && TimeElapsed32u(now, g_led_pulse_start) >= g_led_pulse_ticks) {
+            g_led_pulse_active = false;
+            set_action_idle_color();
+        }
         if (TimeElapsed32u(now, last_heartbeat) >= Ticks_from_Ms(500)) {
             last_heartbeat = now;
             hb_phase++;
@@ -551,10 +565,8 @@ int main() {
                         uart_tx(new_crc);
                         uart_tx(0x55);
 
-                        // Ping LED amber briefly
-                        ws2812_set(60, 40, 0);
-                        Delay_Ms(50);
-                        set_action_idle_color();
+                        // Ping LED amber briefly (non-blocking)
+                        start_led_pulse(60, 40, 0, 50);
                     } else {
                         // SMART END BLOCK BEHAVIOR:
                         // Loop packet back onto Pin 4 return rail (temporarily drive PD0 PP, then release to idle)
@@ -579,10 +591,8 @@ int main() {
 
                         pd0_set_idle();
 
-                        // Glow emerald green to signal valid termination
-                        ws2812_set(0, 240, 30);
-                        Delay_Ms(350);
-                        set_action_idle_color();
+                        // Glow emerald green to signal valid termination (non-blocking)
+                        start_led_pulse(0, 240, 30, 350);
                     }
                 }
             }
@@ -610,6 +620,7 @@ int main() {
                     uart_tx(rx_crc);
                     uart_tx(0x55);
 
+                    g_led_pulse_active = false;
                     if (active_step == 0xFF) {
                         // Program Complete: Celebration Rainbow Sparkle!
                         for (int k = 0; k < 3; k++) {

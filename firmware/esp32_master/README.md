@@ -31,14 +31,14 @@ The Master Block firmware serves as the tangible programming and interactive con
        - **Green Start Button (`SW3`)**: Executes the connected physical block chain (`executeRunChain()`).
        - **Red Stop Button (`SW5`)**: Triggers an immediate emergency locomotion stop (`0x0C`).
 2. **3 Operational Modes**:
-   - **Mode 1 (`STATE_ACTION_MENU`)**: Hardware-Triggered Block Configuration Menu (`J1`) & Chain Run Mode (`J2`).
-   - **Mode 2 (`STATE_REMOTE_CONTROL`)**: Live Handheld RC Steering, 3-Gear Drive, and 10-Stunt Catalog (Default boot mode when no blocks are attached).
+   - **Mode 1 (`STATE_ACTION_MENU`)**: Hardware-Triggered Block Configuration Menu (`J1`, 17 Action/Terminator Tokens) & Chain Run Mode (`J2`).
+   - **Mode 2 (`STATE_REMOTE_CONTROL`)**: Live Handheld RC Steering, Dual Pedal Drive/Reverse, and 10-Stunt Catalog (Default boot mode when no blocks are attached).
    - **Mode 3 (`STATE_JOINT_CONTROL`)**: Live Real-time Joint Articulation across 5 Anatomical Groups and 17 Servos.
 3. **Battery Voltage Monitor (BATSENSE - GPIO 1 / ADC1_CH0)**:
-   - Reads precision 1:1 voltage divider with 100nF filter, calculating live Li-ion battery voltage and percentage.
+   - Reads precision 1:1 voltage divider with 100nF filter on Core 1, calculating live Li-ion battery voltage and percentage.
    - Renders battery gauge icon and percentage on the E-Paper status header.
 4. **Config Dock (UART1, GPIO 17/18)**:
-   - Continuously polls (non-blocking 0ms state machine every 350ms) across all modes to detect when a smart action block (CH32V003) is docked onto the 4-pin magnetic dock (`J1`).
+   - Continuously polls (non-blocking 0ms state machine every 250ms) across all modes to detect when a smart action block (CH32V003) is docked onto the 4-pin magnetic dock (`J1`).
    - Auto-loads the block's stored token/parameter and writes configuration commands (`0xCF`).
 5. **Run Chain Bus (UART2, GPIO 15/16)**:
    - Continuously polls (non-blocking 0ms state machine every 800ms) using Phase 1 Discovery (`0xAA`) to detect when a physical block chain + Smart End Block (`0xEE`) is attached to the Run Port (`J2`).
@@ -108,10 +108,10 @@ The firmware implements comprehensive handling for the new **Red Tactile Push Bu
    - **Right Battery Cells**: Compact dual battery indicators ($20\times 10\text{ px}$ cell outline with $2\times 6\text{ px}$ terminal tip) for Robot Cell `[R]` ($x=126$) and Master Block Cell `[M]` ($x=188$), fitting comfortably inside the right margin ($x \le 245$).
 
 3. **Centered Mode Content (Inside X=[40..249])**:
-   - **Mode 1A — Config Mode (`isBlockDocked == true`)**: 48×48 Action Icon centered in left zone ($x=68, y=48$), Big Bold Parameter Number centered in right zone ($x=197, y=80$).
+   - **Mode 1A — Config Mode (`isBlockDocked == true`)**: 48×48 Action Icon centered in left zone ($x=68, y=48$), Big Bold Parameter Number (with geometric degree ring for turn angles) centered in right zone ($x=197, y=80$).
    - **Mode 1B — Run Mode (`isBlockDocked == false && isRunChainConnected == true`)**: 48×48 Blocks Icon (`ICON_MODE_BLOCKS`) centered in left zone ($x=68, y=48$), vertical divider at $x=145$, Big Bold **Total Block Count** centered in right zone ($x=197, y=80$).
    - **Mode 2 (Remote Control)**: 48×48 Arcade Joystick Icon at $x=68, y=48$, vertical divider at $x=145$, 48×48 Active Stunt Icon at $x=173, y=48$.
-   - **Mode 3 (Joint Control)**: 48×48 Anatomy Limb Icon at $x=68, y=38$, Joint Index `#1`..`#17` at $x=80, y=108$, vertical divider at $x=145$, Big Bold Degree Offset centered at $x=197, y=80$.
+   - **Mode 3 (Joint Control)**: 48×48 Anatomy Limb Icon at $x=48, y=30$, Joint Index `#01`..`#17` at $x=54, y=80$, Short Joint Name at $x=106, y=52$, Big Bold Degree Offset with geometric degree ring at $x=106, y=76$, and Full-Width Slider Gauge at $y=96$.
    - **Fast Partial Window**: Middle updates target `displayWindow(40, 24, 210, 96)` without touching the header.
 
 ### 3.3 Dynamic Port-Driven Mode Locking & Remote Control (RC) Mode

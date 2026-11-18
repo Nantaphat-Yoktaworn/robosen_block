@@ -36,7 +36,7 @@ flowchart TD
         DisplayTask -->|"Idle >= 350ms"| SettleLUT["Load Settle 30-Frame LUT<br>(Crisp Ghosting Elimination)"]
         FastLUT --> Window["Partial Window Drive<br>displayWindow(40, 24, 210, 96)"]
         SettleLUT --> DualBuff["Dual-Buffer Differential Sync<br>(0x26 Previous vs 0x24 Current)"]
-        Window --> SPI["8 MHz Hardware SPI (SCL 21, SDA 38)"]
+        Window --> SPI["4 MHz Hardware SPI (SCL 21, SDA 38)"]
         DualBuff --> SPI
         SPI --> SSD1680["SSD1680 E-Paper Controller"]
     end
@@ -148,9 +148,9 @@ sequenceDiagram
 
 | Optimization | Standard Implementation | Master Block Implementation | Benefit |
 |:---|:---|:---|:---|
-| **SPI Bus Clock** | 2 MHz or 4 MHz default | **8.0 MHz hardware SPI** (`SPI_MODE0`) | Cuts bitmap transfer latency in half |
+| **SPI Bus Clock** | 2 MHz default | **4.0 MHz hardware SPI** (`SPI_MODE0`) | Reliable signal integrity with low transfer latency |
 | **Serial Diagnostics** | Verbose print on every frame | `serial_diag_bitrate = 0` in `display.init()` | Prevents UART buffer backpressure from blocking SPI |
-| **Busy Flag Callback** | Hard `while (digitalRead(BUSY))` spin-loop | Cooperative `vTaskDelay(pdMS_TO_TICKS(10))` | Frees CPU slices for RTOS background tasks |
+| **Busy Flag Callback** | Hard `while (digitalRead(BUSY))` spin-loop | Cooperative `vTaskDelay(pdMS_TO_TICKS(2))` | Frees CPU slices for RTOS background tasks |
 | **Viewport Alignment** | Full 250×122 windowing | Calibrated $X \in [40, 249]$ Bezel Viewport | Ensures 100% of visible pixels are centered within case window |
 
 ---

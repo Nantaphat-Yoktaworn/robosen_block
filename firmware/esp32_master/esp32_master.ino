@@ -126,6 +126,13 @@ GxEPD2_BW<RobosenEPD2_213_BN, RobosenEPD2_213_BN::HEIGHT> display(
   #define RGB_BUILTIN 48       // ESP32-S3 DevKitC-1 onboard RGB
 #endif
 
+// Set to 1 only when testing against a mock phone peripheral without Service 0xFFE0
+#ifndef ALLOW_BLE_PHONE_MOCK
+  #define ALLOW_BLE_PHONE_MOCK 0
+#endif
+
+volatile bool ledUpdatePending = false;
+
 void setStatusLED(uint8_t r, uint8_t g, uint8_t b) {
   #ifdef RGB_BUILTIN
     rgbLedWrite(RGB_BUILTIN, r, g, b);
@@ -154,14 +161,23 @@ struct RobosenAction {
 };
 
 RobosenAction ACTIONS[] = {
-  {"01: Walk Forward",   0x01, "",                      "Steps", 1,   1,   5,   1,  0x01},
-  {"02: Walk Backward",  0x05, "",                      "Steps", 1,   1,   5,   1,  0x02},
-  {"03: Turn Left",      0x08, "",                      "Deg°",  90,  45,  180, 45, 0x03},
-  {"04: Turn Right",     0x02, "",                      "Deg°",  90,  45,  180, 45, 0x04},
-  {"05: Punch Left",     0x17, "ProAction/Left Punch",  "Reps",  1,   1,   3,   1,  0x10},
-  {"06: Push-ups",       0x17, "ProAction/Push Ups",    "Reps",  1,   1,   3,   1,  0x14},
-  {"07: Wave Hand",      0x17, "ProAction/Say Hello",   "Reps",  1,   1,   3,   1,  0x18},
-  {"08: End Terminator", 0xEE, "",                      "Cap",   0,   0,   0,   0,  0xEE}
+  {"01: Walk Forward",    0x01, "",                       "Steps", 1,   1,   5,   1,  0x01},
+  {"02: Walk Backward",   0x05, "",                       "Steps", 1,   1,   5,   1,  0x02},
+  {"03: Turn Left",       0x08, "",                       "Deg°",  90,  45,  180, 45, 0x03},
+  {"04: Turn Right",      0x02, "",                       "Deg°",  90,  45,  180, 45, 0x04},
+  {"05: Side-step Left",  0x07, "",                       "Steps", 1,   1,   5,   1,  0x07},
+  {"06: Side-step Right", 0x03, "",                       "Steps", 1,   1,   5,   1,  0x08},
+  {"07: Punch Left",      0x17, "ProAction/Left Punch",   "Reps",  1,   1,   3,   1,  0x10},
+  {"08: Punch Right",     0x17, "ProAction/Right Punch",  "Reps",  1,   1,   3,   1,  0x11},
+  {"09: Kung Fu",         0x17, "ProAction/Kung Fu",      "Reps",  1,   1,   3,   1,  0x12},
+  {"10: Dance",           0x17, "Action/Boogaloo",        "Reps",  1,   1,   3,   1,  0x13},
+  {"11: Push-ups",        0x17, "ProAction/Push Ups",     "Reps",  1,   1,   3,   1,  0x14},
+  {"12: Handstand",       0x17, "ProAction/Handstand",    "Reps",  1,   1,   3,   1,  0x15},
+  {"13: Single Kick",     0x17, "ProAction/Left Kick",    "Reps",  1,   1,   3,   1,  0x16},
+  {"14: Squats",          0x17, "ProAction/Do Squats",    "Reps",  1,   1,   3,   1,  0x17},
+  {"15: Wave Hand",       0x17, "ProAction/Say Hello",    "Reps",  1,   1,   3,   1,  0x18},
+  {"16: Celebrate",       0x17, "ProAction/Celebrate",    "Reps",  1,   1,   3,   1,  0x19},
+  {"17: End Terminator",  0xEE, "",                       "Cap",   0,   0,   0,   0,  0xEE}
 };
 const int TOTAL_ACTIONS = sizeof(ACTIONS) / sizeof(ACTIONS[0]);
 int currentActionIndex = 0; // Default: Walk Forward
@@ -315,20 +331,33 @@ void writeConfigToDockedBlock(uint8_t actionToken, uint8_t param) {
   setConfigUartPins(savedTx, savedRx);
   Serial1.write(packet, 6);
   Serial1.flush();
-  delay(2);
 
-  // Also transmit on alternate pin (savedRx -> savedTx) so blocks docked with PD6 on either J1 Pin 3 or Pin 4 receive the write frame without reflashing
-  setConfigUartPins(savedRx, savedTx);
-  Serial1.write(packet, 6);
-  Serial1.flush();
-  delay(2);
-
-  // Restore active Config Port UART direction
-  setConfigUartPins(savedTx, savedRx);
+  // Only attempt alternate pin direction if UART direction is not locked AND no ACK arrives within 15ms
+  // (CH32V003 flash erase + program takes ~3.5ms before transmitting ACK 0x06 on PD5;
+  //  never switch savedRx to output during that window to avoid push-pull bus contention!)
+  if (!cfgUartDirLocked) {
+    unsigned long tWait = millis();
+    while (millis() - tWait < 15 && Serial1.available() < 4) {
+      delay(1);
+    }
+    if (Serial1.available() == 0) {
+      setConfigUartPins(savedRx, savedTx);
+      Serial1.write(packet, 6);
+      Serial1.flush();
+      tWait = millis();
+      while (millis() - tWait < 15 && Serial1.available() < 4) {
+        delay(1);
+      }
+      if (Serial1.available() == 0) {
+        setConfigUartPins(savedTx, savedRx);
+      }
+    }
+  }
 
   dockedActionId = actionToken;
   dockedParamVal = param;
   lastDockResponseTime = millis();
+  lastConfigPollTime = millis();
   Serial.printf("\n[CONFIG DOCK] ⚡ Flashing Action 0x%02X (%s, %d %s) to docked block (J1 GPIO 17/18)...\n", 
                 actionToken, getActionNameByToken(actionToken), param, getParamUnitByToken(actionToken));
 }
@@ -341,37 +370,14 @@ enum SystemState {
   STATE_BLE_SCANNING, 
   STATE_BLE_PAIRING_MENU,
   STATE_RUNNING,
-  STATE_MODE_SELECT_MENU,
   STATE_REMOTE_CONTROL,
   STATE_JOINT_CONTROL
 };
 SystemState currentState = STATE_ACTION_MENU;
-SystemState previousOperationalState = STATE_ACTION_MENU;
 
 // ==============================================================================
-// 4.01 MULTI-MODE SWITCHER & REMOTE CONTROL (RC) DEFINITIONS
+// 4.01 REMOTE CONTROL (RC) DEFINITIONS
 // ==============================================================================
-struct SystemModeItem {
-  const char* name;
-  const char* desc;
-  SystemState state;
-};
-
-SystemModeItem SYSTEM_MODES[] = {
-  {"01: Block Coding & Dock", "Tangible Chain + Flash Dock", STATE_ACTION_MENU},
-  {"02: Remote Control (RC)",  "Live Steering + Stunt Drive", STATE_REMOTE_CONTROL},
-  {"03: Joint Control Mode",   "Anatomy Groups + Servo Angle", STATE_JOINT_CONTROL}
-};
-const int TOTAL_SYSTEM_MODES = sizeof(SYSTEM_MODES) / sizeof(SYSTEM_MODES[0]);
-int currentModeMenuIndex = 0;
-
-// Remote Control (RC) Gear Selector: 2-way toggle DRIVE <-> STRAFE
-enum RcGear {
-  RC_GEAR_DRIVE = 0,
-  RC_GEAR_STRAFE = 1
-};
-RcGear currentRcGear = RC_GEAR_DRIVE;
-
 // Live non-blocking motion state
 enum RcActiveMotion {
   RC_MOTION_IDLE = 0,
@@ -379,13 +385,11 @@ enum RcActiveMotion {
   RC_MOTION_WALK_REV,
   RC_MOTION_TURN_LEFT,
   RC_MOTION_TURN_RIGHT,
-  RC_MOTION_STRAFE_LEFT,
-  RC_MOTION_STRAFE_RIGHT,
   RC_MOTION_STUNT
 };
 RcActiveMotion currentRcMotion = RC_MOTION_IDLE;
 
-// Mode 2 Remote Control Action Item (exclusively stunts: Punch, Push-ups, Wave)
+// Mode 2 Remote Control Action Item (Full 10-Stunt Catalog)
 struct RcActionItem {
   const char* name;
   uint8_t opcode;
@@ -395,9 +399,16 @@ struct RcActionItem {
 };
 
 const RcActionItem RC_ACTIONS[] = {
-  {"01: Punch Left", 0x17, "ProAction/Left Punch", 2500,  ICON_PUNCH},
-  {"02: Push-ups",   0x17, "ProAction/Push Ups",   12000, ICON_PUSHUPS},
-  {"03: Wave Hand",  0x17, "ProAction/Say Hello",  8500,  ICON_WAVE}
+  {"01: Punch Left",  0x17, "ProAction/Left Punch",  2500,  ICON_PUNCH},
+  {"02: Punch Right", 0x17, "ProAction/Right Punch", 2500,  ICON_PUNCH},
+  {"03: Single Kick", 0x17, "ProAction/Left Kick",   7000,  ICON_STUNT_BURST},
+  {"04: Wave Hand",   0x17, "ProAction/Say Hello",   8500,  ICON_WAVE},
+  {"05: Celebrate",   0x17, "ProAction/Celebrate",   8000,  ICON_STUNT_CELEBRATE},
+  {"06: Kung Fu",     0x17, "ProAction/Kung Fu",     11000, ICON_STUNT_KUNGFU},
+  {"07: Push-ups",    0x17, "ProAction/Push Ups",    12000, ICON_PUSHUPS},
+  {"08: Squats",      0x17, "ProAction/Do Squats",   20000, ICON_PUSHUPS},
+  {"09: Handstand",   0x17, "ProAction/Handstand",   18000, ICON_STUNT_BURST},
+  {"10: Dance",       0x17, "Action/Boogaloo",       55000, ICON_STUNT_DANCE}
 };
 const int TOTAL_RC_ACTIONS = sizeof(RC_ACTIONS) / sizeof(RC_ACTIONS[0]);
 int rcActionIndex = 0;
@@ -452,10 +463,26 @@ uint8_t currentServoPositions[17] = {
 // Mode 3 navigation state (Single flat 17-joint controller)
 int currentJointIndex = 0;      // 0..16
 unsigned long lastJointBleSendMs = 0;
+bool jointFramePending = false;
 
 Preferences preferences;
 String pairedMAC  = "None (Unpaired)";
 String pairedName = "None";
+char pairedMacBuf[24]  = "None (Unpaired)";
+char pairedNameBuf[32] = "None";
+
+void setPairedRobotInfo(const String& mac, const String& name) {
+  pairedMAC = mac;
+  pairedName = name;
+  strncpy(pairedMacBuf, mac.c_str(), sizeof(pairedMacBuf) - 1);
+  pairedMacBuf[sizeof(pairedMacBuf) - 1] = '\0';
+  strncpy(pairedNameBuf, name.c_str(), sizeof(pairedNameBuf) - 1);
+  pairedNameBuf[sizeof(pairedNameBuf) - 1] = '\0';
+}
+
+inline bool isRobotPaired() {
+  return (strlen(pairedMacBuf) >= 10 && strcmp(pairedMacBuf, "None (Unpaired)") != 0);
+}
 
 struct DiscoveredDevice { 
   String name; 
@@ -481,7 +508,7 @@ volatile bool robotAutoStand = true;
 // Retry Timing: 1s fast scan + 2s pause between attempts
 const unsigned long RETRY_INTERVAL_MS = 2000;
 unsigned long lastConnectAttemptTime = 0;
-int connectAttemptCounter = 0;
+volatile int connectAttemptCounter = 0;
 
 // --- ROTARY ENCODER STATE MACHINE (BUXTRONIX QUADRATURE DECODER) ---
 // Immune to mechanical contact bounce, detent vibration, and settling recoil.
@@ -540,8 +567,6 @@ void IRAM_ATTR isrK2() {
 
 // --- NON-BLOCKING LED BLIP & ASYNC FREERTOS E-INK DISPLAY STATE ---
 unsigned long ledBlipUntil = 0;
-String lastUiEventMsg = "";
-unsigned long lastUiEventTime = 0;
 
 // FreeRTOS Display & BLE Synchronization State
 SemaphoreHandle_t bleMutex = nullptr;
@@ -574,12 +599,6 @@ void requestEInkCenterUpdate() {
   einkNeedsCrispSettle = true;
 }
 
-void setUiEventFeedback(const char* msg) {
-  lastUiEventMsg = msg;
-  lastUiEventTime = millis();
-  requestEInkFullUpdate();
-}
-
 void triggerLedBlip(uint8_t r, uint8_t g, uint8_t b) {
   setStatusLED(r, g, b);
   ledBlipUntil = millis() + 50; // 50ms tactile feedback
@@ -591,7 +610,6 @@ unsigned long lastHeartbeatTime = 0;
 // Forward Declarations
 void renderActionMenu();
 void renderPairingMenu();
-void renderModeSelectMenu();
 void renderRemoteControlMenu();
 void renderJointControlMenu();
 void runBleScan();
@@ -605,6 +623,7 @@ bool executeRunChain();
 RobosenAction getActionObjByToken(uint8_t token, int param);
 float readBatteryVoltage();
 int calculateBatteryPercent(float vbat);
+int updateMasterBatteryState();
 void sendLocomotionStop();
 bool abortableDelay(unsigned long ms);
 void triggerChainAbort(int count);
@@ -632,12 +651,10 @@ void loadCustomEInkLut(bool fastMode);
 void drawActionMenuToBuffer(bool invertMiddle = false);
 void updateEInkActionMenu();
 void updateEInkPairingMenu();
-void updateEInkModeSelectMenu();
 void updateEInkRemoteControl();
 void updateEInkJointControl();
 void updateEInkScanning();
 void updateEInkRunChain(int currentStep, int totalSteps, const char* actionName, int paramVal, const char* paramUnit);
-void drawModeSelectMenuToBuffer();
 void drawRemoteControlToBuffer(bool invertMiddle = false);
 void drawJointControlToBuffer(bool invertMiddle = false);
 void startBackgroundTasks();
@@ -656,24 +673,28 @@ class RobosenClientCallback : public BLEClientCallbacks {
     robotBatteryPercent = -1;
     Serial.println("\n[BLE STATUS] 🔴 Robot disconnected / link lost! Resuming retry loop...");
     if (currentState == STATE_ACTION_MENU || currentState == STATE_REMOTE_CONTROL || currentState == STATE_JOINT_CONTROL) {
-      updateStatusLED();
+      ledUpdatePending = true;
+      requestEInkFullUpdate();
     }
   }
 };
 
 void updateStatusLED() {
-  if (ledBlipUntil > 0 && millis() < ledBlipUntil) return; // Preserve active tactile feedback blip
+  // Ensure RMT WS2812 driver is only written from Core 1 to prevent multi-core RMT contention
+  if (xPortGetCoreID() != 1) {
+    ledUpdatePending = true;
+    return;
+  }
+  if (ledBlipUntil > 0 && (long)(ledBlipUntil - millis()) > 0) return; // Preserve active tactile feedback blip
   if (currentState == STATE_RUNNING) {
     setStatusLED(0, 100, 20); // 🟢 Bright Green: Chain actively executing
   } else if (currentState == STATE_BLE_SCANNING) {
     setStatusLED(0, 0, 40);  // 🔵 Vivid Blue: Active Scanning
   } else if (currentState == STATE_BLE_PAIRING_MENU) {
     setStatusLED(0, 0, 30);  // 🔵 Soft Blue: Pairing Menu Selection
-  } else if (currentState == STATE_MODE_SELECT_MENU) {
-    setStatusLED(40, 0, 80); // 🟣 Purple: Mode Selector Menu
   } else if (currentState == STATE_JOINT_CONTROL) {
     if (!isConnected) {
-      if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
+      if (!isRobotPaired()) {
         setStatusLED(30, 0, 0);  // 🔴 Red: Unpaired
       } else {
         setStatusLED(30, 15, 0); // 🟠 Amber/Orange: Paired, reconnecting
@@ -683,7 +704,7 @@ void updateStatusLED() {
     }
   } else if (currentState == STATE_REMOTE_CONTROL) {
     if (!isConnected) {
-      if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
+      if (!isRobotPaired()) {
         setStatusLED(30, 0, 0);  // 🔴 Red: Unpaired
       } else {
         setStatusLED(30, 15, 0); // 🟠 Amber/Orange: Paired, reconnecting
@@ -693,16 +714,15 @@ void updateStatusLED() {
         setStatusLED(0, 100, 10); // 🟢 Vivid Green: Walking Forward
       } else if (currentRcMotion == RC_MOTION_WALK_REV) {
         setStatusLED(100, 50, 0); // 🟠 Vivid Amber-Yellow: Walking Backward
-      } else if (currentRcMotion == RC_MOTION_TURN_LEFT || currentRcMotion == RC_MOTION_TURN_RIGHT ||
-                 currentRcMotion == RC_MOTION_STRAFE_LEFT || currentRcMotion == RC_MOTION_STRAFE_RIGHT) {
-        setStatusLED(0, 40, 100); // 🔵 Vivid Electric Blue: Turning / Strafing
+      } else if (currentRcMotion == RC_MOTION_TURN_LEFT || currentRcMotion == RC_MOTION_TURN_RIGHT) {
+        setStatusLED(0, 40, 100); // 🔵 Vivid Electric Blue: Turning
       } else if (currentRcMotion == RC_MOTION_STUNT) {
         setStatusLED(90, 0, 90);  // 🟣 Vivid Magenta: Executing Stunt
       } else {
         setStatusLED(0, 35, 25);  // 🟢 Soft Teal/Cyan: RC Connected & Ready
       }
     }
-  } else if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
+  } else if (!isRobotPaired()) {
     setStatusLED(30, 0, 0);  // 🔴 Red: Unpaired
   } else if (!isConnected) {
     setStatusLED(30, 15, 0); // 🟠 Amber/Orange: Paired, waiting / reconnecting
@@ -715,6 +735,7 @@ void updateStatusLED() {
 // 4.1 BATTERY SENSE & SAFETY HALT IMPLEMENTATIONS
 // ==============================================================================
 float smoothedBatteryVoltage = 0.0f;
+volatile int currentMasterBatteryPct = 100;
 int lastDisplayedMasterPct = -1;
 unsigned long lastMasterBatCheckMs = 0;
 
@@ -756,6 +777,12 @@ int calculateBatteryPercent(float vbat) {
   if (vbat <= 3.20f) return 0;
   int pct = (int)((vbat - 3.20f) / (4.20f - 3.20f) * 100.0f);
   return constrain(pct, 0, 100);
+}
+
+int updateMasterBatteryState() {
+  int pct = calculateBatteryPercent(readBatteryVoltage());
+  currentMasterBatteryPct = pct;
+  return pct;
 }
 
 void sendLocomotionStop() {
@@ -838,6 +865,15 @@ void stopRcMotionImmediate() {
 
 void updateRemoteControlEngine() {
   if (currentState != STATE_REMOTE_CONTROL) return;
+  if (!isConnected || pRemoteChar == nullptr) {
+    if (currentRcMotion != RC_MOTION_IDLE) {
+      currentRcMotion = RC_MOTION_IDLE;
+      rcSteerActiveUntilMs = 0;
+      rcStuntEndMs = 0;
+      updateStatusLED();
+    }
+    return;
+  }
   unsigned long now = millis();
 
   // 1. If executing action, check duration
@@ -855,9 +891,8 @@ void updateRemoteControlEngine() {
   bool fwdHeld = (digitalRead(PIN_START_BTN) == LOW);
   bool revHeld = (digitalRead(PIN_STOP_BTN) == LOW);
 
-  // 2. Check steering / strafing momentum window
-  if (currentRcMotion == RC_MOTION_TURN_LEFT || currentRcMotion == RC_MOTION_TURN_RIGHT ||
-      currentRcMotion == RC_MOTION_STRAFE_LEFT || currentRcMotion == RC_MOTION_STRAFE_RIGHT) {
+  // 2. Check steering momentum window
+  if (currentRcMotion == RC_MOTION_TURN_LEFT || currentRcMotion == RC_MOTION_TURN_RIGHT) {
     if (now >= rcSteerActiveUntilMs) {
       // Momentum window elapsed! Check if Forward or Reverse pedal is still held
       if (fwdHeld && revHeld) {
@@ -978,23 +1013,25 @@ void sendJointFrameNonBlocking(uint8_t speed) {
 void resetActiveJointToCenter() {
   const JointDef& j = ALL_JOINTS[currentJointIndex];
   currentServoPositions[j.servoId] = j.neutral;
+  jointFramePending = false;
+  lastJointBleSendMs = millis();
   sendJointFrameNonBlocking(25);
   triggerLedBlip(0, 80, 0);
   requestEInkCenterUpdate();
   Serial.printf("\n🎯 [JOINT] Reset Joint %d (%s) to neutral (%d)\n",
                 j.servoId, j.name, j.neutral);
-  setUiEventFeedback("JOINT: RESET TO CTR");
 }
 
 void resetAllJointsToStand() {
   for (int i = 0; i < 17; i++) {
     currentServoPositions[i] = STANDING_SERVO_DEFAULTS[i];
   }
+  jointFramePending = false;
+  lastJointBleSendMs = millis();
   sendJointFrameNonBlocking(20);
   triggerLedBlip(90, 0, 90);
   requestEInkCenterUpdate();
   Serial.println("\n🧍 [JOINT] Reset ALL 17 joints to calibrated standing posture!");
-  setUiEventFeedback("ALL JOINTS: STAND");
 }
 
 // ==============================================================================
@@ -1024,6 +1061,16 @@ void sendHeartbeatPingNonBlocking() {
 
 void robotNotifyCallback(BLERemoteCharacteristic* pChar, uint8_t* pData, size_t length, bool isNotify) {
   if (length >= 6 && pData[0] == 0xFF && pData[1] == 0xFF) {
+    uint8_t numBytes = pData[2];
+    if ((size_t)(numBytes + 3) <= length) {
+      uint16_t sum = 0;
+      for (size_t i = 2; i < (size_t)(numBytes + 2); i++) {
+        sum += pData[i];
+      }
+      if ((uint8_t)(sum & 0xFF) != pData[numBytes + 2]) {
+        return; // Ignore corrupted BLE notification frame
+      }
+    }
     uint8_t opcode = pData[3];
     if (opcode == 0x0F && length >= 12) {
       // 0x0F Telemetry packet: payload starts at pData[4]
@@ -1056,7 +1103,7 @@ void robotNotifyCallback(BLERemoteCharacteristic* pChar, uint8_t* pData, size_t 
 // 5. DIRECT PERSISTENT BLE CONNECTION MANAGER (FAST 1s NON-BLOCKING SCAN CHECK)
 // ==============================================================================
 bool connectToRobot(bool quietBg) {
-  if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
+  if (!isRobotPaired()) {
     if (!quietBg) Serial.println("[BLE STATUS] ⚠️ No robot paired in NVS flash. Hold Start for 3s to pair.");
     updateStatusLED();
     return false;
@@ -1093,7 +1140,7 @@ bool connectToRobot(bool quietBg) {
   for (int i = 0; i < count; i++) {
     BLEAdvertisedDevice d = results->getDevice(i);
     String dAddr = d.getAddress().toString().c_str();
-    if (dAddr.equalsIgnoreCase(pairedMAC)) {
+    if (dAddr.equalsIgnoreCase(pairedMacBuf)) {
       targetDevice = d;
       found = true;
       break;
@@ -1136,10 +1183,19 @@ bool connectToRobot(bool quietBg) {
   Serial.println("[BLE STATUS] 🔗 Link established! Discovering GATT Service (0xFFE0)...");
   BLERemoteService* pRemoteService = pClient->getService(SERVICE_UUID);
   if (pRemoteService == nullptr) {
-    Serial.println("[BLE STATUS] ⚠️ Service 0xFFE0 not found (Phone mock / simulation device).");
-    isConnected = true;
-    updateStatusLED();
-    return true;
+    #if ALLOW_BLE_PHONE_MOCK
+      Serial.println("[BLE STATUS] ⚠️ Service 0xFFE0 not found (Phone mock / simulation device).");
+      isConnected = true;
+      updateStatusLED();
+      return true;
+    #else
+      Serial.println("[BLE STATUS] ❌ Service 0xFFE0 not found on target device. Disconnecting to retry...");
+      pClient->disconnect();
+      isConnected = false;
+      pRemoteChar = nullptr;
+      updateStatusLED();
+      return false;
+    #endif
   }
 
   pRemoteChar = pRemoteService->getCharacteristic(CHAR_UUID);
@@ -1159,7 +1215,7 @@ bool connectToRobot(bool quietBg) {
 
   isConnected = true;
   Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
-  Serial.printf("║  [BLE STATUS: CONNECTED] Target: %-38s║\n", pairedName.c_str());
+  Serial.printf("║  [BLE STATUS: CONNECTED] Target: %-38s║\n", pairedNameBuf);
   Serial.println("║  Persistent link ACTIVE! Ready for instant commands.                   ║");
   Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
   updateStatusLED();
@@ -1419,16 +1475,19 @@ void pollConfigDock() {
   if (now - lastConfigPollTime >= CONFIG_POLL_INTERVAL_MS) {
     lastConfigPollTime = now;
 
-    bool elecPresent = probeConfigDockElectrical();
-    if (elecPresent) {
-      cfgElectricalConsecMiss = 0;
-      if (cfgElectricalConsecHits < 10) cfgElectricalConsecHits++;
-      if (cfgElectricalConsecHits >= 2) {
-        handleDockedBlockConfirmed(dockedActionId, dockedParamVal, false, "J1 Electrical Pull-Up");
+    // Only run electrical pull-down probe if UART has not recently replied, so we never flush incoming UART bytes
+    if (!cfgUartDirLocked || (now - lastDockUartReplyMs > 600)) {
+      bool elecPresent = probeConfigDockElectrical();
+      if (elecPresent) {
+        cfgElectricalConsecMiss = 0;
+        if (cfgElectricalConsecHits < 10) cfgElectricalConsecHits++;
+        if (cfgElectricalConsecHits >= 2) {
+          handleDockedBlockConfirmed(dockedActionId, dockedParamVal, false, "J1 Electrical Pull-Up");
+        }
+      } else {
+        cfgElectricalConsecHits = 0;
+        if (cfgElectricalConsecMiss < 10) cfgElectricalConsecMiss++;
       }
-    } else {
-      cfgElectricalConsecHits = 0;
-      if (cfgElectricalConsecMiss < 10) cfgElectricalConsecMiss++;
     }
 
     // Auto-alternate UART1 TX/RX direction between (TX=17, RX=18) and (TX=18, RX=17) until UART reply locks direction
@@ -1584,6 +1643,7 @@ void printEInkAndPowerDiagnostics() {
   float rawVbat = sampleRawBatteryVoltage(&rawMv);
   float filtVbat = readBatteryVoltage();
   int batPct = calculateBatteryPercent(filtVbat);
+  currentMasterBatteryPct = batPct;
 
   pinMode(PIN_EPD_BUSY, INPUT_PULLDOWN);
   delayMicroseconds(100);
@@ -1620,7 +1680,9 @@ void setup() {
   setStatusLED(30, 15, 0);
 
   Serial.begin(115200);
-  Serial.setTxTimeoutMs(0); // Non-blocking USB CDC: 0ms timeout prevents loop freeze when USB CDC buffer fills
+  #if ARDUINO_USB_CDC_ON_BOOT
+    Serial.setTxTimeoutMs(0); // Non-blocking USB CDC: 0ms timeout prevents loop freeze when USB CDC buffer fills
+  #endif
   delay(300);               // Brief 300ms rail stabilization (reduced from 1500ms for fast boot)
 
   // Configure Internal Pull-Up Resistors for all 4 UI inputs (2 Encoders + 2 Buttons)
@@ -1683,11 +1745,12 @@ void setup() {
 
   // Load Saved Robot Binding from NVS Flash & set initial RGB LED immediately (<200ms from boot)
   preferences.begin("robosen_cfg", false);
-  pairedMAC = preferences.getString("paired_mac", "");
-  if (pairedMAC == "" || pairedMAC == "None (Unpaired)") {
-    pairedMAC = preferences.getString("last_paired_mac", "None (Unpaired)");
+  String loadedMac = preferences.getString("paired_mac", "");
+  if (loadedMac == "" || loadedMac == "None (Unpaired)") {
+    loadedMac = preferences.getString("last_paired_mac", "None (Unpaired)");
   }
-  pairedName = preferences.getString("paired_name", "Robosen Robot");
+  String loadedName = preferences.getString("paired_name", "Robosen Robot");
+  setPairedRobotInfo(loadedMac, loadedName);
   updateStatusLED();
 
   // Perform clean initial dual-buffer sync on Core 1 before starting BLE RF activity
@@ -1709,9 +1772,9 @@ void setup() {
   Serial.println("\n[SYSTEM] ESP32-S3 Dual-Knob Master Initialized.");
 
   // Fast auto-connect check on boot (takes only 1s if robot is off!)
-  if (pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
+  if (isRobotPaired()) {
     connectAttemptCounter = 1;
-    Serial.printf("\n[BLE STATUS] 🔌 Saved Robot Target: %s (%s)\n", pairedName.c_str(), pairedMAC.c_str());
+    Serial.printf("\n[BLE STATUS] 🔌 Saved Robot Target: %s (%s)\n", pairedNameBuf, pairedMacBuf);
     Serial.printf("[BLE STATUS] ⏳ [Attempt #%d] Auto-connecting on boot (1s check)...\n", connectAttemptCounter);
     if (connectToRobot()) {
       connectAttemptCounter = 0;
@@ -1743,6 +1806,7 @@ void setup() {
   pollConfigDock();
   pollRunChainPort();
 
+  lastDisplayedMasterPct = updateMasterBatteryState();
   startBackgroundTasks();
   if (hasAnyBlockConnected()) {
     currentState = STATE_ACTION_MENU;
@@ -1763,9 +1827,13 @@ void setup() {
 void loop() {
   unsigned long now = millis();
 
-  // --- 0. LED TACTILE FEEDBACK TIMEOUT ---
-  if (ledBlipUntil > 0 && now >= ledBlipUntil) {
+  // --- 0. LED TACTILE FEEDBACK TIMEOUT & ASYNC CORE 0 LED SYNC ---
+  if (ledBlipUntil > 0 && (long)(now - ledBlipUntil) >= 0) {
     ledBlipUntil = 0;
+    ledUpdatePending = false;
+    updateStatusLED();
+  } else if (ledUpdatePending && ledBlipUntil == 0) {
+    ledUpdatePending = false;
     updateStatusLED();
   }
 
@@ -1775,6 +1843,13 @@ void loop() {
 
   // --- 1.1 REMOTE CONTROL ENGINE (NON-BLOCKING LOCOMOTION & STEERING MOMENTUM) ---
   updateRemoteControlEngine();
+
+  // --- 1.2 JOINT CONTROL TRAILING-EDGE RATE LIMITER FLUSH ---
+  if (currentState == STATE_JOINT_CONTROL && jointFramePending && (now - lastJointBleSendMs >= 45)) {
+    jointFramePending = false;
+    lastJointBleSendMs = now;
+    sendJointFrameNonBlocking(25);
+  }
 
   // Serial Monitor Interactive Test ('t' = Ping Config Dock, 'r' = Run Chain, 'f' = Reinit E-Ink, 'd' = Diagnostics)
   if (Serial.available() > 0) {
@@ -1826,16 +1901,22 @@ void loop() {
       }
     } else if (currentState == STATE_REMOTE_CONTROL) {
       triggerLedBlip(0, 80, 80);
-      // Knob 1 Turn: Live Rotational Steering (Turn Left / Right)
-      RcActiveMotion newMotion = (d1 < 0) ? RC_MOTION_TURN_LEFT : RC_MOTION_TURN_RIGHT;
-      uint8_t op = (d1 < 0) ? 0x08 : 0x02;
-      currentRcMotion = newMotion;
-      unsigned long dur = (d1 < 0) ? 550 : 900;
-      unsigned long maxWindow = (d1 < 0) ? 1100 : 1500;
-      rcSteerActiveUntilMs = constrain(now + dur, rcSteerActiveUntilMs + 400, now + maxWindow);
-      sendRawOpcodeNonBlocking(op);
-      updateStatusLED();
-      Serial.printf("🔄 [RC STEER] Turn %s\n", (d1 < 0) ? "Left" : "Right");
+      if (isConnected && pRemoteChar != nullptr && currentRcMotion != RC_MOTION_STUNT) {
+        // Knob 1 Turn: Live Rotational Steering (Turn Left / Right)
+        RcActiveMotion newMotion = (d1 < 0) ? RC_MOTION_TURN_LEFT : RC_MOTION_TURN_RIGHT;
+        uint8_t op = (d1 < 0) ? 0x08 : 0x02;
+        unsigned long dur = (d1 < 0) ? 550UL : 900UL;
+        unsigned long maxWindow = (d1 < 0) ? 1100UL : 1500UL;
+        unsigned long baseMs = (currentRcMotion == newMotion && rcSteerActiveUntilMs > now) ? rcSteerActiveUntilMs : now;
+        unsigned long targetMs = baseMs + 400UL;
+        if (targetMs < now + dur) targetMs = now + dur;
+        if (targetMs > now + maxWindow) targetMs = now + maxWindow;
+        rcSteerActiveUntilMs = targetMs;
+        currentRcMotion = newMotion;
+        sendRawOpcodeNonBlocking(op);
+        updateStatusLED();
+        Serial.printf("🔄 [RC STEER] Turn %s\n", (d1 < 0) ? "Left" : "Right");
+      }
     } else if (currentState == STATE_JOINT_CONTROL) {
       triggerLedBlip(0, 80, 80);
       currentJointIndex = (currentJointIndex + d1) % TOTAL_JOINTS;
@@ -1867,7 +1948,7 @@ void loop() {
       }
     } else if (currentState == STATE_REMOTE_CONTROL) {
       triggerLedBlip(80, 0, 80);
-      // Knob 2 Turn: Scroll Actions Catalog (exclusively stunts: Punch, Push-ups, Wave)
+      // Knob 2 Turn: Scroll 10-Stunt Catalog
       rcActionIndex = (rcActionIndex + d2) % TOTAL_RC_ACTIONS;
       while (rcActionIndex < 0) rcActionIndex += TOTAL_RC_ACTIONS;
       requestEInkCenterUpdate(); // Fast middle band refresh on Core 0
@@ -1879,8 +1960,11 @@ void loop() {
       newPos = constrain(newPos, (int)j.minLimit, (int)j.maxLimit);
       currentServoPositions[j.servoId] = (uint8_t)newPos;
       if (now - lastJointBleSendMs >= 45) {
+        jointFramePending = false;
         lastJointBleSendMs = now;
         sendJointFrameNonBlocking(25);
+      } else {
+        jointFramePending = true;
       }
       requestEInkCenterUpdate();
       int degOffset = (int)currentServoPositions[j.servoId] - (int)j.neutral;
@@ -1945,12 +2029,14 @@ void loop() {
           updateStatusLED();
           renderRemoteControlMenu();
         }
-      } else if (currentState == STATE_BLE_PAIRING_MENU && bleDeviceCount > 0) {
-        pairedMAC  = bleList[currentBleIndex].address;
-        pairedName = bleList[currentBleIndex].name;
-        preferences.putString("paired_mac", pairedMAC);
-        preferences.putString("paired_name", pairedName);
-        connectAttemptCounter = 0;
+      } else if (currentState == STATE_BLE_PAIRING_MENU) {
+        if (bleDeviceCount > 0) {
+          setPairedRobotInfo(bleList[currentBleIndex].address, bleList[currentBleIndex].name);
+          preferences.putString("paired_mac", pairedMAC);
+          preferences.putString("paired_name", pairedName);
+          connectAttemptCounter = 0;
+          requestBgReconnect = true;
+        }
         if (hasAnyBlockConnected()) {
           currentState = STATE_ACTION_MENU;
           renderActionMenu();
@@ -1958,7 +2044,7 @@ void loop() {
           currentState = STATE_REMOTE_CONTROL;
           renderRemoteControlMenu();
         }
-        requestBgReconnect = true;
+        updateStatusLED();
       }
     } else if (k1SwRaw == HIGH && k1SwPressed) {
       k1SwPressed = false;
@@ -2010,19 +2096,21 @@ void loop() {
             requestEInkCenterUpdate();
           }
         } else if (currentState == STATE_REMOTE_CONTROL) {
-          // Fire Selected Stunt Action Instantly
-          if (currentRcMotion != RC_MOTION_IDLE && currentRcMotion != RC_MOTION_STUNT) {
-            sendLocomotionStop();
-            delay(40);
+          if (isConnected && pRemoteChar != nullptr) {
+            // Fire Selected Stunt Action Instantly
+            if (currentRcMotion != RC_MOTION_IDLE && currentRcMotion != RC_MOTION_STUNT) {
+              sendLocomotionStop();
+              delay(40);
+            }
+            currentRcMotion = RC_MOTION_STUNT;
+            const RcActionItem& act = RC_ACTIONS[rcActionIndex];
+            sendStuntPacketNonBlocking(act.opcode, act.payload);
+            rcStuntEndMs = now + act.durationMs;
+            triggerLedBlip(90, 0, 90);
+            updateStatusLED();
+            Serial.printf("\n>>> [RC ACTION] Fired: %s (Duration: %lu ms) <<<\n",
+                          act.name, act.durationMs);
           }
-          currentRcMotion = RC_MOTION_STUNT;
-          const RcActionItem& act = RC_ACTIONS[rcActionIndex];
-          sendStuntPacketNonBlocking(act.opcode, act.payload);
-          rcStuntEndMs = now + act.durationMs;
-          triggerLedBlip(90, 0, 90);
-          updateStatusLED();
-          Serial.printf("\n>>> [RC ACTION] Fired: %s (Duration: %lu ms) <<<\n",
-                        act.name, act.durationMs);
         } else if (currentState == STATE_JOINT_CONTROL) {
           // Reset active joint to neutral center (0°)
           resetActiveJointToCenter();
@@ -2051,13 +2139,15 @@ void loop() {
       startBtnHeld3s = false;
       lastUserActivity = now;
       triggerLedBlip(0, 100, 0); // Green
-      if (currentState != STATE_REMOTE_CONTROL) {
+      if (currentState != STATE_REMOTE_CONTROL || !isConnected) {
         Serial.println("\n[BUTTON] Start button pressed... (Hold 3s to switch robot)");
       }
     } else if (startRaw == LOW && startBtnPressed) {
       lastUserActivity = now;
       if (!startBtnHeld3s && (now - startPressStart >= 3000)) {
-        if (currentState == STATE_ACTION_MENU || currentState == STATE_JOINT_CONTROL) {
+        if (currentState == STATE_ACTION_MENU ||
+            currentState == STATE_JOINT_CONTROL ||
+            (currentState == STATE_REMOTE_CONTROL && !isConnected)) {
           startBtnHeld3s = true;
           Serial.println("\n[SYSTEM] 🎯 3-Second Hold Confirmed! Opening Teacher Pairing Menu...");
           runBleScan();
@@ -2085,21 +2175,20 @@ void loop() {
               setStatusLED(50, 0, 0);
               delay(500);
               updateStatusLED();
-              setUiEventFeedback("START: NO CHAIN BLOCKS!");
             }
           }
         } else if (currentState == STATE_REMOTE_CONTROL) {
-          if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
+          if (!isConnected && isRobotPaired()) {
             Serial.println("[BLE STATUS] ⚡ Green Start clicked while disconnected in RC Mode: Triggering background reconnect...");
             requestBgReconnect = true;
-            setUiEventFeedback("CONNECTING...");
           }
         } else if (currentState == STATE_JOINT_CONTROL) {
-          if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
+          if (!isConnected && isRobotPaired()) {
             Serial.println("[BLE STATUS] ⚡ Green Start clicked while disconnected in Joint Mode: Triggering background reconnect...");
             requestBgReconnect = true;
-            setUiEventFeedback("CONNECTING...");
           } else {
+            jointFramePending = false;
+            lastJointBleSendMs = now;
             sendJointFrameNonBlocking(25);
             triggerLedBlip(0, 80, 40);
             const JointDef& j = ALL_JOINTS[currentJointIndex];
@@ -2110,11 +2199,11 @@ void loop() {
           }
         } else if (currentState == STATE_BLE_PAIRING_MENU) {
           if (bleDeviceCount > 0) {
-            pairedMAC  = bleList[currentBleIndex].address;
-            pairedName = bleList[currentBleIndex].name;
+            setPairedRobotInfo(bleList[currentBleIndex].address, bleList[currentBleIndex].name);
             preferences.putString("paired_mac", pairedMAC);
             preferences.putString("paired_name", pairedName);
-            Serial.printf("\n[BLE STATUS] 🟢 Confirmed robot via Start Button: %s (%s)\n", pairedName.c_str(), pairedMAC.c_str());
+            connectAttemptCounter = 0;
+            Serial.printf("\n[BLE STATUS] 🟢 Confirmed robot via Start Button: %s (%s)\n", pairedNameBuf, pairedMacBuf);
           }
           if (hasAnyBlockConnected()) {
             currentState = STATE_ACTION_MENU;
@@ -2123,7 +2212,7 @@ void loop() {
             currentState = STATE_REMOTE_CONTROL;
             renderRemoteControlMenu();
           }
-          if (pairedMAC != "None (Unpaired)" && !isConnected) {
+          if (isRobotPaired() && !isConnected) {
             requestBgReconnect = true;
           } else {
             updateStatusLED();
@@ -2175,6 +2264,7 @@ void loop() {
           setStatusLED(60, 0, 0);
           delay(300);
           updateStatusLED();
+          requestEInkFullUpdate();
         }
       }
     } else if (stopRaw == HIGH && stopBtnPressed) {
@@ -2196,13 +2286,11 @@ void loop() {
             setStatusLED(80, 0, 0);
             delay(200);
             updateStatusLED();
-            setUiEventFeedback("STOP: EMERGENCY HALT!");
           }
         } else if (currentState == STATE_REMOTE_CONTROL) {
-          if (!isConnected && pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
+          if (!isConnected && isRobotPaired()) {
             Serial.println("[BLE STATUS] ⚡ Red button clicked while disconnected in RC Mode: Triggering background reconnect...");
             requestBgReconnect = true;
-            setUiEventFeedback("CONNECTING...");
           }
         } else if (currentState == STATE_JOINT_CONTROL) {
           Serial.println("\n[EMERGENCY STOP] Red Stop button pressed in Joint Mode: Sending locomotion stop!");
@@ -2210,7 +2298,6 @@ void loop() {
           setStatusLED(80, 0, 0);
           delay(100);
           updateStatusLED();
-          setUiEventFeedback("JOINT: EMERGENCY STOP");
         } else if (currentState == STATE_BLE_PAIRING_MENU || currentState == STATE_BLE_SCANNING) {
           Serial.println("\n[CANCEL] Cancelled pairing/scan, returning to active operational mode.");
           if (hasAnyBlockConnected()) {
@@ -2244,7 +2331,7 @@ void loop() {
   // --- 8. PERIODIC MASTER BATTERY HEADER REFRESH (EVERY 3s WHEN IDLE) ---
   if (now - lastMasterBatCheckMs >= 3000) {
     lastMasterBatCheckMs = now;
-    int currentMasterPct = calculateBatteryPercent(readBatteryVoltage());
+    int currentMasterPct = updateMasterBatteryState();
     if (lastDisplayedMasterPct < 0) {
       lastDisplayedMasterPct = currentMasterPct;
     } else if (abs(currentMasterPct - lastDisplayedMasterPct) >= 4 && (now - lastUserActivity >= 1000)) {
@@ -2274,7 +2361,7 @@ bool writeBlePacketLocked(const uint8_t* data, size_t len) {
 }
 
 bool sendRobosenPacket(const RobosenAction& action) {
-  if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
+  if (!isRobotPaired()) {
     Serial.println("\n[BLE STATUS] ⚠️ No robot paired! Hold Start for 3s to pair.");
     setStatusLED(40, 0, 0);
     delay(500);
@@ -2282,11 +2369,11 @@ bool sendRobosenPacket(const RobosenAction& action) {
     return false;
   }
 
-  // Re-establish link if connection was lost (synchronized via bleMutex)
+  // Re-establish link if connection was lost (synchronized via bleMutex with 2.5s timeout so it waits if Core 0 is mid-scan)
   if (!isConnected || pClient == nullptr || !pClient->isConnected() || pRemoteChar == nullptr) {
     Serial.println("\n[BLE STATUS] ⚡ Connection inactive. Quick scan to connect before dispatch...");
     bool connectedOk = false;
-    if (bleMutex != nullptr && xSemaphoreTake(bleMutex, pdMS_TO_TICKS(200)) == pdTRUE) {
+    if (bleMutex != nullptr && xSemaphoreTake(bleMutex, pdMS_TO_TICKS(2500)) == pdTRUE) {
       connectedOk = connectToRobot();
       xSemaphoreGive(bleMutex);
     }
@@ -2299,8 +2386,8 @@ bool sendRobosenPacket(const RobosenAction& action) {
   setStatusLED(40, 30, 0); // 🟡 Active Transmitting
 
   Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
-  Serial.printf("║  [TRANSMITTING] Target:        %-40s║\n", pairedName.c_str());
-  Serial.printf("║  Target MAC:                   %-40s║\n", pairedMAC.c_str());
+  Serial.printf("║  [TRANSMITTING] Target:        %-40s║\n", pairedNameBuf);
+  Serial.printf("║  Target MAC:                   %-40s║\n", pairedMacBuf);
   Serial.printf("║  Action:                       %-40s║\n", action.name);
   Serial.printf("║  Configured Parameter:         %d %-36s║\n", action.paramVal, action.paramUnit);
   Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
@@ -2656,7 +2743,7 @@ void triggerChainAbort(int count) {
   setStatusLED(120, 0, 0);
 
   // Update E-Ink Display
-  updateEInkRunChain(0, count, "HALT / EMERGENCY STOP", 0, "");
+  updateEInkRunChain(0, count, "EMERGENCY STOP", 0, "Stopped");
 
   delay(1500);
   restorePostRunMode(true);
@@ -2681,107 +2768,135 @@ bool executeRunChain() {
     return false;
   }
 
-  // 1. Flush any residual noise or old bytes on Chain Return Rail
-  while (ChainSerial.available() > 0) {
-    ChainSerial.read();
-  }
-
-  // 2. Dispatch Phase 1 Discovery Seed Frame: [0xAA, Len=0, Count=0, CRC=0, Footer=0x55]
-  uint8_t seedPkt[5] = { 0xAA, 0x00, 0x00, 0x00, 0x55 };
-  ChainSerial.write(seedPkt, 5);
-  ChainSerial.flush();
-
-  // 3. Await header (0xAA) on Return Rail (PIN_CHAIN_RX = GPIO 16) with 350ms timeout
-  unsigned long t0 = millis();
-  bool headerFound = false;
-  while (millis() - t0 < 350) {
-    if (digitalRead(PIN_STOP_BTN) == LOW) {
-      Serial.println("║ 🛑 Discovery aborted by Red Stop Button.                               ║");
-      Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+  // If a background 0xAA poll was just sent within the last 400ms, let any block LED pulse finish first
+  unsigned long sinceLastPoll = millis() - lastChainPollTime;
+  if (lastChainPollTime > 0 && sinceLastPoll < 400) {
+    if (!abortableDelay(400 - sinceLastPoll)) {
       restorePostRunMode(false);
       return false;
     }
-    if (ChainSerial.available() > 0) {
-      uint8_t b = ChainSerial.read();
-      if (b == 0xAA) {
-        headerFound = true;
-        break;
-      }
-    }
-    delay(1);
   }
 
-  if (!headerFound) {
-    Serial.println("║ ❌ Return Rail: No response / open circuit. (No blocks or no End Block)║");
-    Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
-    restorePostRunMode(false);
-    return false;
-  }
-
-  // 4. Read Len and Count
-  unsigned long t1 = millis();
-  while (ChainSerial.available() < 2 && (millis() - t1 < 100)) {
-    if (digitalRead(PIN_STOP_BTN) == LOW) {
-      restorePostRunMode(false);
-      return false;
-    }
-    delay(1);
-  }
-  if (ChainSerial.available() < 2) {
-    Serial.println("║ ❌ Incomplete response: Timeout waiting for length and count.          ║");
-    Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
-    restorePostRunMode(false);
-    return false;
-  }
-
-  uint8_t len = ChainSerial.read();
-  uint8_t count = ChainSerial.read();
-
-  if (count == 0 || len != count * 2 || len > 60) {
-    Serial.printf("║ ❌ Invalid chain frame dimensions: Len=%d, Count=%d                       ║\n", len, count);
-    Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
-    restorePostRunMode(false);
-    return false;
-  }
-
-  // 5. Read payload (len bytes) + CRC8 (1 byte) + Footer (1 byte)
+  uint8_t len = 0;
+  uint8_t count = 0;
+  uint8_t rxCrc = 0;
   uint8_t rxBuf[64];
-  unsigned long t2 = millis();
-  int bytesRead = 0;
-  while (bytesRead < (len + 2) && (millis() - t2 < 200)) {
-    if (digitalRead(PIN_STOP_BTN) == LOW) {
-      restorePostRunMode(false);
-      return false;
+  bool discoverySuccess = false;
+
+  for (int attempt = 1; attempt <= 2 && !discoverySuccess; attempt++) {
+    // 1. Flush any residual noise or old bytes on Chain Return Rail
+    while (ChainSerial.available() > 0) {
+      ChainSerial.read();
     }
-    if (ChainSerial.available() > 0) {
-      rxBuf[bytesRead++] = ChainSerial.read();
-    } else {
+
+    // 2. Dispatch Phase 1 Discovery Seed Frame: [0xAA, Len=0, Count=0, CRC=0, Footer=0x55]
+    uint8_t seedPkt[5] = { 0xAA, 0x00, 0x00, 0x00, 0x55 };
+    ChainSerial.write(seedPkt, 5);
+    ChainSerial.flush();
+
+    // 3. Await header (0xAA) on Return Rail (PIN_CHAIN_RX = GPIO 16) with 350ms timeout
+    unsigned long t0 = millis();
+    bool headerFound = false;
+    while (millis() - t0 < 350) {
+      if (digitalRead(PIN_STOP_BTN) == LOW) {
+        Serial.println("║ 🛑 Discovery aborted by Red Stop Button.                               ║");
+        Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
+        restorePostRunMode(false);
+        return false;
+      }
+      if (ChainSerial.available() > 0) {
+        uint8_t b = ChainSerial.read();
+        if (b == 0xAA) {
+          headerFound = true;
+          break;
+        }
+      }
       delay(1);
     }
+
+    if (!headerFound) {
+      if (attempt == 1) {
+        if (!abortableDelay(150)) {
+          restorePostRunMode(false);
+          return false;
+        }
+      }
+      continue;
+    }
+
+    // 4. Read Len and Count
+    unsigned long t1 = millis();
+    while (ChainSerial.available() < 2 && (millis() - t1 < 100)) {
+      if (digitalRead(PIN_STOP_BTN) == LOW) {
+        restorePostRunMode(false);
+        return false;
+      }
+      delay(1);
+    }
+    if (ChainSerial.available() < 2) {
+      continue;
+    }
+
+    len = ChainSerial.read();
+    count = ChainSerial.read();
+
+    if (count == 0 || len != count * 2 || len > 60) {
+      continue;
+    }
+
+    // 5. Read payload (len bytes) + CRC8 (1 byte) + Footer (1 byte)
+    unsigned long t2 = millis();
+    int bytesRead = 0;
+    while (bytesRead < (len + 2) && (millis() - t2 < 200)) {
+      if (digitalRead(PIN_STOP_BTN) == LOW) {
+        restorePostRunMode(false);
+        return false;
+      }
+      if (ChainSerial.available() > 0) {
+        rxBuf[bytesRead++] = ChainSerial.read();
+      } else {
+        delay(1);
+      }
+    }
+
+    if (bytesRead < (len + 2)) {
+      continue;
+    }
+
+    rxCrc = rxBuf[len];
+    uint8_t footer = rxBuf[len + 1];
+
+    // 6. Verify cumulative CRC-8 (covers [len, count, payload...])
+    uint8_t checkBuf[64];
+    checkBuf[0] = len;
+    checkBuf[1] = count;
+    for (int i = 0; i < len; i++) {
+      checkBuf[2 + i] = rxBuf[i];
+    }
+    uint8_t calcCrc = calcCrc8(checkBuf, 2 + len);
+
+    if (calcCrc == rxCrc && footer == 0x55) {
+      discoverySuccess = true;
+    }
   }
 
-  if (bytesRead < (len + 2)) {
-    Serial.printf("║ ❌ Frame truncated: Expected %d bytes, only received %d.                 ║\n", len + 2, bytesRead);
-    Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
-    restorePostRunMode(false);
-    return false;
+  // Fallback to live-polled chain buffer if a momentary pogo bounce occurred during seed retry
+  if (!discoverySuccess && isRunChainConnected && detectedChainCount > 0 &&
+      ((long)(millis() - lastChainResponseTime) <= (long)CHAIN_TIMEOUT_MS)) {
+    count = (uint8_t)detectedChainCount;
+    len = count * 2;
+    memcpy(rxBuf, detectedChainBuf, len);
+    uint8_t checkBuf[64];
+    checkBuf[0] = len;
+    checkBuf[1] = count;
+    for (int i = 0; i < len; i++) checkBuf[2 + i] = rxBuf[i];
+    rxCrc = calcCrc8(checkBuf, 2 + len);
+    discoverySuccess = true;
+    Serial.println("║ ℹ️ Using verified live-polled chain sequence buffer.                   ║");
   }
 
-  uint8_t rxCrc = rxBuf[len];
-  uint8_t footer = rxBuf[len + 1];
-
-  // 6. Verify cumulative CRC-8 (covers [len, count, payload...])
-  uint8_t checkBuf[64];
-  checkBuf[0] = len;
-  checkBuf[1] = count;
-  for (int i = 0; i < len; i++) {
-    checkBuf[2 + i] = rxBuf[i];
-  }
-  uint8_t calcCrc = calcCrc8(checkBuf, 2 + len);
-
-  if (calcCrc != rxCrc || footer != 0x55) {
-    Serial.printf("║ ❌ CRC-8 Mismatch! Calc: 0x%02X, Recv: 0x%02X, Footer: 0x%02X                   ║\n",
-                  calcCrc, rxCrc, footer);
+  if (!discoverySuccess) {
+    Serial.println("║ ❌ Return Rail: No valid response. (No blocks or no End Block)         ║");
     Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
     restorePostRunMode(false);
     return false;
@@ -2879,7 +2994,7 @@ bool executeRunChain() {
   Serial.println("║  Triggering Rainbow Victory Sparkle across all connected blocks!       ║");
   Serial.println("╚════════════════════════════════════════════════════════════════════════╝\n");
 
-  updateEInkRunChain(count, count, "ALL STEPS DONE! [OK]", 0, "");
+  updateEInkRunChain(count, count, "MISSION COMPLETE", 0, "Done!");
 
   // Master RGB LED Rainbow Sparkle
   for (int k = 0; k < 3; k++) {
@@ -2900,19 +3015,12 @@ bool executeRunChain() {
 // ==============================================================================
 // 9. BLE SCANNING ROUTINE (TEACHER PAIRING / SWITCH ROBOT)
 // ==============================================================================
-void runBleScan() {
-  // If actively connected, disconnect so the robot resumes advertising
-  if (bleMutex != nullptr && xSemaphoreTake(bleMutex, pdMS_TO_TICKS(200)) == pdTRUE) {
-    if (pClient != nullptr && pClient->isConnected()) {
-      Serial.println("\n[BLE STATUS] Disconnecting from current robot before scan...");
-      pClient->disconnect();
-      isConnected = false;
-      pRemoteChar = nullptr;
-      delay(200);
-    }
-    xSemaphoreGive(bleMutex);
-  }
+static bool isLikelyRobosenDevice(const String& name) {
+  return name.startsWith("K1") || name.startsWith("k1") || name.indexOf("Robosen") >= 0 || name.indexOf("ROBOSEN") >= 0;
+}
 
+void runBleScan() {
+  // Transition state BEFORE taking bleMutex so bleReconnectTask on Core 0 will not start a new scan
   currentState = STATE_BLE_SCANNING;
   updateStatusLED(); // 🔵 Active Scanning
   updateEInkScanning(); // Render Scanning status on E-Ink
@@ -2921,6 +3029,17 @@ void runBleScan() {
   Serial.println("║            [TEACHER PAIRING MODE: SCANNING BLE...]             ║");
   Serial.println("║  Scanning nearby Bluetooth devices for 4 seconds...            ║");
   Serial.println("╚════════════════════════════════════════════════════════════════╝");
+
+  bool lockTaken = (bleMutex != nullptr && xSemaphoreTake(bleMutex, pdMS_TO_TICKS(2500)) == pdTRUE);
+
+  // If actively connected, disconnect so the robot resumes advertising
+  if (pClient != nullptr && pClient->isConnected()) {
+    Serial.println("\n[BLE STATUS] Disconnecting from current robot before scan...");
+    pClient->disconnect();
+    isConnected = false;
+    pRemoteChar = nullptr;
+    delay(200);
+  }
 
   BLEScan* pBLEScan = BLEDevice::getScan();
   pBLEScan->setActiveScan(true);
@@ -2941,10 +3060,18 @@ void runBleScan() {
     bleDeviceCount++;
   }
 
-  // Sort by RSSI (strongest signal first)
+  // Sort with Robosen K1 devices first, then by RSSI (strongest signal first)
   for (int i = 0; i < bleDeviceCount - 1; i++) {
     for (int j = 0; j < bleDeviceCount - i - 1; j++) {
-      if (bleList[j].rssi < bleList[j + 1].rssi) {
+      bool jIsK1 = isLikelyRobosenDevice(bleList[j].name);
+      bool nextIsK1 = isLikelyRobosenDevice(bleList[j + 1].name);
+      bool shouldSwap = false;
+      if (!jIsK1 && nextIsK1) {
+        shouldSwap = true;
+      } else if (jIsK1 == nextIsK1 && bleList[j].rssi < bleList[j + 1].rssi) {
+        shouldSwap = true;
+      }
+      if (shouldSwap) {
         DiscoveredDevice temp = bleList[j];
         bleList[j] = bleList[j + 1];
         bleList[j + 1] = temp;
@@ -2953,6 +3080,10 @@ void runBleScan() {
   }
 
   pBLEScan->clearResults();
+  if (lockTaken) {
+    xSemaphoreGive(bleMutex);
+  }
+
   currentBleIndex = 0;
   currentState = STATE_BLE_PAIRING_MENU;
   updateStatusLED();
@@ -2965,7 +3096,7 @@ void runBleScan() {
 void renderActionMenu() {
   Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
   Serial.println("║              ROBOSEN K1 PHYSICAL BLOCK MASTER (DUAL-KNOB)              ║");
-  String targetStr = pairedName + " (" + pairedMAC + ")";
+  String targetStr = String(pairedNameBuf) + " (" + String(pairedMacBuf) + ")";
   if (targetStr.length() > 34) targetStr = targetStr.substring(0, 31) + "...";
 
   char statusStr[32];
@@ -2975,7 +3106,7 @@ void renderActionMenu() {
     } else {
       snprintf(statusStr, sizeof(statusStr), "CONNECTED 🟢");
     }
-  } else if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
+  } else if (!isRobotPaired()) {
     snprintf(statusStr, sizeof(statusStr), "UNPAIRED 🔴");
   } else if (connectAttemptCounter > 0) {
     snprintf(statusStr, sizeof(statusStr), "RETRY #%-3d ⏳", connectAttemptCounter);
@@ -3035,7 +3166,7 @@ void renderPairingMenu() {
   Serial.println("║                     TEACHER BLE PAIRING DISCOVERY                      ║");
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
   if (bleDeviceCount == 0) {
-    Serial.println("║  No BLE devices discovered. Press Start button to exit.                ║");
+    Serial.println("║  No BLE devices discovered. Press Start, Knob, or Stop to exit.        ║");
   } else {
     for (int i = 0; i < bleDeviceCount; i++) {
       char row[80];
@@ -3050,32 +3181,12 @@ void renderPairingMenu() {
     }
   }
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
-  Serial.println("║ • Turn Knob: Scroll List       • Click Knob: Save to NVS Flash         ║");
-  Serial.println("║ • Start Click: Cancel & Exit                                           ║");
+  Serial.println("║ • Turn Knob: Scroll List       • Start / Click K1: Save to NVS Flash   ║");
+  Serial.println("║ • Stop Click: Cancel & Exit                                            ║");
   Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
 
   // Render to 2.13" E-Paper Display
   updateEInkPairingMenu();
-}
-
-void renderModeSelectMenu() {
-  Serial.println("\n╔════════════════════════════════════════════════════════════════════════╗");
-  Serial.println("║                 SYSTEM MODE SELECTOR (SCALABLE 3+ MODES)               ║");
-  Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
-  for (int i = 0; i < TOTAL_SYSTEM_MODES; i++) {
-    char row[100];
-    if (i == currentModeMenuIndex) {
-      snprintf(row, sizeof(row), "║ ► [%-23s] : %-35s ◄ ║", SYSTEM_MODES[i].name, SYSTEM_MODES[i].desc);
-    } else {
-      snprintf(row, sizeof(row), "║   %-25s  : %-35s   ║", SYSTEM_MODES[i].name, SYSTEM_MODES[i].desc);
-    }
-    Serial.println(row);
-  }
-  Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
-  Serial.println("║ • Knob 1/2: Scroll Modes      • Start / Click K1: Confirm Selection    ║");
-  Serial.println("║ • Red Stop: Cancel & Return   • Hold Knob 1 (1.5s): Re-open anywhere   ║");
-  Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
-  updateEInkModeSelectMenu();
 }
 
 void renderRemoteControlMenu() {
@@ -3083,9 +3194,9 @@ void renderRemoteControlMenu() {
   Serial.println("║              ROBOSEN K1 LIVE REMOTE CONTROL (HANDHELD RC)              ║");
   const char* gearStr = "DRIVE [STEER]";
   if (isConnected && hasRobotBattery && robotBatteryPercent >= 0) {
-    Serial.printf("║ Active Mode: %-26s Target: %s (Bat: %d%%) ║\n", gearStr, pairedName.c_str(), robotBatteryPercent);
+    Serial.printf("║ Active Mode: %-26s Target: %s (Bat: %d%%) ║\n", gearStr, pairedNameBuf, robotBatteryPercent);
   } else {
-    Serial.printf("║ Active Mode: %-26s Target: %-25s ║\n", gearStr, pairedName.c_str());
+    Serial.printf("║ Active Mode: %-26s Target: %-25s ║\n", gearStr, pairedNameBuf);
   }
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
   Serial.printf("║ Selected Action (K2): %-48s ║\n", RC_ACTIONS[rcActionIndex].name);
@@ -3096,8 +3207,8 @@ void renderRemoteControlMenu() {
   Serial.println("║ • Both Buttons (Hold) : Priority Emergency Safety Halt (0x0C)          ║");
   Serial.println("║ • Knob 1 Short-Click  : Direct Mode Cycle -> Mode 3 (Joints)           ║");
   Serial.println("║ • Knob 1 Twist        : Steering Turn (Turn Left / Right)              ║");
-  Serial.println("║ • Knob 2 Twist        : Scroll Actions Catalog (Mode 1 Actions)        ║");
-  Serial.println("║ • Knob 2 Short-Click  : Fire Selected Action Instantly                 ║");
+  Serial.println("║ • Knob 2 Twist        : Scroll 10-Stunt Catalog                        ║");
+  Serial.println("║ • Knob 2 Short-Click  : Fire Selected Stunt Instantly                  ║");
   Serial.println("╚════════════════════════════════════════════════════════════════════════╝");
   updateEInkRemoteControl();
 }
@@ -3111,7 +3222,7 @@ void renderJointControlMenu() {
   Serial.println("║                 ROBOSEN JOINT CONTROL MODE (MODE 3)                    ║");
   if (isConnected && hasRobotBattery && robotBatteryPercent >= 0) {
     Serial.printf("║ Target: %-26s Robot Battery: %3d%% (Volume: %-3d)       ║\n",
-                  pairedName.c_str(), robotBatteryPercent, robotSpeakerVolume);
+                  pairedNameBuf, robotBatteryPercent, robotSpeakerVolume);
   }
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
   Serial.printf("║ Joint: [%-10s] (%2d/%2d)  (ID %2d)                                     ║\n",
@@ -3120,7 +3231,7 @@ void renderJointControlMenu() {
                 rawVal, degOffset, j.minLimit, j.maxLimit);
   Serial.println("╠════════════════════════════════════════════════════════════════════════╣");
   Serial.println("║ • Knob 1: Direct Joint Cycle (All 17 Joints)                           ║");
-  Serial.println("║ • Knob 1 Short-Click: Direct Mode Cycle -> Mode 1 (Blocks)             ║");
+  Serial.println("║ • Knob 1 Short-Click: Direct Mode Cycle -> Mode 2 (RC) / Mode 1        ║");
   Serial.println("║ • Knob 2: +/- 5 deg Direct Angle Adjust                                ║");
   Serial.println("║ • K2 Click: Reset Active Joint to Neutral (0°)                         ║");
   Serial.println("║ • K2 Hold (1.5s): Reset ALL 17 Servos to Standing Posture              ║");
@@ -3212,11 +3323,14 @@ void drawDualBatteryHeader(int16_t w) {
   display.setCursor(SCREEN_VISIBLE_X_MIN + 5, 17);
 
   if (isConnected) {
-    String rName = pairedName;
-    if (rName.length() == 0 || rName == "None") rName = "K1";
-    if (rName.length() > 8) rName = rName.substring(0, 8); // Max 8 chars to avoid overlap with battery cells
+    char rName[9];
+    strncpy(rName, pairedNameBuf, 8);
+    rName[8] = '\0';
+    if (rName[0] == '\0' || strcmp(rName, "None") == 0) {
+      strcpy(rName, "K1");
+    }
     display.print(rName);
-  } else if (pairedMAC == "None (Unpaired)" || pairedMAC.length() < 10) {
+  } else if (!isRobotPaired()) {
     display.print("UNPAIRED");
   } else if (connectAttemptCounter > 0) {
     display.print("SEARCH");
@@ -3228,9 +3342,7 @@ void drawDualBatteryHeader(int16_t w) {
   display.setFont();
   display.setTextSize(1);
 
-  float vbat = readBatteryVoltage();
-  int masterPct = calculateBatteryPercent(vbat);
-  lastDisplayedMasterPct = masterPct;
+  int masterPct = currentMasterBatteryPct;
 
   // --- Robot Battery Cell [R] (20x10 px outline + 2x6 terminal tip) ---
   int rx = 126;
@@ -3273,7 +3385,6 @@ void drawActionMenuToBuffer(bool invertMiddle) {
   display.fillScreen(GxEPD_WHITE);
 
   int16_t w = display.width();
-  int16_t h = display.height();
 
   // 1. Frame border around visible window
   display.drawRect(SCREEN_VISIBLE_X_MIN, SCREEN_VISIBLE_Y_MIN, SCREEN_VISIBLE_WIDTH, SCREEN_VISIBLE_HEIGHT, GxEPD_BLACK);
@@ -3283,11 +3394,13 @@ void drawActionMenuToBuffer(bool invertMiddle) {
 
   // 3. Center Section (y = 24..119, full height)
   uint16_t midFg = invertMiddle ? GxEPD_WHITE : GxEPD_BLACK;
+  uint16_t midBg = invertMiddle ? GxEPD_BLACK : GxEPD_WHITE;
   if (invertMiddle) {
     display.fillRect(SCREEN_VISIBLE_X_MIN + 1, 23, SCREEN_VISIBLE_WIDTH - 2, 97, GxEPD_BLACK);
   }
 
   char numStr[16];
+  bool isDegreeParam = false;
   if (isBlockDocked) {
     // Sub-Mode 1A: Configuration Menu UI (Action Icon + Parameter Value)
     int actIdx = currentActionIndex;
@@ -3295,13 +3408,14 @@ void drawActionMenuToBuffer(bool invertMiddle) {
     RobosenAction act = ACTIONS[actIdx];
 
     // 48x48 Action Bitmap (centered in left half of visible window: x = 92 - 24 = 68, y = 48)
-    drawBitmap2x(68, 48, getActionIcon(actIdx), 24, 24, midFg);
+    drawBitmap2x(68, 48, getActionIconByToken(act.tokenID), 24, 24, midFg);
 
     // Big Parameter Number (dynamically centered in right half of visible window: center = 197)
     if (act.tokenID == 0xEE || strcmp(act.paramUnit, "Cap") == 0) {
       snprintf(numStr, sizeof(numStr), "END");
     } else if (strcmp(act.paramUnit, "Deg°") == 0) {
-      snprintf(numStr, sizeof(numStr), "%d°", act.paramVal);
+      snprintf(numStr, sizeof(numStr), "%d", act.paramVal);
+      isDegreeParam = true;
     } else {
       snprintf(numStr, sizeof(numStr), "%d", act.paramVal);
     }
@@ -3319,16 +3433,22 @@ void drawActionMenuToBuffer(bool invertMiddle) {
   uint16_t bw, bh;
   display.getTextBounds(numStr, 0, 0, &bx, &by, &bw, &bh);
 
-  int16_t textX = 197 - (bw / 2) - bx;
+  int16_t totalW = bw + (isDegreeParam ? 12 : 0);
+  int16_t textX = 197 - (totalW / 2) - bx;
   display.setCursor(textX, 80);
   display.print(numStr);
+  if (isDegreeParam) {
+    // Geometric degree ring (7-bit FreeSansBold18pt7b lacks UTF-8 '°')
+    int16_t degX = textX + bx + bw + 6;
+    int16_t degY = 56;
+    display.fillCircle(degX, degY, 5, midFg);
+    display.fillCircle(degX, degY, 2, midBg);
+  }
 }
 
 void drawPairingMenuToBuffer() {
   display.setFullWindow();
   display.fillScreen(GxEPD_WHITE);
-  int16_t w = display.width();
-  int16_t h = display.height();
 
   display.drawRect(SCREEN_VISIBLE_X_MIN, SCREEN_VISIBLE_Y_MIN, SCREEN_VISIBLE_WIDTH, SCREEN_VISIBLE_HEIGHT, GxEPD_BLACK);
 
@@ -3379,8 +3499,6 @@ void drawPairingMenuToBuffer() {
 void drawScanningToBuffer() {
   display.setFullWindow();
   display.fillScreen(GxEPD_WHITE);
-  int16_t w = display.width();
-  int16_t h = display.height();
 
   display.drawRect(SCREEN_VISIBLE_X_MIN, SCREEN_VISIBLE_Y_MIN, SCREEN_VISIBLE_WIDTH, SCREEN_VISIBLE_HEIGHT, GxEPD_BLACK);
 
@@ -3396,7 +3514,7 @@ void drawScanningToBuffer() {
   display.setCursor(SCREEN_VISIBLE_X_MIN + 8, 46);
   display.print("Searching nearby Robosen K1 robots...");
   display.setCursor(SCREEN_VISIBLE_X_MIN + 8, 62);
-  display.print("Sorting by RSSI signal strength.");
+  display.print("Sorting by K1 match & RSSI strength.");
 
   display.drawLine(SCREEN_VISIBLE_X_MIN + 2, 92, SCREEN_VISIBLE_X_MAX - 2, 92, GxEPD_BLACK);
   display.setCursor(SCREEN_VISIBLE_X_MIN + 6, 102);
@@ -3406,8 +3524,6 @@ void drawScanningToBuffer() {
 void drawRunChainToBuffer(int currentStep, int totalSteps, const char* actionName, int paramVal, const char* paramUnit) {
   display.setFullWindow();
   display.fillScreen(GxEPD_WHITE);
-  int16_t w = display.width();
-  int16_t h = display.height();
 
   display.drawRect(SCREEN_VISIBLE_X_MIN, SCREEN_VISIBLE_Y_MIN, SCREEN_VISIBLE_WIDTH, SCREEN_VISIBLE_HEIGHT, GxEPD_BLACK);
 
@@ -3435,7 +3551,13 @@ void drawRunChainToBuffer(int currentStep, int totalSteps, const char* actionNam
   display.setTextSize(2);
   display.setCursor(SCREEN_VISIBLE_X_MIN + 10, 64);
   if (paramVal > 0) {
-    display.printf("%d %s", paramVal, paramUnit);
+    if (paramUnit != nullptr && strcmp(paramUnit, "Deg°") == 0) {
+      display.printf("%d Deg", paramVal);
+    } else {
+      display.printf("%d %s", paramVal, paramUnit ? paramUnit : "");
+    }
+  } else if (paramUnit != nullptr && paramUnit[0] != '\0') {
+    display.print(paramUnit);
   } else {
     display.print("Active");
   }
@@ -3455,10 +3577,6 @@ void updateEInkPairingMenu() {
   requestEInkFullUpdate();
 }
 
-void updateEInkModeSelectMenu() {
-  requestEInkFullUpdate();
-}
-
 void updateEInkRemoteControl() {
   requestEInkFullUpdate();
 }
@@ -3468,6 +3586,9 @@ void updateEInkJointControl() {
 }
 
 void updateEInkScanning() {
+  einkFullDirty = false;
+  einkCenterDirty = false;
+  einkNeedsCrispSettle = false;
   einkScanningDirty = true;
 }
 
@@ -3479,46 +3600,16 @@ void updateEInkRunChain(int currentStep, int totalSteps, const char* actionName,
   rcSnapParam = paramVal;
   strncpy(rcSnapUnit, paramUnit ? paramUnit : "", sizeof(rcSnapUnit) - 1);
   rcSnapUnit[sizeof(rcSnapUnit) - 1] = '\0';
+  einkFullDirty = false;
+  einkCenterDirty = false;
+  einkNeedsCrispSettle = false;
   einkRunChainDirty = true;
-}
-
-void drawModeSelectMenuToBuffer() {
-  display.setFullWindow();
-  display.fillScreen(GxEPD_WHITE);
-  int16_t w = display.width();
-  int16_t h = display.height();
-
-  // 1. Frame border around visible window
-  display.drawRect(SCREEN_VISIBLE_X_MIN, SCREEN_VISIBLE_Y_MIN, SCREEN_VISIBLE_WIDTH, SCREEN_VISIBLE_HEIGHT, GxEPD_BLACK);
-
-  // 2. Dual Battery Header with Connected Robot Name
-  drawDualBatteryHeader(w);
-
-  // 3. 3-Icon Carousel within calibrated visible window (x = 40..249, 60x60 cards)
-  const int cardX[3] = {47, 115, 183};
-  const int cardY = 40;
-  const int cardW = 60;
-  const int cardH = 60;
-
-  for (int i = 0; i < 3; i++) {
-    bool isSelected = (i == currentModeMenuIndex);
-    if (isSelected) {
-      // Inverted solid black card for selected mode
-      display.fillRect(cardX[i], cardY, cardW, cardH, GxEPD_BLACK);
-      drawBitmap2x(cardX[i] + 6, cardY + 6, getModeBadgeIcon(i), 24, 24, GxEPD_WHITE);
-    } else {
-      // Outlined card for unselected modes
-      display.drawRect(cardX[i], cardY, cardW, cardH, GxEPD_BLACK);
-      drawBitmap2x(cardX[i] + 6, cardY + 6, getModeBadgeIcon(i), 24, 24, GxEPD_BLACK);
-    }
-  }
 }
 
 void drawRemoteControlToBuffer(bool invertMiddle) {
   display.setFullWindow();
   display.fillScreen(GxEPD_WHITE);
   int16_t w = display.width();
-  int16_t h = display.height();
 
   // 1. Frame border around visible window
   display.drawRect(SCREEN_VISIBLE_X_MIN, SCREEN_VISIBLE_Y_MIN, SCREEN_VISIBLE_WIDTH, SCREEN_VISIBLE_HEIGHT, GxEPD_BLACK);
@@ -3546,7 +3637,6 @@ void drawJointControlToBuffer(bool invertMiddle) {
   display.setFullWindow();
   display.fillScreen(GxEPD_WHITE);
   int16_t w = display.width();
-  int16_t h = display.height();
 
   // 1. Frame border around visible window
   display.drawRect(SCREEN_VISIBLE_X_MIN, SCREEN_VISIBLE_Y_MIN, SCREEN_VISIBLE_WIDTH, SCREEN_VISIBLE_HEIGHT, GxEPD_BLACK);
@@ -3556,6 +3646,7 @@ void drawJointControlToBuffer(bool invertMiddle) {
 
   // 3. Center Section (y = 24..119, full height)
   uint16_t midFg = invertMiddle ? GxEPD_WHITE : GxEPD_BLACK;
+  uint16_t midBg = invertMiddle ? GxEPD_BLACK : GxEPD_WHITE;
   if (invertMiddle) {
     display.fillRect(SCREEN_VISIBLE_X_MIN + 1, 23, SCREEN_VISIBLE_WIDTH - 2, 97, GxEPD_BLACK);
   }
@@ -3564,8 +3655,15 @@ void drawJointControlToBuffer(bool invertMiddle) {
   int currentVal = (int)currentServoPositions[j.servoId];
   int offset = currentVal - (int)j.neutral;
 
-  // Anatomy 48x48 Icon (Head, L.Arm, R.Arm, L.Leg, R.Leg at x=48)
-  drawBitmap2x(48, 34, getJointGroupIcon(j.groupIconIdx), 24, 24, midFg);
+  // Anatomy 48x48 Icon (Head, L.Arm, R.Arm, L.Leg, R.Leg at x=48, y=30)
+  drawBitmap2x(48, 30, getJointGroupIcon(j.groupIconIdx), 24, 24, midFg);
+
+  // Joint Index Badge (#1..#17) under Anatomy Icon
+  display.setFont();
+  display.setTextSize(1);
+  display.setTextColor(midFg);
+  display.setCursor(54, 80);
+  display.printf("#%02d", currentJointIndex + 1);
 
   // Short Joint Name (strip "L." or "R." prefix)
   const char* sName = (j.name[1] == '.') ? (j.name + 2) : j.name;
@@ -3574,15 +3672,19 @@ void drawJointControlToBuffer(bool invertMiddle) {
   display.setCursor(106, 52);
   display.print(sName);
 
-  // Big Degree Readout (y = 76)
+  // Big Degree Readout (y = 76) with geometric degree circle (FreeSansBold12pt7b lacks UTF-8 '°')
   display.setCursor(106, 76);
   if (offset > 0) {
-    display.printf("+%d°", offset);
+    display.printf("+%d", offset);
   } else if (offset < 0) {
-    display.printf("%d°", offset);
+    display.printf("%d", offset);
   } else {
-    display.print("0°");
+    display.print("0");
   }
+  int16_t degX = display.getCursorX() + 5;
+  int16_t degY = 61;
+  display.fillCircle(degX, degY, 4, midFg);
+  display.fillCircle(degX, degY, 2, midBg);
 
   // Full-width Slider Gauge (y = 96, x=46..242)
   int gaugeX = 46;
@@ -3658,6 +3760,9 @@ void einkDisplayTask(void* pvParameters) {
       bool doFull = einkFullDirty;
       einkFullDirty = false;
       einkCenterDirty = false;
+      if (doFull) {
+        lastDisplayedMasterPct = currentMasterBatteryPct;
+      }
 
       // Use fast symmetric 280ms LUT for interactive knob turns and mode switching;
       // 350ms settle pass below ensures crisp contrast.
@@ -3667,10 +3772,6 @@ void einkDisplayTask(void* pvParameters) {
       if (currentState == STATE_BLE_PAIRING_MENU) {
         loadCustomEInkLut(false);
         drawPairingMenuToBuffer();
-        display.display(true);
-      } else if (currentState == STATE_MODE_SELECT_MENU) {
-        loadCustomEInkLut(true); // Fast 280ms LUT for snappy, instant carousel response
-        drawModeSelectMenuToBuffer();
         display.display(true);
       } else if (currentState == STATE_ACTION_MENU) {
         drawActionMenuToBuffer(false);
@@ -3702,28 +3803,33 @@ void einkDisplayTask(void* pvParameters) {
     //    AND White background (0->1) in the middle band with full 30-frame symmetric factory LUT!
     if (einkNeedsCrispSettle && !einkFullDirty && !einkCenterDirty && (now - lastEInkInputMs >= 350)) {
       einkNeedsCrispSettle = false;
-      loadCustomEInkLut(false); // Factory 30-frame symmetric LUT
-      epdWaitStartMs = millis();
+      if (currentState == STATE_ACTION_MENU ||
+          currentState == STATE_REMOTE_CONTROL ||
+          currentState == STATE_JOINT_CONTROL) {
+        loadCustomEInkLut(false); // Factory 30-frame symmetric LUT
+        epdWaitStartMs = millis();
+        lastDisplayedMasterPct = currentMasterBatteryPct;
 
-      if (currentState == STATE_ACTION_MENU) {
-        // Pre-load 0x26 (Previous RAM) with middle band INVERTED (White text on Black bg):
-        // - Every Black text pixel in middle band sees 1 -> 0 (LUT2: full 30-frame +15V Black!)
-        // - Every White bg pixel in middle band sees 0 -> 1 (LUT1: full 30-frame -15V White!)
-        // - Header & Footer see 0 -> 0 / 1 -> 1 (untouched, zero flicker!)
-        drawActionMenuToBuffer(true);
-        display.nextPageToPrevious();
-        drawActionMenuToBuffer(false);
-        display.display(true);
-      } else if (currentState == STATE_REMOTE_CONTROL) {
-        drawRemoteControlToBuffer(true);
-        display.nextPageToPrevious();
-        drawRemoteControlToBuffer(false);
-        display.display(true);
-      } else if (currentState == STATE_JOINT_CONTROL) {
-        drawJointControlToBuffer(true);
-        display.nextPageToPrevious();
-        drawJointControlToBuffer(false);
-        display.display(true);
+        if (currentState == STATE_ACTION_MENU) {
+          // Pre-load 0x26 (Previous RAM) with middle band INVERTED (White text on Black bg):
+          // - Every Black text pixel in middle band sees 1 -> 0 (LUT2: full 30-frame +15V Black!)
+          // - Every White bg pixel in middle band sees 0 -> 1 (LUT1: full 30-frame -15V White!)
+          // - Header & Footer see 0 -> 0 / 1 -> 1 (untouched, zero flicker!)
+          drawActionMenuToBuffer(true);
+          display.nextPageToPrevious();
+          drawActionMenuToBuffer(false);
+          display.display(true);
+        } else if (currentState == STATE_REMOTE_CONTROL) {
+          drawRemoteControlToBuffer(true);
+          display.nextPageToPrevious();
+          drawRemoteControlToBuffer(false);
+          display.display(true);
+        } else if (currentState == STATE_JOINT_CONTROL) {
+          drawJointControlToBuffer(true);
+          display.nextPageToPrevious();
+          drawJointControlToBuffer(false);
+          display.display(true);
+        }
       }
       continue;
     }
@@ -3739,12 +3845,14 @@ void bleReconnectTask(void* pvParameters) {
     bool userRequested = requestBgReconnect;
     if (userRequested) requestBgReconnect = false;
 
-    if ((currentState == STATE_ACTION_MENU || currentState == STATE_REMOTE_CONTROL || currentState == STATE_JOINT_CONTROL) && !isConnected) {
-      if (pairedMAC != "None (Unpaired)" && pairedMAC.length() >= 10) {
+    if ((currentState == STATE_ACTION_MENU || currentState == STATE_REMOTE_CONTROL || currentState == STATE_JOINT_CONTROL) &&
+        (!isConnected || pRemoteChar == nullptr)) {
+      if (isRobotPaired()) {
         if (userRequested || ((now - lastUserActivity > 5000) && (now - lastConnectAttemptTime >= 3000))) {
           if (bleMutex != nullptr && xSemaphoreTake(bleMutex, pdMS_TO_TICKS(50)) == pdTRUE) {
             // Re-verify connection status before starting 1s scan
-            if ((currentState == STATE_ACTION_MENU || currentState == STATE_REMOTE_CONTROL || currentState == STATE_JOINT_CONTROL) && !isConnected) {
+            if ((currentState == STATE_ACTION_MENU || currentState == STATE_REMOTE_CONTROL || currentState == STATE_JOINT_CONTROL) &&
+                (!isConnected || pRemoteChar == nullptr)) {
               connectAttemptCounter++;
               bool ok = connectToRobot(true); // quietBg = true: does not hijack RGB LED!
               lastConnectAttemptTime = millis();

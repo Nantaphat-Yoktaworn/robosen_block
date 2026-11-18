@@ -181,12 +181,19 @@ int main() {
     uint8_t rx_buf[64];
     uint32_t last_heartbeat = SysTick->CNT;
     uint8_t hb_phase = 0;
+    bool led_pulse_active = false;
+    uint32_t led_pulse_start = 0;
+    uint32_t led_pulse_ticks = 0;
 
     while (1) {
-        // Non-blocking 500ms Heartbeat:
+        // Non-blocking 500ms Heartbeat & LED pulse expiration check:
         // Toggles onboard LEDs (PD4 / PC0) as a visual liveness indicator.
         // Return Rail TX remains completely silent until queried by Master or looping back 0xAA frames.
         uint32_t now = SysTick->CNT;
+        if (led_pulse_active && TimeElapsed32u(now, led_pulse_start) >= led_pulse_ticks) {
+            led_pulse_active = false;
+            set_end_idle_color();
+        }
         if (TimeElapsed32u(now, last_heartbeat) >= Ticks_from_Ms(500)) {
             last_heartbeat = now;
             hb_phase++;
@@ -248,10 +255,11 @@ int main() {
                         uart_tx(ack_crc);
                         uart_tx(0x55);
 
-                        // Emerald Green confirmation pulse
+                        // Non-blocking 300ms Emerald Green confirmation pulse
                         ws2812_set(0, 255, 40);
-                        Delay_Ms(300);
-                        set_end_idle_color();
+                        led_pulse_start = SysTick->CNT;
+                        led_pulse_ticks = Ticks_from_Ms(300);
+                        led_pulse_active = true;
                     }
                 }
             }
@@ -297,10 +305,11 @@ int main() {
                     uart_tx(rx_crc);
                     uart_tx(0x55);
 
-                    // Visual Feedback: Vivid Emerald Green Success Glow
+                    // Visual Feedback: Non-blocking 350ms Vivid Emerald Green Success Glow
                     ws2812_set(0, 240, 30);
-                    Delay_Ms(350);
-                    set_end_idle_color();
+                    led_pulse_start = SysTick->CNT;
+                    led_pulse_ticks = Ticks_from_Ms(350);
+                    led_pulse_active = true;
                 }
             }
             funDigitalWrite(PD4, FUN_LOW);
@@ -322,6 +331,7 @@ int main() {
                 
                 uint8_t check[2] = { active_step, total_steps };
                 if (crc8(check, 2) == rx_crc && footer == 0x55) {
+                    led_pulse_active = false;
                     if (active_step == 0xFF) {
                         // Program Complete: Rainbow Celebration Sparkle!
                         rainbow_victory_sparkle();

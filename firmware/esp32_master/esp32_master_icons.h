@@ -922,6 +922,29 @@ const unsigned char ICON_END_BLOCK[72] PROGMEM = {
 // ==============================================================================
 // 7. HELPER ICON ACCESSORS
 // ==============================================================================
+inline const unsigned char* getActionIconByToken(uint8_t token) {
+  switch (token) {
+    case 0x01: return ICON_WALK_FWD;
+    case 0x02: return ICON_WALK_REV;
+    case 0x03: return ICON_TURN_LEFT;
+    case 0x04: return ICON_TURN_RIGHT;
+    case 0x07: return ICON_STRAFE_LEFT;
+    case 0x08: return ICON_STRAFE_RIGHT;
+    case 0x10: return ICON_PUNCH;
+    case 0x11: return ICON_PUNCH;
+    case 0x12: return ICON_STUNT_KUNGFU;
+    case 0x13: return ICON_STUNT_DANCE;
+    case 0x14: return ICON_PUSHUPS;
+    case 0x15: return ICON_STUNT_BURST;
+    case 0x16: return ICON_STUNT_BURST;
+    case 0x17: return ICON_PUSHUPS;
+    case 0x18: return ICON_WAVE;
+    case 0x19: return ICON_STUNT_CELEBRATE;
+    case 0xEE: return ICON_END_BLOCK;
+    default:   return ICON_WALK_FWD;
+  }
+}
+
 inline const unsigned char* getActionIcon(int actionIdx) {
   switch (actionIdx) {
     case 0: return ICON_WALK_FWD;
@@ -934,15 +957,6 @@ inline const unsigned char* getActionIcon(int actionIdx) {
     case 7: return ICON_END_BLOCK;
     default: return ICON_WALK_FWD;
   }
-}
-
-inline const unsigned char* getGearIcon(int rcGear) {
-  return (rcGear == 1) ? ICON_GEAR_STRAFE : ICON_JOYSTICK;
-}
-
-inline const unsigned char* getStuntIcon(int actionIdx) {
-  // Mode 2 uses the exact same action icon set as Mode 1
-  return getActionIcon(actionIdx);
 }
 
 inline const unsigned char* getJointGroupIcon(int groupIdx) {
